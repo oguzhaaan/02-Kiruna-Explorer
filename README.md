@@ -19,26 +19,26 @@
 
 - **users Table**
 
-  - `id` (Integer)
-  - `role` (String)
+  - `id` (Integer) - (Primary Key)
+  - `role` (String) - limited to "urban_planner", "resident", and "visitor" values.
 
 - **document Table**
 
-  - `id` (Integer)
+  - `id` (Integer) - (Primary Key)
   - `title` (String)
   - `description` (String)
+  - `areaId` (String) - (Foreign Key)
 
 - **area Table**
 
-  - `id` (Integer)
-  - `geoJson` (String/JSON)
-  - `docId` (Integer)
+  - `id` (Integer) - (Primary Key)
+  - `geoJson` (String/JSON) - Coordinate(s)
 
 - **document_link Table**
-  - `id` (Integer)
-  - `doc1Id` (Integer)
-  - `doc2Id` (Integer)
+  - `id` (Integer) - (Primary Key)
+  - `doc1Id` (Integer) - (Foreign Key)
+  - `doc2Id` (Integer) - (Foreign Key)
   - `date` (String)
-  - `connection` (String)
+  - `connection` (String) - limited to "direct_consequence", "collateral_consequence", "prevision", and "update" values.
 
 ### 4. API Documentation

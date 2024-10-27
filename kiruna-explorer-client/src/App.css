@@ -1,0 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
+/*------ Variables (To be defined) --------*/
+:root {
+    --primary-color: #f9a826;
+    --secondary-color: #f9a826;
+    --tertiary-color: #f9a826;
+    --quaternary-color: #f9a826;
+    --quinary-color: #f9a826;
+    --senary-color: #f9a826;
+    --septenary-color: #f9a826;
+    --octonary-color: #f9a826;
+    --nonary-color: #f9a826;
+    --denary-color: #f9a826;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    letter-spacing: 0.03em;
+    text-transform: none;
+    word-wrap: break-word;
+    font-size: 1rem;
+    line-height: 1.8;
+    -webkit-font-smoothing: antialiased;
+    box-sizing: content-box;
+    color: rgb(243, 243, 243);
+}
+
+/*------ General--------*/
+

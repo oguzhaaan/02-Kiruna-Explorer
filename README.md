@@ -20,12 +20,19 @@
 - **users Table**
 
   - `id` (Integer) - (Primary Key)
-  - `role` (String) - limited to "urban_planner", "resident", and "visitor" values.
+  - `role` (String) - limited to "urban_planner" and "resident" values.
+  - `username` (String)
+  - `password` (String)
+  - `salt` (String)
 
 - **document Table**
 
   - `id` (Integer) - (Primary Key)
   - `title` (String)
+  - `stakeholders` (String)
+  - `date` (String) - Issuance date
+  - `type` (String) - limited to "design", "informative", "prescriptive", and "technical".
+  - `language` (String)
   - `description` (String)
   - `areaId` (String) - (Foreign Key)
 

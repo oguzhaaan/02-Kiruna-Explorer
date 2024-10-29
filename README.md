@@ -6,6 +6,7 @@
 2. [Technologies Used](#2-technologies-used)
 3. [Database Structure](#3-database-structure)
 4. [API Documentation](#4-api-documentation)
+5. [Users Credentials](#5-users-credentials)
 
 ### 1. Introduction
 
@@ -96,3 +97,10 @@ If not already present area, first he has to create one
 
   - No body
   - return all documents in a specific area
+
+### 5. Users Credentials
+
+| username | Password | Role          |
+| -------- | -------- | ------------- |
+| Romeo    | 1111     | urban planner |
+| Juliet   | 2222     | resident      |

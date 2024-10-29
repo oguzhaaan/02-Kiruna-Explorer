@@ -2,13 +2,26 @@
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";
-import initializeAuth from "./auth.mjs";
+
+import passport from "passport";
+import session from "express-session";
+
+import authRoutes from "./auth/authRoutes.mjs";
 
 // --- Middlewares ---
 const app = express();
 app.use(morgan("dev"));
 app.use(express.json());
-initializeAuth(app); // Initialize authentication and session
+
+// --- Session Configuration ---
+app.use(
+  session({
+    secret: "Sic.Parvis.Magna", // Famous quote from Uncharted video game
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+app.use(passport.authenticate("session"));
 
 // --- CORS ---
 const corsOptions = {
@@ -24,5 +37,6 @@ app.listen(PORT, () =>
 );
 
 // --- Routes ---
+app.use(authRoutes);
 
 export { app };

@@ -1,0 +1,8 @@
+### Log In with Valid Credentials
+POST http://localhost:3000/api/sessions
+Content-Type: application/json
+
+{
+  "username": "Romeo",
+  "password": "1111"
+}

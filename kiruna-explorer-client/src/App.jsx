@@ -3,14 +3,14 @@ import "./App.css";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import LoginPage from "./components/LoginPage";
-import { useUserContext } from "./contexts/UserContext";
+import { useUserContext } from "./contexts/UserContext.jsx";
 
 function App() {
-  const { isLoggedIn, checkAuth } = useUserContext;
+  const { isLoggedIn, checkAuth } = useUserContext();
 
-  // useEffect(() => {
-  //   checkAuth();
-  // }, []);
+  useEffect(() => {
+    checkAuth();
+  }, []);
 
   return (
     <>

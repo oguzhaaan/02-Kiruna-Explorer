@@ -1,4 +1,37 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useUserContext } from "../contexts/UserContext.jsx";
+
 function LoginPage() {
+  const { logIn } = useUserContext();
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    logIn(formData);
+  };
+
+  const handleCancel = () => {
+    setFormData({
+      username: "",
+      password: "",
+    });
+    navigate("/");
+  };
+
   return (
     <div
       className="relative flex items-center justify-center w-screen h-screen bg-cover bg-center font-sans"
@@ -14,7 +47,7 @@ function LoginPage() {
       <div className="relative z-10 p-10 max-w-md w-full text-white text-opacity-80">
         <h2 className="text-4xl text-center mb-8">Login</h2>
 
-        <form>
+        <form onSubmit={handleSubmit}>
           <div className="mb-7 relative">
             <label
               className="block text-xl font-normal mb-3"
@@ -25,6 +58,9 @@ function LoginPage() {
             <input
               type="text"
               id="username"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
               placeholder="Enter your username"
               className="w-100 px-5 h-12 rounded-full bg-customGray bg-opacity-30 backdrop-blur shadow text-white text-lg focus:outline-none"
             />
@@ -40,6 +76,9 @@ function LoginPage() {
             <input
               type="password"
               id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
               placeholder="Enter your password"
               className="w-full px-5 h-12  rounded-full bg-customGray bg-opacity-30 backdrop-blur shadow text-white text-lg focus:outline-none"
             />
@@ -48,6 +87,7 @@ function LoginPage() {
           <div className="flex justify-between">
             <button
               type="button"
+              onClick={handleCancel}
               className="w-44 h-14 bg-customGray bg-opacity-60 shadow text-2xl  font-normal text-black rounded-full hover:bg-gray-600"
             >
               Go back

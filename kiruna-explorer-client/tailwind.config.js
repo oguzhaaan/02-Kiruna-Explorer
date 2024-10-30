@@ -9,6 +9,9 @@ export default {
       colors: {
         primary_color: 'var(--primary-color)',
       },
+      backgroundColor: {
+        navbar_color: 'var(--navbar-bg)'
+      }
     },
   },
   plugins: [],

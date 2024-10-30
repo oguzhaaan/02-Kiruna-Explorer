@@ -43,4 +43,5 @@ const API = {
   getUserInfo,
   logOut,
 };
+
 export default API;

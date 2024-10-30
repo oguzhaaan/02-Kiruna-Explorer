@@ -14,7 +14,7 @@ function App() {
   return (
     <>
       <Routes>
-        <Route path="/document" element={<Document />} />
+        <Route path="/document" element={<Document/>} />
       </Routes>
     </>
   );

@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import { Route, Routes } from "react-router-dom";
-import { useUserContext } from "./contexts/UserContext.mjs";
+import { Navigate, Route, Routes } from "react-router-dom";
+
+import LoginPage from "./components/LoginPage";
+import { useUserContext } from "./contexts/UserContext.jsx";
 
 function App() {
-  const { checkAuth } = useUserContext;
+  const { isLoggedIn, checkAuth } = useUserContext();
 
   useEffect(() => {
     checkAuth();
@@ -13,7 +15,11 @@ function App() {
   return (
     <>
       <Routes>
-        <Route path="/" />
+        {/* <Route path="/" /> */}
+        <Route
+          path="/login"
+          element={isLoggedIn ? <Navigate replace to="/" /> : <LoginPage />}
+        />
       </Routes>
     </>
   );

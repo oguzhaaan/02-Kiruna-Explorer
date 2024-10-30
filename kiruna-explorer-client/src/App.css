@@ -10,8 +10,8 @@
     --senary-color: #f9a826;
     --septenary-color: #f9a826;
     --octonary-color: #f9a826;
-    --nonary-color: #f9a826;
-    --navbar-bg: #2B2B2B;
+    --white-text: #F4F4F4;
+    --navbar-bg: #2b2b2b80;
 }
 
 @tailwind base;
@@ -21,7 +21,7 @@
 body {
     margin: 0;
     padding: 0;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter';
     font-weight: 400;
     font-style: normal;
     letter-spacing: 0.03em;
@@ -31,7 +31,8 @@ body {
     line-height: 1.8;
     -webkit-font-smoothing: antialiased;
     box-sizing: content-box;
-    color: #131313;
+    background: #131313;
+    color: var(--white-text);
 }
 
 /*------ General--------*/
@@ -54,7 +55,7 @@ body {
 .toggler-bar{
     width: 30px;
     height: 3px;
-    background-color: #777777;
+    background-color: var(--white-text);
     display: block;
     transition: all 0.2s;
 }
@@ -96,11 +97,11 @@ body {
 
 /* Color of Toggler when collapsed */
 .navbar-toggler.collapsed .toggler-bar {
-    background-color: #777777;
+    background-color: var(--white-text);
 }
 
 .custom-toggler {
-    z-index: 1051; /* Mantiene il toggle sopra l’Offcanvas (Bootstrap usa 1050 per il suo z-index di Offcanvas) */
+    z-index: 2000; /* Mantiene il toggle sopra l’Offcanvas (Bootstrap usa 1050 per il suo z-index di Offcanvas) */
   }
 
   .offcanvas-content {
@@ -110,15 +111,13 @@ body {
     gap: 20px;                   /* Distanza tra gli elementi */
     padding: 10px;               /* Padding per distanziare dal bordo */
     text-align:left;          /* Centra il testo */
-    cursor: pointer;
     width: 100%;
   }
   
   /* Stile individuale per ciascun elemento */
   .offcanvas-content {
     font-size: 18px;             /* Dimensione del testo */
-    font-weight: 500;            /* Peso del testo */
-    color: #333;                 /* Colore del testo */
+    font-weight: 400;            /* Peso del testo */
   }
 
   .offcanvas-item {
@@ -129,31 +128,27 @@ body {
   
   /* Effetto hover */
   .offcanvas-item:hover {
-    background-color: #f0f0f0;   /* Cambia il colore di sfondo al passaggio del mouse */
+    background-color: #707070;   /* Cambia il colore di sfondo al passaggio del mouse */
   }
 
   .offcanvas-content-small {
     font-size: 15px;             /* Dimensione del testo */
-    font-weight: 400;            /* Peso del testo */
-    color: #333;                 /* Colore del testo */
+    font-weight: 200;            /* Peso del testo */
   }
 
   .separator {
-    height: 2px;              /* Spessore della linea */
-    background-color: #333;
+    height: 1px;              /* Spessore della linea */
+    background-color: var(--white-text);
     margin: 15px 0;           /* Margine sopra e sotto la linea */
     width: 80%;              /* Larghezza della linea */
     border-radius: 20px;
   }
 
   .offcanvas-footer {
-    margin-top: 50% !important;
     display:flex;
     padding: 10px; 
     text-align: left;
-    font-size: 18px;
-    font-weight: 500;
-    color: #333;
+    font-weight: 400;
     align-items:start;
     cursor: pointer;      /* Aggiungi un cursore se è un link o pulsante */
     width: 100%;

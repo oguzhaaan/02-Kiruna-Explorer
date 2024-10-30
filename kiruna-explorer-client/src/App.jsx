@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import "./App.css";
 import { Container } from "react-bootstrap";
 import { Route, Routes, Outlet } from "react-router-dom";
 import { useUserContext } from "./contexts/UserContext.jsx";
@@ -18,14 +17,15 @@ function App() {
         <Route element={
           <>
           <NavHeader/>
-          <Container fluid>
+          <Container fluid className="m-0 p-0">
             <Outlet/>
           </Container>
           </>
         }>
 
         <Route index element={
-          <></>
+          <>
+          </>
         } />
 
         </Route>

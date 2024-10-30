@@ -3,22 +3,22 @@ import {Navbar,Nav, Container, Offcanvas, Row, Col} from "react-bootstrap"
 function NavHeader () {
 
     return(
-        <Navbar expand="false" className="">
+        <Navbar expand="false" className="fixed z-[20000]">
           <Container fluid>
             <Navbar.Toggle
-                className="navbar-toggler custom-toggler"
+                className="navbar-toggler custom-toggler mt-4"
                 aria-controls="basic-navbar-nav"
                 >
                 <span className="toggler-bar"></span>
                 <span className="toggler-bar middle-bar"></span>
                 <span className="toggler-bar"></span>
             </Navbar.Toggle>
-            <Navbar.Offcanvas id="basic-navbar-nav" className="navbar-bg drop-shadow-xl">  
-                <Offcanvas.Body>
+            <Navbar.Offcanvas id="basic-navbar-nav" className="drop-shadow-xl backdrop-blur-2xl bg-navbar text-white_text overflow-hidden" backdrop= {false}>  
+                <Offcanvas.Body className="flex flex-col justify-between">
                 <div className="offcanvas-content">
-                    <Row className="mt-5 offcanvas-item w-100 p-1">
+                    <Row className="mt-10 w-100 p-1">
                         <Col xs="auto">
-                            <i class="bi bi-person-circle fs-2 align-middle"></i>
+                            <i className="bi bi-person-circle fs-2 align-middle"></i>
                         </Col>
                         <Col>
                             <Row>
@@ -34,7 +34,7 @@ function NavHeader () {
                     <div className="separator"></div>
                     <Row className="offcanvas-item w-100 p-1">
                         <Col xs="auto">
-                            <i class="bi bi-journals fs-2 align-middle"></i>
+                            <i className="bi bi-journals fs-2 align-middle"></i>
                         </Col>
                         <Col className="my-auto">
                             Documents
@@ -42,7 +42,7 @@ function NavHeader () {
                     </Row>
                     <Row className="offcanvas-item w-100 p-1">
                         <Col xs="auto">
-                            <i class="bi bi-globe-americas fs-2 align-middle"></i>
+                            <i className="bi bi-globe-americas fs-2 align-middle"></i>
                         </Col>
                         <Col className="my-auto">
                             Map
@@ -50,22 +50,23 @@ function NavHeader () {
                     </Row>
                     <Row className="offcanvas-item w-100 p-1">
                         <Col xs="auto">
-                            <i class="bi bi-diagram-3 fs-2 align-middle"></i>
+                            <i className="bi bi-diagram-3 fs-2 align-middle"></i>
                         </Col>
                         <Col className="my-auto">
                             Diagram
                         </Col>
                     </Row>
-                    <Row className="offcanvas-footer offcanvas-item w-100 p-1">
+                </div>
+                <div className="offcanvas-content">
+                    <Row className="offcanvas-item w-100 p-1">
                         <Col xs="auto">
-                            <i class="bi bi-door-open-fill fs-2 align-middle"></i>
+                            <i className="bi bi-door-open-fill fs-2 align-middle"></i>
                         </Col>
                         <Col className="my-auto">
                             Logout
                         </Col>
                     </Row>
                 </div>
-            
                 </Offcanvas.Body>         
             </Navbar.Offcanvas>
           </Container>

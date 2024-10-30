@@ -1,19 +1,20 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 import { Route, Routes } from "react-router-dom";
-import { useUserContext } from "./contexts/UserContext.mjs";
+import { useUserContext } from "./contexts/UserContext.jsx";
+import Document from "./Components/Document.jsx";
 
 function App() {
   const { checkAuth } = useUserContext;
 
   useEffect(() => {
-    checkAuth();
+    //checkAuth();
   }, []);
 
   return (
     <>
       <Routes>
-        <Route path="/" />
+        <Route path="/document" element={<Document />} />
       </Routes>
     </>
   );

@@ -12,8 +12,14 @@ export default {
       colors: {
         customGray: "#D9D9D9",
         customBlue: "#4388B2",
+        primary_color: 'var(--primary-color)',
+        white_text: 'var(--white-text)'
+      },
+      backgroundColor: {
+        navbar: 'var(--navbar-bg)',
       },
     },
   },
   plugins: [],
-};
+  important: true
+}

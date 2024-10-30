@@ -10,8 +10,8 @@
     --senary-color: #f9a826;
     --septenary-color: #f9a826;
     --octonary-color: #f9a826;
-    --nonary-color: #f9a826;
-    --denary-color: #f9a826;
+    --white-text: #F4F4F4;
+    --navbar-bg: #2b2b2b80;
 }
 
 @tailwind base;
@@ -21,7 +21,7 @@
 body {
     margin: 0;
     padding: 0;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter';
     font-weight: 400;
     font-style: normal;
     letter-spacing: 0.03em;
@@ -31,8 +31,125 @@ body {
     line-height: 1.8;
     -webkit-font-smoothing: antialiased;
     box-sizing: content-box;
-    color: rgb(243, 243, 243);
+    background: #131313;
+    color: var(--white-text);
 }
 
 /*------ General--------*/
 
+/*--NavBar--*/
+
+.navbar-toggler {
+    border: 0 !important;
+}
+
+.navbar-toggler:focus,
+.navbar-toggler:active,
+.navbar-toggler-icon{
+    outline: none !important;
+    box-shadow: none !important;
+    border: 0 !important;
+}
+
+/* Lines of the Toggler */
+.toggler-bar{
+    width: 30px;
+    height: 3px;
+    background-color: var(--white-text);
+    display: block;
+    transition: all 0.2s;
+}
+
+/* Adds Space between the lines */
+.middle-bar{
+    margin: 5px auto;
+}
+
+/* State when navbar is opened (START) */
+.custom-toggler .toggler-bar:nth-child(1) {
+    transform: rotate(45deg);
+    transform-origin: 10% 10%;
+}
+
+.custom-toggler .toggler-bar:nth-child(2) {
+    opacity: 0;
+    filter: alpha(opacity=0);
+}
+
+.custom-toggler .toggler-bar:nth-child(3) {
+    transform: rotate(-45deg);
+    transform-origin: 10% 90%;
+}
+
+/* State when navbar is collapsed (END) */
+.custom-toggler.collapsed .toggler-bar:nth-child(1) {
+    transform: rotate(0);
+}
+
+.custom-toggler.collapsed .toggler-bar:nth-child(2) {
+    opacity: 1;
+    filter: alpha(opacity=100);
+}
+
+.custom-toggler.collapsed .toggler-bar:nth-child(3) {
+    transform: rotate(0);
+}
+
+/* Color of Toggler when collapsed */
+.navbar-toggler.collapsed .toggler-bar {
+    background-color: var(--white-text);
+}
+
+.custom-toggler {
+    z-index: 2000; /* Mantiene il toggle sopra l’Offcanvas (Bootstrap usa 1050 per il suo z-index di Offcanvas) */
+  }
+
+  .offcanvas-content {
+    display: flex;               /* Usa flexbox per disporre gli elementi in fila */
+    flex-direction: column;      /* Posiziona gli elementi verticalmente */
+    align-items:start;         /* Centra gli elementi orizzontalmente */
+    gap: 20px;                   /* Distanza tra gli elementi */
+    padding: 10px;               /* Padding per distanziare dal bordo */
+    text-align:left;          /* Centra il testo */
+    width: 100%;
+  }
+  
+  /* Stile individuale per ciascun elemento */
+  .offcanvas-content {
+    font-size: 18px;             /* Dimensione del testo */
+    font-weight: 400;            /* Peso del testo */
+  }
+
+  .offcanvas-item {
+    cursor: pointer;              /* Cambia il cursore per indicare che è cliccabile */
+    transition: background-color 0.3s ease; /* Effetto di transizione per il background */
+    border-radius: 20px;
+  }
+  
+  /* Effetto hover */
+  .offcanvas-item:hover {
+    background-color: #707070;   /* Cambia il colore di sfondo al passaggio del mouse */
+  }
+
+  .offcanvas-content-small {
+    font-size: 15px;             /* Dimensione del testo */
+    font-weight: 200;            /* Peso del testo */
+  }
+
+  .separator {
+    height: 1px;              /* Spessore della linea */
+    background-color: var(--white-text);
+    margin: 15px 0;           /* Margine sopra e sotto la linea */
+    width: 80%;              /* Larghezza della linea */
+    border-radius: 20px;
+  }
+
+  .offcanvas-footer {
+    display:flex;
+    padding: 10px; 
+    text-align: left;
+    font-weight: 400;
+    align-items:start;
+    cursor: pointer;      /* Aggiungi un cursore se è un link o pulsante */
+    width: 100%;
+  }

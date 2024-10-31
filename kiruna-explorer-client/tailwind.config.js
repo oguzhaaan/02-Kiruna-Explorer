@@ -8,31 +8,15 @@ export default {
     extend: {
       colors: {
         primary_color: 'var(--primary-color)',
+        search_color: 'var(--search-gray-color)',
+        box_color: 'var(--box-gray-color)',
+        background_color: 'var(--background-color)',
+        input_color: 'var(--input-color)',
+        placeholder_color : 'var(--placeholder-input-color)'
       },
     },
   },
   plugins: [
-    function ({ addUtilities }) {
-      const newUtilities = {
-        ".scrollbar-thin": {
-          scrollbarWidth: "thin", // Per Firefox
-          scrollbarColor: "rgb(31, 29, 29) white", // Per Firefox
-        },
-        ".scrollbar-webkit": {
-          "&::-webkit-scrollbar": {
-            width: "8px", // Larghezza della scrollbar
-          },
-          "&::-webkit-scrollbar-track": {
-            background: "black", // Colore del binario
-          },
-          "&::-webkit-scrollbar-thumb": {
-            background: "rgb(31, 41, 55)", // Colore del manico
-            borderRadius: "20px", // Raggio degli angoli del manico
-            border: "1px solid white" // Bordo del manico
-          }
-        }
-      }
-      addUtilities(newUtilities, ["responsive", "hover"]);
-    }
-  ],
+  
+  ]
 }

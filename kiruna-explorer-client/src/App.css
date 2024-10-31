@@ -12,6 +12,11 @@
     --octonary-color: #f9a826;
     --nonary-color: #f9a826;
     --denary-color: #f9a826;
+    --search-gray-color: #f4f4f4ad;
+    --box-gray-color: #373737a6;
+    --background-color: #131313;
+    --input-color: #d9d9d93f;
+    --placeholder-input-color: #A2A2A2;
 }
 
 @tailwind base;
@@ -21,7 +26,7 @@
 body {
     margin: 0;
     padding: 0;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter';
     font-weight: 400;
     font-style: normal;
     letter-spacing: 0.03em;
@@ -36,3 +41,6 @@ body {
 
 /*------ General--------*/
 
+select option {
+    background-color: #2e2e2ef7;
+}

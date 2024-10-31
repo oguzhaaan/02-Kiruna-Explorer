@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUserContext } from "../contexts/UserContext.jsx";
 
-function LoginPage() {
+function LoginPage(props) {
   const { logIn } = useUserContext();
   const navigate = useNavigate();
 
@@ -29,6 +29,7 @@ function LoginPage() {
       username: "",
       password: "",
     });
+    props.setNavShow(true);
     navigate("/");
   };
 

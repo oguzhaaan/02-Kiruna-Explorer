@@ -1,8 +1,24 @@
 import {Navbar,Nav, Container, Offcanvas, Row, Col} from "react-bootstrap"
+import { Link } from "react-router-dom"
 
-function NavHeader () {
+function NavHeader (props) {
 
     return(
+        <>
+        {!props.isLoggedIn ? 
+        props.navShow && 
+        <Navbar expand="false" className="fixed z-[20000]">
+            <Container fluid className="text-center w-screen justify-end">
+                <Navbar.Brand className="text-white_text text-2xl flex items-center justify-center mt-4 mr-10">
+                    <Link to="login" className="text-inherit no-underline hover:text-slate-300" onClick={()=>props.setNavShow(false)}>
+                        <i className="bi bi-person fs-2 align-middle mx-2"></i>
+                        Login
+                    </Link>
+                </Navbar.Brand>
+            </Container>
+        </Navbar>
+        :
+        props.navShow &&
         <Navbar expand="false" className="fixed z-[20000]">
           <Container fluid>
             <Navbar.Toggle
@@ -71,6 +87,8 @@ function NavHeader () {
             </Navbar.Offcanvas>
           </Container>
         </Navbar>
+        }
+        </>
     )
 }
 

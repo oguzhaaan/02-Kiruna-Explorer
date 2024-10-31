@@ -104,3 +104,11 @@ If not already present area, first he has to create one
 | -------- | -------- | ------------- |
 | Romeo    | 1111     | urban planner |
 | Juliet   | 2222     | resident      |
+
+
+## LICENSE
+
+This document is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. <br>
+For more information, visit [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+<br><br>
+[![License: CC BY-SA 4.0](https://img.shields.io/badge/License-CC%20BY--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-sa/4.0/)

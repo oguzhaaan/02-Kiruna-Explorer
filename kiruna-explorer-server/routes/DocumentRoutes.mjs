@@ -10,7 +10,9 @@ router.get("/:DocId", async (req, res) => {
         const document = await DocumentDAO.getDocumentById(req.params.documentId);
         res.json(document);
     } catch (err) {
-        console.error(err);
+        console.error("Error fetching document:", err);
         res.status(500).json({ error: err });
     }
 })
+
+export default router;

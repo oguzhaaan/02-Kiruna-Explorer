@@ -42,7 +42,7 @@ function LoginPage(props) {
       }}
     >
       {/* Dark overlay */}
-      <div className="absolute inset-0 bg-black opacity-80"></div>
+      <div className="absolute inset-0 bg-black opacity-50"></div>
 
       {/* Login box */}
       <div className="relative z-10 p-10 max-w-md w-full text-white text-opacity-80">
@@ -63,7 +63,7 @@ function LoginPage(props) {
               value={formData.username}
               onChange={handleChange}
               placeholder="Enter your username"
-              className="w-100 px-5 h-12 rounded-full bg-customGray bg-opacity-30 backdrop-blur shadow text-white text-lg focus:outline-none"
+              className="w-100 px-4 h-12 rounded-full bg-customGray bg-opacity-30 backdrop-blur shadow text-white text-lg focus:outline-none"
             />
           </div>
 
@@ -81,7 +81,7 @@ function LoginPage(props) {
               value={formData.password}
               onChange={handleChange}
               placeholder="Enter your password"
-              className="w-full px-5 h-12  rounded-full bg-customGray bg-opacity-30 backdrop-blur shadow text-white text-lg focus:outline-none"
+              className="w-full px-4 h-12  rounded-full bg-customGray bg-opacity-30 backdrop-blur shadow text-white text-lg focus:outline-none"
             />
           </div>
 
@@ -89,13 +89,13 @@ function LoginPage(props) {
             <button
               type="button"
               onClick={handleCancel}
-              className="w-44 h-14 bg-customGray bg-opacity-60 shadow text-2xl  font-normal text-black rounded-full hover:bg-gray-600"
+              className="w-44 h-14 bg-customGray bg-opacity-80 shadow text-2xl  font-normal text-black rounded-full hover:bg-gray-400"
             >
               Go back
             </button>
             <button
               type="submit"
-              className="w-44 h-14  bg-customBlue bg-opacity-100 shadow text-2xl  font-normal rounded-full hover:bg-blue-700"
+              className="w-44 h-14  bg-customBlue bg-opacity-100 shadow text-2xl  font-normal rounded-full hover:bg-[#2e5c79]"
             >
               Enter
             </button>

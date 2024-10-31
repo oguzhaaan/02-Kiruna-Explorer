@@ -13,7 +13,7 @@ function App() {
   const [navShow, setNavShow] = useState(true);
 
   useEffect(() => {
-    //checkAuth();
+    checkAuth();
   }, []);
 
   return (

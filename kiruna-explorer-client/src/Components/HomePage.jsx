@@ -12,7 +12,7 @@ function HomePage(props) {
             <div>
                 
             </div>
-            <div className="absolute inset-0 bg-black opacity-80"></div>
+            <div className="absolute inset-0 bg-black opacity-50"></div>
 
             <div className="relative text-white_text">
             <Row className="text-8xl font-black p-4">
@@ -27,7 +27,7 @@ function HomePage(props) {
             </Row>
             <Row className="flex justify-center mt-4">
                 <Col xs="auto">
-                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Flag_of_Sweden.svg/2560px-Flag_of_Sweden.svg.png" alt="sweden-flag" width="80" height="50"></img>
+                 <img src="https://upload.wikimedia.org/wikipedia/commons/3/3d/Kiruna_vapen.svg" alt="sweden-flag" width="80" height="50"></img>
                 </Col>
             </Row>
             </div>

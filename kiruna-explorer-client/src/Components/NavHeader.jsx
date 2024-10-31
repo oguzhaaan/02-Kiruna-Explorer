@@ -1,11 +1,15 @@
 import {Navbar,Nav, Container, Offcanvas, Row, Col} from "react-bootstrap"
 import { Link } from "react-router-dom"
+import { useUserContext } from "../contexts/UserContext"
 
 function NavHeader (props) {
 
+    const { isLoggedIn, logOut } = useUserContext();
+
+
     return(
         <>
-        {!props.isLoggedIn ? 
+        {!isLoggedIn ? 
         props.navShow && 
         <Navbar expand="false" className="fixed z-[20000]">
             <Container fluid className="text-center w-screen justify-end">
@@ -73,7 +77,7 @@ function NavHeader (props) {
                         </Col>
                     </Row>
                 </div>
-                <div className="offcanvas-content">
+                <div className="offcanvas-content" onClick={()=>logOut()}>
                     <Row className="offcanvas-item w-100 p-1">
                         <Col xs="auto">
                             <i className="bi bi-door-open-fill fs-2 align-middle"></i>

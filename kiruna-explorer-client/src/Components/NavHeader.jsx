@@ -4,7 +4,7 @@ import { useUserContext } from "../contexts/UserContext"
 
 function NavHeader (props) {
 
-    const { isLoggedIn, logOut } = useUserContext();
+    const { user, isLoggedIn, logOut } = useUserContext();
 
 
     return(
@@ -22,7 +22,6 @@ function NavHeader (props) {
             </Container>
         </Navbar>
         :
-        props.navShow &&
         <Navbar expand="false" className="fixed z-[20000]">
           <Container fluid>
             <Navbar.Toggle
@@ -42,11 +41,11 @@ function NavHeader (props) {
                         </Col>
                         <Col>
                             <Row>
-                                <Col> Username
+                                <Col> {user.username}
                                 </Col>
                             </Row>
                             <Row className="offcanvas-content-small">
-                                <Col> Role
+                                <Col> {user.role}
                                 </Col>
                             </Row>
                         </Col>
@@ -77,7 +76,7 @@ function NavHeader (props) {
                         </Col>
                     </Row>
                 </div>
-                <div className="offcanvas-content" onClick={()=>logOut()}>
+                <div className="offcanvas-content" onClick={()=>{logOut(),props.setNavShow(true)}}>
                     <Row className="offcanvas-item w-100 p-1">
                         <Col xs="auto">
                             <i className="bi bi-door-open-fill fs-2 align-middle"></i>

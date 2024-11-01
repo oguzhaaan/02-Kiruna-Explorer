@@ -8,12 +8,17 @@ import {NavHeader} from "./Components/NavHeader.jsx"
 import { HomePage } from "./Components/HomePage.jsx";
 
 function App() {
-  const { isLoggedIn, checkAuth } = useUserContext();
+  const { user, isLoggedIn, checkAuth } = useUserContext();
 
   const [navShow, setNavShow] = useState(true);
 
   useEffect(() => {
+    try{
     checkAuth();
+    }
+    catch(err){
+      console.log(err)
+    }
   }, []);
 
   return (

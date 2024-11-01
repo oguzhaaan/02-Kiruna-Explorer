@@ -4,7 +4,7 @@ import Document from "../models/Document.mjs";
 
 export default function DocumentDAO() {
     this.getDocumentById = (id) => {
-        query = "SELECT * FROM documents WHERE id = ?";
+        const query = "SELECT * FROM document WHERE id = ?";
 
         return new Promise((resolve, reject) => {
             db.get(query, [id], (err, row) => {

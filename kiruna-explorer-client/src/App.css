@@ -2,16 +2,6 @@
 
 /*------ Variables (To be defined) --------*/
 :root {
-    --primary-color: #f9a826;
-    --secondary-color: #f9a826;
-    --tertiary-color: #f9a826;
-    --quaternary-color: #f9a826;
-    --quinary-color: #f9a826;
-    --senary-color: #f9a826;
-    --septenary-color: #f9a826;
-    --octonary-color: #f9a826;
-    --nonary-color: #f9a826;
-    --denary-color: #f9a826;
     --search-gray-color: #f4f4f4ad;
     --box-gray-color: #373737a6;
     --background-color: #131313;
@@ -19,6 +9,9 @@
     --placeholder-input-color: #A2A2A2;
     --white-text: #F4F4F4;
     --navbar-bg: #2b2b2b80;
+    --my-green: #17F381;
+    --my-red: #E63232;
+    --my-orange: #f09711;
 }
 
 @tailwind base;

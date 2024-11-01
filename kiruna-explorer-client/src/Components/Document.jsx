@@ -1,6 +1,7 @@
 import { useState } from "react";
 import dayjs from "dayjs";
 import "./document.css";
+import Alert from "./Alert";
 
 function Document() {
 
@@ -18,7 +19,7 @@ function Document() {
 
     const [number, setNumber] = useState("");
 
-
+    const [alertMessage, setAlertMessage] = useState(['', '']);
 
 
     const toggleModal = () => {
@@ -50,14 +51,19 @@ function Document() {
         setNumber(event.target.value);
     };
 
+    const handleConfirm = () => {
+            setAlertMessage(['FANCULOOOOOOO', 'success']); //integration TODO
+    }
+
 
     return (
         <>
             <div className="bg-background_color min-h-screen flex justify-center">
+                <Alert message={alertMessage[0]} type={alertMessage[1]} clearMessage={() => setAlertMessage(['', ''])}></Alert>
                 <div className="flex items-center justify-between w-full h-16  ">
 
                     <div className="flex items-center gap-3 mr-3 ml-20 mt-4">
-                       
+
 
                         <div className="relative">
                             <span className="absolute inset-y-0 left-0 flex items-center pl-3">
@@ -206,7 +212,7 @@ function Document() {
                         </div>
 
                         {/* Save button */}
-                        <button className="bg-[#1A5F88] w-full font-bold text-[28px]  text-white py-2 px-4 rounded-lg mt-4">
+                        <button className="bg-[#1A5F88] w-full font-bold text-[28px]  text-white py-2 px-4 rounded-lg mt-4" onClick={handleConfirm}>
                             Confirm
                         </button>
                     </div>
@@ -216,4 +222,4 @@ function Document() {
     );
 }
 
-export {Document};
+export { Document };

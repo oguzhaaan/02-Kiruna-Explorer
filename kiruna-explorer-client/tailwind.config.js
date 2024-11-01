@@ -15,7 +15,10 @@ export default {
         background_color: 'var(--background-color)',
         input_color: 'var(--input-color)',
         placeholder_color: 'var(--placeholder-input-color)',
-        white_text: 'var(--white-text)'
+        white_text: 'var(--white-text)',
+        my_green: 'var(--my-green)',
+        my_red: 'var(--my-red)',
+        my_orange: 'var(--my-orange)'
       },
       backgroundColor: {
         navbar: 'var(--navbar-bg)',

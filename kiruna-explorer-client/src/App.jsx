@@ -6,6 +6,7 @@ import { Route, Routes, Outlet, Navigate } from "react-router-dom";
 import { useUserContext } from "./contexts/UserContext.jsx";
 import {NavHeader} from "./Components/NavHeader.jsx"
 import { HomePage } from "./Components/HomePage.jsx";
+import { Document } from "./Components/Document.jsx";
 
 function App() {
   const { user, isLoggedIn, checkAuth } = useUserContext();
@@ -39,6 +40,8 @@ function App() {
         } />
 
         <Route path="/login" element={isLoggedIn ? <Navigate replace to="/" /> : <LoginPage setNavShow={setNavShow}/>}/>
+
+        <Route path="/documents" element={isLoggedIn ? <Document /> : <Navigate replace to="/" />}/>
         
         </Route>
       </Routes>

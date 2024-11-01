@@ -54,12 +54,10 @@ function Document() {
     return (
         <>
             <div className="bg-background_color min-h-screen flex justify-center">
-                <div className="flex items-center justify-between w-full h-16 ">
+                <div className="flex items-center justify-between w-full h-16  ">
 
-                    <div className="flex items-center gap-3 mx-3">
-                        <button className="text-white text-2xl">
-                            <i className="bi bi-list"></i>
-                        </button>
+                    <div className="flex items-center gap-3 mr-3 ml-20 mt-4">
+                       
 
                         <div className="relative">
                             <span className="absolute inset-y-0 left-0 flex items-center pl-3">
@@ -77,7 +75,7 @@ function Document() {
                         </button>
                     </div>
 
-                    <button onClick={toggleModal} className="bg-[#2E6A8E] text-white grid justify-items-end py-2 px-4 mx-3 rounded-[77px]">
+                    <button onClick={toggleModal} className="bg-[#2E6A8E] text-white grid justify-items-end py-2 px-4 mx-3 rounded-[77px] mt-4">
                         <span><i className="bi bi-file-earmark-plus"></i>  Add document</span>
                     </button>
                 </div>
@@ -218,4 +216,4 @@ function Document() {
     );
 }
 
-export default Document;
+export {Document};

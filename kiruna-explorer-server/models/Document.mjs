@@ -8,11 +8,11 @@
  * @param {string} type
  * @param {string} language
  * @param {string} description
- * @param {number} areaid
+ * @param {number} areaId
  */
 
 export default class Document {
-    constructor(id, title,stakeholders, date, type, language, description, areaid) {
+    constructor(id, title,stakeholders, date, type, language, description, areaId) {
         this.id = id;
         this.title = title;
         this.stakeholders = stakeholders;
@@ -20,7 +20,7 @@ export default class Document {
         this.type = type;
         this.language = language;
         this.description = description;
-        this.areaid = areaid;
+        this.areaId = areaId;
         
     }
 

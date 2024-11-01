@@ -1,13 +1,10 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import { useUserContext } from "./contexts/UserContext.jsx";
-import Document from "./Components/Document.jsx";
-import { Container } from "react-bootstrap";
-import { Route, Routes, Outlet } from "react-router-dom";
-import {NavHeader} from "./Components/NavHeader.jsx"
+import { Route, Routes } from "react-router-dom";
+import { useUserContext } from "./contexts/UserContext.mjs";
 
 function App() {
-  const { checkAuth } = useUserContext;
+  const { isLoggedIn, checkAuth } = useUserContext();
 
   useEffect(() => {
     //checkAuth();
@@ -16,22 +13,7 @@ function App() {
   return (
     <>
       <Routes>
-        <Route path="/documents" element={<Document/>} />
-        <Route element={
-          <>
-          <NavHeader/>
-          <Container fluid className="m-0 p-0">
-            <Outlet/>
-          </Container>
-          </>
-        }>
-
-        <Route index element={
-          <>
-          </>
-        } />
-
-        </Route>
+        <Route path="/" />
       </Routes>
     </>
   );

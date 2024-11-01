@@ -1,12 +1,11 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-    "./src/App.css"
-  ],
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["Inter", "sans-serif"],
+      },
       colors: {
         primary_color: 'var(--primary-color)',
         search_color: 'var(--search-gray-color)',
@@ -18,6 +17,10 @@ export default {
       },
       backgroundColor: {
         navbar: 'var(--navbar-bg)',
+      },
+      colors: {
+        customGray: "#D9D9D9",
+        customBlue: "#4388B2",
       },
     },
   },

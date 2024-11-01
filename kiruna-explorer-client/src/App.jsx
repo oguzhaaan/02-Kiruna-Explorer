@@ -35,11 +35,9 @@ function App() {
           </>
         }>
 
-        <Route index element={
-          <HomePage/>
-        } />
+        <Route path="/" element={isLoggedIn ? <Navigate replace to="/documents"/> : <HomePage/>}/>
 
-        <Route path="/login" element={isLoggedIn ? <Navigate replace to="/" /> : <LoginPage setNavShow={setNavShow}/>}/>
+        <Route path="/login" element={isLoggedIn ? <Navigate replace to="/documents" /> : <LoginPage setNavShow={setNavShow}/>}/>
 
         <Route path="/documents" element={isLoggedIn ? <Document /> : <Navigate replace to="/" />}/>
         

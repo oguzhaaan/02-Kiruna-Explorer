@@ -21,6 +21,8 @@ function Document() {
 
     const [alertMessage, setAlertMessage] = useState(['', '']);
 
+    const [planNumber, setPlanNumber] = useState();
+
 
     const toggleModal = () => {
         setIsModalOpen(!isModalOpen);
@@ -39,6 +41,10 @@ function Document() {
         setDate(selectedDate);
     };
 
+    const handlePlanNumber = (event) => {
+        setPlanNumber(event.target.value);
+    };
+
     const handleType = (event) => {
         setType(event.target.value);
     }
@@ -52,7 +58,7 @@ function Document() {
     };
 
     const handleConfirm = () => {
-            setAlertMessage(['FANCULOOOOOOO', 'success']); //integration TODO
+        setAlertMessage(['CONFIRM MESSAGE', 'success']); //integration TODO
     }
 
 
@@ -128,11 +134,25 @@ function Document() {
                                 onChange={handleScale}
                                 className="w-full px-3 text-xl py-2 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color rounded-[40px]">
                                 <option value="none">None</option>
-                                <option value="report">Report</option>
-                                <option value="invoice">Invoice</option>
-                                <option value="contract">Contract</option>
+                                <option value="text">Text</option>
+                                <option value="concept">Concept</option>
+                                <option value="plan">Plan</option>
+                                <option value="blueprints">Blueprints/effects</option>
                             </select>
                         </div>
+
+                        {scale === 'plan' &&
+                            <div className="input-plan mb-4 w-full">
+                                <label className="text-white mb-1 text-xl w-full ml-2 text-left">Enter the scale 1:n</label>
+                                <input
+                                    id="number-input"
+                                    type="number"
+                                    value={planNumber}
+                                    placeholder="n"
+                                    onChange={handlePlanNumber}
+                                    className="w-full text-xl px-3 py-2 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color rounded-[40px]">
+                                </input>
+                            </div>}
 
                         <div className="input-date mb-4 w-full">
                             <label className="text-white mb-1 text-xl w-full ml-2 text-left">Issuance date</label>

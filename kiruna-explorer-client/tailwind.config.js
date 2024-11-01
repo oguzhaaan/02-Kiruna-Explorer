@@ -7,6 +7,8 @@ export default {
         sans: ["Inter", "sans-serif"],
       },
       colors: {
+        customGray: "#D9D9D9",
+        customBlue: "#4388B2",
         primary_color: 'var(--primary-color)',
         search_color: 'var(--search-gray-color)',
         box_color: 'var(--box-gray-color)',
@@ -18,14 +20,8 @@ export default {
       backgroundColor: {
         navbar: 'var(--navbar-bg)',
       },
-      colors: {
-        customGray: "#D9D9D9",
-        customBlue: "#4388B2",
-      },
     },
   },
-  plugins: [
-
-  ],
+  plugins: [],
   important: true
 }

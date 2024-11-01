@@ -27,15 +27,18 @@ router.post("/", async (req, res) => {
         const params = req.body;
         let areaId = params.areaId;
 
-        // Check if areaId is provided, if not create a new area
-        if (!areaId) {
-            const latestAreaId = await AreaDao.getLatestAreaId();
-            const newAreaId = latestAreaId + 1;
-            const newArea = new Area(newAreaId, '{"type": "Feature", "geometry": {"type": "Point", "coordinates": [0.0, 0.0]}, "properties": {}}');
-            areaId = await AreaDao.addArea(newArea);
+        // If areaId is provided, verify if it exists
+        if (areaId) {
+            const areaExists = await AreaDao.getAreaById(areaId);
+            if (!areaExists) {
+                return res.status(404).json({ error: "Area not found" });
+            }
+        } else {
+            // If areaId is not provided, set it to null
+            areaId = null;
         }
 
-        // Add the document with the areaId
+        // Add the document with the areaId (which could be null)
         const newDocument = {
             ...params,
             areaId: areaId

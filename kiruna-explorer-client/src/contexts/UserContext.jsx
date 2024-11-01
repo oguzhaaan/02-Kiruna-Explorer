@@ -1,6 +1,6 @@
-import React, { useState, useContext, createContext } from "react";
+import {React, useState, useContext, createContext } from "react";
 
-import API from "../api/API.mjs";
+import API from "../API/API.mjs"
 
 const UserContext = createContext();
 

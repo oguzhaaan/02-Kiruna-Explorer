@@ -9,10 +9,11 @@
  * @param {string} language
  * @param {string} description
  * @param {number} areaId
+ * @param {scale} scale
  */
 
 export default class Document {
-    constructor(id, title,stakeholders, date, type, language, description, areaId) {
+    constructor(id, title,stakeholders, date, type, language, description, areaId, scale) {
         this.id = id;
         this.title = title;
         this.stakeholders = stakeholders;
@@ -21,6 +22,7 @@ export default class Document {
         this.language = language;
         this.description = description;
         this.areaId = areaId;
+        this.scale = scale;
         
     }
 

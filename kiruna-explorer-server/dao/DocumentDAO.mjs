@@ -13,7 +13,7 @@ export default function DocumentDAO() {
                 } else if (row === undefined) {
                     resolve(false);
                 } else {
-                    const document = new Document(row.id, row.title, row.stakeholders, row.date, row.type, row.language, row.description, row.areaId);
+                    const document = new Document(row.id, row.title, row.stakeholders, row.date, row.type, row.language, row.description, row.areaId, row.scale);
                     resolve(document);
                 }
             });

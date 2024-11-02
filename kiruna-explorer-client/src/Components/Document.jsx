@@ -5,6 +5,23 @@ import Alert from "./Alert";
 
 function Document() {
 
+
+    const popularLanguages = [
+        { code: "en", name: "English" },
+        { code: "sv", name: "Swedish" },
+        { code: "se", name: "Northern Sami" },
+        { code: "fi", name: "Finnish" },
+        { code: "es", name: "Spanish" },
+        { code: "zh", name: "Chinese" },
+        { code: "fr", name: "French" },
+        { code: "de", name: "German" },
+        { code: "ja", name: "Japanese" },
+        { code: "ru", name: "Russian" },
+        { code: "pt", name: "Portuguese" },
+        { code: "ar", name: "Arabic" },
+        { code: "it", name: "Italian" },
+    ];
+
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const [stakeholder, setStakeholder] = useState("None");
@@ -120,9 +137,12 @@ function Document() {
 
                                 className="w-full px-3 text-xl py-2 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color rounded-[40px]">
                                 <option value="none">None</option>
-                                <option value="report">Report</option>
-                                <option value="invoice">Invoice</option>
-                                <option value="contract">Contract</option>
+                                <option value="lkab">LKBAB</option>
+                                <option value="municipalty">Municipalty</option>
+                                <option value="regional authority">Regional authority</option>
+                                <option value="architecture firms">Architecture firms</option>
+                                <option value="citizens">Citizens</option>
+                                <option value="others">Others</option>
                             </select>
                         </div>
 
@@ -173,9 +193,14 @@ function Document() {
                                 onChange={handleType}
                                 className="w-full px-3 text-xl py-2 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color rounded-[40px]">
                                 <option value="none">None</option>
-                                <option value="report">Report</option>
-                                <option value="invoice">Invoice</option>
-                                <option value="contract">Contract</option>
+                                <option value="design document">Design document</option>
+                                <option value="informative document">Informative document</option>
+                                <option value="prescriptive document">Prescriptive document</option>
+                                <option value="technical document">Technical document</option>
+                                <option value="agreement">Agreement</option>
+                                <option value="conflict">Conflict</option>
+                                <option value="consultation">Consultation</option>
+                                <option value="material effects">Material effects</option>
                             </select>
                         </div>
 
@@ -186,10 +211,12 @@ function Document() {
                                 value={language}
                                 onChange={handleLanguage}
                                 className="w-full px-3 text-xl py-2 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color  rounded-[40px]">
-                                <option value="none">None</option>
-                                <option value="report">Report</option>
-                                <option value="invoice">Invoice</option>
-                                <option value="contract">Contract</option>
+                                <option value="">None</option>
+                                {popularLanguages.map((lang) => (
+                                    <option key={lang.code} value={lang.code}>
+                                        {lang.name}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 
@@ -231,7 +258,6 @@ function Document() {
                             </button>
                         </div>
 
-                        {/* Save button */}
                         <button className="bg-[#1A5F88] w-full font-bold text-[28px]  text-white py-2 px-4 rounded-lg mt-4" onClick={handleConfirm}>
                             Confirm
                         </button>

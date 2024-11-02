@@ -71,12 +71,33 @@ const addDocument = async (documentData) => {
   }
 };
 
+const getDocumentById = async (docid) => {
+  try {
+    const response = await fetch(`${SERVER_URL}/api/documents/${docid}`, {
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const errMessage = await response.json();
+      throw new Error(`Error ${response.status}: ${errMessage.message || 'Error while creating the document.'}`);
+    }
+
+    const result = await response.json();
+    return result; 
+    
+  } catch (error) {
+    console.error("Error in getDocumentById function:", error.message);
+    throw new Error("Unable to get the document. Please check your connection and try again.");
+  }
+};
+
 
 const API = {
   logIn,
   getUserInfo,
   logOut,
-  addDocument
+  addDocument,
+  getDocumentById
 };
 
 export default API;

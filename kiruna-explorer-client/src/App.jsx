@@ -7,6 +7,7 @@ import { useUserContext } from "./contexts/UserContext.jsx";
 import {NavHeader} from "./Components/NavHeader.jsx"
 import { HomePage } from "./Components/HomePage.jsx";
 import { Document } from "./Components/Document.jsx";
+import { SingleDocument } from "./Components/SingleDocument.jsx";
 
 function App() {
   const { user, isLoggedIn, checkAuth } = useUserContext();
@@ -41,7 +42,7 @@ function App() {
 
         <Route path="/documents" element={isLoggedIn ? <Document /> : <Navigate replace to="/" />}/>
 
-          <Route path="/documents/:id" element={isLoggedIn ? <Document /> : <Navigate replace to="/" />}/>
+        <Route path="/documents/:id" element={isLoggedIn && <SingleDocument />}/>
         
         </Route>
       </Routes>

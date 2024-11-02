@@ -1,11 +1,13 @@
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import {useNavigate, useParams} from "react-router-dom";
 
 import informativeIcon from "../assets/informative.svg";
 import {Charging} from "./Charging.jsx";
+import API from "../API/API.mjs";
 
 function SingleDocument(props) {
     const [collapsedSections, setCollapsedSections] = useState({});
+    const [document, setDocument] = useState({})
 
     const iconMap = {
         "Informative Document": informativeIcon,
@@ -16,18 +18,32 @@ function SingleDocument(props) {
         "Citizens": "bg-[#417C95]",
     }
 
+    const stakeholders = ["Municipality","Citizens"]
+
     const {id} = useParams();
     const navigate = useNavigate();
 
-    const document = {
-        type: "Informative Document",
-        stakeholders: ["Municipality", "Citizens"],
-        title: "Compilation of responses “So what the people of Kiruna think?” (15)",
-        scale: "Text",
-        issuance_date: "March 2024",
-        language: "Swedish",
-        pages: 316,
-        description: "This document is a compilation of the responses to the survey 'What is your impression of Kiruna?'From the citizens' responses to this last part of thesurvey, it is evident that certain buildings, such as the Kiruna Church, the Hjalmar Lundbohmsgården,and the Town Hall, are considered of significant value to the population. The municipality views the experience of this survey positively, to the extent that over the years it will propose various consultation opportunities.",
+    useEffect(()=>{
+        const getDoc = async ()=>{
+            try {
+                const d = await API.getDocumentById(id)
+                console.log(d)
+                if (d !== false) {
+                    setDocument(d)
+                }
+                else{
+                    navigate("/documents")
+                } 
+            }
+            catch(err){
+                console.log(err)
+            }
+        }
+        getDoc()
+    },[])
+
+    {/*TODO adding API to get all document linked to document with specific id*/}
+    const documentlink = {
         connections: [
             {
                 id: 2,
@@ -98,9 +114,11 @@ function SingleDocument(props) {
                                 </div>
                             </div>
 
-                            {/* Stakeholders */}
-                            <div className="font-normal flex flex-row gap-3">
-                                {document.stakeholders.map((stakeholder, index) => {
+                            {/*TODO modify to see only the right stakeholders, it should be an array?
+                             if it's only one then there is no need of map*/}
+                            {/* Stakeholders*/}
+                            {<div className="font-normal flex flex-row gap-3">
+                                {stakeholders.map((stakeholder, index) => {
                                     return (
                                         <div key={index}
                                              className={`text-center ${stakeholderColors[stakeholder]} rounded-2xl py-1 px-3`}>
@@ -108,7 +126,8 @@ function SingleDocument(props) {
                                         </div>
                                     );
                                 })}
-                            </div>
+                            </div>}
+
 
                             {/* Title */}
                             <div className="text-4xl font-bold">{document.title}</div>
@@ -123,7 +142,7 @@ function SingleDocument(props) {
                                 {/* Issuance Date */}
                                 <div className="flex flex-row gap-2">
                                     <p className="m-0 p-0 text-text_gray">Issuance Date:</p>
-                                    {document.issuance_date}
+                                    {document.date}
                                 </div>
                                 {/* Language */}
                                 <div className="flex flex-row gap-2">
@@ -177,7 +196,7 @@ function SingleDocument(props) {
 
                         </div>
                         {/* Connections */}
-                        {Object.entries(document.connections.reduce((acc, connection) => {
+                        {Object.entries(documentlink.connections.reduce((acc, connection) => {
                             if (!acc[connection.connection]) {
                                 acc[connection.connection] = [];
                             }

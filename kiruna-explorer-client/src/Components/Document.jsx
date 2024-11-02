@@ -47,51 +47,123 @@ function Document() {
 
     const [connections, setConnections] = useState(0);
 
+    const [errors, setErrors] = useState({});
+
+    const validateFields = () => {
+        const newErrors = {};
+        if (!title) newErrors.title = "Title is required";
+        if (stakeholder === "none") newErrors.stakeholder = "Stakeholder is required";
+        if (scale === "none") newErrors.scale = "Scale is required";
+        if (scale === "plan" && !planNumber) newErrors.planNumber = "Plan Number is required for scale 'plan'";
+        if (!date) newErrors.date = "Date is required";
+        if (type === "none") newErrors.type = "Type is required";
+        if (!description) newErrors.description = "Description is required";
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const toggleModal = () => {
         setIsModalOpen(!isModalOpen);
+        clearErrors();
     };
 
     const handleTitle = (event) => {
         setTitle(event.target.value);
-    }
+
+        if (event.target.value) {
+            setErrors((prevErrors) => {
+                const { title, ...remainingErrors } = prevErrors;
+                return remainingErrors;
+            });
+        }
+    };
 
     const handleStakeholder = (event) => {
         setStakeholder(event.target.value);
-    };
 
-    const handleDescription = (event) => {
-        setDescription(event.target.value);
-    }
+        if (event.target.value !== "none") {
+            setErrors((prevErrors) => {
+                const { stakeholder, ...remainingErrors } = prevErrors;
+                return remainingErrors;
+            });
+        }
+    };
 
     const handleScale = (event) => {
         setScale(event.target.value);
-    }
 
-    const handleDate = (event) => {
-        const selectedDate = dayjs(event.target.value).format("YYYY-MM-DD");
-        setDate(selectedDate);
+        if (event.target.value !== "none") {
+            setErrors((prevErrors) => {
+                const { scale, ...remainingErrors } = prevErrors;
+                return remainingErrors;
+            });
+        }
     };
 
     const handlePlanNumber = (event) => {
         setPlanNumber(event.target.value);
+
+        if (event.target.value) {
+            setErrors((prevErrors) => {
+                const { planNumber, ...remainingErrors } = prevErrors;
+                return remainingErrors;
+            });
+        }
+    };
+
+    const handleDate = (event) => {
+        const selectedDate = dayjs(event.target.value).format("YYYY-MM-DD");
+        setDate(selectedDate);
+
+        if (selectedDate) {
+            setErrors((prevErrors) => {
+                const { date, ...remainingErrors } = prevErrors;
+                return remainingErrors;
+            });
+        }
     };
 
     const handleType = (event) => {
         setType(event.target.value);
-    }
+
+        if (event.target.value !== "none") {
+            setErrors((prevErrors) => {
+                const { type, ...remainingErrors } = prevErrors;
+                return remainingErrors;
+            });
+        }
+    };
 
     const handleLanguage = (event) => {
         setLanguage(event.target.value);
-    }
+    };
 
     const handleNumber = (event) => {
         setNumber(event.target.value);
+    };
+
+    const handleDescription = (event) => {
+        setDescription(event.target.value);
+
+        if (event.target.value) {
+            setErrors((prevErrors) => {
+                const { description, ...remainingErrors } = prevErrors;
+                return remainingErrors;
+            });
+        }
+    };
+
+    const clearErrors = () => {
+        setErrors({});
     };
 
     const handleConfirm = async () => {
 
         //CAMPI OPZIONALI: PAGE + LANGUAGE + GIORNO DELLA DATA(?) + COORDINATES
         //CAMPI OBBLIGATORI: TITLE + STAKEHOLDER + SCALE(PLANE NUMBER IN CASE) + DATE + DESCRIPTION + TYPE 
+
+      
 
         const documentData = {
             title,
@@ -107,15 +179,15 @@ function Document() {
 
         console.log(documentData);
 
-        if (!title || stakeholder === "none" || !date || type === "none" || !description || scale === "none" || (scale === 'plan' && !planNumber)) {
+        if (!validateFields()) {
             setAlertMessage(['Please fill all the mandatory fields.', 'error']);
             return;
         }
 
-        if (connections === 0) {
-            setAlertMessage(['Impossible to have 0 connections for a document.', 'error']);
-
-        }
+        /*   if (connections === 0) {
+               setAlertMessage(['Impossible to have 0 connections for a document.', 'error']);
+               return
+           } IT SHOULD BE UNCOMMENT WHEN THERE IS THE POSSIBILITY TO ADD LINK!!!*/
 
         try {
             await API.addDocument(documentData);
@@ -186,7 +258,7 @@ function Document() {
                                 placeholder="Title"
                                 value={title}
                                 onChange={handleTitle}
-                                className="w-full px-3 text-xl py-2 text-white placeholder:text-placeholder_color border-none bg-input_color rounded-[40px]"
+                                className={`w-full px-3 text-xl py-2 text-white placeholder:text-placeholder_color bg-input_color rounded-[40px] ${errors.title ? 'border-red-500 border-1' : ''}`}
                             />
                         </div>
 
@@ -197,7 +269,8 @@ function Document() {
                                 value={stakeholder}
                                 onChange={handleStakeholder}
 
-                                className="w-full px-3 text-xl py-2 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color rounded-[40px]">
+                                className={`w-full px-3 text-xl py-2 text-white bg-input_color rounded-[40px] ${errors.stakeholder ? 'border-red-500 border-1' : ''}`}
+                            >
                                 <option value="none">None</option>
                                 <option value="lkab">LKBAB</option>
                                 <option value="municipalty">Municipalty</option>
@@ -214,7 +287,7 @@ function Document() {
                                 id="document-type"
                                 value={scale}
                                 onChange={handleScale}
-                                className="w-full px-3 text-xl py-2 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color rounded-[40px]">
+                                className={`w-full px-3 text-xl py-2 text-white bg-input_color rounded-[40px] ${errors.scale ? 'border-red-500 border-1' : ''}`}>
                                 <option value="none">None</option>
                                 <option value="text">Text</option>
                                 <option value="concept">Concept</option>
@@ -232,7 +305,7 @@ function Document() {
                                     value={planNumber}
                                     placeholder="n"
                                     onChange={handlePlanNumber}
-                                    className="w-full text-xl px-3 py-2 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color rounded-[40px]">
+                                    className={`w-full text-xl px-3 py-2 text-white bg-input_color rounded-[40px] ${errors.planNumber ? 'border-red-500 border-1' : ''}`}>
                                 </input>
                             </div>}
 
@@ -243,7 +316,7 @@ function Document() {
                                 type="date"
                                 value={date}
                                 onChange={handleDate}
-                                className="w-full px-3 text-xl py-2 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color rounded-[40px]">
+                                className={`w-full px-3 text-xl py-2 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color rounded-[40px]  ${errors.date ? 'border-red-500 border-1' : ''}`}>
                             </input>
                         </div>
 
@@ -253,7 +326,7 @@ function Document() {
                                 id="document-type"
                                 value={type}
                                 onChange={handleType}
-                                className="w-full px-3 text-xl py-2 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color rounded-[40px]">
+                                className={`w-full px-3 text-xl py-2 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color rounded-[40px] ${errors.type ? 'border-red-500 border-1' : ''}`}>
                                 <option value="none">None</option>
                                 <option value="design">Design document</option>
                                 <option value="informative">Informative document</option>
@@ -301,7 +374,7 @@ function Document() {
                                 placeholder="Description"
                                 value={description}
                                 onChange={handleDescription}
-                                className="w-full p-2 px-3 py-2 text-xl text-white border-gray-300 placeholder:text-placeholder_color bg-input_color"
+                                className={`w-full p-2 px-3 py-2 text-xl text-white border-gray-300 placeholder:text-placeholder_color bg-input_color ${errors.description ? 'border-red-500 border-1' : ''}`}
                                 rows="4"
                             ></textarea>
                         </div>

@@ -1,6 +1,6 @@
-import crypto from "crypto";
+import crypto from 'node:crypto'
 import db from "../db.mjs";
-import User from "../models/User.mjs";
+import {User} from "../models/User.mjs";
 
 export default function UserDAO() {
   this.getUser = (username, password) => {

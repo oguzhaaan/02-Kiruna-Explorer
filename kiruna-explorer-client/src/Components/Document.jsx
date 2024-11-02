@@ -3,6 +3,8 @@ import dayjs from "dayjs";
 import "./document.css";
 import Alert from "./Alert";
 import API from "../API/API.mjs";
+import { SingleDocument } from "./SingleDocument.jsx";
+import { useNavigate } from "react-router-dom";
 
 function Document() {
 
@@ -163,7 +165,7 @@ function Document() {
         //CAMPI OPZIONALI: PAGE + LANGUAGE + GIORNO DELLA DATA(?) + COORDINATES
         //CAMPI OBBLIGATORI: TITLE + STAKEHOLDER + SCALE(PLANE NUMBER IN CASE) + DATE + DESCRIPTION + TYPE 
 
-      
+
 
         const documentData = {
             title,
@@ -210,16 +212,17 @@ function Document() {
         setPlanNumber("");
         setDescription("");
     };
+    const navigate = useNavigate();
 
     return (
         <>
             <div className="bg-background_color min-h-screen flex justify-center">
-                <Alert message={alertMessage[0]} type={alertMessage[1]} clearMessage={() => setAlertMessage(['', ''])}></Alert>
-                <div className="flex items-center justify-between w-full h-16  ">
+                <SingleDocument></SingleDocument>
+                <Alert message={alertMessage[0]} type={alertMessage[1]}
+                    clearMessage={() => setAlertMessage(['', ''])}></Alert>
+                <div className="flex items-center justify-between w-full h-16">
 
                     <div className="flex items-center gap-3 mr-3 ml-20 mt-4">
-
-
                         <div className="relative">
                             <span className="absolute inset-y-0 left-0 flex items-center pl-3">
                                 <i className="bi bi-search"></i>
@@ -236,7 +239,8 @@ function Document() {
                         </button>
                     </div>
 
-                    <button onClick={toggleModal} className="bg-[#2E6A8E] text-white grid justify-items-end py-2 px-4 mx-3 rounded-[77px] mt-4">
+                    <button onClick={toggleModal}
+                        className="bg-[#2E6A8E] text-white grid justify-items-end py-2 px-4 mx-3 rounded-[77px] mt-4">
                         <span><i className="bi bi-file-earmark-plus"></i>  Add document</span>
                     </button>
                 </div>
@@ -245,9 +249,11 @@ function Document() {
             {isModalOpen && (
                 <div className="fixed inset-0 flex items-center justify-center scrollbar-thin scrollbar-webkit">
 
-                    <div className="bg-box_color backdrop-blur-2xl drop-shadow-xl  w-1/3 p-6 h-2/3 overflow-y-auto rounded-lg flex flex-col items-center relative scrollbar-thin scrollbar-webkit">
+                    <div
+                        className="bg-box_color backdrop-blur-2xl drop-shadow-xl  w-1/3 p-6 h-2/3 overflow-y-auto rounded-lg flex flex-col items-center relative scrollbar-thin scrollbar-webkit">
                         <h2 className="text-white text-3xl font-bold ">Add New Document</h2>
-                        <button onClick={toggleModal} className="absolute top-5 text-white text-xl right-4 hover:text-gray-600">
+                        <button onClick={toggleModal}
+                            className="absolute top-5 text-white text-xl right-4 hover:text-gray-600">
                             <i className="bi bi-x-lg"></i>
                         </button>
 
@@ -298,7 +304,8 @@ function Document() {
 
                         {scale === 'plan' &&
                             <div className="input-plan mb-4 w-full">
-                                <label className="text-white mb-1 text-xl w-full ml-2 text-left">Enter the scale 1:n</label>
+                                <label className="text-white mb-1 text-xl w-full ml-2 text-left">Enter the scale
+                                    1:n</label>
                                 <input
                                     id="number-input"
                                     type="number"
@@ -382,24 +389,33 @@ function Document() {
                         <div className="input-map mb-4 w-full">
                             <label className="text-white mb-1 text-xl w-full ml-2 text-left">Georeference</label>
                             <button
-                                onClick={() => { console.log("ok") }}
-                                className="w-full p-2 text-xl text-black border border-gray-300 focus:outline-none bg-[#D9D9D9] rounded-[40px]"><i className="bi bi-globe-europe-africa"></i> Open the Map
+                                onClick={() => {
+                                    console.log("ok")
+                                }}
+                                className="w-full p-2 text-xl text-black border border-gray-300 focus:outline-none bg-[#D9D9D9] rounded-[40px]">
+                                <i className="bi bi-globe-europe-africa"></i> Open the Map
                             </button>
                         </div>
 
                         <div className="input-link mb-4 w-full">
                             <label className="text-white mb-1 text-xl w-full ml-2 text-left">Linking</label>
                             <button
-                                onClick={() => { console.log("ok") }}
-                                className="w-full p-2 text-black border text-xl border-gray-300 focus:outline-none bg-[#D9D9D9] rounded-[40px]"> Select Documents to Link
+                                onClick={() => {
+                                    console.log("ok")
+                                }}
+                                className="w-full p-2 text-black border text-xl border-gray-300 focus:outline-none bg-[#D9D9D9] rounded-[40px]"> Select
+                                Documents to Link
                             </button>
                         </div>
 
-                        <button className="bg-[#1A5F88] w-full font-bold text-[28px]  text-white py-2 px-4 rounded-lg mt-4" onClick={handleConfirm}>
+                        {/* Save button */}
+                        <button
+                            className="bg-[#1A5F88] w-full font-bold text-[28px]  text-white py-2 px-4 rounded-lg mt-4"
+                            onClick={handleConfirm}>
                             Confirm
                         </button>
                     </div>
-                </div>
+                </div >
             )}
         </>
     );

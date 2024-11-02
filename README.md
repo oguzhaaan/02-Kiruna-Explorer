@@ -24,6 +24,7 @@
   - `username` (String)
   - `password` (String)
   - `salt` (String)
+  - `avatar_url` (String)
 
 - **document Table**
 
@@ -34,6 +35,7 @@
   - `type` (String) - limited to "design", "informative", "prescriptive", and "technical".
   - `language` (String)
   - `description` (String)
+  - `scale` (String)
   - `areaId` (String) - (Foreign Key)
 
 - **area Table**

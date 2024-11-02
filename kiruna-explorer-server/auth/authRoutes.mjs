@@ -24,7 +24,7 @@ router.get("/api/sessions/current", isLoggedIn, (req, res) => {
 });
 
 // DELETE /api/sessions/current
-router.delete("/api/sessions/current", (req, res) => {
+router.delete("/api/sessions/current",isLoggedIn, (req, res) => {
   req.logout(() => {
     res.end();
   });

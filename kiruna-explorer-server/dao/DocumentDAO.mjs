@@ -21,19 +21,21 @@ export default function DocumentDAO() {
     }
 
     this.addDocument = (document) => {
+        console.log(document);
         const query = `
-            INSERT INTO document (title, stakeholders, date, type, language, description, areaId)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO document (title, stakeholders, date, type, language, description, scale, areaId)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         return new Promise((resolve, reject) => {
             db.run(query, [
                 document.title,
-                document.stakeholders,
+                document.stakeholder,
                 document.date,
                 document.type,
                 document.language,
                 document.description,
+                document.scale,
                 document.areaId
             ], function(err) {
                 if (err) {

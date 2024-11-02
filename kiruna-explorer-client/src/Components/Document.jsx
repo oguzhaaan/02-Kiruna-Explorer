@@ -2,6 +2,7 @@ import { useState } from "react";
 import dayjs from "dayjs";
 import "./document.css";
 import Alert from "./Alert";
+import API from "../API/API.mjs";
 
 function Document() {
 
@@ -24,30 +25,43 @@ function Document() {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const [stakeholder, setStakeholder] = useState("None");
+    const [stakeholder, setStakeholder] = useState("none");
 
-    const [scale, setScale] = useState("");
+    const [title, setTitle] = useState("");
+
+    const [scale, setScale] = useState("none");
 
     const [date, setDate] = useState("");
 
-    const [type, setType] = useState("");
+    const [type, setType] = useState("none");
 
-    const [language, setLanguage] = useState("");
+    const [language, setLanguage] = useState("none");
 
-    const [number, setNumber] = useState("");
+    const [pageNumber, setNumber] = useState("");
 
     const [alertMessage, setAlertMessage] = useState(['', '']);
 
-    const [planNumber, setPlanNumber] = useState();
+    const [planNumber, setPlanNumber] = useState("");
 
+    const [description, setDescription] = useState("");
+
+    const [connections, setConnections] = useState(0);
 
     const toggleModal = () => {
         setIsModalOpen(!isModalOpen);
     };
 
+    const handleTitle = (event) => {
+        setTitle(event.target.value);
+    }
+
     const handleStakeholder = (event) => {
         setStakeholder(event.target.value);
     };
+
+    const handleDescription = (event) => {
+        setDescription(event.target.value);
+    }
 
     const handleScale = (event) => {
         setScale(event.target.value);
@@ -74,10 +88,56 @@ function Document() {
         setNumber(event.target.value);
     };
 
-    const handleConfirm = () => {
-        setAlertMessage(['CONFIRM MESSAGE', 'success']); //integration TODO
+    const handleConfirm = async () => {
+
+        //CAMPI OPZIONALI: PAGE + LANGUAGE + GIORNO DELLA DATA(?) + COORDINATES
+        //CAMPI OBBLIGATORI: TITLE + STAKEHOLDER + SCALE(PLANE NUMBER IN CASE) + DATE + DESCRIPTION + TYPE 
+
+        const documentData = {
+            title,
+            stakeholder,
+            scale,
+            planNumber, // Optional
+            date, //day is optional
+            type,
+            language: language || null, // Set to null if not provided
+            pageNumber: pageNumber || null, // Set to null if not provided
+            description, // Mandatory
+        };
+
+        console.log(documentData);
+
+        if (!title || stakeholder === "none" || !date || type === "none" || !description || scale === "none" || (scale === 'plan' && !planNumber)) {
+            setAlertMessage(['Please fill all the mandatory fields.', 'error']);
+            return;
+        }
+
+        if (connections === 0) {
+            setAlertMessage(['Impossible to have 0 connections for a document.', 'error']);
+
+        }
+
+        try {
+            await API.addDocument(documentData);
+            setAlertMessage(['Document added successfully!', 'success']);
+            resetForm();
+            toggleModal();
+        } catch (error) {
+            console.log(error);
+            setAlertMessage(['errore', 'error']);
+        }
     }
 
+    const resetForm = () => {
+        setStakeholder("None");
+        setScale("");
+        setDate("");
+        setType("");
+        setLanguage("");
+        setNumber("");
+        setPlanNumber("");
+        setDescription("");
+    };
 
     return (
         <>
@@ -116,20 +176,22 @@ function Document() {
                     <div className="bg-box_color backdrop-blur-2xl drop-shadow-xl  w-1/3 p-6 h-2/3 overflow-y-auto rounded-lg flex flex-col items-center relative scrollbar-thin scrollbar-webkit">
                         <h2 className="text-white text-3xl font-bold ">Add New Document</h2>
                         <button onClick={toggleModal} className="absolute top-5 text-white text-xl right-4 hover:text-gray-600">
-                            <i class="bi bi-x-lg"></i>
+                            <i className="bi bi-x-lg"></i>
                         </button>
 
                         <div className="input-title mb-4 w-full">
-                            <label className="text-white w-full ml-2 mb-1 text-xl text-left">Title</label>
+                            <label className="text-white w-full ml-2 mb-1 text-xl text-left">Title*</label>
                             <input
                                 type="text"
                                 placeholder="Title"
-                                className="w-full px-3 text-xl py-2 text-black placeholder:text-placeholder_color border-none bg-input_color rounded-[40px]"
+                                value={title}
+                                onChange={handleTitle}
+                                className="w-full px-3 text-xl py-2 text-white placeholder:text-placeholder_color border-none bg-input_color rounded-[40px]"
                             />
                         </div>
 
                         <div className="input-stakeholder mb-4 w-full">
-                            <label className="text-white mb-1 text-xl w-full ml-2 text-left">Stakeholders</label>
+                            <label className="text-white mb-1 text-xl w-full ml-2 text-left">Stakeholders*</label>
                             <select
                                 id="document-type"
                                 value={stakeholder}
@@ -147,7 +209,7 @@ function Document() {
                         </div>
 
                         <div className="input-scale mb-4 w-full">
-                            <label className="text-white mb-1 text-xl w-full ml-2 text-left">Scale</label>
+                            <label className="text-white mb-1 text-xl w-full ml-2 text-left">Scale*</label>
                             <select
                                 id="document-type"
                                 value={scale}
@@ -175,7 +237,7 @@ function Document() {
                             </div>}
 
                         <div className="input-date mb-4 w-full">
-                            <label className="text-white mb-1 text-xl w-full ml-2 text-left">Issuance date</label>
+                            <label className="text-white mb-1 text-xl w-full ml-2 text-left">Issuance date*</label>
                             <input
                                 id="document-date"
                                 type="date"
@@ -186,17 +248,17 @@ function Document() {
                         </div>
 
                         <div className="input-type mb-4 w-full">
-                            <label className="text-white mb-1 text-xl w-full ml-2 text-left">Type</label>
+                            <label className="text-white mb-1 text-xl w-full ml-2 text-left">Type*</label>
                             <select
                                 id="document-type"
                                 value={type}
                                 onChange={handleType}
                                 className="w-full px-3 text-xl py-2 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color rounded-[40px]">
                                 <option value="none">None</option>
-                                <option value="design document">Design document</option>
-                                <option value="informative document">Informative document</option>
-                                <option value="prescriptive document">Prescriptive document</option>
-                                <option value="technical document">Technical document</option>
+                                <option value="design">Design document</option>
+                                <option value="informative">Informative document</option>
+                                <option value="prescriptive">Prescriptive document</option>
+                                <option value="technical">Technical document</option>
                                 <option value="agreement">Agreement</option>
                                 <option value="conflict">Conflict</option>
                                 <option value="consultation">Consultation</option>
@@ -222,11 +284,11 @@ function Document() {
 
 
                         <div className="input-number mb-4 w-full">
-                            <label className="text-white mb-1 text-xl w-full ml-2 text-left">Enter a Number</label>
+                            <label className="text-white mb-1 text-xl w-full ml-2 text-left">Pages</label>
                             <input
                                 id="number-input"
                                 type="number"
-                                value={number}
+                                value={pageNumber}
                                 placeholder="Select a number"
                                 onChange={handleNumber}
                                 className="w-full text-xl px-3 py-2 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color rounded-[40px]">
@@ -234,9 +296,11 @@ function Document() {
                         </div>
 
                         <div className="input-description mb-4 w-full">
-                            <label className="text-white mb-1 text-xl w-full ml-2 text-left">Description</label>
+                            <label className="text-white mb-1 text-xl w-full ml-2 text-left">Description*</label>
                             <textarea
                                 placeholder="Description"
+                                value={description}
+                                onChange={handleDescription}
                                 className="w-full p-2 px-3 py-2 text-xl text-white border-gray-300 placeholder:text-placeholder_color bg-input_color"
                                 rows="4"
                             ></textarea>
@@ -246,7 +310,7 @@ function Document() {
                             <label className="text-white mb-1 text-xl w-full ml-2 text-left">Georeference</label>
                             <button
                                 onClick={() => { console.log("ok") }}
-                                className="w-full p-2 text-xl text-black border border-gray-300 focus:outline-none bg-[#D9D9D9] rounded-[40px]"><i class="bi bi-globe-europe-africa"></i> Open the Map
+                                className="w-full p-2 text-xl text-black border border-gray-300 focus:outline-none bg-[#D9D9D9] rounded-[40px]"><i className="bi bi-globe-europe-africa"></i> Open the Map
                             </button>
                         </div>
 

@@ -38,10 +38,45 @@ const logOut = async () => {
   if (response.ok) return null;
 };
 
+const addDocument = async (documentData) => {
+  try {
+    const response = await fetch(`${SERVER_URL}/api/documents`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: documentData.title,
+        stakeholder: documentData.stakeholder,
+        scale: documentData.scale,
+        planNumber: documentData.planNumber,
+        date: documentData.date,
+        type: documentData.type,
+        language: documentData.language,
+        number: documentData.number,
+        description: documentData.description,
+      }),
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const errMessage = await response.json();
+      throw new Error(`Error ${response.status}: ${errMessage.message || 'Error while creating the document.'}`);
+    }
+
+    const result = await response.json();
+    return result; 
+    
+  } catch (error) {
+    console.error("Error in addDocument function:", error.message);
+    throw new Error("Unable to add the document. Please check your connection and try again.");
+  }
+};
+
+
 const API = {
   logIn,
   getUserInfo,
   logOut,
+  addDocument
 };
 
 export default API;

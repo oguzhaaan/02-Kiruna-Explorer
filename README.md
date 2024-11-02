@@ -78,7 +78,7 @@ If not already present area, first he has to create one
   - Body: DocId1 , DocId2, type, date
   - return success
 
-- **GET** `api/documents/link/:DocId`
+- **GET** `api/documents/:DocId/links`
 
   - req param: Document Id
   - return: Id, title and type of linked documents

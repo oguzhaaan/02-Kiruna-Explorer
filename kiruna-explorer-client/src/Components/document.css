@@ -7,12 +7,12 @@
 }
  
 ::-webkit-scrollbar-thumb {
-  background: grey; 
+  background: rgba(109, 109, 109, 0.6);
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: black; 
+    background: rgba(66, 66, 66, 0.6);
   }
 
   .input-stakeholder select,

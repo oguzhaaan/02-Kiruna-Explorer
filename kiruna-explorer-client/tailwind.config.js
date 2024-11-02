@@ -7,6 +7,7 @@ export default {
         sans: ["Inter", "sans-serif"],
       },
       colors: {
+        text_gray: "#B7B7B7",
         customGray: "#D9D9D9",
         customBlue: "#4388B2",
         primary_color: 'var(--primary-color)',
@@ -18,7 +19,8 @@ export default {
         white_text: 'var(--white-text)',
         my_green: 'var(--my-green)',
         my_red: 'var(--my-red)',
-        my_orange: 'var(--my-orange)'
+        my_orange: 'var(--my-orange)',
+        box_high_opacity: 'var(--box-high-opacity)'
       },
       backgroundColor: {
         navbar: 'var(--navbar-bg)',

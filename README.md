@@ -32,7 +32,8 @@
   - `title` (String)
   - `stakeholders` (String)
   - `date` (String) - Issuance date
-  - `type` (String) - limited to "design", "informative", "prescriptive", and "technical".
+  - `type` (String) - limited to "design", "informative", "prescriptive", "technical", "agreement", "conflict", "consultation", and "material effects"
+
   - `language` (String)
   - `description` (String)
   - `scale` (String)

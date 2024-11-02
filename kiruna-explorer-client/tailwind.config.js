@@ -7,10 +7,20 @@ export default {
         sans: ["Inter", "sans-serif"],
       },
       colors: {
+        text_gray: "#B7B7B7",
         customGray: "#D9D9D9",
         customBlue: "#4388B2",
         primary_color: 'var(--primary-color)',
-        white_text: 'var(--white-text)'
+        search_color: 'var(--search-gray-color)',
+        box_color: 'var(--box-gray-color)',
+        background_color: 'var(--background-color)',
+        input_color: 'var(--input-color)',
+        placeholder_color: 'var(--placeholder-input-color)',
+        white_text: 'var(--white-text)',
+        my_green: 'var(--my-green)',
+        my_red: 'var(--my-red)',
+        my_orange: 'var(--my-orange)',
+        box_high_opacity: 'var(--box-high-opacity)'
       },
       backgroundColor: {
         navbar: 'var(--navbar-bg)',

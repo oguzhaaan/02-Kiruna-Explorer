@@ -1,9 +1,11 @@
 import {Navbar,Nav, Container, Offcanvas, Row, Col} from "react-bootstrap"
 import { Link } from "react-router-dom"
 import { useUserContext } from "../contexts/UserContext"
+import { useNavigate } from "react-router-dom";
 
 function NavHeader (props) {
 
+    const navigate = useNavigate();
     const { user, isLoggedIn, logOut } = useUserContext();
 
 
@@ -51,7 +53,7 @@ function NavHeader (props) {
                         </Col>
                     </Row>
                     <div className="separator"></div>
-                    <Row className="offcanvas-item w-100 p-1">
+                    <Row className="offcanvas-item w-100 p-1"  onClick={() => { navigate("/documents")}}>
                         <Col xs="auto">
                             <i className="bi bi-journals fs-2 align-middle"></i>
                         </Col>

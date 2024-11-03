@@ -1,13 +1,15 @@
 import {Navbar,Nav, Container, Offcanvas, Row, Col} from "react-bootstrap"
 import { Link } from "react-router-dom"
 import { useUserContext } from "../contexts/UserContext"
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useState } from "react";
 
 function NavHeader (props) {
 
     const navigate = useNavigate();
+    const location = useLocation()
+    const currentRoute = location.pathname;
     const { user, isLoggedIn, logOut } = useUserContext();
-
 
     return(
         <>
@@ -53,7 +55,7 @@ function NavHeader (props) {
                         </Col>
                     </Row>
                     <div className="separator"></div>
-                    <Row className="offcanvas-item w-100 p-1"  onClick={() => { navigate("/documents")}}>
+                    <Row className={`offcanvas-item w-100 p-1 border-3 ${currentRoute.includes("documents")? " border-[#2E6A8E] ":""}`} onClick={() => {navigate("/documents")}}>
                         <Col xs="auto">
                             <i className="bi bi-journals fs-2 align-middle"></i>
                         </Col>
@@ -61,7 +63,7 @@ function NavHeader (props) {
                             Documents
                         </Col>
                     </Row>
-                    <Row className="offcanvas-item w-100 p-1">
+                    <Row className={`offcanvas-item w-100 p-1 border-3 ${currentRoute.includes("map")? " border-[#2E6A8E] ":""}`} onClick={() => {}} >
                         <Col xs="auto">
                             <i className="bi bi-globe-americas fs-2 align-middle"></i>
                         </Col>
@@ -69,7 +71,7 @@ function NavHeader (props) {
                             Map
                         </Col>
                     </Row>
-                    <Row className="offcanvas-item w-100 p-1">
+                    <Row className={`offcanvas-item w-100 p-1 border-3 ${currentRoute.includes("diagram")? " border-[#2E6A8E] ":""}`} onClick={() => {}}>
                         <Col xs="auto">
                             <i className="bi bi-diagram-3 fs-2 align-middle"></i>
                         </Col>
@@ -79,7 +81,7 @@ function NavHeader (props) {
                     </Row>
                 </div>
                 <div className="offcanvas-content" onClick={()=>{logOut(),props.setNavShow(true)}}>
-                    <Row className="offcanvas-item w-100 p-1">
+                    <Row className="offcanvas-item w-100 p-1 border-3">
                         <Col xs="auto">
                             <i className="bi bi-door-open-fill fs-2 align-middle"></i>
                         </Col>

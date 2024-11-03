@@ -38,7 +38,6 @@ router.get("/:DocId",
 router.post("/",
     [
         body("title").notEmpty().withMessage("Title is required"),
-        body("stakeholder").notEmpty().withMessage("Stakeholder is required"),
         body("scale").notEmpty().withMessage("Scale is required"),
         body("date").notEmpty().withMessage("Date is required"),
         body("type").notEmpty().withMessage("Type is required"),
@@ -46,7 +45,17 @@ router.post("/",
         body("number").optional().isNumeric().withMessage("Page number must be a number"),
         body("description").notEmpty().withMessage("Description is required"),
         body("areaId").optional().isNumeric().withMessage("Area ID must be a number"),
-
+        body("stakeholder")
+            .isArray().withMessage("Stakeholder must be an array") 
+            .notEmpty().withMessage("Stakeholder is required")
+            .custom((value) => {
+                value.forEach((element) => {
+                    if (typeof element !== 'string') {
+                        throw new Error('Each stakeholder must be a string');
+                    }
+                });
+                return true; 
+            }),
         body("planNumber")
             .if((value, { req }) => req.body.scale === "plan")
             .notEmpty().withMessage("Plan number is required when scale is 'plan'")

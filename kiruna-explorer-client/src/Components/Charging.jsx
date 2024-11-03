@@ -4,7 +4,6 @@ function Charging() {
           <div className="loader text-white_text">
           </div>
       </div>
-
   );
 }
 

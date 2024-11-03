@@ -2,10 +2,15 @@
 
 ## Table of Contents
 
-1. [Introduction](#1-introduction)
-2. [Technologies Used](#2-technologies-used)
-3. [Database Structure](#3-database-structure)
-4. [API Documentation](#4-api-documentation)
+- [Kiruna Explorer](#kiruna-explorer)
+  - [Table of Contents](#table-of-contents)
+    - [1. Introduction](#1-introduction)
+    - [2. Technologies Used](#2-technologies-used)
+    - [3. Database Structure](#3-database-structure)
+    - [4. API Documentation](#4-api-documentation)
+      - [Add Document](#add-document)
+      - [Link Document:](#link-document)
+      - [Geolocate Document:](#geolocate-document)
 
 ### 1. Introduction
 
@@ -37,6 +42,8 @@
   - `language` (String)
   - `description` (String)
   - `scale` (String)
+  - `pages` (number) 
+  - `planNumber` (number)
   - `areaId` (String) - (Foreign Key)
 
 - **area Table**

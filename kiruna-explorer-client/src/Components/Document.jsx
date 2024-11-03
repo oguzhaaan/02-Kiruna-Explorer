@@ -279,7 +279,7 @@ function Document() {
                             >
                                 <option value="none">None</option>
                                 <option value="lkab">LKBAB</option>
-                                <option value="municipalty">Municipalty</option>
+                                <option value="municipality">Municipality</option>
                                 <option value="regional authority">Regional authority</option>
                                 <option value="architecture firms">Architecture firms</option>
                                 <option value="citizens">Citizens</option>

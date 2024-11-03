@@ -27,7 +27,7 @@ function Document() {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const [stakeholder, setStakeholder] = useState("none");
+    const [stakeholder, setStakeholder] = useState([]);
 
     const [title, setTitle] = useState("");
 
@@ -54,7 +54,7 @@ function Document() {
     const validateFields = () => {
         const newErrors = {};
         if (!title) newErrors.title = "Title is required";
-        if (stakeholder === "none") newErrors.stakeholder = "Stakeholder is required";
+        if (stakeholder.length === 0) newErrors.stakeholder = "At least one stakeholder is required";
         if (scale === "none") newErrors.scale = "Scale is required";
         if (scale === "plan" && !planNumber) newErrors.planNumber = "Plan Number is required for scale 'plan'";
         if (!date) newErrors.date = "Date is required";
@@ -82,9 +82,16 @@ function Document() {
     };
 
     const handleStakeholder = (event) => {
-        setStakeholder(event.target.value);
+        const options = event.target.options;
+        const selectedStakeholders = [];
+        for (let i = 0; i < options.length; i++) {
+            if (options[i].selected) {
+                selectedStakeholders.push(options[i].value);
+            }
+        }
+        setStakeholder(selectedStakeholders);
 
-        if (event.target.value !== "none") {
+        if (selectedStakeholders.length > 0) {
             setErrors((prevErrors) => {
                 const { stakeholder, ...remainingErrors } = prevErrors;
                 return remainingErrors;
@@ -274,10 +281,9 @@ function Document() {
                                 id="document-type"
                                 value={stakeholder}
                                 onChange={handleStakeholder}
-
+                                
                                 className={`w-full px-3 text-xl py-2 text-white bg-input_color rounded-[40px] ${errors.stakeholder ? 'border-red-500 border-1' : ''}`}
                             >
-                                <option value="none">None</option>
                                 <option value="lkab">LKBAB</option>
                                 <option value="municipalty">Municipalty</option>
                                 <option value="regional authority">Regional authority</option>
@@ -285,6 +291,7 @@ function Document() {
                                 <option value="citizens">Citizens</option>
                                 <option value="others">Others</option>
                             </select>
+
                         </div>
 
                         <div className="input-scale mb-4 w-full">

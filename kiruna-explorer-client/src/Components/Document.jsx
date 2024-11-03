@@ -285,7 +285,7 @@ function Document() {
                                 className={`w-full px-3 text-xl py-2 text-white bg-input_color rounded-[40px] ${errors.stakeholder ? 'border-red-500 border-1' : ''}`}
                             >
                                 <option value="lkab">LKBAB</option>
-                                <option value="municipalty">Municipalty</option>
+                                <option value="municipality">Municipality</option>
                                 <option value="regional authority">Regional authority</option>
                                 <option value="architecture firms">Architecture firms</option>
                                 <option value="citizens">Citizens</option>

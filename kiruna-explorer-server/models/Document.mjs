@@ -3,17 +3,19 @@
  * 
  * @param {number} id 
  * @param {string} title
- * @param {string} stakeholders
+ * @param {array} stakeholders
  * @param {string} date
  * @param {string} type
  * @param {string} language
  * @param {string} description
  * @param {number} areaId
+ * @param {number} pages
+ * @param {number} planNumber
  * @param {scale} scale
  */
 
 export default class Document {
-    constructor(id, title,stakeholders, date, type, language, description, areaId, scale) {
+    constructor(id, title, stakeholders, date, type, language, description, areaId, scale, pages, planNumber) {
         this.id = id;
         this.title = title;
         this.stakeholders = stakeholders;
@@ -23,7 +25,9 @@ export default class Document {
         this.description = description;
         this.areaId = areaId;
         this.scale = scale;
-        
+        this.pages = pages;
+        this.planNumber = planNumber;
+
     }
 
 }

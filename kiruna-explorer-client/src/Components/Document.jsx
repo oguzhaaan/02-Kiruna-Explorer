@@ -5,9 +5,84 @@ import Alert from "./Alert";
 import API from "../API/API.mjs";
 import { SingleDocument } from "./SingleDocument.jsx";
 import { useNavigate } from "react-router-dom";
+import Select from "react-select";
+
 
 function Document() {
 
+
+    //className={`w-full px-3 text-xl py-2 text-white bg-input_color rounded-[40px] ${errors.scale ? 'border-red-500 border-1' : ''}`}>
+
+
+    const customDropdownStyles = {
+        control: (provided, state) => ({
+            ...provided,
+            backgroundColor: '#d9d9d93f',     // Sfondo del campo
+            borderRadius: '40px',             // Bordo arrotondato come richiesto
+            borderColor:'transparent',        // Bordo attivo se selezionato
+            padding: '0px 5px',               // Padding interno per centrare il testo
+            boxShadow: 'none',                // Rimozione ombra
+            minHeight: '48px',                // Altezza minima
+            cursor: 'pointer',
+            fontSize: '20px',
+
+        }),
+        singleValue: (provided) => ({
+            ...provided,
+            color: 'white',                   // Testo bianco per leggibilità
+            fontSize: '16px',                 // Testo uniforme e visibile
+        }),
+        placeholder: (provided) => ({
+            ...provided,
+            color: 'white',                   // Placeholder bianco
+        }),
+        dropdownIndicator: () => ({
+            display: 'none',                  // Rimuove la freccia predefinita
+        }),
+        indicatorSeparator: () => ({
+            display: 'none',                  // Rimuove la linea separatrice
+        }),
+        menu: (provided) => ({
+            ...provided,
+            backgroundColor: '#2b2b2b',       // Sfondo opaco per il menu
+            borderRadius: '10px',             // Bordo arrotondato del menu
+            marginTop: '8px',                 // Spazio tra campo e menu
+            padding: '0',                     // Rimuove padding extra
+            overflow: 'hidden',               // Rimuove eventuali scroll imprevisti
+            border: ' 0px solid white'
+        }),
+        menuList: (provided) => ({
+            ...provided,
+            padding: '0',                     // Rimuove padding extra
+
+        }),
+        option: (provided, state) => ({
+            ...provided,
+            backgroundColor: state.isSelected ? '#373737a6' : '#373737a6',  // Sfondo opzione selezionata
+            color: 'white',                   // Testo bianco
+            padding: '5px 15px',             // Spaziatura interna
+            cursor: 'pointer',
+            fontSize: '19px',                 // Aumenta la dimensione del testo delle opzioni
+            '&:hover': {
+                backgroundColor: '#1e90ff',   // Colore blu al passaggio del mouse
+            },
+        }),
+        multiValue: (provided) => ({
+            ...provided,
+            borderRadius: '40px',              // Bordi arrotondati per il tag
+            padding: '10px 10px',               // Padding per rendere i tag più "pillole"
+            margin: '10px 5px',
+        }),
+    };
+
+    const stakeholderOptions = [
+        { value: "lkab", label: "LKAB" },
+        { value: "municipality", label: "Municipality" },
+        { value: "regional authority", label: "Regional authority" },
+        { value: "architecture firms", label: "Architecture firms" },
+        { value: "citizens", label: "Citizens" },
+        { value: "others", label: "Others" },
+    ];
 
     const popularLanguages = [
         { code: "en", name: "English" },
@@ -81,17 +156,11 @@ function Document() {
         }
     };
 
-    const handleStakeholder = (event) => {
-        const options = event.target.options;
-        const selectedStakeholders = [];
-        for (let i = 0; i < options.length; i++) {
-            if (options[i].selected) {
-                selectedStakeholders.push(options[i].value);
-            }
-        }
-        setStakeholder(selectedStakeholders);
+    const handleStakeholder = (selectedOptions) => {
 
-        if (selectedStakeholders.length > 0) {
+        setStakeholder(selectedOptions || []); // Use an empty array if no options are selected
+
+        if (selectedOptions.length > 0) {
             setErrors((prevErrors) => {
                 const { stakeholder, ...remainingErrors } = prevErrors;
                 return remainingErrors;
@@ -172,11 +241,9 @@ function Document() {
         //CAMPI OPZIONALI: PAGE + LANGUAGE + GIORNO DELLA DATA(?) + COORDINATES
         //CAMPI OBBLIGATORI: TITLE + STAKEHOLDER + SCALE(PLANE NUMBER IN CASE) + DATE + DESCRIPTION + TYPE 
 
-
-
         const documentData = {
             title,
-            stakeholder,
+            stakeholder: stakeholder.map((e) => {return e.value; }),
             scale,
             planNumber, // Optional
             date, //day is optional
@@ -230,7 +297,7 @@ function Document() {
                 <div className="flex items-center justify-between w-full h-16">
 
                     <div className="flex items-center gap-3 mr-3 ml-20 mt-4">
-                        <div className="relative">
+                        <div className="z-[0] relative">
                             <span className="absolute inset-y-0 left-0 flex items-center pl-3">
                                 <i className="bi bi-search"></i>
                             </span>
@@ -277,22 +344,20 @@ function Document() {
 
                         <div className="input-stakeholder mb-4 w-full">
                             <label className="text-white mb-1 text-xl w-full ml-2 text-left">Stakeholders*</label>
-                            <select
-                                id="document-type"
+                            <Select
+                                isMulti
+                                options={stakeholderOptions}
                                 value={stakeholder}
                                 onChange={handleStakeholder}
-                                
-                                className={`w-full px-3 text-xl py-2 text-white bg-input_color rounded-[40px] ${errors.stakeholder ? 'border-red-500 border-1' : ''}`}
-                            >
-                                <option value="lkab">LKBAB</option>
-                                <option value="municipality">Municipality</option>
-                                <option value="regional authority">Regional authority</option>
-                                <option value="architecture firms">Architecture firms</option>
-                                <option value="citizens">Citizens</option>
-                                <option value="others">Others</option>
-                            </select>
-
+                                classNamePrefix="react-select"
+                                styles={customDropdownStyles}
+                                placeholder="None"
+                                isClearable={false}
+                                isSearchable={false}
+                                className="select"
+                            />
                         </div>
+
 
                         <div className="input-scale mb-4 w-full">
                             <label className="text-white mb-1 text-xl w-full ml-2 text-left">Scale*</label>

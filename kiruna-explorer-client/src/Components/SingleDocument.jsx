@@ -1,11 +1,11 @@
-import {useState, useEffect} from "react";
-import {useNavigate, useParams} from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 import informativeIcon from "../assets/informative.svg";
-import {Charging} from "./Charging.jsx";
-import {getIcon} from "./Utilities/DocumentIcons.jsx";
-import {getStakeholderColor} from "./Utilities/StakeholdersColors.jsx";
-import {getLanguageName} from "./Utilities/Languages.jsx";
+import { Charging } from "./Charging.jsx";
+import { getIcon } from "./Utilities/DocumentIcons.jsx";
+import { getStakeholderColor } from "./Utilities/StakeholdersColors.jsx";
+import { getLanguageName } from "./Utilities/Languages.jsx";
 import API from "../API/API.mjs";
 
 function SingleDocument(props) {
@@ -13,13 +13,11 @@ function SingleDocument(props) {
     const [document, setDocument] = useState({});
     const [isCharging, setIsCharging] = useState(false);
 
-    const stakeholders = ["Municipality","Citizens"]
-
-    const {id} = useParams();
+    const { id } = useParams();
     const navigate = useNavigate();
 
-    useEffect(()=>{
-        const getDoc = async ()=>{
+    useEffect(() => {
+        const getDoc = async () => {
             try {
                 setIsCharging(true)
                 const d = await API.getDocumentById(id)
@@ -34,16 +32,20 @@ function SingleDocument(props) {
                 }
                 else {
                     navigate("/documents")
-                } 
+                }
             }
-            catch(err){
+            catch (err) {
                 console.log(err)
             }
         }
         getDoc()
-    },[id])
+    }, [id])
 
-    {/*TODO adding API to get all document linked to document with specific id*/}
+    function capitalizeWords(str) {
+        return str.replace(/\b\w/g, char => char.toUpperCase());
+    }
+
+    {/*TODO adding API to get all document linked to document with specific id*/ }
     const documentlink = {
         connections: [
             {
@@ -76,7 +78,7 @@ function SingleDocument(props) {
     };
 
     return (
-        id && <div className="fixed inset-0 flex items-center justify-center scrollbar-thin scrollbar-webkit">
+        id && <div className="fixed inset-0 z-[200] flex items-center justify-center scrollbar-thin scrollbar-webkit">
 
             <div
                 className="bg-box_color backdrop-blur-2xl drop-shadow-xl w-11/12 py-3 px-4 h-5/6 overflow-none rounded-2xl flex flex-col gap-3 items-center relative scrollbar-thin scrollbar-webkit">
@@ -108,8 +110,8 @@ function SingleDocument(props) {
                             {/* Type */}
                             <div className="font-light">
                                 <div className="text-white text-xl flex flex-row align-items-center gap-3">
-                                    <img src={document.type ? getIcon(document.type) : getIcon("informative")}
-                                         className="w-12" alt={"type_icon"}></img>
+                                    <img src={document.type ? getIcon({type: document.type}) : getIcon("informative")}
+                                        className="w-12" alt={"type_icon"}></img>
                                     <p className="m-0 p-0">{document.type ? document.type.charAt(0).toUpperCase() + document.type.slice(1) : ''}</p>
                                 </div>
                             </div>
@@ -119,14 +121,15 @@ function SingleDocument(props) {
                             {/* Stakeholders*/}
                             {<div className="font-normal flex flex-row gap-3">
                                 {
-                                    stakeholders.map((stakeholder, index) => {
-                                    return (
-                                        <div key={index}
-                                             className={`text-center ${getStakeholderColor({stakeholder: stakeholder})} rounded-2xl py-1 px-3`}>
-                                            <p className="m-0 p-0 text-center mb-1">{stakeholder}</p>
-                                        </div>
-                                    );
-                                })}
+                                    document.stakeholders ? document.stakeholders.map((stakeholder, index) => {
+                                        return (
+                                            <div key={index}
+                                                className={`text-center ${getStakeholderColor({ stakeholder: stakeholder })} rounded-2xl py-1 px-3`}>
+                                                <p className="m-0 p-0 text-center mb-1">{capitalizeWords(stakeholder)}</p>
+                                            </div>
+                                        );
+                                    }) : ""
+                                }
                             </div>}
 
 
@@ -139,6 +142,7 @@ function SingleDocument(props) {
                                 <div className="flex flex-row gap-2">
                                     <p className="m-0 p-0 text-text_gray">Scale:</p>
                                     {document.scale ? document.scale.charAt(0).toUpperCase() + document.scale.slice(1) : ''}
+                                    {document.scale === "plan" ? " 1:" + document.planNumber : ""}
                                 </div>
                                 {/* Issuance Date */}
                                 <div className="flex flex-row gap-2">
@@ -200,10 +204,10 @@ function SingleDocument(props) {
                         }, {})).map(([connectionType, connections], index) => (
                             <div key={index} className="flex flex-col gap-3 bg-[#D9D9D90E] p-3 rounded-xl">
                                 <div className="flex flex-row justify-content-between align-items-center cursor-pointer"
-                                     onClick={() => setCollapsedSections(prevState => ({
-                                         ...prevState,
-                                         [connectionType]: !prevState[connectionType]
-                                     }))}
+                                    onClick={() => setCollapsedSections(prevState => ({
+                                        ...prevState,
+                                        [connectionType]: !prevState[connectionType]
+                                    }))}
                                 >
                                     <h3 className="p-0 m-0 text-white_text text-lg">{connectionType}</h3>
                                     <div
@@ -213,9 +217,9 @@ function SingleDocument(props) {
                                 </div>
                                 {!collapsedSections[connectionType] && connections.map((connection, idx) => (
                                     <div key={idx} className={"flex flex-col gap-1"}
-                                         onClick={() => {
-                                             //add click event to navigate to the document
-                                         }}
+                                        onClick={() => {
+                                            //add click event to navigate to the document
+                                        }}
                                     >
                                         <div
                                             onClick={() => {
@@ -242,4 +246,4 @@ function SingleDocument(props) {
     );
 }
 
-export {SingleDocument};
+export { SingleDocument };

@@ -1,16 +1,16 @@
 function getStakeholderColor({stakeholder}) {
     switch (stakeholder) {
-        case "Municipality":
+        case "municipality":
             return "bg-[#8F3C3C]";
-        case "Citizens":
+        case "citizens":
             return "bg-[#417C95]";
-        case "LKAB":
+        case "lkab":
             return "bg-[#8C3C8F]";
-        case "Regional authority":
+        case "regional authority":
             return "bg-[#8F803C]";
-        case "Architecture firms":
+        case "architecture firms":
             return "bg-[#598F3C]";
-        case "Others":
+        case "others":
             return "bg-[#3C8F4D]";
         default:
             return "bg-white";

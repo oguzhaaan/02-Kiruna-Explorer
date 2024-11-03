@@ -13,7 +13,7 @@ function NavHeader (props) {
         <>
         {!isLoggedIn ? 
         props.navShow && 
-        <Navbar expand="false" className="fixed z-[20000]">
+        <Navbar expand="false" className="fixed z-[2000]">
             <Container fluid className="text-center w-screen justify-end">
                 <Navbar.Brand className="text-white_text text-2xl flex items-center justify-center mt-4 mr-10">
                     <Link to="login" className="text-inherit no-underline hover:text-slate-300" onClick={()=>props.setNavShow(false)}>

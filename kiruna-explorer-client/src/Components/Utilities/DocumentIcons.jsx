@@ -8,6 +8,7 @@ import technicalIcon from "../../assets/technical.svg";
 import informativeIcon from "../../assets/informative.svg";
 
 function getIcon({type}) {
+    
         switch (type) {
             case "agreement":
                 return agreementIcon;

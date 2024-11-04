@@ -7,8 +7,7 @@ const router = express.Router();
 const DocumentDao = new DocumentDAO();
 const DocumentLinksDao = new DocumentLinksDAO();
 
-/* GET /api/documents/:DocId/links */
-router.get("/:DocId/links",
+router.get("/DocId/links",
     [
         param("DocId")
             .isNumeric()
@@ -24,25 +23,41 @@ router.get("/:DocId/links",
         try {
             const params = req.params;
             const documentId = params.DocId
-
+            
+            // Get all the links for the given document
             const documentLinks = await DocumentLinksDao.getLinksByDocumentId(documentId);
+            
             const linkedDocuemnts = [];
-
+       
             for (const link of documentLinks) {
-                const doc = await DocumentDao.getDocumentById(link.linkedDocumentId);
-                const linkedDocument = {
-                    id: doc.id,
-                    title: doc.title,
-                    connection: link.connection
-                };
-                linkedDocuemnts.push(linkedDocument);
+                try {
+                    // given  document id could be either stored in doc1Id column or doc2Id column
+                    const linkedDocumentId = link.doc1Id == documentId ? link.doc2Id : link.doc1Id
+                   
+                    //find all info of the linked document
+                    const doc = await DocumentDao.getDocumentById(linkedDocumentId);
+                  
+                    const linkedDocument = {
+                        id: doc.id,
+                        title: doc.title,
+                        connection: link.connection
+                    };
+                    linkedDocuemnts.push(linkedDocument);
+                }
+                catch (error) {
+                    console.error("Error in getDocumentById function:", error.message);
+                    throw new Error("Unable to get the document. Please check your connection and try again.");
+                }
             }
 
             res.json(linkedDocuemnts);
         }
         catch (error) {
             console.error("Error in getDocumentById function:", error.message);
-            throw new Error("Unable to get the document. Please check your connection and try again.");
+            throw new Error("Unable to get the linked documents. Please check your connection and try again.");
         }
     }
 );
+
+
+export default router

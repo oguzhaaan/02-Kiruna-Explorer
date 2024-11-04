@@ -32,14 +32,14 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
+// --- Routes ---
+app.use(authRoutes);
+app.use('/api/documents', DocumentRoutes);
+
 // --- Server Activation ---
 const PORT = 3000;
 app.listen(PORT, () =>
   console.log(`Server running on http://localhost:${PORT}/`)
 );
-
-// --- Routes ---
-app.use(authRoutes);
-app.use('/api/documents', DocumentRoutes);
 
 export { app };

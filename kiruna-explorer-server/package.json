@@ -4,7 +4,7 @@
   "main": "server.mjs",
   "type": "module",
   "scripts": {
-    "test": "set NODE_ENV=test && vitest --coverage --testTimeout=30000"
+    "test": "set NODE_ENV=test && vitest --no-file-parallelism --coverage --testTimeout=30000"
   },
   "author": "",
   "license": "ISC",

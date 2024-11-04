@@ -31,3 +31,16 @@ export default class Document {
     }
 
 }
+
+/**
+ * Represents an error that occurs when a document is not found.
+ */
+export class DocumentNotFound extends Error {
+
+    constructor() {
+        super()
+        this.customMessage = "Document Not Found"
+        this.status = 404
+    }
+}
+

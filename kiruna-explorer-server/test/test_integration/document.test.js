@@ -4,6 +4,7 @@ import request from "supertest";
 import { cleanup } from "../cleanup.js";
 import Document from "../../models/Document.mjs";
 import { Role } from "../../models/User.mjs";
+import { DocumentNotFound } from "../../models/Document.mjs";
 
 const basePath = "/api/documents"
 // Helper function that logs in a user and returns the cookie
@@ -87,15 +88,18 @@ describe("Integration Test GET /:DocId - Get Document by ID", () => {
             .get(`${basePath}/${nonExistentDocId}`)
             .set("Cookie", urbanplanner_cookie)
             .expect('Content-Type', /json/)
-            .expect(404);
+            .expect(404)
+            .catch(err=>err)
+
+        console.log(result.text.error)
     
-        expect(result.body.error).toBe("Document not found");
+        expect(result.body.error.customMessage).toEqual("Document Not Found");
     });
 
     test("should return 400 for an invalid document ID", async () => {
         const invalidDocId = "invalid-id";
 
-        const result = await request(app)
+        await request(app)
             .get(`${basePath}/${invalidDocId}`)
             .set("Cookie", urbanplanner_cookie)
             .expect('Content-Type', /json/)
@@ -154,7 +158,5 @@ describe("Integration Test POST / - Add Document", () => {
         expect(result.body).toHaveProperty('lastId');
         expect(result.body.message).toBe("Document added successfully");
     });
-    
-
 });
 

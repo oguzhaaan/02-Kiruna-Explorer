@@ -1,5 +1,6 @@
 import db from "../db.mjs";
 import Document from "../models/Document.mjs";
+import { DocumentNotFound } from "../models/Document.mjs";
 
 export default function DocumentDAO() {
     this.getDocumentById = (id) => {
@@ -8,9 +9,9 @@ export default function DocumentDAO() {
         return new Promise((resolve, reject) => {
             db.get(query, [id], (err, row) => {
                 if (err) {
-                    reject(err);
+                    return reject(err);
                 } else if (row === undefined) {
-                    resolve(false);
+                    return reject(new DocumentNotFound());
                 } else {
                     // Converti la riga del database in un oggetto Document
                     console.log(row);

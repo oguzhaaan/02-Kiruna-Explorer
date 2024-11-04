@@ -31,7 +31,7 @@ router.get("/:DocId", isLoggedIn,
             res.status(200).json(document);
         } catch (err) {
             console.error("Error fetching document:", err);
-            res.status(500).json({ error: err });
+            res.status(err.status).json({ error: err });
         }
     })
 const validStakeholders = ["lkab", "municipality", "regional authority", "architecture firms", "citizens", "others" ];
@@ -119,7 +119,7 @@ router.post("/",
             res.status(201).json({ lastId: lastId, message: "Document added successfully" });
         } catch (err) {
             console.error("Error adding document:", err);
-            res.status(500).json({ error: err.message });
+            res.status(err.status).json({ error: err.message });
         }
     });
 

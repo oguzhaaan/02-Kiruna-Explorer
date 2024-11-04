@@ -60,11 +60,11 @@ const LinkDocuments = ({
     return documents.reduce((acc, doc, index) => {
       const connectionType = connections[index];
       if (connectionType !== "None") {
-        acc.push({
-          originalDocId,
-          selectedDocId: doc.id,
-          connectionType,
-        });
+        const connectionObject =
+          mode === "return"
+            ? { selectedDocId: doc.id, connectionType }
+            : { originalDocId, selectedDocId: doc.id, connectionType };
+        acc.push(connectionObject);
       }
       return acc;
     }, []);

@@ -9,13 +9,13 @@ export default function DocumentLinksDAO() {
     }
 
     this.getLinksByDocumentId = (id) => {
-        query = "SELECT * FROM document_links WHERE doc1 = ?";
+        const query = "SELECT * FROM document_link WHERE doc1Id = ? or doc2Id = ?";
         return new Promise((resolve, reject) => {
             db.all(query, [id, id], (err, rows) => {
                 if (err) {
                     reject(err);
                 } else {
-                    const links = rows.map(row => new Link(row.id, row.doc1, row.doc2, row.date, row.connection));
+                    const links = rows.map(row => new Link(row.id, row.doc1Id, row.doc2Id, row.date, row.connection));
                     resolve(links);
                 }
             });

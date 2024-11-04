@@ -79,3 +79,174 @@ describe("Unit Test getDocumentById", () => {
         expect(db.get).toBeCalledTimes(1);
     });
 });
+
+describe("Unit Test addDocument", () => {
+    let documentDAO;
+
+    beforeEach(() => {
+        documentDAO = new DocumentDAO();
+    });
+
+    afterEach(() => {
+        vitest.clearAllMocks();
+    });
+
+    test("should insert a document and return its ID", async () => {
+        const mockDocumentData = {
+            title: 'Test Document',
+            date: '2023-01-01',
+            type: 'design',
+            language: 'English',
+            description: 'A test document',
+            scale: '1:100',
+            areaId: 1,
+            pages: 10,
+            planNumber: 123,
+            lkab: true,
+            municipality: false,
+            regional_authority: true,
+            architecture_firms: false,
+            citizens: true,
+            others: false
+        };
+        const expectedDbDocument = {
+            ...mockDocumentData,
+            lkab: 1,
+            municipality: 0,
+            regional_authority: 1,
+            architecture_firms: 0,
+            citizens: 1,
+            others: 0
+        };
+
+        // Mock the convertDocumentForDB method
+        vitest.spyOn(documentDAO, 'convertDocumentForDB').mockReturnValue(expectedDbDocument);
+
+         // Mock the db.run method
+         const lastID = 42; // Example ID for the inserted document
+         vitest.spyOn(db, "run").mockImplementation((_sql, _params, callback) => {
+            callback.call({ lastID }, null); // Simulate successful insertion with lastID
+        });
+
+        const result = await documentDAO.addDocument(mockDocumentData);
+
+        expect(result).toBe(lastID);
+        expect(db.run).toBeCalledWith(
+            expect.stringContaining("INSERT INTO document"),
+            [
+                expectedDbDocument.title,
+                expectedDbDocument.date,
+                expectedDbDocument.type,
+                expectedDbDocument.language,
+                expectedDbDocument.description,
+                expectedDbDocument.scale,
+                expectedDbDocument.areaId,
+                expectedDbDocument.pages,
+                expectedDbDocument.planNumber,
+                expectedDbDocument.lkab,
+                expectedDbDocument.municipality,
+                expectedDbDocument.regional_authority,
+                expectedDbDocument.architecture_firms,
+                expectedDbDocument.citizens,
+                expectedDbDocument.others
+            ],
+            expect.any(Function)
+        );
+    });
+
+    test("should insert a document and return its ID if areaID is not provided", async () => {
+        const mockDocumentData = {
+            title: 'Test Document',
+            date: '2023-01-01',
+            type: 'design',
+            language: 'English',
+            description: 'A test document',
+            scale: '1:100',
+            areaId: null,
+            pages: 10,
+            planNumber: 123,
+            lkab: true,
+            municipality: false,
+            regional_authority: true,
+            architecture_firms: false,
+            citizens: true,
+            others: false
+        };
+        const expectedDbDocument = {
+            ...mockDocumentData,
+            lkab: 1,
+            municipality: 0,
+            regional_authority: 1,
+            architecture_firms: 0,
+            citizens: 1,
+            others: 0
+        };
+
+        // Mock the convertDocumentForDB method
+        vitest.spyOn(documentDAO, 'convertDocumentForDB').mockReturnValue(expectedDbDocument);
+
+         // Mock the db.run method
+         const lastID = 42; // Example ID for the inserted document
+         vitest.spyOn(db, "run").mockImplementation((_sql, _params, callback) => {
+            callback.call({ lastID }, null); // Simulate successful insertion with lastID
+        });
+
+        const result = await documentDAO.addDocument(mockDocumentData);
+
+        expect(result).toBe(lastID);
+        expect(db.run).toBeCalledWith(
+            expect.stringContaining("INSERT INTO document"),
+            [
+                expectedDbDocument.title,
+                expectedDbDocument.date,
+                expectedDbDocument.type,
+                expectedDbDocument.language,
+                expectedDbDocument.description,
+                expectedDbDocument.scale,
+                expectedDbDocument.areaId, // should be null
+                expectedDbDocument.pages,
+                expectedDbDocument.planNumber,
+                expectedDbDocument.lkab,
+                expectedDbDocument.municipality,
+                expectedDbDocument.regional_authority,
+                expectedDbDocument.architecture_firms,
+                expectedDbDocument.citizens,
+                expectedDbDocument.others
+            ],
+            expect.any(Function)
+        );
+    });
+
+    test("should reject with an error if input is invalid", async () => {
+        const invalidDocumentData = {
+            // Example of invalid data: missing required fields or invalid types
+            title: '', // Assuming title is required and cannot be empty
+            date: 'invalid-date', // Invalid date format
+            type: 'design',
+            language: 'English',
+            description: 'A test document',
+            scale: '1:100',
+            areaId: null,
+            pages: 10,
+            planNumber: 123,
+            lkab: true,
+            municipality: false,
+            regional_authority: true,
+            architecture_firms: false,
+            citizens: true,
+            others: false
+        };
+
+        // Mock the convertDocumentForDB method to return the invalid data
+        vitest.spyOn(documentDAO, 'convertDocumentForDB').mockReturnValue(invalidDocumentData);
+
+        // Mock the db.run method to simulate an error due to invalid input
+        const error = new Error('Invalid input data');
+        vitest.spyOn(db, "run").mockImplementation((_sql, _params, callback) => {
+            callback(error); // Simulate an error during insertion
+        });
+
+        await expect(documentDAO.addDocument(invalidDocumentData)).rejects.toThrow('Invalid input data');
+    });
+});
+

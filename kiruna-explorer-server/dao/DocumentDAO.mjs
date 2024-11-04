@@ -23,10 +23,9 @@ export default function DocumentDAO() {
     };
 
     this.addDocument = (documentData) => {
-        console.log(documentData);
-
         // Converti il documento per l'inserimento nel database
         const dbDocument = this.convertDocumentForDB(documentData);
+        console.log(dbDocument);
 
         // Query per inserire il documento
         const insertDocumentQuery = `
@@ -53,6 +52,7 @@ export default function DocumentDAO() {
                 dbDocument.others
             ], function (err) {
                 if (err) {
+                    console.log(err)
                     return reject(err); // Rifiuta la promessa in caso di errore
                 }
                 resolve(this.lastID); // Risolvi la promessa con l'ID del documento inserito
@@ -68,15 +68,15 @@ export default function DocumentDAO() {
             language: documentData.language,
             description: documentData.description,
             scale: documentData.scale,
-            areaId: documentData.areaId,
+            areaId: documentData.areaId ? documentData.areaId:null,
             pages: documentData.pages,
             planNumber: documentData.planNumber,
-            lkab: documentData.stakeholder.includes("lkab"),
-            municipality: documentData.stakeholder.includes("municipality"),
-            regional_authority: documentData.stakeholder.includes("regional authority"),
-            architecture_firms: documentData.stakeholder.includes("architecture firms"),
-            citizens: documentData.stakeholder.includes("citizens"),
-            others: documentData.stakeholder.includes("others"),
+            lkab: documentData.stakeholders.includes("lkab"),
+            municipality: documentData.stakeholders.includes("municipality"),
+            regional_authority: documentData.stakeholders.includes("regional authority"),
+            architecture_firms: documentData.stakeholders.includes("architecture firms"),
+            citizens: documentData.stakeholders.includes("citizens"),
+            others: documentData.stakeholders.includes("others"),
         };
     };
 

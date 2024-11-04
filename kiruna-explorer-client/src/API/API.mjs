@@ -45,7 +45,7 @@ const addDocument = async (documentData) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         title: documentData.title,
-        stakeholder: documentData.stakeholder,
+        stakeholders: documentData.stakeholder,
         scale: documentData.scale,
         planNumber: documentData.planNumber,
         date: documentData.date,

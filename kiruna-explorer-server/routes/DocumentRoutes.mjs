@@ -3,13 +3,14 @@ import DocumentDAO from "../dao/DocumentDAO.mjs";
 import { body, param, validationResult } from "express-validator";
 import AreaDAO from "../dao/AreaDAO.mjs";
 import Area from "../models/Area.mjs";
+import { isLoggedIn } from "../auth/authMiddleware.mjs";
 
 const router = express.Router();
 const DocumentDao = new DocumentDAO();
 const AreaDao = new AreaDAO();
 
 /* GET /api/documents/:DocId */
-router.get("/:DocId",
+router.get("/:DocId", isLoggedIn,
     [
         param("DocId")
             .isNumeric()
@@ -27,7 +28,7 @@ router.get("/:DocId",
             const documentId = params.DocId
 
             const document = await DocumentDao.getDocumentById(documentId);
-            res.json(document);
+            res.status(200).json(document);
         } catch (err) {
             console.error("Error fetching document:", err);
             res.status(500).json({ error: err });
@@ -35,17 +36,17 @@ router.get("/:DocId",
     })
 
 /* POST /api/documents */
-router.post("/",
+router.post("/", isLoggedIn,
     [
         body("title").notEmpty().withMessage("Title is required"),
         body("scale").notEmpty().withMessage("Scale is required"),
         body("date").notEmpty().withMessage("Date is required"),
         body("type").notEmpty().withMessage("Type is required"),
         body("language").optional(),
-        body("number").optional().isNumeric().withMessage("Page number must be a number"),
+        body("pages").optional().isNumeric().withMessage("Page number must be a number"),
         body("description").notEmpty().withMessage("Description is required"),
         body("areaId").optional().isNumeric().withMessage("Area ID must be a number"),
-        body("stakeholder")
+        body("stakeholders")
             .isArray().withMessage("Stakeholder must be an array") 
             .notEmpty().withMessage("Stakeholder is required")
             .custom((value) => {
@@ -89,8 +90,8 @@ router.post("/",
                 areaId: areaId
             };
 
-            await DocumentDao.addDocument(newDocument);
-            res.json({ message: "Document added successfully" });
+            let lastId = await DocumentDao.addDocument(newDocument);
+            res.status(201).json({lastId: lastId, message: "Document added successfully" });
         } catch (err) {
             console.error("Error adding document:", err);
             res.status(500).json({ error: err.message });

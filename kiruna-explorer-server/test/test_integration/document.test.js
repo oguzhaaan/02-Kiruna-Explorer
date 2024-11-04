@@ -80,6 +80,81 @@ describe("Integration Test GET /:DocId - Get Document by ID", () => {
         expect(result.body).toEqual({id:mockDocId, areaId: null, ...mockDocumentbody});
     });
 
+    test("should return 404 if the document does not exist", async () => {
+        const nonExistentDocId = 9999; // Assuming this ID does not exist
+    
+        const result = await request(app)
+            .get(`${basePath}/${nonExistentDocId}`)
+            .set("Cookie", urbanplanner_cookie)
+            .expect('Content-Type', /json/)
+            .expect(404);
+    
+        expect(result.body.error).toBe("Document not found");
+    });
+
+    test("should return 400 for an invalid document ID", async () => {
+        const invalidDocId = "invalid-id";
+
+        const result = await request(app)
+            .get(`${basePath}/${invalidDocId}`)
+            .set("Cookie", urbanplanner_cookie)
+            .expect('Content-Type', /json/)
+            .expect(400);
+    });
+
+
 });
 
+describe("Integration Test POST / - Add Document", () => {
+    beforeEach(async () => {
+        await cleanup();
+        urbanplanner_cookie = await login(urbanplannerUser);
+    });
+
+    test("should add a document successfully", async () => {
+        const result = await request(app)
+            .post(`${basePath}`)
+            .send(mockDocumentbody)
+            .set("Cookie", urbanplanner_cookie)
+            .expect('Content-Type', /json/)
+            .expect(201);
+
+        expect(result.body).toHaveProperty('lastId');
+        expect(result.body.message).toBe("Document added successfully");
+    }); 
+
+    test("should return 400 if required fields are missing", async () => {
+        const incompleteDocumentBody = { ...mockDocumentbody };
+        delete incompleteDocumentBody.title; // Remove a required field
+
+        const result = await request(app)
+            .post(`${basePath}`)
+            .send(incompleteDocumentBody)
+            .set("Cookie", urbanplanner_cookie)
+            .expect('Content-Type', /json/)
+            .expect(400);
+
+        expect(result.body.errors).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({ msg: "Title is required" })
+            ])
+        );
+    });
+
+    test("should add a document successfully with areaId is not provided", async () => {
+        const documentWithNullAreaId = { ...mockDocumentbody };
+
+        const result = await request(app)
+            .post(`${basePath}`)
+            .send(documentWithNullAreaId)
+            .set("Cookie", urbanplanner_cookie)
+            .expect('Content-Type', /json/)
+            .expect(201);
+
+        expect(result.body).toHaveProperty('lastId');
+        expect(result.body.message).toBe("Document added successfully");
+    });
+    
+
+});
 

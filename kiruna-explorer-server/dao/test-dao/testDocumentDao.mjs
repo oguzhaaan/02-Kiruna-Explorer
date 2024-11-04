@@ -52,4 +52,4 @@ async function testAddArea() {
     console.log('Area added with ID:', areaId);
 }
 
-testAddArea();
+//testAddArea();

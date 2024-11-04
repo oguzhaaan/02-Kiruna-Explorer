@@ -13,6 +13,8 @@
     --my-red: #E63232;
     --my-orange: #f09711;
     --box-high-opacity: rgba(217, 217, 217, 0.1);
+    --document-item-gradient-grey: linear-gradient(90deg, #686868 21%, #313131 100%);
+    --document-item-gradient-blue: linear-gradient(90deg, #166595 1%, #092A3E 100%);
 }
 
 @tailwind base;

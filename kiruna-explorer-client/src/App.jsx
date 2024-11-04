@@ -8,6 +8,7 @@ import {NavHeader} from "./Components/NavHeader.jsx"
 import { HomePage } from "./Components/HomePage.jsx";
 import { Document } from "./Components/Document.jsx";
 import { SingleDocument } from "./Components/SingleDocument.jsx";
+import LinkDocuments from "./Components/LinkDocuments.jsx";
 
 function App() {
   const { user, isLoggedIn, checkAuth } = useUserContext();
@@ -36,6 +37,8 @@ function App() {
           </>
         }>
 
+        
+
         <Route path="/" element={isLoggedIn ? <Navigate replace to="/documents"/> : <HomePage/>}/>
 
         <Route path="/login" element={isLoggedIn ? <Navigate replace to="/documents" /> : <LoginPage setNavShow={setNavShow}/>}/>
@@ -43,6 +46,8 @@ function App() {
         <Route path="/documents" element={isLoggedIn ? <Document /> : <Navigate replace to="/" />}/>
 
         <Route path="/documents/:id" element={isLoggedIn && <Document />}/>
+        
+        <Route path="/linkDocuments" element={<LinkDocuments />}/>
         
         </Route>
       </Routes>

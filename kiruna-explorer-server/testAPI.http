@@ -1,1 +1,5 @@
 GET http://localhost:3000/api/documents/1 HTTP/1.1
+###
+
+
+GET http://localhost:3000/api/documents/1/links HTTP/1.1

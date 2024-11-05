@@ -36,13 +36,25 @@ export default function DocumentLinksDAO() {
     }
 
     this.isLink = (link) => {
-        const query = "SELECT * FROM document_link WHERE (doc1Id = ? AND doc2Id = ?) OR (doc1Id = ? AND doc2Id = ?) AND connection = ?";
+        const query = "SELECT * FROM document_link WHERE ((doc1Id = ? AND doc2Id = ?) OR (doc1Id = ? AND doc2Id = ?)) AND connection = ?";
         return new Promise((resolve, reject) => {
             db.all(query, [link.doc1Id, link.doc2Id,link.doc2Id, link.doc1Id, link.connection], (err, rows) => {
                 if (err) {
                     reject(err);
                 } else {
                     resolve(rows.length > 0);
+                }
+            });
+        });
+    }
+    this.getPossibleLinks = (id) => {
+        const query = "SEELCT * FROM document WHERE id != ?";
+        return new Promise((resolve, reject) => {
+            db.all(query, [id], (err, rows) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(rows);
                 }
             });
         });

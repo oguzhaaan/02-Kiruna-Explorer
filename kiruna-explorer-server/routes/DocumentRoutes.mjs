@@ -189,6 +189,21 @@ router.post("/:DocId/links",
             throw new Error("Unable to check if link already exists. Please check your connection and try again.");
         }
 
+        //check if documents exist
+        try {
+            const doc1Exists = await DocumentDao.getDocumentById(req.body.docId1);
+            if (!doc1Exists) {
+                return res.status(404).json({ error: "Document 1 not found" });
+            }
+            const doc2Exists = await DocumentDao.getDocumentById(req.body.docId2);
+            if (!doc2Exists) {
+                return res.status(404).json({ error: "Document 2 not found" });
+            }
+        } catch (error) {
+            console.error("Error in isLink function:", error.message);
+            throw new Error("Unable to check if documents exist. Please check your connection and try again.");
+        }
+
         try {
         
             const result = await DocumentLinksDao.addLinktoDocument(newLink);

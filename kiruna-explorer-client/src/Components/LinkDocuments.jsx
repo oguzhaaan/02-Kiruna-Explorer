@@ -28,6 +28,7 @@ const LinkDocuments = ({
     const fetchDocuments = async () => {
       try {
         const documents = await API.getAllDocuments();
+        console.log(documents)
         setDocuments(documents);
       } catch (error) {
         console.error("Error in getAllDocuments function:", error.message);
@@ -37,31 +38,7 @@ const LinkDocuments = ({
 
     fetchDocuments();
   }, [])
-
-  // Sample documents array with test data
-  /* const documents = [
-    {
-      id: 2,
-      title: 'Compilation of responses "So what the people of Kiruna think?',
-      type: "agreement",
-      date: "12/2024",
-      stakeholders: ["municipality", "citizens"],
-    },
-    {
-      id: 3,
-      title: "Environmental Impact Study",
-      type: "material effect",
-      date: "11/2024",
-      stakeholders: ["lkab", "regional authority"],
-    },
-    {
-      id: 4,
-      title: "City Development Plan",
-      type: "informative",
-      date: "10/2024",
-      stakeholders: ["architecture firms", "others"],
-    },
-  ]; */
+  
 
   // State to hold the connection types for each document
   const [links, setLinks] = useState(documents.map(() => "None"));

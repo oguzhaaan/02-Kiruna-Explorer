@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import "./document.css";
 import Alert from "./Alert";
@@ -8,9 +8,12 @@ import { useNavigate } from "react-router-dom";
 import Select from "react-select";
 
 
-function Document() {
+function Document(props) {
 
-
+    useEffect(() => {
+        props.setNavShow(true); 
+      }, []); 
+    
     //className={`w-full px-3 text-xl py-2 text-white bg-input_color rounded-[40px] ${errors.scale ? 'border-red-500 border-1' : ''}`}>
 
 
@@ -251,6 +254,7 @@ function Document() {
             language: language || null, // Set to null if not provided
             pageNumber: pageNumber || null, // Set to null if not provided
             description, // Mandatory
+            areaId: props.newAreaId
         };
 
         console.log(documentData);
@@ -462,7 +466,7 @@ function Document() {
                             <label className="text-white mb-1 text-xl w-full ml-2 text-left">Georeference</label>
                             <button
                                 onClick={() => {
-                                    console.log("ok")
+                                    navigate("/map")
                                 }}
                                 className="w-full p-2 text-xl text-black border border-gray-300 focus:outline-none bg-[#D9D9D9] rounded-[40px]">
                                 <i className="bi bi-globe-europe-africa"></i> Open the Map

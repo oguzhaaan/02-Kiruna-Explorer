@@ -53,6 +53,7 @@ const addDocument = async (documentData) => {
         language: documentData.language,
         pages: documentData.pageNumber,
         description: documentData.description,
+        areaId: documentData.areaId
       }),
       credentials: 'include'
     });

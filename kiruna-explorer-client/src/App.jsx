@@ -8,11 +8,13 @@ import {NavHeader} from "./Components/NavHeader.jsx"
 import { HomePage } from "./Components/HomePage.jsx";
 import { Document } from "./Components/Document.jsx";
 import { SingleDocument } from "./Components/SingleDocument.jsx";
+import { GeoreferenceMap } from "./Components/Map.jsx";
 
 function App() {
   const { user, isLoggedIn, checkAuth } = useUserContext();
 
   const [navShow, setNavShow] = useState(true);
+  const [newAreaId, setnewAreaId] = useState(null);
 
   useEffect(() => {
     try{
@@ -40,9 +42,11 @@ function App() {
 
         <Route path="/login" element={isLoggedIn ? <Navigate replace to="/documents" /> : <LoginPage setNavShow={setNavShow}/>}/>
 
-        <Route path="/documents" element={isLoggedIn ? <Document /> : <Navigate replace to="/" />}/>
+        <Route path="/documents" element={isLoggedIn ? <Document setNavShow={setNavShow} newAreaId={newAreaId}/> : <Navigate replace to="/" />}/>
 
-        <Route path="/documents/:id" element={isLoggedIn && <Document />}/>
+        <Route path="/documents/:id" element={isLoggedIn ? <Document setNavShow={setNavShow} newAreaId={newAreaId}/>: <Navigate replace to="/" />}/>
+
+        <Route path="/map" element={isLoggedIn ? <GeoreferenceMap setNavShow={setNavShow} setnewAreaId={setnewAreaId}/>: <Navigate replace to="/" />}/>
         
         </Route>
       </Routes>

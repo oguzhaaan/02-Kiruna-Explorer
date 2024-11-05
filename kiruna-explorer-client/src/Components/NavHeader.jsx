@@ -26,6 +26,7 @@ function NavHeader (props) {
             </Container>
         </Navbar>
         :
+        props.navShow && 
         <Navbar expand="false" className="fixed z-[20000]">
           <Container fluid>
             <Navbar.Toggle

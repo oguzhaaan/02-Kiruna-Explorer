@@ -2,8 +2,11 @@
 
 import AreaDAO from "./AreaDAO.mjs";
 import Area from "../models/Area.mjs";
+import DocumentDAO from "./DocumentDAO.mjs";
+import Document from "../models/Document.mjs";
 
 const areaDAO = new AreaDAO();
+const documentDAO = new DocumentDAO();
 
 function testAddArea() {
 areaDAO.addArea(new Area(1, "geoJson"))
@@ -25,4 +28,16 @@ function testGetAreas() {
     })
 }
 
-testGetAreas();   
+//testGetAreas();
+
+function testGetDocumentsByAreaId() {
+    documentDAO.getDocumentsByAreaId(1)
+    .then(documents => {
+        console.log("Documents:", documents);
+    })
+    .catch(err => {
+        console.error("Error getting documents:", err);
+    });
+}
+
+//testGetDocumentsByAreaId();

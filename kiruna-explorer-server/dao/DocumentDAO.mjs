@@ -1,6 +1,10 @@
 import db from "../db.mjs";
 import Document from "../models/Document.mjs";
 import { DocumentNotFound } from "../models/Document.mjs";
+import AreaDAO from "./AreaDAO.mjs";
+import { AreaNotFound } from "../models/Area.mjs";
+import { InvalidArea } from "../models/Area.mjs";
+import Area from "../models/Area.mjs";
 
 export default function DocumentDAO() {
     this.getDocumentById = (id) => {
@@ -22,6 +26,29 @@ export default function DocumentDAO() {
             });
         });
     };
+
+    this.getDocumentsByAreaId = (areaId) => {
+        const areaDAO = new AreaDAO();
+        const query = "SELECT * FROM document WHERE areaId = ?";
+        return new Promise((resolve, reject) => {
+            db.all(query, [areaId], (err, rows) => {
+                if (err) {
+                    return reject(err);
+                }else if(!Number.isInteger(areaId)) {
+                    return reject(new InvalidArea());
+                }
+                else if (rows.length === 0) {
+                    return reject(new DocumentNotFound());
+                } else if (areaId === null && !areaDAO.getAllAreas().includes(areaId)) {
+                    return reject(new AreaNotFound());
+                
+                } 
+                 else {
+                    resolve(rows.map(row => this.convertDBRowToDocument(row)));
+                }
+            });
+        });
+    }
 
     this.addDocument = (documentData) => {
         // Converti il documento per l'inserimento nel database

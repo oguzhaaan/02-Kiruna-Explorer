@@ -22,4 +22,14 @@ export class InvalidArea extends Error {
         this.customMessage = "Invalid Area"
         this.status = 400
     }
+
+}
+export class AreaNotFound extends Error {
+
+    constructor() {
+        super()
+        this.customMessage = "Area not found"
+        this.status = 404
+    }
+
 }

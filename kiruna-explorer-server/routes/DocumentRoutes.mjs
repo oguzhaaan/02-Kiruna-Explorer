@@ -84,6 +84,7 @@ router.post("/",
                 areaId: areaId
             };
 
+            //TODO add id to return response
             await DocumentDao.addDocument(newDocument);
             res.json({ message: "Document added successfully" });
         } catch (err) {
@@ -148,6 +149,7 @@ router.get("/:DocId/links",
 
 
 /* POST /api/documents/:DocId/links */
+
 router.post("/:DocId/links",
     [
         body("docId1")
@@ -214,6 +216,71 @@ router.post("/:DocId/links",
             throw new Error("Unable to add the link. Please check your connection and try again.");
         }
     }
-);
+); 
+
+/* router.post("/links",
+   [
+       body().notEmpty().withMessage("There should be at least one connection"),
+   ],
+    async (req, res) => {
+
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        } 
+       // console.log(req.body[0])
+        //check if connection type is valid
+        for (let i = 0; i < req.body.length; i++) {
+            const link = req.body[i];
+        
+            const connections = ["direct_consequence", "collateral_consequence", "prevision", "update"];
+    
+            if (!connections.includes(link.connection)) {
+                console.log(link.connection)
+                return res.status(400).json({ error: "Invalid connection type" });
+            }
+            
+            //check if link already exists
+            try {
+                const linkExists = await DocumentLinksDao.isLink(link);
+                if (linkExists) {
+                    return res.status(400).json({ error: "Link already exists" });
+                }
+            } catch (error) {
+                console.error("Error in linkExists function:", error.message);
+                throw new Error("Unable to check if link already exists. Please check your connection and try again.");
+            }
+            
+            //check if documents exist
+            try {
+                const doc1Exists = await DocumentDao.getDocumentById(link.docId1);
+                if (!doc1Exists) {
+                    return res.status(404).json({ error: "Document 1 not found" });
+                }
+                const doc2Exists = await DocumentDao.getDocumentById(link.docId2);
+                if (!doc2Exists) {
+                    return res.status(404).json({ error: "Document 2 not found" });
+                }
+            } catch (error) {
+                console.error("Error in isLink function:", error.message);
+                throw new Error("Unable to check if documents exist. Please check your connection and try again.");
+            }
+            
+            
+            try {
+                
+                const newLink = new Link(null, link.docId1, link.docId2, link.date, link.connection);
+                const result = await DocumentLinksDao.addLinktoDocument(newLink);
+                res.json({ message: "Links added successfully" });
+                
+            }   catch (error) {
+                console.error("Error in addLinktoDocument function:", error.message);
+                throw new Error("Unable to add the link. Please check your connection and try again.");
+            }
+        }
+    }
+); 
+ */
+
 
 export default router;

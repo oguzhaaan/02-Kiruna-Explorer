@@ -13,6 +13,8 @@
     --my-red: #E63232;
     --my-orange: #f09711;
     --box-high-opacity: rgba(217, 217, 217, 0.1);
+    --document-item-gradient-grey: linear-gradient(90deg, #686868 21%, #313131 100%);
+    --document-item-gradient-blue: linear-gradient(90deg, #166595 1%, #092A3E 100%);
 }
 
 @tailwind base;
@@ -128,6 +130,7 @@ select option {
     cursor: pointer;              /* Cambia il cursore per indicare che è cliccabile */
     transition: background-color 0.3s ease; /* Effetto di transizione per il background */
     border-radius: 20px;
+    border-color: #2b2b2b80 ;
   }
   
   /* Effetto hover */
@@ -159,16 +162,14 @@ select option {
   }
 
 .loader {
-    width: 90px;
-    height: 14px;
-    color: #000;
+    width: 110px;
+    height: 18px;
     background: linear-gradient(90deg,#0000 16px, currentColor 0 30px, #0000 0),
             radial-gradient(circle closest-side at 68% 50%, currentColor 92%,#0000),
             conic-gradient(from   45deg at calc(100% - 7px) 50%,currentColor 90deg,#0000 0),
             conic-gradient(from -135deg at             7px  50%,currentColor 90deg,#0000 0);
     background-size: calc(3*100%/4) 100%;
     background-repeat: repeat-x;
-    background-color: #2b2b2bdd;
     animation: l9 2s infinite linear;
     z-index: 3000;
 }

@@ -51,7 +51,7 @@ const addDocument = async (documentData) => {
         date: documentData.date,
         type: documentData.type,
         language: documentData.language,
-        number: documentData.number,
+        pages: documentData.pageNumber,
         description: documentData.description,
       }),
       credentials: 'include'

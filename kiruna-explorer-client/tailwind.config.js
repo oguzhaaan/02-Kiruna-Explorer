@@ -10,6 +10,10 @@ export default {
         text_gray: "#B7B7B7",
         customGray: "#D9D9D9",
         customBlue: "#4388B2",
+        customGray1: '#686868',
+        customGray2: '#313131',
+        customGray3: '#D9D9D9',
+        customGray3_30: 'rgba(217, 217, 217, 0.3)',
         primary_color: 'var(--primary-color)',
         search_color: 'var(--search-gray-color)',
         box_color: 'var(--box-gray-color)',
@@ -21,6 +25,10 @@ export default {
         my_red: 'var(--my-red)',
         my_orange: 'var(--my-orange)',
         box_high_opacity: 'var(--box-high-opacity)'
+      },
+      backgroundImage: {
+        document_item_radient_grey: 'var(--document-item-gradient-grey)',
+        document_item_radient_blue: "var(--document-item-gradient-blue)",
       },
       backgroundColor: {
         navbar: 'var(--navbar-bg)',

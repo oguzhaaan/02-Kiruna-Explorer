@@ -42,5 +42,4 @@ app.listen(PORT, () =>
 // --- Routes ---
 app.use(authRoutes);
 app.use('/api/documents', DocumentRoutes);
-
 export { app };

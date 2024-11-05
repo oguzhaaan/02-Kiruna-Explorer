@@ -14,7 +14,8 @@ Content-Type: application/json
     "doc1Id": 1,
     "doc2Id": 4,
     "date" : "10/12/2023",
-    "connection" : "update"
+    "connection" : "collateral_consequence"
 }
+
 ###
 GET http://localhost:3000/api/documents/links HTTP/1.1

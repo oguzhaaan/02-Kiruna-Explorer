@@ -4,7 +4,6 @@ import { DocumentNotFound } from "../models/Document.mjs";
 import AreaDAO from "./AreaDAO.mjs";
 import { AreaNotFound } from "../models/Area.mjs";
 import { InvalidArea } from "../models/Area.mjs";
-import Area from "../models/Area.mjs";
 
 export default function DocumentDAO() {
     this.getDocumentById = (id) => {

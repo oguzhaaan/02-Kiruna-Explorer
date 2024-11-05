@@ -50,7 +50,7 @@ router.post("/",
         body("description").notEmpty().withMessage("Description is required"),
         body("areaId").optional().isNumeric().withMessage("Area ID must be a number"),
         body("stakeholder")
-            .isArray().withMessage("Stakeholder must be an array") 
+            .isArray().withMessage("Stakeholder must be an array")
             .notEmpty().withMessage("Stakeholder is required")
             .custom((value) => {
                 value.forEach((element) => {
@@ -58,7 +58,7 @@ router.post("/",
                         throw new Error('Each stakeholder must be a string');
                     }
                 });
-                return true; 
+                return true;
             }),
         body("planNumber")
             .if((value, { req }) => req.body.scale === "plan")
@@ -121,23 +121,23 @@ router.get("/:DocId/links",
             const params = req.params;
             const documentId = params.DocId
             console.log(documentId)
-            
+
             // Get all the links for the given document
             const documentLinks = await DocumentLinksDao.getLinksByDocumentId(documentId);
-            
+
             const linkedDocuemnts = [];
-       
+
             for (const link of documentLinks) {
                 try {
                     // given  document id could be either stored in doc1Id column or doc2Id column
                     const linkedDocumentId = link.doc1Id == documentId ? link.doc2Id : link.doc1Id
-                   
+
                     const doc = await DocumentDao.getDocumentById(linkedDocumentId);
-                  
+
                     const linkedDocument = {
                         id: doc.id,
                         title: doc.title,
-                        type : doc.type,
+                        type: doc.type,
                         connection: link.connection
                     };
                     linkedDocuemnts.push(linkedDocument);
@@ -152,7 +152,7 @@ router.get("/:DocId/links",
         }
         catch (error) {
             console.error("Error in getDocumentById function:", error.message);
-            throw new Error("Unable to get the linked documents. Please check your connection and try again.");
+            res.status(500).json({ error: err.message });
         }
     }
 );
@@ -217,80 +217,29 @@ router.post("/links",
         }
 
         try {
-        
+
             const result = await DocumentLinksDao.addLinktoDocument(newLink);
             res.json({ message: "Link added successfully" });
-        
-        }   catch (error) {
+
+        } catch (error) {
             console.error("Error in addLinktoDocument function:", error.message);
-            throw new Error("Unable to add the link. Please check your connection and try again.");
+            res.status(500).json({ error: err.message });
         }
     }
-); 
+);
 
-/* router.post("/links",
-   [
-       body().notEmpty().withMessage("There should be at least one connection"),
-   ],
+router.get("/links",
     async (req, res) => {
-
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        } 
-       // console.log(req.body[0])
-        //check if connection type is valid
-        for (let i = 0; i < req.body.length; i++) {
-            const link = req.body[i];
-        
-            const connections = ["direct_consequence", "collateral_consequence", "prevision", "update"];
-    
-            if (!connections.includes(link.connection)) {
-                console.log(link.connection)
-                return res.status(400).json({ error: "Invalid connection type" });
-            }
-            
-            //check if link already exists
-            try {
-                const linkExists = await DocumentLinksDao.isLink(link);
-                if (linkExists) {
-                    return res.status(400).json({ error: "Link already exists" });
-                }
-            } catch (error) {
-                console.error("Error in linkExists function:", error.message);
-                throw new Error("Unable to check if link already exists. Please check your connection and try again.");
-            }
-            
-            //check if documents exist
-            try {
-                const doc1Exists = await DocumentDao.getDocumentById(link.docId1);
-                if (!doc1Exists) {
-                    return res.status(404).json({ error: "Document 1 not found" });
-                }
-                const doc2Exists = await DocumentDao.getDocumentById(link.docId2);
-                if (!doc2Exists) {
-                    return res.status(404).json({ error: "Document 2 not found" });
-                }
-            } catch (error) {
-                console.error("Error in isLink function:", error.message);
-                throw new Error("Unable to check if documents exist. Please check your connection and try again.");
-            }
-            
-            
-            try {
-                
-                const newLink = new Link(null, link.docId1, link.docId2, link.date, link.connection);
-                const result = await DocumentLinksDao.addLinktoDocument(newLink);
-                res.json({ message: "Links added successfully" });
-                
-            }   catch (error) {
-                console.error("Error in addLinktoDocument function:", error.message);
-                throw new Error("Unable to add the link. Please check your connection and try again.");
-            }
+        try {
+            console.log("here")
+            const documents = await DocumentDao.getAllDocuments();
+            res.json(documents);
+        } catch (error) {
+            console.error("Error in getAllDocuments function:", error.message);
+            res.status(500).json({ error: err.message });
         }
-    }
-); 
- */
+
+    });
 
 
 export default router;

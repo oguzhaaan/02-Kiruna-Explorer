@@ -5,6 +5,14 @@ import { getStakeholderColor } from "./Utilities/StakeholdersColors";
 import { getIcon } from "./Utilities/DocumentIcons";
 import API from "../API/API.mjs";
 
+function formatString(input) {
+  return input
+    .replace(/_/g, " ") // Replace underscores with spaces
+    .split(" ") // Split the string into an array of words
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
+    .join(" "); // Join the words back into a single string
+}
+
 const LinkDocuments = ({
   originalDocId = 1,
   mode = "save",
@@ -12,7 +20,6 @@ const LinkDocuments = ({
 }) => {
   const navigate = useNavigate();
   const [isModalVisible, setIsModalVisible] = useState(false);
-
   const [documents, setDocuments] = useState([]);
 
   // Default connection options for all documents
@@ -24,24 +31,29 @@ const LinkDocuments = ({
     "update",
   ];
 
+  // State to hold the connection types for each document
+  const [links, setLinks] = useState([]);
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
-        const documents = await API.getAllDocuments();
-        console.log(documents)
-        setDocuments(documents);
+        const allDocuments = await API.getAllDocuments();
+        // Filter out the document with the same ID as originalDocId
+        const filteredDocuments = allDocuments.filter(
+          (doc) => doc.id !== originalDocId
+        );
+        setDocuments(filteredDocuments);
+        setLinks(filteredDocuments.map(() => "None"));
       } catch (error) {
         console.error("Error in getAllDocuments function:", error.message);
-        throw new Error("Unable to get the documents. Please check your connection and try again.");
+        throw new Error(
+          "Unable to get the documents. Please check your connection and try again."
+        );
       }
-    }
+    };
 
     fetchDocuments();
-  }, [])
-  
+  }, []);
 
-  // State to hold the connection types for each document
-  const [links, setLinks] = useState(documents.map(() => "None"));
   // State to hold the search query
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -223,7 +235,7 @@ const DocumentItem = ({
         >
           {connectionOptions.map((option, idx) => (
             <option key={idx} value={option}>
-              {option}
+              {formatString(option)}
             </option>
           ))}
         </select>

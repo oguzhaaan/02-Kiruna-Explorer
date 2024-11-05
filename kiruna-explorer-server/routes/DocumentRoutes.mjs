@@ -34,7 +34,7 @@ router.get("/:DocId", isLoggedIn,
             res.status(err.status).json({ error: err });
         }
     })
-const validStakeholders = ["lkab", "municipality", "regional authority", "architecture firms", "citizens", "others" ];
+const validStakeholders = ["lkab", "municipality", "regional authority", "architecture firms", "citizens", "others"];
 
 router.post("/",
     isLoggedIn,
@@ -56,19 +56,19 @@ router.post("/",
             .isIn(["design", "informative", "prescriptive", "technical", "agreement", "conflict", "consultation", "material effects"]).withMessage("Invalid document type"),
 
         body("language")
-            .optional()
+            .optional({ nullable: true, checkFalsy: true }) // Ignora se è `null` o stringa vuota
             .isString().withMessage("Language must be a string"),
 
         body("pages")
-            .optional()
+            .optional({ nullable: true, checkFalsy: true })
             .isInt({ min: 1 }).withMessage("Page number must be a positive integer"),
 
         body("description")
             .trim()
             .notEmpty().withMessage("Description is required"),
-            
+
         body("areaId")
-            .optional()
+            .optional({ nullable: true, checkFalsy: true })
             .isInt().withMessage("Area ID must be a number"),
 
         body("stakeholders")

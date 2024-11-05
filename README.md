@@ -73,9 +73,9 @@ If not already present area, first he has to create one
 
 #### Link Document:
 
-- **POST** `api/documents/links`
+- **POST** `api/documents/:DocId/links`
 
-  - Body: DocId1 , DocId2, type, date
+  - Body: [{DocId1 , DocId2, type, date}, ..]
   - return success
 
 - **GET** `api/documents/:DocId/links`

@@ -35,6 +35,7 @@ function SingleDocument(props) {
                 }
             }
             catch (err) {
+                navigate("/documents")
                 console.log(err)
             }
         }

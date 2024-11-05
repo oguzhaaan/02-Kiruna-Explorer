@@ -2,7 +2,7 @@ import db from "../db.mjs";
 import Area from "../models/Area.mjs";
 
 export default function AreaDAO() {
-/*
+
     this.addArea = (area) => {
         const query = `
             INSERT INTO area (geoJson)
@@ -19,7 +19,7 @@ export default function AreaDAO() {
             });
         });
     }
-*/
+
     this.getAreaById = (id) => {
         const query = "SELECT * FROM area WHERE id = ?";
 
@@ -38,4 +38,18 @@ export default function AreaDAO() {
             });
         });
     };
+
+    this.getAllAreas = () => {
+        const query = "SELECT * FROM area";
+        return new Promise((resolve, reject) => {
+            db.all(query, (err, rows) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(rows);
+                }
+            });
+        });
+    }
+    
 }

@@ -280,7 +280,7 @@ function Document(props) {
             toggleModal();
         } catch (error) {
             console.log(error);
-            setAlertMessage(['errore', 'error']);
+            setAlertMessage([error.message, 'error']);
         }
     }
 

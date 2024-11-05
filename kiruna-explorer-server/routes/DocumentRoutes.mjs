@@ -91,7 +91,7 @@ router.post("/",
 
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
+            return res.status(400).json({ message: errors.array().map((e) => e.msg) });
         }
 
         try {
@@ -102,7 +102,7 @@ router.post("/",
             if (areaId) {
                 const areaExists = await AreaDao.getAreaById(areaId);
                 if (!areaExists) {
-                    return res.status(404).json({ error: "Area not found" });
+                    return res.status(404).json({ message: "Area not found" });
                 }
             } else {
                 // If areaId is not provided, set it to null
@@ -119,7 +119,7 @@ router.post("/",
             res.status(201).json({ lastId: lastId, message: "Document added successfully" });
         } catch (err) {
             console.error("Error adding document:", err);
-            res.status(err.status).json({ error: err.message });
+            res.status(err.status).json({ message: err.message });
         }
     });
 

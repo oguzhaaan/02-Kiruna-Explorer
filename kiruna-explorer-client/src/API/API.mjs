@@ -91,6 +91,27 @@ const getDocumentById = async (docid) => {
   }
 };
 
+const getAllDocuments = async () => {
+  try {
+    const response = await fetch(`${SERVER_URL}/api/documents`, {
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const errMessage = await response.json();
+      throw new Error(`Error ${response.status}: ${errMessage.message || 'Error while creating the document.'}`);
+    }
+
+    const result = await response.json();
+    return result;
+    
+  } catch (error) {
+    console.error("Error in getAllDocuments function:", error.message);
+    throw new Error("Unable to get the documents. Please check your connection and try again.");
+  }
+};
+
+
 const addLink = async (link) => {
   try {
     const response = await fetch(`${SERVER_URL}/api/documents/links`, {
@@ -139,6 +160,8 @@ const getDocuemntLinks = async (docid) => {
   }
 };
 
+
+
 const API = {
   logIn,
   getUserInfo,
@@ -147,6 +170,7 @@ const API = {
   getDocumentById,
   addLink,
   getDocuemntLinks,
+  getAllDocuments
 };
 
 export default API;

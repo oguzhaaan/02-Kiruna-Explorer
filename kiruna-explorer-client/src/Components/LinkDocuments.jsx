@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { getStakeholderColor } from "./Utilities/StakeholdersColors";
@@ -13,6 +13,8 @@ const LinkDocuments = ({
   const navigate = useNavigate();
   const [isModalVisible, setIsModalVisible] = useState(false);
 
+  const [documents, setDocuments] = useState([]);
+
   // Default connection options for all documents
   const defaultConnectionOptions = [
     "None",
@@ -22,8 +24,22 @@ const LinkDocuments = ({
     "update",
   ];
 
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      try {
+        const documents = await API.getAllDocuments();
+        setDocuments(documents);
+      } catch (error) {
+        console.error("Error in getAllDocuments function:", error.message);
+        throw new Error("Unable to get the documents. Please check your connection and try again.");
+      }
+    }
+
+    fetchDocuments();
+  }, [])
+
   // Sample documents array with test data
-  const documents = [
+  /* const documents = [
     {
       id: 2,
       title: 'Compilation of responses "So what the people of Kiruna think?',
@@ -45,7 +61,7 @@ const LinkDocuments = ({
       date: "10/2024",
       stakeholders: ["architecture firms", "others"],
     },
-  ];
+  ]; */
 
   // State to hold the connection types for each document
   const [links, setLinks] = useState(documents.map(() => "None"));

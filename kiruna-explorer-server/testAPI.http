@@ -6,6 +6,18 @@ GET http://localhost:3000/api/documents/1/links HTTP/1.1
 
 ###
 
+should return error message, can't add link to not existing document
+POST http://localhost:3000/api/documents/1/links HTTP/1.1
+Content-Type: application/json
+
+{
+    "docId1": 1,
+    "docId2": 4,
+    "date" : "10/12/2023",
+    "connection" : "prevision"
+}
+###
+should return error message, can't add link with same type between same documents
 POST http://localhost:3000/api/documents/1/links HTTP/1.1
 Content-Type: application/json
 

@@ -16,9 +16,10 @@ const LinkDocuments = ({
   // Default connection options for all documents
   const defaultConnectionOptions = [
     "None",
-    "Projection",
-    "Analysis",
-    "Implementation",
+    "direct_consequence",
+    "collateral_consequence",
+    "prevision",
+    "update",
   ];
 
   // Sample documents array with test data
@@ -47,35 +48,35 @@ const LinkDocuments = ({
   ];
 
   // State to hold the connection types for each document
-  const [connections, setConnections] = useState(documents.map(() => "None"));
+  const [links, setLinks] = useState(documents.map(() => "None"));
   // State to hold the search query
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleConnectionChange = (index, value) => {
-    const newConnections = [...connections];
+    const newConnections = [...links];
     newConnections[index] = value;
-    setConnections(newConnections);
+    setLinks(newConnections);
   };
 
-  // Generate connection array based on user selections
-  const generateConnectionArray = () => {
+  // Generate link array based on user selections
+  const generateLinkArray = () => {
     return documents.reduce((acc, doc, index) => {
-      const connectionType = connections[index];
+      const connectionType = links[index];
       if (connectionType !== "None") {
-        const connectionObject =
+        const linkObject =
           mode === "return"
             ? {
-              selectedDocId: doc.id,
-              connectionType,
-              date: dayjs().format("YYYY-MM-DD"),
-            }
+                selectedDocId: doc.id,
+                connectionType,
+                date: dayjs().format("YYYY-MM-DD"),
+              }
             : {
-              doc1Id : originalDocId,
-              doc2Id: doc.id,
-              connection : connectionType,
-              date: dayjs().format("YYYY-MM-DD"),
-            };
-        acc.push(connectionObject);
+                originalDocId,
+                selectedDocId: doc.id,
+                connectionType,
+                date: dayjs().format("YYYY-MM-DD"),
+              };
+        acc.push(linkObject);
       }
       return acc;
     }, []);
@@ -83,7 +84,7 @@ const LinkDocuments = ({
 
   // Filter documents based on the search query and connection status
   const filteredDocuments = documents.filter((doc, index) => {
-    const connectionType = connections[index];
+    const connectionType = links[index];
     return (
       doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       connectionType !== "None"
@@ -95,32 +96,32 @@ const LinkDocuments = ({
     setIsModalVisible(true);
   };
 
-  // Confirm and log connection array when modal confirmation is clicked
+  // Confirm and log link array when modal confirmation is clicked
   const handleConfirm = async () => {
-    const connectionArray = generateConnectionArray();
+    const linkArray = generateLinkArray();
 
     if (mode === "return") {
       // In "return" mode, call the callback function with connectionArray
       if (setConnectionsInForm) {
-        setConnectionsInForm(connectionArray);
+        setConnectionsInForm(linkArray);
       }
     } else if (mode === "save") {
       //
       // In "save" mode, make an API call to save the connections
-      for (const connection of connectionArray) {
+      for (const link of linkArray) {
         try {
-          console.log(connection);
-          await API.addConnection(connection);
-        }
-        catch (error) {
+          console.log(link);
+          await API.addLink(link);
+        } catch (error) {
           console.error("Error in adding connection:", error.message);
-          throw new Error("Unable to add the connection. Please check your connection and try again.");
+          throw new Error(
+            "Unable to add the connection. Please check your connection and try again."
+          );
         }
       }
-
     }
 
-    console.log(connectionArray);
+    console.log(linkArray);
     setIsModalVisible(false); // Hide modal after confirmation
   };
 
@@ -137,7 +138,7 @@ const LinkDocuments = ({
           {/* Back Button */}
           <button
             onClick={() => {
-              setConnections(documents.map(() => "None")); // Reset connections
+              setLinks(documents.map(() => "None")); // Reset connections
               setSearchQuery(""); // Reset search query
               navigate(-1); // Navigate back
             }}
@@ -187,7 +188,7 @@ const LinkDocuments = ({
             date={doc.date}
             stakeholders={doc.stakeholders}
             connectionOptions={defaultConnectionOptions}
-            selectedOption={connections[index]}
+            selectedOption={links[index]}
             onConnectionChange={(value) => handleConnectionChange(index, value)}
           />
         ))}

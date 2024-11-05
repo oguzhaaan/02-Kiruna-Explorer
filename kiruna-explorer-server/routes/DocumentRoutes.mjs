@@ -161,10 +161,10 @@ router.get("/:DocId/links",
 
 router.post("/links",
     [
-        body("docId1")
+        body("doc1Id")
             .isNumeric()
             .withMessage("Document ID must be a valid number"),
-        body("docId2")
+        body("doc2Id")
             .isNumeric()
             .withMessage("Document ID must be a valid number"),
         body("connection")
@@ -188,7 +188,7 @@ router.post("/links",
             return res.status(400).json({ error: "Invalid connection type" });
         }
         console.log("here")
-        const newLink = new Link(null, req.body.docId1, req.body.docId2, req.body.date, req.body.connection);
+        const newLink = new Link(null, req.body.doc1Id, req.body.doc2Id, req.body.date, req.body.connection);
         //check if link already exists
         try {
             const linkExists = await DocumentLinksDao.isLink(newLink);
@@ -202,11 +202,11 @@ router.post("/links",
 
         //check if documents exist
         try {
-            const doc1Exists = await DocumentDao.getDocumentById(req.body.docId1);
+            const doc1Exists = await DocumentDao.getDocumentById(req.body.doc1Id);
             if (!doc1Exists) {
                 return res.status(404).json({ error: "Document 1 not found" });
             }
-            const doc2Exists = await DocumentDao.getDocumentById(req.body.docId2);
+            const doc2Exists = await DocumentDao.getDocumentById(req.body.doc2Id);
             if (!doc2Exists) {
                 return res.status(404).json({ error: "Document 2 not found" });
             }

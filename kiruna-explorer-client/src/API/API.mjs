@@ -91,16 +91,15 @@ const getDocumentById = async (docid) => {
   }
 };
 
-const addConnection = async (link) => {
+const addLink = async (link) => {
   try {
-    console.log(link);
     const response = await fetch(`${SERVER_URL}/api/documents/links`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        doc1Id: link.doc1Id,
-        doc2Id: link.doc2Id,
-        connection: link.connection,
+        doc1Id: link.originalDocId,
+        doc2Id: link.selectedDocId,
+        connection: link.connectionType,
         date: link.date,
       }),
       credentials: 'include'
@@ -127,7 +126,7 @@ const API = {
   logOut,
   addDocument,
   getDocumentById,
-  addConnection,
+  addLink,
 };
 
 export default API;

@@ -8,6 +8,7 @@ import session from "express-session";
 
 import authRoutes from "./auth/authRoutes.mjs";
 import DocumentRoutes from "./routes/DocumentRoutes.mjs";
+//import DocumentLinksRoutes from "./routes/DocumentsLinksRoutes.mjs";
 
 // --- Middlewares ---
 const app = express();
@@ -41,5 +42,5 @@ app.listen(PORT, () =>
 // --- Routes ---
 app.use(authRoutes);
 app.use('/api/documents', DocumentRoutes);
-
+//app.use('/api/documents', DocumentLinksRoutes);
 export { app };

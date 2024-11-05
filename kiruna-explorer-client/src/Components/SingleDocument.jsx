@@ -39,7 +39,7 @@ function SingleDocument(props) {
                 console.log(err)
             }
         }
-        getDoc()
+        if (id) getDoc()
     }, [id])
 
     function capitalizeWords(str) {

@@ -6,9 +6,10 @@ import API from "../API/API.mjs";
 import { SingleDocument } from "./SingleDocument.jsx";
 import { useNavigate } from "react-router-dom";
 import Select from "react-select";
-
+import DocumentClass from "../classes/Document.mjs";
 
 function Document(props) {
+
 
     useEffect(() => {
         props.setNavShow(true); 
@@ -105,25 +106,7 @@ function Document(props) {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const [stakeholder, setStakeholder] = useState([]);
-
-    const [title, setTitle] = useState("");
-
-    const [scale, setScale] = useState("none");
-
-    const [date, setDate] = useState("");
-
-    const [type, setType] = useState("none");
-
-    const [language, setLanguage] = useState("none");
-
-    const [pageNumber, setNumber] = useState("");
-
     const [alertMessage, setAlertMessage] = useState(['', '']);
-
-    const [planNumber, setPlanNumber] = useState("");
-
-    const [description, setDescription] = useState("");
 
     const [connections, setConnections] = useState(0);
 
@@ -131,13 +114,13 @@ function Document(props) {
 
     const validateFields = () => {
         const newErrors = {};
-        if (!title) newErrors.title = "Title is required";
-        if (stakeholder.length === 0) newErrors.stakeholder = "At least one stakeholder is required";
-        if (scale === "none") newErrors.scale = "Scale is required";
-        if (scale === "plan" && !planNumber) newErrors.planNumber = "Plan Number is required for scale 'plan'";
-        if (!date) newErrors.date = "Date is required";
-        if (type === "none") newErrors.type = "Type is required";
-        if (!description) newErrors.description = "Description is required";
+        if (!props.newDocument.title) newErrors.title = "Title is required";
+        if (props.newDocument.stakeholders.length === 0) newErrors.stakeholder = "At least one stakeholder is required";
+        if (props.newDocument.scale === "none") newErrors.scale = "Scale is required";
+        if (props.newDocument.scale === "plan" && !props.newDocument.planNumber) newErrors.planNumber = "Plan Number is required for scale 'plan'";
+        if (!props.newDocument.date) newErrors.date = "Date is required";
+        if (props.newDocument.type === "none") newErrors.type = "Type is required";
+        if (!props.newDocument.description) newErrors.description = "Description is required";
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -149,7 +132,10 @@ function Document(props) {
     };
 
     const handleTitle = (event) => {
-        setTitle(event.target.value);
+        props.setNewDocument(prevDoc => ({
+            ...prevDoc,
+            title: event.target.value
+        }));
 
         if (event.target.value) {
             setErrors((prevErrors) => {
@@ -160,8 +146,10 @@ function Document(props) {
     };
 
     const handleStakeholder = (selectedOptions) => {
-
-        setStakeholder(selectedOptions || []); // Use an empty array if no options are selected
+        props.setNewDocument(prevDoc => ({
+            ...prevDoc,
+            stakeholders: selectedOptions || []
+        }));
 
         if (selectedOptions.length > 0) {
             setErrors((prevErrors) => {
@@ -172,7 +160,10 @@ function Document(props) {
     };
 
     const handleScale = (event) => {
-        setScale(event.target.value);
+        props.setNewDocument(prevDoc => ({
+            ...prevDoc,
+            scale: event.target.value
+        }));
 
         if (event.target.value !== "none") {
             setErrors((prevErrors) => {
@@ -183,7 +174,10 @@ function Document(props) {
     };
 
     const handlePlanNumber = (event) => {
-        setPlanNumber(event.target.value);
+        props.setNewDocument(prevDoc => ({
+            ...prevDoc,
+            planNumber: event.target.value
+        }));
 
         if (event.target.value) {
             setErrors((prevErrors) => {
@@ -195,7 +189,10 @@ function Document(props) {
 
     const handleDate = (event) => {
         const selectedDate = dayjs(event.target.value).format("YYYY-MM-DD");
-        setDate(selectedDate);
+        props.setNewDocument(prevDoc => ({
+            ...prevDoc,
+            date: selectedDate
+        }));
 
         if (selectedDate) {
             setErrors((prevErrors) => {
@@ -206,7 +203,10 @@ function Document(props) {
     };
 
     const handleType = (event) => {
-        setType(event.target.value);
+        props.setNewDocument(prevDoc => ({
+            ...prevDoc,
+            type: event.target.value
+        }));
 
         if (event.target.value !== "none") {
             setErrors((prevErrors) => {
@@ -217,15 +217,25 @@ function Document(props) {
     };
 
     const handleLanguage = (event) => {
-        setLanguage(event.target.value);
+        const selectedLanguage = event.target.value;
+        props.setNewDocument(prevDoc => ({
+            ...prevDoc,
+            language: selectedLanguage
+        }));
     };
 
     const handleNumber = (event) => {
-        setNumber(event.target.value);
+        props.setNewDocument(prevDoc => ({
+            ...prevDoc,
+            pages: event.target.value
+        }));
     };
 
     const handleDescription = (event) => {
-        setDescription(event.target.value);
+        props.setNewDocument(prevDoc => ({
+            ...prevDoc,
+            description: event.target.value
+        }));
 
         if (event.target.value) {
             setErrors((prevErrors) => {
@@ -243,21 +253,19 @@ function Document(props) {
 
         //CAMPI OPZIONALI: PAGE + LANGUAGE + GIORNO DELLA DATA(?) + COORDINATES
         //CAMPI OBBLIGATORI: TITLE + STAKEHOLDER + SCALE(PLANE NUMBER IN CASE) + DATE + DESCRIPTION + TYPE 
-
+        
         const documentData = {
-            title,
-            stakeholder: stakeholder.map((e) => {return e.value; }),
-            scale,
-            planNumber, // Optional
-            date, //day is optional
-            type,
-            language: language || null, // Set to null if not provided
-            pageNumber: pageNumber || null, // Set to null if not provided
-            description, // Mandatory
-            areaId: props.newAreaId
+            title: props.newDocument.title,
+            stakeholder: props.newDocument.stakeholders.map((e) => {return e.value; }),
+            scale: props.newDocument.scale,
+            planNumber: props.newDocument.planNumber, // Optional
+            date: props.newDocument.date, //day is optional
+            type: props.newDocument.type,
+            language: props.newDocument.language || null, // Set to null if not provided
+            pageNumber: props.newDocument.pages || null, // Set to null if not provided
+            description: props.newDocument.description, // Mandatory
+            area: props.newDocument.areaId
         };
-
-        console.log(documentData);
 
         if (!validateFields()) {
             setAlertMessage(['Please fill all the mandatory fields.', 'error']);
@@ -276,19 +284,13 @@ function Document(props) {
             toggleModal();
         } catch (error) {
             console.log(error);
-            setAlertMessage(['errore', 'error']);
+            setAlertMessage([error.message, 'error']);
         }
     }
 
     const resetForm = () => {
-        setStakeholder("None");
-        setScale("");
-        setDate("");
-        setType("");
-        setLanguage("");
-        setNumber("");
-        setPlanNumber("");
-        setDescription("");
+
+       props.setNewDocument(new DocumentClass())
     };
     const navigate = useNavigate();
 
@@ -340,7 +342,7 @@ function Document(props) {
                             <input
                                 type="text"
                                 placeholder="Title"
-                                value={title}
+                                value={props.newDocument.title}
                                 onChange={handleTitle}
                                 className={`w-full px-3 text-xl py-2 text-white placeholder:text-placeholder_color bg-input_color rounded-[40px] ${errors.title ? 'border-red-500 border-1' : ''}`}
                             />
@@ -351,7 +353,7 @@ function Document(props) {
                             <Select
                                 isMulti
                                 options={stakeholderOptions}
-                                value={stakeholder}
+                                value={props.newDocument.stakeholders}
                                 onChange={handleStakeholder}
                                 classNamePrefix="react-select"
                                 styles={customDropdownStyles}
@@ -367,7 +369,7 @@ function Document(props) {
                             <label className="text-white mb-1 text-xl w-full ml-2 text-left">Scale*</label>
                             <select
                                 id="document-type"
-                                value={scale}
+                                value={props.newDocument.scale}
                                 onChange={handleScale}
                                 className={`w-full px-3 text-xl py-2 text-white bg-input_color rounded-[40px] ${errors.scale ? 'border-red-500 border-1' : ''}`}>
                                 <option value="none">None</option>
@@ -378,14 +380,14 @@ function Document(props) {
                             </select>
                         </div>
 
-                        {scale === 'plan' &&
+                        {props.newDocument.scale === 'plan' &&
                             <div className="input-plan mb-4 w-full">
                                 <label className="text-white mb-1 text-xl w-full ml-2 text-left">Enter the scale
                                     1:n</label>
                                 <input
                                     id="number-input"
                                     type="number"
-                                    value={planNumber}
+                                    value={props.newDocument.planNumber}
                                     placeholder="n"
                                     onChange={handlePlanNumber}
                                     className={`w-full text-xl px-3 py-2 text-white bg-input_color rounded-[40px] ${errors.planNumber ? 'border-red-500 border-1' : ''}`}>
@@ -397,7 +399,7 @@ function Document(props) {
                             <input
                                 id="document-date"
                                 type="date"
-                                value={date}
+                                value={props.newDocument.date}
                                 onChange={handleDate}
                                 className={`w-full px-3 text-xl py-2 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color rounded-[40px]  ${errors.date ? 'border-red-500 border-1' : ''}`}>
                             </input>
@@ -407,7 +409,7 @@ function Document(props) {
                             <label className="text-white mb-1 text-xl w-full ml-2 text-left">Type*</label>
                             <select
                                 id="document-type"
-                                value={type}
+                                value={props.newDocument.type}
                                 onChange={handleType}
                                 className={`w-full px-3 text-xl py-2 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color rounded-[40px] ${errors.type ? 'border-red-500 border-1' : ''}`}>
                                 <option value="none">None</option>
@@ -426,7 +428,7 @@ function Document(props) {
                             <label className="text-white mb-1 text-xl w-full ml-2 text-left">Language</label>
                             <select
                                 id="document-language"
-                                value={language}
+                                value={props.newDocument.language}
                                 onChange={handleLanguage}
                                 className="w-full px-3 text-xl py-2 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color  rounded-[40px]">
                                 <option value="">None</option>
@@ -444,7 +446,7 @@ function Document(props) {
                             <input
                                 id="number-input"
                                 type="number"
-                                value={pageNumber}
+                                value={props.newDocument.pages}
                                 placeholder="Select a number"
                                 onChange={handleNumber}
                                 className="w-full text-xl px-3 py-2 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color rounded-[40px]">
@@ -455,7 +457,7 @@ function Document(props) {
                             <label className="text-white mb-1 text-xl w-full ml-2 text-left">Description*</label>
                             <textarea
                                 placeholder="Description"
-                                value={description}
+                                value={props.newDocument.description}
                                 onChange={handleDescription}
                                 className={`w-full p-2 px-3 py-2 text-xl text-white border-gray-300 placeholder:text-placeholder_color bg-input_color ${errors.description ? 'border-red-500 border-1' : ''}`}
                                 rows="4"

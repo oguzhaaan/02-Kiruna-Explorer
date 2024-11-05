@@ -60,7 +60,7 @@ const addDocument = async (documentData) => {
 
     if (!response.ok) {
       const errMessage = await response.json();
-      throw new Error(`Error ${response.status}: ${errMessage.message || 'Error while creating the document.'}`);
+      throw new Error(`${errMessage.message || 'Error while creating the document.'}`);
     }
 
     const result = await response.json();
@@ -68,7 +68,7 @@ const addDocument = async (documentData) => {
     
   } catch (error) {
     console.error("Error in addDocument function:", error.message);
-    throw new Error("Unable to add the document. Please check your connection and try again.");
+    throw new Error(`${error.message || 'Error while creating the document.'}`);
   }
 };
 
@@ -80,7 +80,7 @@ const getDocumentById = async (docid) => {
 
     if (!response.ok) {
       const errMessage = await response.json();
-      throw new Error(`Error ${response.status}: ${errMessage.message || 'Error while creating the document.'}`);
+      throw new Error(`${errMessage.message || 'Error while creating the document.'}`);
     }
 
     const result = await response.json();
@@ -88,7 +88,7 @@ const getDocumentById = async (docid) => {
     
   } catch (error) {
     console.error("Error in getDocumentById function:", error.message);
-    throw new Error("Unable to get the document. Please check your connection and try again.");
+    throw new Error(`${error.message || 'Error while creating the document.'}`);
   }
 };
 

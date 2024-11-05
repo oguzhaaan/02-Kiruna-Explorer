@@ -9,12 +9,14 @@ import { HomePage } from "./Components/HomePage.jsx";
 import { Document } from "./Components/Document.jsx";
 import { SingleDocument } from "./Components/SingleDocument.jsx";
 import { GeoreferenceMap } from "./Components/Map.jsx";
+import DocumentClass from "./classes/Document.mjs";
 
 function App() {
   const { user, isLoggedIn, checkAuth } = useUserContext();
 
   const [navShow, setNavShow] = useState(true);
   const [newAreaId, setnewAreaId] = useState(null);
+  const [newDocument, setNewDocument] = useState(new DocumentClass())
 
   useEffect(() => {
     try{
@@ -42,7 +44,7 @@ function App() {
 
         <Route path="/login" element={isLoggedIn ? <Navigate replace to="/documents" /> : <LoginPage setNavShow={setNavShow}/>}/>
 
-        <Route path="/documents" element={isLoggedIn ? <Document setNavShow={setNavShow} newAreaId={newAreaId}/> : <Navigate replace to="/" />}/>
+        <Route path="/documents" element={isLoggedIn ? <Document setNavShow={setNavShow} newAreaId={newAreaId} setNewDocument={setNewDocument} newDocument={newDocument} /> : <Navigate replace to="/" />}/>
 
         <Route path="/documents/:id" element={isLoggedIn ? <Document setNavShow={setNavShow} newAreaId={newAreaId}/>: <Navigate replace to="/" />}/>
 

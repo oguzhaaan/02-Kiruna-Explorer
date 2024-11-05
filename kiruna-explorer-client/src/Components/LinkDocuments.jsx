@@ -3,10 +3,11 @@ import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { getStakeholderColor } from "./Utilities/StakeholdersColors";
 import { getIcon } from "./Utilities/DocumentIcons";
+import API from "../API/API.mjs";
 
 const LinkDocuments = ({
-  originalDocId,
-  mode = "return",
+  originalDocId = 1,
+  mode = "save",
   setConnectionsInForm,
 }) => {
   const navigate = useNavigate();
@@ -64,16 +65,16 @@ const LinkDocuments = ({
         const connectionObject =
           mode === "return"
             ? {
-                selectedDocId: doc.id,
-                connectionType,
-                date: dayjs().format("YYYY-MM-DD"),
-              }
+              selectedDocId: doc.id,
+              connectionType,
+              date: dayjs().format("YYYY-MM-DD"),
+            }
             : {
-                originalDocId,
-                selectedDocId: doc.id,
-                connectionType,
-                date: dayjs().format("YYYY-MM-DD"),
-              };
+              doc1Id : originalDocId,
+              doc2Id: doc.id,
+              connection : connectionType,
+              date: dayjs().format("YYYY-MM-DD"),
+            };
         acc.push(connectionObject);
       }
       return acc;
@@ -95,7 +96,7 @@ const LinkDocuments = ({
   };
 
   // Confirm and log connection array when modal confirmation is clicked
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     const connectionArray = generateConnectionArray();
 
     if (mode === "return") {
@@ -106,6 +107,17 @@ const LinkDocuments = ({
     } else if (mode === "save") {
       //
       // In "save" mode, make an API call to save the connections
+      for (const connection of connectionArray) {
+        try {
+          console.log(connection);
+          await API.addConnection(connection);
+        }
+        catch (error) {
+          console.error("Error in adding connection:", error.message);
+          throw new Error("Unable to add the connection. Please check your connection and try again.");
+        }
+      }
+
     }
 
     console.log(connectionArray);

@@ -91,13 +91,43 @@ const getDocumentById = async (docid) => {
   }
 };
 
+const addConnection = async (link) => {
+  try {
+    console.log(link);
+    const response = await fetch(`${SERVER_URL}/api/documents/links`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        doc1Id: link.doc1Id,
+        doc2Id: link.doc2Id,
+        connection: link.connection,
+        date: link.date,
+      }),
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const errMessage = await response.json();
+      throw new Error(`Error ${response.status}: ${errMessage.message || 'Error while creating the connection.'}`);
+    }
+
+    const result = await response.json();
+    return result; 
+    
+  } catch (error) {
+    console.error("Error in addConnection function:", error.message);
+    throw new Error("Unable to add the connection. Please check your connection and try again.");
+  }
+};
+
 
 const API = {
   logIn,
   getUserInfo,
   logOut,
   addDocument,
-  getDocumentById
+  getDocumentById,
+  addConnection,
 };
 
 export default API;

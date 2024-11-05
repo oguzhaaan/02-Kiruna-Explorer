@@ -157,9 +157,9 @@ router.get("/:DocId/links",
 );
 
 
-/* POST /api/documents/:DocId/links */
+/* POST /api/documents/links */
 
-router.post("/:DocId/links",
+router.post("/links",
     [
         body("docId1")
             .isNumeric()
@@ -187,7 +187,7 @@ router.post("/:DocId/links",
         if (!connections.includes(req.body.connection)) {
             return res.status(400).json({ error: "Invalid connection type" });
         }
-        
+        console.log("here")
         const newLink = new Link(null, req.body.docId1, req.body.docId2, req.body.date, req.body.connection);
         //check if link already exists
         try {

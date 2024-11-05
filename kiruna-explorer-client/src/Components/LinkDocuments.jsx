@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import dayjs from "dayjs";
 import { getStakeholderColor } from "./Utilities/StakeholdersColors";
 import { getIcon } from "./Utilities/DocumentIcons";
 
@@ -62,8 +63,17 @@ const LinkDocuments = ({
       if (connectionType !== "None") {
         const connectionObject =
           mode === "return"
-            ? { selectedDocId: doc.id, connectionType }
-            : { originalDocId, selectedDocId: doc.id, connectionType };
+            ? {
+                selectedDocId: doc.id,
+                connectionType,
+                date: dayjs().format("YYYY-MM-DD"),
+              }
+            : {
+                originalDocId,
+                selectedDocId: doc.id,
+                connectionType,
+                date: dayjs().format("YYYY-MM-DD"),
+              };
         acc.push(connectionObject);
       }
       return acc;
@@ -94,6 +104,7 @@ const LinkDocuments = ({
         setConnectionsInForm(connectionArray);
       }
     } else if (mode === "save") {
+      //
       // In "save" mode, make an API call to save the connections
     }
 

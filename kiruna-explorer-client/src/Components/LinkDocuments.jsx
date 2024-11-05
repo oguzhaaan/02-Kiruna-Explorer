@@ -73,13 +73,13 @@ const LinkDocuments = ({
             ? {
                 selectedDocId: doc.id,
                 connectionType,
-                date: dayjs().format("YYYY-MM-DD"),
+                date: dayjs().format("YYYY/MM/DD"),
               }
             : {
                 originalDocId,
                 selectedDocId: doc.id,
                 connectionType,
-                date: dayjs().format("YYYY-MM-DD"),
+                date: dayjs().format("YYYY/MM/DD"),
               };
         acc.push(linkObject);
       }
@@ -244,12 +244,12 @@ const DocumentItem = ({
       {/* Vertical Line */}
       <div className="w-0.5 h-28 bg-white opacity-10 mx-2"></div>
 
-      {/* Document Title and Description */}
+      {/* Document Title and Type */}
       <div className="mx-4 flex-col">
-        <div className="text-2xl mb-4 font-normal">{title}</div>
+        <div className="text-2xl mb-4 font-normal">{formatString(title)}</div>
         <div className="text-2xl font-light flex items-center">
           <img src={getIcon({ type })} className="w-8 mr-2" alt="type_icon" />
-          {type}
+          {formatString(type)}
         </div>
       </div>
 
@@ -265,7 +265,7 @@ const DocumentItem = ({
               { stakeholder }
             )}`}
           >
-            {stakeholder}
+            {formatString(stakeholder)}
           </span>
         ))}
       </div>

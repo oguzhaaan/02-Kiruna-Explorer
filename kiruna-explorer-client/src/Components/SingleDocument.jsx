@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useFetcher, useNavigate, useParams } from "react-router-dom";
 
 import informativeIcon from "../assets/informative.svg";
 import { Charging } from "./Charging.jsx";
@@ -11,12 +11,13 @@ import API from "../API/API.mjs";
 function SingleDocument(props) {
     const [collapsedSections, setCollapsedSections] = useState({});
     const [document, setDocument] = useState({});
+    const [documenLinks, setDocumentLinks] = useState([]);
     const [isCharging, setIsCharging] = useState(false);
 
     const { id } = useParams();
     const navigate = useNavigate();
 
-    useEffect(() => {
+    useEffect( () => {
         const getDoc = async () => {
             try {
                 setIsCharging(true)
@@ -46,36 +47,57 @@ function SingleDocument(props) {
     }
 
     {/*TODO adding API to get all document linked to document with specific id*/ }
-    const documentlink = {
-        connections: [
-            {
-                id: 2,
-                title: "Compilation of responses “So what the people of Kiruna think?” (15)",
-                type: "Informative Document",
-                connection: "Direct Consequence"
-            }, {
-                id: 3,
-                title: "Compilation of responses “So what the people of Kiruna think?” (15)",
-                type: "Informative Document",
-                connection: "Collateral Consequence"
-            }, {
-                id: 4,
-                title: "Compilation of responses “So what the people of Kiruna think?” (15)",
-                type: "Informative Document",
-                connection: "Projection"
-            }, {
-                id: 5,
-                title: "Compilation of responses “So what the people of Kiruna think?” (15)",
-                type: "Informative Document",
-                connection: "Update"
-            }, {
-                id: 6,
-                title: "Compilation of responses “So what the people of Kiruna think?” (15)",
-                type: "Informative Document",
-                connection: "Update"
+    useEffect(() => {
+        const getLinks = async () => {
+            try {
+                const links  = await API.getDocuemntLinks(id) // [{link1}, {link2}]
+                console.log(links)
+                setDocumentLinks(links)
+            } catch (error) {
+                console.error(error)
             }
-        ]
-    };
+        }
+        getLinks()
+        
+    }, [id])
+        /*documentlink = {
+         connections: [
+             {
+                 id: 2,
+                 title: "Compilation of responses “So what the people of Kiruna think?” (15)",
+                 type: "Informative Document",
+                 connection: "Direct Consequence"
+             }, {
+                 id: 3,
+                 title: "Compilation of responses “So what the people of Kiruna think?” (15)",
+                 type: "Informative Document",
+                 connection: "Collateral Consequence"
+             }, {
+                 id: 4,
+                 title: "Compilation of responses “So what the people of Kiruna think?” (15)",
+                 type: "Informative Document",
+                 connection: "Projection"
+             }, {
+                 id: 5,
+                 title: "Compilation of responses “So what the people of Kiruna think?” (15)",
+                 type: "Informative Document",
+                 connection: "Update"
+             }, {
+                 id: 6,
+                 title: "Compilation of responses “So what the people of Kiruna think?” (15)",
+                 type: "Informative Document",
+                 connection: "Update"
+             }
+         ]
+    }; */
+
+    function formatString(input) {
+        return input
+            .replace(/_/g, ' ') // Replace underscores with spaces
+            .split(' ') // Split the string into an array of words
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
+            .join(' '); // Join the words back into a single string
+    }
 
     return (
         id && <div className="fixed inset-0 z-[200] flex items-center justify-center scrollbar-thin scrollbar-webkit">
@@ -110,7 +132,7 @@ function SingleDocument(props) {
                             {/* Type */}
                             <div className="font-light">
                                 <div className="text-white text-xl flex flex-row align-items-center gap-3">
-                                    <img src={document.type ? getIcon({type: document.type}) : getIcon("informative")}
+                                    <img src={document.type ? getIcon({ type: document.type }) : getIcon("informative")}
                                         className="w-12" alt={"type_icon"}></img>
                                     <p className="m-0 p-0">{document.type ? document.type.charAt(0).toUpperCase() + document.type.slice(1) : ''}</p>
                                 </div>
@@ -195,7 +217,7 @@ function SingleDocument(props) {
 
                         </div>
                         {/* Connections */}
-                        {Object.entries(documentlink.connections.reduce((acc, connection) => {
+                        {Object.entries(documenLinks.reduce((acc, connection) => {
                             if (!acc[connection.connection]) {
                                 acc[connection.connection] = [];
                             }
@@ -209,7 +231,7 @@ function SingleDocument(props) {
                                         [connectionType]: !prevState[connectionType]
                                     }))}
                                 >
-                                    <h3 className="p-0 m-0 text-white_text text-lg">{connectionType}</h3>
+                                    <h3 className="p-0 m-0 text-white_text text-lg">{connectionType ? formatString(connectionType) : ''}</h3>
                                     <div
                                         className="text-white_text text-xl right-4 hover:text-gray-400">
                                         <i className={`bi ${collapsedSections[connectionType] ? 'bi-caret-down' : 'bi-caret-up'} text-2xl`}></i>
@@ -226,7 +248,7 @@ function SingleDocument(props) {
                                                 navigate(`/documents/${connection.id}`);
                                             }}
                                             className="flex flex-row gap-2 bg-box_high_opacity px-3 py-4 rounded-lg hover:bg-[#D9D9D950] transition cursor-pointer">
-                                            <img src={getIcon(connection.type)} className="w-8" alt={"type_icon"}></img>
+                                            <img src={getIcon({type : connection.type})} className="w-8" alt={"type_icon"}></img>
                                             <p className="m-0 p-0 text-white_text text-lg font-normal line-clamp-1">{connection.title}</p>
                                         </div>
                                     </div>

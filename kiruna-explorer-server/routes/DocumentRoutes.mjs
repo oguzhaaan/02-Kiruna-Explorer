@@ -137,6 +137,7 @@ router.get("/:DocId/links",
                     const linkedDocument = {
                         id: doc.id,
                         title: doc.title,
+                        type : doc.type,
                         connection: link.connection
                     };
                     linkedDocuemnts.push(linkedDocument);

@@ -73,7 +73,7 @@ If not already present area, first he has to create one
 
 #### Link Document:
 
-- **POST** `api/documents/link`
+- **POST** `api/documents/links`
 
   - Body: DocId1 , DocId2, type, date
   - return success

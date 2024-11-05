@@ -1,5 +1,6 @@
 import db from "../db.mjs";
 import Document from "../models/Document.mjs";
+import { DocumentNotFound } from "../models/Document.mjs";
 
 export default function DocumentDAO() {
     this.getAllDocuments = () => {
@@ -23,9 +24,9 @@ export default function DocumentDAO() {
         return new Promise((resolve, reject) => {
             db.get(query, [id], (err, row) => {
                 if (err) {
-                    reject(err);
+                    return reject(err);
                 } else if (row === undefined) {
-                    resolve(false);
+                    return reject(new DocumentNotFound());
                 } else {
                     // Converti la riga del database in un oggetto Document
                     console.log(row);
@@ -38,10 +39,9 @@ export default function DocumentDAO() {
     };
 
     this.addDocument = (documentData) => {
-        console.log(documentData);
-
         // Converti il documento per l'inserimento nel database
         const dbDocument = this.convertDocumentForDB(documentData);
+        console.log(dbDocument);
 
         // Query per inserire il documento
         const insertDocumentQuery = `
@@ -68,6 +68,7 @@ export default function DocumentDAO() {
                 dbDocument.others
             ], function (err) {
                 if (err) {
+                    console.log(err)
                     return reject(err); // Rifiuta la promessa in caso di errore
                 }
                 resolve(this.lastID); // Risolvi la promessa con l'ID del documento inserito
@@ -83,15 +84,15 @@ export default function DocumentDAO() {
             language: documentData.language,
             description: documentData.description,
             scale: documentData.scale,
-            areaId: documentData.areaId,
+            areaId: documentData.areaId ? documentData.areaId:null,
             pages: documentData.pages,
             planNumber: documentData.planNumber,
-            lkab: documentData.stakeholder.includes("lkab"),
-            municipality: documentData.stakeholder.includes("municipality"),
-            regional_authority: documentData.stakeholder.includes("regional authority"),
-            architecture_firms: documentData.stakeholder.includes("architecture firms"),
-            citizens: documentData.stakeholder.includes("citizens"),
-            others: documentData.stakeholder.includes("others"),
+            lkab: documentData.stakeholders.includes("lkab"),
+            municipality: documentData.stakeholders.includes("municipality"),
+            regional_authority: documentData.stakeholders.includes("regional authority"),
+            architecture_firms: documentData.stakeholders.includes("architecture firms"),
+            citizens: documentData.stakeholders.includes("citizens"),
+            others: documentData.stakeholders.includes("others"),
         };
     };
 

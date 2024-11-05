@@ -5,6 +5,7 @@ import AreaDAO from "../dao/AreaDAO.mjs";
 import Area from "../models/Area.mjs";
 import DocumentLinksDAO from "../dao/DocumentLinksDAO.mjs";
 import Link from "../models/Link.mjs";
+import { isLoggedIn } from "../auth/authMiddleware.mjs";
 
 const router = express.Router();
 const DocumentDao = new DocumentDAO();
@@ -28,7 +29,7 @@ router.get("/",
 );
 
 /* GET /api/documents/:DocId */
-router.get("/:DocId",
+router.get("/:DocId", isLoggedIn,
     [
         param("DocId")
             .isNumeric()
@@ -46,45 +47,70 @@ router.get("/:DocId",
             const documentId = params.DocId
 
             const document = await DocumentDao.getDocumentById(documentId);
-            res.json(document);
+            res.status(200).json(document);
         } catch (err) {
             console.error("Error fetching document:", err);
-            res.status(500).json({ error: err });
+            res.status(err.status).json({ error: err });
         }
-    });
+    })
+const validStakeholders = ["lkab", "municipality", "regional authority", "architecture firms", "citizens", "others" ];
 
-/* POST /api/documents */
 router.post("/",
+    isLoggedIn,
     [
-        body("title").notEmpty().withMessage("Title is required"),
-        body("scale").notEmpty().withMessage("Scale is required"),
-        body("date").notEmpty().withMessage("Date is required"),
-        body("type").notEmpty().withMessage("Type is required"),
-        body("language").optional(),
-        body("number").optional().isNumeric().withMessage("Page number must be a number"),
-        body("description").notEmpty().withMessage("Description is required"),
-        body("areaId").optional().isNumeric().withMessage("Area ID must be a number"),
-        body("stakeholder")
-            .isArray().withMessage("Stakeholder must be an array")
-            .notEmpty().withMessage("Stakeholder is required")
-            .custom((value) => {
-                value.forEach((element) => {
-                    if (typeof element !== 'string') {
-                        throw new Error('Each stakeholder must be a string');
+        body("title")
+            .trim()
+            .notEmpty().withMessage("Title is required")
+            .isString().withMessage("Title must be a string"),
+
+        body("scale")
+            .notEmpty().withMessage("Scale is required")
+            .isIn(["text", "concept", "plan", "blueprints"]).withMessage("Scale must be one of: text, concept, plan, blueprints"),
+
+        body("date")
+            .notEmpty().withMessage("Date is required"),
+
+        body("type")
+            .notEmpty().withMessage("Type is required")
+            .isIn(["design", "informative", "prescriptive", "technical", "agreement", "conflict", "consultation", "material effects"]).withMessage("Invalid document type"),
+
+        body("language")
+            .optional()
+            .isString().withMessage("Language must be a string"),
+
+        body("pages")
+            .optional()
+            .isInt({ min: 1 }).withMessage("Page number must be a positive integer"),
+
+        body("description")
+            .trim()
+            .notEmpty().withMessage("Description is required"),
+            
+        body("areaId")
+            .optional()
+            .isInt().withMessage("Area ID must be a number"),
+
+        body("stakeholders")
+            .isArray({ min: 1 }).withMessage("Stakeholders must be a non-empty array")
+            .custom((stakeholders) => {
+                stakeholders.forEach((stakeholder) => {
+                    if (!validStakeholders.includes(stakeholder)) {
+                        throw new Error(`Each stakeholder must be one of the following: ${validStakeholders.join(", ")}`);
                     }
                 });
                 return true;
             }),
+
         body("planNumber")
-            .if((value, { req }) => req.body.scale === "plan")
+            .if((_, { req }) => req.body.scale === "plan")
             .notEmpty().withMessage("Plan number is required when scale is 'plan'")
-            .isNumeric().withMessage("Plan number must be a number"),
+            .isInt({ min: 1 }).withMessage("Plan number must be a positive integer"),
     ],
     async (req, res) => {
 
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
+            return res.status(400).json({ message: errors.array().map((e) => e.msg) });
         }
 
         try {
@@ -95,7 +121,7 @@ router.post("/",
             if (areaId) {
                 const areaExists = await AreaDao.getAreaById(areaId);
                 if (!areaExists) {
-                    return res.status(404).json({ error: "Area not found" });
+                    return res.status(404).json({ message: "Area not found" });
                 }
             } else {
                 // If areaId is not provided, set it to null
@@ -108,12 +134,11 @@ router.post("/",
                 areaId: areaId
             };
 
-            //TODO add id to return response
-            await DocumentDao.addDocument(newDocument);
-            res.json({ message: "Document added successfully" });
+            let lastId = await DocumentDao.addDocument(newDocument);
+            res.status(201).json({ lastId: lastId, message: "Document added successfully" });
         } catch (err) {
             console.error("Error adding document:", err);
-            res.status(500).json({ error: err.message });
+            res.status(err.status).json({ message: err.message });
         }
     });
 

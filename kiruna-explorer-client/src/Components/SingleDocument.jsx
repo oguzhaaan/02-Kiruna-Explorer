@@ -36,10 +36,11 @@ function SingleDocument(props) {
                 }
             }
             catch (err) {
+                navigate("/documents")
                 console.log(err)
             }
         }
-        getDoc()
+        if (id) getDoc()
     }, [id])
 
     function capitalizeWords(str) {

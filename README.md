@@ -82,13 +82,18 @@ If not already present area, first he has to create one
 
 - **POST** `api/documents/:DocId/links`
 
-  - Body: [{DocId1 , DocId2, type, date}, ..]
+  - Body: DocId1 , DocId2, type, date
   - return success
 
 - **GET** `api/documents/:DocId/links`
 
   - req param: Document Id
   - return: Id, title and type of linked documents
+  
+- **GET** `api/documents/links`
+
+  - No body
+  - return all documents 
 
 #### Geolocate Document:
 

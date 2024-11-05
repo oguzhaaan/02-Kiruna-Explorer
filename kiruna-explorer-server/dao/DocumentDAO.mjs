@@ -2,6 +2,21 @@ import db from "../db.mjs";
 import Document from "../models/Document.mjs";
 
 export default function DocumentDAO() {
+    this.getAllDocuments = () => {
+        const query = "SELECT * FROM document";
+        return new Promise((resolve, reject) => {
+            db.all(query, (err, rows) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    const documents = rows.map(row => this.convertDBRowToDocument(row));
+                    console.log(documents);
+                    resolve(documents);
+                }
+        })
+    }
+    )};
+    
     this.getDocumentById = (id) => {
         const query = "SELECT * FROM document WHERE id = ?";
 

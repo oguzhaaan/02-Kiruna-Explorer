@@ -12,7 +12,7 @@ const AreaDao = new AreaDAO();
 const DocumentLinksDao = new DocumentLinksDAO();
 
 
-router.get("/links",
+router.get("/",
     async (req, res) => {
         console.log("hello")
         try {

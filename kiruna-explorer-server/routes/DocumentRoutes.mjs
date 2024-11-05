@@ -12,6 +12,21 @@ const AreaDao = new AreaDAO();
 const DocumentLinksDao = new DocumentLinksDAO();
 
 
+router.get("/links",
+    async (req, res) => {
+        console.log("hello")
+        try {
+            const documents = await DocumentDao.getAllDocuments();
+
+            res.json(documents);
+        }
+        catch (error) {
+            console.error("Error in getDocumentById function:", error.message);
+            res.status(500).json({ error: err.message });
+        }
+    }
+);
+
 /* GET /api/documents/:DocId */
 router.get("/:DocId",
     [
@@ -104,6 +119,7 @@ router.post("/",
 
 
 /* GET /api/documents/:DocId/links */
+
 router.get("/:DocId/links",
     [
         param("DocId")
@@ -111,7 +127,7 @@ router.get("/:DocId/links",
             .withMessage("Document ID must be a valid number")
     ],
     async (req, res) => {
-
+      
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
@@ -155,7 +171,7 @@ router.get("/:DocId/links",
             res.status(500).json({ error: err.message });
         }
     }
-);
+); 
 
 
 /* POST /api/documents/links */
@@ -228,18 +244,6 @@ router.post("/links",
     }
 );
 
-router.get("/links",
-    async (req, res) => {
-        try {
-            console.log("here")
-            const documents = await DocumentDao.getAllDocuments();
-            res.json(documents);
-        } catch (error) {
-            console.error("Error in getAllDocuments function:", error.message);
-            res.status(500).json({ error: err.message });
-        }
-
-    });
 
 
 export default router;

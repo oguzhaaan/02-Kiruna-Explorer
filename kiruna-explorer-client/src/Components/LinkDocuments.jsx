@@ -473,8 +473,7 @@ SelectedDocument.propTypes = {
 const ConfirmationModal = ({ onConfirm, onCancel }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center">
-      <div
-        className="flex flex-col justify-items-center align-items-center bg-box_color backdrop-blur-2xl drop-shadow-xl rounded-3xl text-white font-sans p-6">
+      <div className="flex flex-col justify-items-center align-items-center bg-box_color backdrop-blur-2xl drop-shadow-xl rounded-3xl text-white font-sans p-6">
         <div className="text-2xl font-bold">Edit connections?</div>
         <div className="flex justify-center space-x-3 mt-16">
           <button

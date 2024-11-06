@@ -129,9 +129,17 @@ function GeoreferenceMap(props){
           const allAreas = await API.getAllAreas()
           console.log(allAreas)
           setPresentAreas(allAreas)
+          setPopupContent("Municipality Area");
+          setAlertMessage(`You selected Municipality Area`)
+          setClickedArea(1)
+          setShowSave(true)
         }
         else{
           setPresentAreas(null)
+          setPopupContent("");
+          setAlertMessage(null)
+          setClickedArea(null)
+          setShowSave(false)
         }
         
       }catch(err){
@@ -202,8 +210,20 @@ function GeoreferenceMap(props){
                 }
               />
             </FeatureGroup>
+
+            {presentAreas && <Polygon
+              positions={
+                presentAreas[0].geoJson.geometry.coordinates[0].map(coord => [coord[1], coord[0]]) // Inverti le coordinate per Leaflet
+              }
+              pathOptions={{ color: 'blue' }}
+              eventHandlers={{
+                mouseover: (e) => handleMouseOver(e),
+                click: (e) => handleClick(e, area.id),
+                mouseout: (e) => handleMouseOut(e)
+              }}
+            />}
             {/* Visualize All present Areas*/}
-            {
+            {/*
               presentAreas && presentAreas.map((area)=>{
                 const geometry = area.geoJson.geometry;
                 
@@ -240,7 +260,7 @@ function GeoreferenceMap(props){
                 }
                 return null; // Gestione nel caso in cui il tipo di geometria non sia supportato
               })
-            }
+            */}
           
             <Marker position={[latitude, longitude]}
             icon={redCenter}>
@@ -296,8 +316,8 @@ function GeoreferenceMap(props){
           </div>
 
         {showModal &&
-          <div className="fixed inset-0 flex items-center justify-center ">
-          <div className="flex flex-col items-center bg-box_color backdrop-blur-2xl drop-shadow-xl w-1/3 h-1/3 p-6 rounded-3xl text-white relative font-sans">
+          <div className="fixed inset-0 flex items-center justify-center">
+            <div className="flex flex-col justify-items-center align-items-center bg-box_color backdrop-blur-2xl drop-shadow-xl rounded-3xl text-white font-sans p-6">
             <div className="text-2xl mb-2 font-bold">Are you really sure to exit?</div>
             <div className="text-l font-bold">Your changes will be discarded</div>
             <div className="flex justify-center space-x-2 mt-10">

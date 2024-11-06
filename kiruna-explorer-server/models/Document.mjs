@@ -29,7 +29,6 @@ export default class Document {
         this.planNumber = planNumber;
 
     }
-
 }
 
 /**

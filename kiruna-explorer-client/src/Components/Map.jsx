@@ -149,8 +149,9 @@ function GeoreferenceMap(props){
                 <div>{popupContent}</div>
               </Popup>
             )}
+          </MapContainer>
 
-        <div style={{
+          <div style={{
                 position: "absolute",
                 justifySelf: "center",
                 top: "30%",
@@ -161,7 +162,7 @@ function GeoreferenceMap(props){
             }}>
             <button
               type="button"
-              className="w-15 bg-[#c7dffa] shadow text-sm font-normal rounded-xl p-2 hover:bg-[#afd0f6]"
+              className="w-15 bg-[#4388B2] shadow text-sm font-normal rounded-xl p-2 hover:bg-[#317199]"
             > <i className="bi bi-house-door fs-5"></i> <br/> Municipal <br/> Area</button>
         </div>
 
@@ -176,19 +177,18 @@ function GeoreferenceMap(props){
             {showExit && <button
               onClick={()=>{setDrawnObject(null),navigate(-1)}}
               type="button"
-              className="w-44 h-14 bg-customGray bg-opacity-80 shadow text-2xl  font-normal text-black rounded-full hover:bg-gray-300"
+              className="w-44 h-14 bg-[#D9D9D9] bg-opacity-60 shadow text-2xl  font-normal text-black rounded-full hover:bg-[#938888]"
             >
               Exit
             </button>}
             {showSave && <button
               onClick={()=>handleSave()}
               type="button"
-              className="w-44 h-14  bg-my_green bg-opacity-100 shadow text-2xl  font-normal rounded-full hover:bg-[#30ff94]"
+              className="w-44 h-14  bg-[#4388B2] bg-opacity-100 shadow text-2xl  font-normal rounded-full hover:bg-[#317199]"
             >
               Save
             </button>}
           </div>
-          </MapContainer>
         </>
     )
 }

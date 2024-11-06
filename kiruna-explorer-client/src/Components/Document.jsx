@@ -1,10 +1,10 @@
-import {useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import "./document.css";
 import Alert from "./Alert";
 import API from "../API/API.mjs";
-import {SingleDocument} from "./SingleDocument.jsx";
-import {useNavigate} from "react-router-dom";
+import { SingleDocument } from "./SingleDocument.jsx";
+import { useNavigate } from "react-router-dom";
 import Select from "react-select";
 import DocumentClass from "../classes/Document.mjs";
 
@@ -82,28 +82,28 @@ function Document(props) {
     };
 
     const stakeholderOptions = [
-        {value: "lkab", label: "LKAB"},
-        {value: "municipality", label: "Municipality"},
-        {value: "regional authority", label: "Regional authority"},
-        {value: "architecture firms", label: "Architecture firms"},
-        {value: "citizens", label: "Citizens"},
-        {value: "others", label: "Others"},
+        { value: "lkab", label: "LKAB" },
+        { value: "municipality", label: "Municipality" },
+        { value: "regional authority", label: "Regional authority" },
+        { value: "architecture firms", label: "Architecture firms" },
+        { value: "citizens", label: "Citizens" },
+        { value: "others", label: "Others" },
     ];
 
     const popularLanguages = [
-        {code: "en", name: "English"},
-        {code: "sv", name: "Swedish"},
-        {code: "se", name: "Northern Sami"},
-        {code: "fi", name: "Finnish"},
-        {code: "es", name: "Spanish"},
-        {code: "zh", name: "Chinese"},
-        {code: "fr", name: "French"},
-        {code: "de", name: "German"},
-        {code: "ja", name: "Japanese"},
-        {code: "ru", name: "Russian"},
-        {code: "pt", name: "Portuguese"},
-        {code: "ar", name: "Arabic"},
-        {code: "it", name: "Italian"},
+        { code: "en", name: "English" },
+        { code: "sv", name: "Swedish" },
+        { code: "se", name: "Northern Sami" },
+        { code: "fi", name: "Finnish" },
+        { code: "es", name: "Spanish" },
+        { code: "zh", name: "Chinese" },
+        { code: "fr", name: "French" },
+        { code: "de", name: "German" },
+        { code: "ja", name: "Japanese" },
+        { code: "ru", name: "Russian" },
+        { code: "pt", name: "Portuguese" },
+        { code: "ar", name: "Arabic" },
+        { code: "it", name: "Italian" },
     ];
 
     const [alertMessage, setAlertMessage] = useState(['', '']);
@@ -138,7 +138,7 @@ function Document(props) {
 
         if (event.target.value) {
             setErrors((prevErrors) => {
-                const {title, ...remainingErrors} = prevErrors;
+                const { title, ...remainingErrors } = prevErrors;
                 return remainingErrors;
             });
         }
@@ -152,7 +152,7 @@ function Document(props) {
 
         if (selectedOptions.length > 0) {
             setErrors((prevErrors) => {
-                const {stakeholder, ...remainingErrors} = prevErrors;
+                const { stakeholder, ...remainingErrors } = prevErrors;
                 return remainingErrors;
             });
         }
@@ -166,7 +166,7 @@ function Document(props) {
 
         if (event.target.value !== "none") {
             setErrors((prevErrors) => {
-                const {scale, ...remainingErrors} = prevErrors;
+                const { scale, ...remainingErrors } = prevErrors;
                 return remainingErrors;
             });
         }
@@ -180,7 +180,7 @@ function Document(props) {
 
         if (event.target.value) {
             setErrors((prevErrors) => {
-                const {planNumber, ...remainingErrors} = prevErrors;
+                const { planNumber, ...remainingErrors } = prevErrors;
                 return remainingErrors;
             });
         }
@@ -195,7 +195,7 @@ function Document(props) {
 
         if (selectedDate) {
             setErrors((prevErrors) => {
-                const {date, ...remainingErrors} = prevErrors;
+                const { date, ...remainingErrors } = prevErrors;
                 return remainingErrors;
             });
         }
@@ -209,7 +209,7 @@ function Document(props) {
 
         if (event.target.value !== "none") {
             setErrors((prevErrors) => {
-                const {type, ...remainingErrors} = prevErrors;
+                const { type, ...remainingErrors } = prevErrors;
                 return remainingErrors;
             });
         }
@@ -238,7 +238,7 @@ function Document(props) {
 
         if (event.target.value) {
             setErrors((prevErrors) => {
-                const {description, ...remainingErrors} = prevErrors;
+                const { description, ...remainingErrors } = prevErrors;
                 return remainingErrors;
             });
         }
@@ -299,14 +299,14 @@ function Document(props) {
             <div className="bg-background_color min-h-screen flex justify-center">
                 <SingleDocument setNavShow={props.setNavShow} setMode={props.setMode} setoriginalDocId={props.setoriginalDocId}></SingleDocument>
                 <Alert message={alertMessage[0]} type={alertMessage[1]}
-                       clearMessage={() => setAlertMessage(['', ''])}></Alert>
+                    clearMessage={() => setAlertMessage(['', ''])}></Alert>
                 <div className="flex items-center justify-between w-full h-16">
 
                     <div className="flex items-center gap-3 mr-3 ml-20 mt-4">
                         <div className="z-[0] relative">
-                                <span className="absolute inset-y-0 left-0 flex items-center pl-3">
-                                    <i className="bi bi-search"></i>
-                                </span>
+                            <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                                <i className="bi bi-search"></i>
+                            </span>
                             <input
                                 type="text"
                                 placeholder="Search"
@@ -320,9 +320,18 @@ function Document(props) {
                     </div>
 
                     <button onClick={toggleModal}
-                            className="bg-[#2E6A8E] text-white grid justify-items-end py-2 px-4 mx-3 rounded-[77px] mt-4">
+                        className="bg-[#2E6A8E] text-white grid justify-items-end py-2 px-4 mx-3 rounded-[77px] mt-4">
                         <span><i className="bi bi-file-earmark-plus"></i>  Add document</span>
                     </button>
+                </div>
+                <div>
+                <button
+                    className="bg-[#2E6A8E] text-white grid justify-items-end py-2 px-5 mb-20 mx-3 rounded-[77px] mt-4"
+                    onClick={() => {
+                        navigate("/documents/4")
+                    }}>
+                    document
+                </button>
                 </div>
             </div>
 
@@ -333,7 +342,7 @@ function Document(props) {
                         className="bg-box_color backdrop-blur-2xl drop-shadow-xl  w-1/3 p-6 h-2/3 overflow-y-auto rounded-lg flex flex-col items-center relative scrollbar-thin scrollbar-webkit">
                         <h2 className="text-white text-3xl font-bold ">Add New Document</h2>
                         <button onClick={toggleModal}
-                                className="absolute top-5 text-white text-xl right-4 hover:text-gray-600">
+                            className="absolute top-5 text-white text-xl right-4 hover:text-gray-600">
                             <i className="bi bi-x-lg"></i>
                         </button>
 
@@ -498,18 +507,13 @@ function Document(props) {
                             onClick={handleConfirm}>
                             Confirm
                         </button>
-                        <button
-                            className="bg-[#1A5F88] w-full font-bold text-[28px]  text-white py-2 px-4 rounded-lg mt-4"
-                            onClick={() => {
-                                navigate("/documents/5")
-                            }}>
-                            NAVIGAAA
-                        </button>
+
                     </div>
                 </div>
             )}
+
         </>
     );
 }
 
-export {Document};
+export { Document };

@@ -15,7 +15,6 @@ const DocumentLinksDao = new DocumentLinksDAO();
 
 router.get("/",
     async (req, res) => {
-        console.log("hello")
         try {
             const documents = await DocumentDao.getAllDocuments();
 
@@ -140,7 +139,6 @@ router.post("/",
 
             let lastId = await DocumentDao.addDocument(newDocument);
             const links = params.links;
-            console.log(links);
             if (links) {
                 await Promise.all(links.map(link => DocumentLinksDao.addLinkstoDocumentAtInsertionTime(link, lastId)));
             }
@@ -171,7 +169,6 @@ router.get("/:DocId/links",
         try {
             const params = req.params;
             const documentId = params.DocId
-            console.log(documentId)
 
             // Get all the links for the given document
             const documentLinks = await DocumentLinksDao.getLinksByDocumentId(documentId);
@@ -208,10 +205,40 @@ router.get("/:DocId/links",
     }
 );
 
+router.delete("/:DocId/links",
+    [
+        param("DocId")
+            .isNumeric()
+            .withMessage("Document ID must be a valid number")
+    ],
+    async (req, res) => {
 
-/* POST /api/documents/links */
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
 
-router.post("/links",
+        try {
+            const params = req.params;
+            const documentId = params.DocId;
+            const deleteResult = await DocumentLinksDao.deleteAll(documentId);
+
+            if (deleteResult.deletedCount === 0) {
+                return res.status(200).json({ message: "No links found for this document ID" });
+            }
+            res.status(200).json({ message: "All links deleted successfully" });
+        }
+        catch (error) {
+            console.error("Error in deleteAll function:", error.message);
+            res.status(500).json({ error: error.message });
+        }
+    }
+);
+
+
+/* POST /api/documents/link */
+
+router.post("/link",
     [
         body("doc1Id")
             .isNumeric()
@@ -237,15 +264,14 @@ router.post("/links",
         const connections = ["direct_consequence", "collateral_consequence", "prevision", "update"];
 
         if (!connections.includes(req.body.connection)) {
-            return res.status(400).json({ error: "Invalid connection type" });
+            return res.status(402).json({ error: "Invalid connection type" });
         }
-        console.log("here")
         const newLink = new Link(null, req.body.doc1Id, req.body.doc2Id, req.body.date, req.body.connection);
         //check if link already exists
         try {
             const linkExists = await DocumentLinksDao.isLink(newLink);
             if (linkExists) {
-                return res.status(400).json({ error: "Link already exists" });
+                return res.status(403).json({ error: "Link already exists" });
             }
         } catch (error) {
             console.error("Error in linkExists function:", error.message);
@@ -260,7 +286,7 @@ router.post("/links",
             }
             const doc2Exists = await DocumentDao.getDocumentById(req.body.doc2Id);
             if (!doc2Exists) {
-                return res.status(404).json({ error: "Document 2 not found" });
+                return res.status(405).json({ error: "Document 2 not found" });
             }
         } catch (error) {
             console.error("Error in isLink function:", error.message);
@@ -278,6 +304,88 @@ router.post("/links",
         }
     }
 );
+
+router.post("/links",
+    [
+        body("links")
+            .isArray({ min: 0 })
+            .withMessage("Links must be a not empty array"),
+    ],
+
+    async (req, res) => {
+
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+        //check if connection type is valid
+        const validConnections = ["direct_consequence", "collateral_consequence", "prevision", "update"];
+
+        const invalidLinks = req.body.links.filter(link => !validConnections.includes(link.connectionType));
+
+        if (invalidLinks.length > 0) {
+            return res.status(402).json({
+                error: "Invalid connection type for the following links",
+                invalidLinks
+            });
+        }
+        const links = req.body.links;
+        //delete the links not present in the array the client gave us
+        try {
+            await DocumentLinksDao.deleteLinks(links);
+        } catch (error) {
+            throw new Error("Unable to delete the links: " + error);
+        }
+
+        // Controlla se i documenti esistono
+        try {
+            // Controlliamo che ogni documenti esista
+            for (const link of links) {
+                const doc1Exists = await DocumentDao.getDocumentById(link.originalDocId);
+                if (!doc1Exists) {
+                    return res.status(404).json({ error: `Document with ID ${link.originalDocId} not found` });
+                }
+
+                const doc2Exists = await DocumentDao.getDocumentById(link.selectedDocId);
+                if (!doc2Exists) {
+                    return res.status(404).json({ error: `Document with ID ${link.selectedDocId} not found` });
+                }
+            }
+        } catch (error) {
+            console.error("Error in isLink function:", error.message);
+            return res.status(500).json({ error: "Unable to check if documents exist. Please try again later." });
+        }
+
+        // Aggiungi i nuovi link, ma solo se non esistono 
+        try {
+            for (const link of links) {
+                // Controlla se la connessione esiste già
+
+                const existingLink = await DocumentLinksDao.checkLinkExists(link.originalDocId, link.selectedDocId, link.connectionType);
+
+                if (existingLink) {
+                    console.log(`Connection already exists for ${link.originalDocId} and ${link.selectedDocId}`);
+                }
+                else {
+                    const newLink = {
+                        doc1Id: link.originalDocId,
+                        doc2Id: link.selectedDocId,
+                        date: link.date,
+                        connection: link.connectionType
+                    };
+                    console.log(link);
+                    await DocumentLinksDao.addLinktoDocument(newLink); // Aggiungi ogni link al database
+                }
+            }
+
+            res.json({ message: "Links added successfully" });
+        } catch (error) {
+            console.error("Error in addLinktoDocument function:", error.message);
+            return res.status(500).json({ error: error.message });
+        }
+    }
+);
+
 
 
 

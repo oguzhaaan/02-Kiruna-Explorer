@@ -13,11 +13,7 @@ function formatString(input) {
     .join(" "); // Join the words back into a single string
 }
 
-const LinkDocuments = ({
-  originalDocId = 1,
-  mode = "save",
-  setConnectionsInForm,
-}) => {
+const LinkDocuments = ({ originalDocId, mode, setConnectionsInForm }) => {
   const navigate = useNavigate();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [documents, setDocuments] = useState([]);
@@ -36,13 +32,23 @@ const LinkDocuments = ({
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
+        const linkedDocument = await API.getDocuemntLinks(originalDocId);
         const allDocuments = await API.getAllDocuments();
         // Filter out the document with the same ID as originalDocId
-        const filteredDocuments = allDocuments.filter(
-          (doc) => doc.id !== originalDocId
-        );
-        setDocuments(filteredDocuments);
-        setLinks(filteredDocuments.map(() => "None"));
+        const mergedDocuments = allDocuments.filter(doc => {
+          // Verifica se il documento NON è presente in linkedDocument
+          return !linkedDocument.some(linkedDoc => linkedDoc.id === doc.id);
+        }).map(doc => {
+          // Se il documento non è presente nei linkedDocument, aggiungi il campo `connection`
+          const linkedDoc = linkedDocument.find(link => link.id === doc.id);
+          return {
+            ...doc,
+            connection: linkedDoc ? linkedDoc.connection : "None"
+          };
+        });
+        console.log(mergedDocuments);
+        setDocuments(mergedDocuments);
+        setLinks(mergedDocuments.map(() => "None"));
       } catch (error) {
         console.error("Error in getAllDocuments function:", error.message);
         throw new Error(
@@ -71,16 +77,16 @@ const LinkDocuments = ({
         const linkObject =
           mode === "return"
             ? {
-                selectedDocId: doc.id,
-                connectionType,
-                date: dayjs().format("YYYY/MM/DD"),
-              }
+              selectedDocId: doc.id,
+              connectionType,
+              date: dayjs().format("YYYY/MM/DD"),
+            }
             : {
-                originalDocId,
-                selectedDocId: doc.id,
-                connectionType,
-                date: dayjs().format("YYYY/MM/DD"),
-              };
+              originalDocId,
+              selectedDocId: doc.id,
+              connectionType,
+              date: dayjs().format("YYYY/MM/DD"),
+            };
         acc.push(linkObject);
       }
       return acc;
@@ -89,7 +95,7 @@ const LinkDocuments = ({
 
   // Filter documents based on the search query and connection status
   const filteredDocuments = documents.filter((doc, index) => {
-    const connectionType = links[index];
+    const connectionType = doc.connection;
     return (
       doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       connectionType !== "None"
@@ -107,9 +113,8 @@ const LinkDocuments = ({
 
     if (mode === "return") {
       // In "return" mode, call the callback function with connectionArray
-      if (setConnectionsInForm) {
-        setConnectionsInForm(linkArray);
-      }
+      setConnectionsInForm(linkArray);
+      navigate(-1);
     } else if (mode === "save") {
       //
       // In "save" mode, make an API call to save the connections
@@ -117,6 +122,7 @@ const LinkDocuments = ({
         try {
           console.log(link);
           await API.addLink(link);
+          navigate(-1);
         } catch (error) {
           console.error("Error in adding connection:", error.message);
           throw new Error(

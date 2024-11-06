@@ -53,7 +53,8 @@ const addDocument = async (documentData) => {
         language: documentData.language,
         pages: documentData.pageNumber,
         description: documentData.description,
-        areaId: documentData.areaId
+        areaId: documentData.areaId,
+        links: documentData.links
       }),
       credentials: 'include'
     });
@@ -111,7 +112,6 @@ const getAllDocuments = async () => {
     throw new Error("Unable to get the documents. Please check your connection and try again.");
   }
 };
-
 
 const addLink = async (link) => {
   try {
@@ -171,7 +171,7 @@ const API = {
   getDocumentById,
   addLink,
   getDocuemntLinks,
-  getAllDocuments
+  getAllDocuments,
 };
 
 export default API;

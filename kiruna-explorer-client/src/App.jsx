@@ -19,7 +19,9 @@ function App() {
   const [newAreaId, setnewAreaId] = useState(null);
   const [newDocument, setNewDocument] = useState(new DocumentClass());
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const [connections, setConnections] = useState([]);
+  const [mode, setMode] = useState("return"); 
+  const [docId, setoriginalDocId] = useState(-1);
 
   useEffect(() => {
     try{
@@ -49,13 +51,13 @@ function App() {
 
         <Route path="/login" element={isLoggedIn ? <Navigate replace to="/documents" /> : <LoginPage setNavShow={setNavShow}/>}/>
 
-        <Route path="/documents" element={isLoggedIn ? <Document setNavShow={setNavShow} setIsModalOpen={setIsModalOpen} isModalOpen={isModalOpen} newAreaId={newAreaId} setNewDocument={setNewDocument} newDocument={newDocument} /> : <Navigate replace to="/" />}/>
+        <Route path="/documents" element={isLoggedIn ? <Document setoriginalDocId={setoriginalDocId} setMode={setMode} connections={connections} setNavShow={setNavShow} setIsModalOpen={setIsModalOpen} isModalOpen={isModalOpen} newAreaId={newAreaId} setNewDocument={setNewDocument} newDocument={newDocument} /> : <Navigate replace to="/" />}/>
 
-        <Route path="/documents/:id" element={isLoggedIn ? <Document setNavShow={setNavShow} setIsModalOpen={setIsModalOpen} isModalOpen={isModalOpen} newAreaId={newAreaId} setNewDocument={setNewDocument} newDocument={newDocument} />: <Navigate replace to="/" />}/>
+        <Route path="/documents/:id" element={isLoggedIn ? <Document setoriginalDocId={setoriginalDocId} setMode={setMode} setNavShow={setNavShow} setIsModalOpen={setIsModalOpen} isModalOpen={isModalOpen} newAreaId={newAreaId} setNewDocument={setNewDocument} newDocument={newDocument} />: <Navigate replace to="/" />}/>
 
         <Route path="/map" element={isLoggedIn ? <GeoreferenceMap setNavShow={setNavShow} setnewAreaId={setnewAreaId} />: <Navigate replace to="/" />}/>
         
-        <Route path="/linkDocuments" element={<LinkDocuments />}/>
+        <Route path="/linkDocuments" element={<LinkDocuments originalDocId={docId} mode={mode} setConnectionsInForm={setConnections} />}/>
         
         </Route>
       </Routes>

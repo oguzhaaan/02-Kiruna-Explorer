@@ -86,6 +86,10 @@ router.post("/",
             .trim()
             .notEmpty().withMessage("Description is required"),
 
+        body("links")
+            .optional({ nullable: true, checkFalsy: true })
+            .isArray({ min: 1 }).withMessage("Links must be an array"),
+
         body("areaId")
             .optional({ nullable: true, checkFalsy: true })
             .isInt().withMessage("Area ID must be a number"),
@@ -135,6 +139,12 @@ router.post("/",
             };
 
             let lastId = await DocumentDao.addDocument(newDocument);
+            const links = params.links;
+            console.log(links);
+            if (links) {
+                await Promise.all(links.map(link => DocumentLinksDao.addLinkstoDocumentAtInsertionTime(link, lastId)));
+            }
+
             res.status(201).json({ lastId: lastId, message: "Document added successfully" });
         } catch (err) {
             console.error("Error adding document:", err);
@@ -152,7 +162,7 @@ router.get("/:DocId/links",
             .withMessage("Document ID must be a valid number")
     ],
     async (req, res) => {
-      
+
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
@@ -193,10 +203,10 @@ router.get("/:DocId/links",
         }
         catch (error) {
             console.error("Error in getDocumentById function:", error.message);
-            res.status(500).json({ error: err.message });
+            res.status(500).json({ error: error.message });
         }
     }
-); 
+);
 
 
 /* POST /api/documents/links */

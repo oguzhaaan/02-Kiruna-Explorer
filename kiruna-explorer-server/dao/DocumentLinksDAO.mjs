@@ -35,6 +35,20 @@ export default function DocumentLinksDAO() {
         });
     }
 
+    this.addLinkstoDocumentAtInsertionTime = (link, id) => {
+        const query = "INSERT INTO document_link (doc1Id, doc2Id, date, connection) VALUES (?, ?, ?, ?)";
+        return new Promise((resolve, reject) => {
+            db.run(query, [id, link.selectedDocId, link.date, link.connectionType], function(err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(this.lastID);
+                }
+            });
+        });
+    }
+
+
     this.isLink = (link) => {
         const query = "SELECT * FROM document_link WHERE ((doc1Id = ? AND doc2Id = ?) OR (doc1Id = ? AND doc2Id = ?)) AND connection = ?";
         return new Promise((resolve, reject) => {

@@ -106,8 +106,6 @@ function Document(props) {
 
     const [alertMessage, setAlertMessage] = useState(['', '']);
 
-    const [connections, setConnections] = useState(0);
-
     const [errors, setErrors] = useState({});
 
     const validateFields = () => {
@@ -264,19 +262,16 @@ function Document(props) {
                 language: props.newDocument.language || null, // Set to null if not provided
                 pageNumber: props.newDocument.pages || null, // Set to null if not provided
                 description: props.newDocument.description, // Mandatory
-                area: props.newAreaId
+                area: props.newAreaId,
+                links: props.connections.length > 0 ? props.connections : null
             };
     
+            console.log(documentData);
 
             if (!validateFields()) {
                 setAlertMessage(['Please fill all the mandatory fields.', 'error']);
                 return;
             }
-
-            /*   if (connections === 0) {
-                   setAlertMessage(['Impossible to have 0 connections for a document.', 'error']);
-                   return
-               } IT SHOULD BE UNCOMMENT WHEN THERE IS THE POSSIBILITY TO ADD LINK!!!*/
 
             try {
                 await API.addDocument(documentData);
@@ -298,7 +293,7 @@ function Document(props) {
         return (
             <>
                 <div className="bg-background_color min-h-screen flex justify-center">
-                    <SingleDocument></SingleDocument>
+                    <SingleDocument setMode={props.setMode} setoriginalDocId={props.setoriginalDocId}></SingleDocument>
                     <Alert message={alertMessage[0]} type={alertMessage[1]}
                         clearMessage={() => setAlertMessage(['', ''])}></Alert>
                     <div className="flex items-center justify-between w-full h-16">
@@ -480,7 +475,9 @@ function Document(props) {
                                 <label className="text-white mb-1 text-xl w-full ml-2 text-left">Linking</label>
                                 <button
                                     onClick={() => {
-                                        console.log("ok")
+                                        props.setNavShow(false);
+                                        props.setMode("return");
+                                        navigate("/linkDocuments");
                                     }}
                                     className="w-full p-2 text-black border text-xl border-gray-300 focus:outline-none bg-[#D9D9D9] rounded-[40px]"> Select
                                     Documents to Link
@@ -492,6 +489,13 @@ function Document(props) {
                                 className="bg-[#1A5F88] w-full font-bold text-[28px]  text-white py-2 px-4 rounded-lg mt-4"
                                 onClick={handleConfirm}>
                                 Confirm
+                            </button>
+                            <button
+                                className="bg-[#1A5F88] w-full font-bold text-[28px]  text-white py-2 px-4 rounded-lg mt-4"
+                                onClick={() => {
+                                    navigate("/documents/7")
+                                }}>
+                                NAVIGAAA
                             </button>
                         </div>
                     </div >

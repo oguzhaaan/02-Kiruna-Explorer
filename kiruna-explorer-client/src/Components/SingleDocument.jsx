@@ -58,39 +58,10 @@ function SingleDocument(props) {
                 console.error(error)
             }
         }
-        getLinks()
+        if (id) getLinks()
         
     }, [id])
-        /*documentlink = {
-         connections: [
-             {
-                 id: 2,
-                 title: "Compilation of responses “So what the people of Kiruna think?” (15)",
-                 type: "Informative Document",
-                 connection: "Direct Consequence"
-             }, {
-                 id: 3,
-                 title: "Compilation of responses “So what the people of Kiruna think?” (15)",
-                 type: "Informative Document",
-                 connection: "Collateral Consequence"
-             }, {
-                 id: 4,
-                 title: "Compilation of responses “So what the people of Kiruna think?” (15)",
-                 type: "Informative Document",
-                 connection: "Projection"
-             }, {
-                 id: 5,
-                 title: "Compilation of responses “So what the people of Kiruna think?” (15)",
-                 type: "Informative Document",
-                 connection: "Update"
-             }, {
-                 id: 6,
-                 title: "Compilation of responses “So what the people of Kiruna think?” (15)",
-                 type: "Informative Document",
-                 connection: "Update"
-             }
-         ]
-    }; */
+   
 
     function formatString(input) {
         return input
@@ -209,6 +180,9 @@ function SingleDocument(props) {
                             <p className="m-0 p-0 text-2xl font-bold">Connections</p>
 
                             <button onClick={() => {
+                                props.setMode("save");
+                                props.setoriginalDocId(id);
+                                navigate("/linkDocuments")
                             }} className="text-white_text text-xl right-4 hover:text-gray-400">
                                 <i className="bi bi-plus-circle-fill text-4xl"></i>
                             </button>

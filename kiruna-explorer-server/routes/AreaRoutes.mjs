@@ -14,10 +14,11 @@ router.get("/", isLoggedIn, async (req, res) => {
         const areas = await areaDao.getAllAreas();
         res.status(200).json(areas);
     } catch (err) {
+        if (err instanceof AreaNotFound) {
+            res.status(404).json({ error: "Area not found" });
+        }
         console.error("Error fetching areas:", err);
         res.status(500).json({ error: "Internal server error" });
-    } if (err instanceof AreaNotFound) {
-        res.status(404).json({ error: "Area not found" });
     }
 });
 
@@ -27,16 +28,18 @@ router.post("/", isLoggedIn, authorizeRoles('admin', 'urban_planner'),
         body("geoJson")
             .trim()
             .notEmpty().withMessage("GeoJSON is required")
-            .isString().withMessage("GeoJSON must be a string")
+            //.isString().withMessage("GeoJSON must be a string")
     ],
     async (req, res) => {
+        console.log(req.body)
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
         try {
-            const area = await areaDao.addArea(req.body);
-        res.status(201).json(area);
+            const geoJson = req.body.geoJson
+            const area = await areaDao.addArea(geoJson);
+            res.status(201).json(area);
     } catch (err) {
         console.error("Error creating area:", err);
         res.status(500).json({ error: "Internal server error" });

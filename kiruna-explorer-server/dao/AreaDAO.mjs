@@ -3,14 +3,14 @@ import Area from "../models/Area.mjs";
 
 export default function AreaDAO() {
 
-    this.addArea = (area) => {
+    this.addArea = (geoJson) => {
         const query = `
             INSERT INTO area (geoJson)
             VALUES (?)
         `;
-
+        console.log(geoJson)
         return new Promise((resolve, reject) => {
-            db.run(query, [area.geoJson], function(err) {
+            db.run(query, [geoJson], function(err) {
                 if (err) {
                     reject(err);
                 } else {
@@ -46,7 +46,8 @@ export default function AreaDAO() {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve(rows);
+                    const allAreas = rows.map((a)=>new Area(a.id,a.geoJson))
+                    resolve(allAreas);
                 }
             });
         });

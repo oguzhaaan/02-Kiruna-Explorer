@@ -92,13 +92,81 @@ const getDocumentById = async (docid) => {
   }
 };
 
+const getDocumentsFromArea = async (areaId) => {
+  try {
+    const response = await fetch(`${SERVER_URL}/api/documents/area/${areaId}`, {
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const errMessage = await response.json();
+      throw new Error(`${errMessage.message || 'Error while getting document from area.'}`);
+    }
+
+    const result = await response.json();
+    return result; 
+    
+  } catch (error) {
+    console.error("Error in get document from area function:", error.message);
+    throw new Error(`${error.message || 'Error while getting document from area.'}`);
+  }
+};
+
+const getAllAreas = async () => {
+  try {
+    const response = await fetch(`${SERVER_URL}/api/areas`, {
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const errMessage = await response.json();
+      throw new Error(`${errMessage.message || 'Error while getting areas.'}`);
+    }
+    
+    const result = await response.json();
+    const geoJson = JSON.parse(result);
+    return geoJson; 
+    
+  } catch (error) {
+    console.error("Error in get all areas function:", error.message);
+    throw new Error(`${error.message || 'Error while getting areas.'}`);
+  }
+};
+
+const addArea = async (geoJson) => {
+  console.log("Sending GeoJSON:", JSON.stringify(geoJson, null, 2));  // Controllo per verificare cosa viene inviato
+
+  try {
+    const response = await fetch(`${SERVER_URL}/api/areas`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ geoJson: JSON.stringify(geoJson) }),
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const errMessage = await response.json();
+      throw new Error(`${errMessage.message || 'Error while creating the document.'}`);
+    }
+
+    const result = await response.json();
+    return result; 
+    
+  } catch (error) {
+    console.error("Error in addDocument function:", error.message);
+    throw new Error(`${error.message || 'Error while creating the document.'}`);
+  }
+};
 
 const API = {
   logIn,
   getUserInfo,
   logOut,
   addDocument,
-  getDocumentById
+  getDocumentById,
+  getDocumentsFromArea,
+  getAllAreas,
+  addArea,
 };
 
 export default API;

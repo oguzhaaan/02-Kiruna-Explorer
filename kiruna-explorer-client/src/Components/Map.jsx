@@ -4,8 +4,9 @@ import { EditControl } from "react-leaflet-draw";
 import { FeatureGroup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
-import L from "leaflet";
+import L, { geoJSON } from "leaflet";
 import { useNavigate } from "react-router-dom";
+import API from "../API/API.mjs";
 
 function GeoreferenceMap(props){
     const navigate = useNavigate()
@@ -16,6 +17,8 @@ function GeoreferenceMap(props){
     const [showSave, setShowSave] = useState(false);
     const [showExit, setShowExit] = useState(true);
     const [showModal, setShowModal] = useState(false)
+    const [presentAreas, setPresentAreas] = useState([]);
+    const [clickedArea, setClickedArea] = useState(null)
 
     useEffect(() => {
         props.setNavShow(false); 
@@ -23,7 +26,7 @@ function GeoreferenceMap(props){
 
     useEffect(()=>{
         //refresh
-    },[showExit,showSave])
+    },[showExit,showSave,presentAreas])
 
     const redCenter = L.icon({
         iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
@@ -45,17 +48,46 @@ function GeoreferenceMap(props){
         [67.86274503663387, 19.86795112123954]
       ];
 
+      const handleClick = (e, content) => {
+        setPopupContent(content);
+        setPopupPosition(e.latlng);
+        setClickedArea(content)
+      };
+    
+      const handleMouseOver = (e) => {
+        //setPopupContent((prevContent) => prevContent ? `${prevContent}, ${content}` : content);
+        //setPopupPosition(null);
+        e.target.setStyle({
+          fillOpacity: 0.7,
+          opacity: 0.7
+        });
+        e.target.bringToFront();
+      };
+    
+      const handleMouseOut = (e) => {
+        //setPopupContent("");
+        //setPopupPosition(null);
+        e.target.setStyle({
+          fillOpacity: 0.1,
+          opacity: 0.1
+        });
+        e.target.bringToBack();
+      };
+
     const onCreated = (e) => {
         const { layerType, layer } = e;
         
         if (layerType === 'polygon') {
             const newPolygon = layer.getLatLngs()[0].map(latlng => [latlng.lat, latlng.lng]);
-            setDrawnObject(newPolygon);
             const geoJson = layer.toGeoJSON();
+            setDrawnObject(geoJson);
             console.log(geoJson);
         }
         else if (layerType === 'marker') {
-            setDrawnObject([layer.getLatLng().lat, layer.getLatLng().lng]);
+          const newPoint = [layer.getLatLng().lat, layer.getLatLng().lng]
+          const geoJson  = layer.toGeoJSON()
+          console.log(geoJson);
+          setDrawnObject(geoJson);
         }
     };
     
@@ -82,13 +114,31 @@ function GeoreferenceMap(props){
         setShowExit(true)
         setShowSave(true)
     }
+
+    const handleMunicipalAreas = async () =>{
+      try{
+        const allAreas = await API.getAllAreas()
+        console.log(allAreas)
+        setPresentAreas(allAreas)
+      }catch(err){
+        console.log(err)
+      }
+    }
     
     const handleSave = async () =>{
         try{
-            //TODO add area api
-            const area_id = 1 
-            props.setnewAreaId(area_id)
-            setDrawnObject(null)
+            //If he drows a new area
+            if(drawnObject){
+              console.log(drawnObject)
+              const area_id = await API.addArea(drawnObject) 
+              props.setnewAreaId(area_id)
+              setDrawnObject(null)
+            }
+            //if he clicked an existing one
+            else{
+              const area_id = clickedArea
+              props.setnewAreaId(area_id)
+            }
             navigate(-1);
         }catch(err){
             console.log(err)
@@ -138,7 +188,22 @@ function GeoreferenceMap(props){
                 }
               />
             </FeatureGroup>
-            
+            {/* Visualize All present Areas*/}
+            {
+              presentAreas && presentAreas.map((coordinates)=>{
+                <Polygon
+                  key={coordinates.id}
+                  positions={coordinates.geoJson}
+                  pathOptions={{ color: 'blue' }}
+                  eventHandlers={{
+                    mouseover: (e) => handleMouseOver(e),
+                    click: (e) => handleClick(e, coordinates.id),
+                    mouseout: (e) => handleMouseOut(e)
+                  }}
+                />
+              })
+            }
+          
             <Marker position={[latitude, longitude]}
             icon={redCenter}>
                 <Popup>
@@ -162,6 +227,7 @@ function GeoreferenceMap(props){
                 zIndex: "1000"
             }}>
             <button
+              onClick={()=>handleMunicipalAreas()}
               type="button"
               className="w-15 bg-[#4388B2] shadow text-sm font-normal rounded-xl p-2 hover:bg-[#317199]"
             > <i className="bi bi-house-door fs-5"></i> <br/> Municipal <br/> Area</button>

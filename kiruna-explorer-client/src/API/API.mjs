@@ -53,7 +53,8 @@ const addDocument = async (documentData) => {
         language: documentData.language,
         pages: documentData.pageNumber,
         description: documentData.description,
-        areaId: documentData.areaId
+        areaId: documentData.areaId,
+        links: documentData.links
       }),
       credentials: 'include'
     });
@@ -155,10 +156,132 @@ const addArea = async (geoJson) => {
 
     const result = await response.json();
     return result; 
-    
+
   } catch (error) {
     console.error("Error in addDocument function:", error.message);
     throw new Error(`${error.message || 'Error while creating the document.'}`);
+  }
+};
+
+const getAllDocuments = async () => {
+  try {
+    const response = await fetch(`${SERVER_URL}/api/documents`, {
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const errMessage = await response.json();
+      throw new Error(`${errMessage.message || 'Error while creating the document.'}`);
+      throw new Error(`Error ${response.status}: ${errMessage.message || 'Error while creating the document.'}`);
+    }
+
+    const result = await response.json();
+    return result;
+    
+  } catch (error) {
+    console.error("Error in getAllDocuments function:", error.message);
+    throw new Error("Unable to get the documents. Please check your connection and try again.");
+  }
+};
+
+const addLink = async (link) => {
+  try {
+    const response = await fetch(`${SERVER_URL}/api/documents/link`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        doc1Id: link.originalDocId,
+        doc2Id: link.selectedDocId,
+        connection: link.connectionType,
+        date: link.date,
+      }),
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const errMessage = await response.json();
+      throw new Error(`Error ${response.status}: ${errMessage.message || 'Error while creating the connection.'}`);
+    }
+
+    const result = await response.json();
+    return result; 
+    
+  } catch (error) {
+    console.error("Error in addConnection function:", error.message);
+    throw new Error("Unable to add the connection. Please check your connection and try again.");
+  }
+};
+
+const addLinks = async (links) => {
+
+  try {
+    const response = await fetch(`${SERVER_URL}/api/documents/links`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        links: links
+      }),
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const errMessage = await response.json();
+      throw new Error(`Error ${response.status}: ${errMessage.message || 'Error while creating the connection.'}`);
+    }
+
+    const result = await response.json();
+    return result; 
+    
+  } catch (error) {
+    console.error("Error in addConnection function:", error.message);
+    throw new Error("Unable to add the connection. Please check your connection and try again.");
+  }
+};
+
+const getDocuemntLinks = async (docid) => {
+  try {
+    const response = await fetch(`${SERVER_URL}/api/documents/${docid}/links`, {
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const errMessage = await response.json();
+      throw new Error(`Error ${response.status}: ${errMessage.message || 'Error while creating the document.'}`);
+    }
+
+    const result = await response.json();
+    return result; 
+    
+  } catch (error) {
+    console.error("Error in getDocumentById function:", error.message);
+    throw new Error("Unable to get the document. Please check your connection and try again.");
+  }
+};
+
+
+const deleteAll = async (id) => {
+
+  try {
+    const response = await fetch(`${SERVER_URL}/api/documents/${id}/links`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id
+      }),
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const errMessage = await response.json();
+      throw new Error(`Error ${response.status}: ${errMessage.message || 'Error while deleting the connections.'}`);
+    }
+
+    const result = await response.json();
+    return result; 
+    
+  } catch (error) {
+    console.error("Error in delete function:", error.message);
+    throw new Error("Unable to delete the connections. Please check your connection and try again.");
   }
 };
 
@@ -171,6 +294,11 @@ const API = {
   getDocumentsFromArea,
   getAllAreas,
   addArea,
+  addLink,
+  getDocuemntLinks,
+  getAllDocuments,
+  addLinks,
+  deleteAll
 };
 
 export default API;

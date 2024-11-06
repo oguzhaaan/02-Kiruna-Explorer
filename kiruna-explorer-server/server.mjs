@@ -9,6 +9,8 @@ import session from "express-session";
 import authRoutes from "./auth/authRoutes.mjs";
 import DocumentRoutes from "./routes/DocumentRoutes.mjs";
 import AreaRoutes from "./routes/AreaRoutes.mjs";
+
+
 // --- Middlewares ---
 const app = express();
 app.use(morgan("dev"));
@@ -44,4 +46,7 @@ app.listen(PORT, () =>
   console.log(`Server running on http://localhost:${PORT}/`)
 );
 
+// --- Routes ---
+app.use(authRoutes);
+app.use('/api/documents', DocumentRoutes);
 export { app };

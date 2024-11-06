@@ -6,6 +6,20 @@ import { AreaNotFound } from "../models/Area.mjs";
 import { InvalidArea } from "../models/Area.mjs";
 
 export default function DocumentDAO() {
+    this.getAllDocuments = () => {
+        const query = "SELECT * FROM document";
+        return new Promise((resolve, reject) => {
+            db.all(query, (err, rows) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    const documents = rows.map(row => this.convertDBRowToDocument(row));
+                    resolve(documents);
+                }
+        })
+    }
+    )};
+    
     this.getDocumentById = (id) => {
         const query = "SELECT * FROM document WHERE id = ?";
 
@@ -17,9 +31,7 @@ export default function DocumentDAO() {
                     return reject(new DocumentNotFound());
                 } else {
                     // Converti la riga del database in un oggetto Document
-                    console.log(row);
                     const document = this.convertDBRowToDocument(row);
-                    console.log(document);
                     resolve(document);
                 }
             });
@@ -52,7 +64,6 @@ export default function DocumentDAO() {
     this.addDocument = (documentData) => {
         // Converti il documento per l'inserimento nel database
         const dbDocument = this.convertDocumentForDB(documentData);
-        console.log(dbDocument);
 
         // Query per inserire il documento
         const insertDocumentQuery = `
@@ -79,7 +90,6 @@ export default function DocumentDAO() {
                 dbDocument.others
             ], function (err) {
                 if (err) {
-                    console.log(err)
                     return reject(err); // Rifiuta la promessa in caso di errore
                 }
                 resolve(this.lastID); // Risolvi la promessa con l'ID del documento inserito

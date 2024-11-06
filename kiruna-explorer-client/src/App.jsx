@@ -45,15 +45,13 @@ function App() {
           </>
         }>
 
-
-
           <Route path="/" element={isLoggedIn ? <Navigate replace to="/documents" /> : <HomePage />} />
 
           <Route path="/login" element={isLoggedIn ? <Navigate replace to="/documents" /> : <LoginPage setNavShow={setNavShow} />} />
 
-          <Route path="/documents" element={isLoggedIn ? <Document setoriginalDocId={setoriginalDocId} setMode={setMode} connections={connections} setNavShow={setNavShow} setIsModalOpen={setIsModalOpen} isModalOpen={isModalOpen} newAreaId={newAreaId} setNewDocument={setNewDocument} newDocument={newDocument} /> : <Navigate replace to="/" />} />
+          <Route path="/documents" element={isLoggedIn ? <Document setoriginalDocId={setoriginalDocId} setMode={setMode} connections={connections} setConnections={setConnections} setNavShow={setNavShow} setIsModalOpen={setIsModalOpen} isModalOpen={isModalOpen} newAreaId={newAreaId} setnewAreaId={setnewAreaId} setNewDocument={setNewDocument} newDocument={newDocument} /> : <Navigate replace to="/" />} />
 
-          <Route path="/documents/:id" element={isLoggedIn ? <Document setoriginalDocId={setoriginalDocId} setMode={setMode} setNavShow={setNavShow} setIsModalOpen={setIsModalOpen} isModalOpen={isModalOpen} newAreaId={newAreaId} setNewDocument={setNewDocument} newDocument={newDocument} /> : <Navigate replace to="/" />} />
+          <Route path="/documents/:id" element={isLoggedIn ? <Document setoriginalDocId={setoriginalDocId} setMode={setMode} connections={connections} setConnections={setConnections} setNavShow={setNavShow} setIsModalOpen={setIsModalOpen} isModalOpen={isModalOpen} newAreaId={newAreaId} setnewAreaId={setnewAreaId} setNewDocument={setNewDocument} newDocument={newDocument} /> : <Navigate replace to="/" />} />
 
           <Route path="/map" element={isLoggedIn ? <GeoreferenceMap setNavShow={setNavShow} setnewAreaId={setnewAreaId} /> : <Navigate replace to="/" />} />
 

@@ -266,7 +266,7 @@ function Document(props) {
             language: props.newDocument.language || null, // Set to null if not provided
             pageNumber: props.newDocument.pages || null, // Set to null if not provided
             description: props.newDocument.description, // Mandatory
-            area: props.newAreaId,
+            areaId: props.newAreaId,
             links: props.connections.length > 0 ? props.connections : null
         };
 
@@ -280,6 +280,8 @@ function Document(props) {
         try {
             await API.addDocument(documentData);
             setAlertMessage(['Document added successfully!', 'success']);
+            props.setnewAreaId(null)
+            props.setConnections([])
             resetForm();
             toggleModal();
         } catch (error) {

@@ -57,7 +57,7 @@ function App() {
 
         <Route path="/map" element={isLoggedIn ? <GeoreferenceMap setNavShow={setNavShow} setnewAreaId={setnewAreaId} />: <Navigate replace to="/" />}/>
         
-        <Route path="/linkDocuments" element={<LinkDocuments originalDocId={docId} mode={mode} setConnectionsInForm={setConnections} />}/>
+        <Route path="/linkDocuments" element={<LinkDocuments setOriginalDocId={setoriginalDocId} originalDocId={docId} mode={mode} setConnectionsInForm={setConnections} />}/>
         
         </Route>
       </Routes>

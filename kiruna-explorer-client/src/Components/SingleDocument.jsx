@@ -22,7 +22,6 @@ function SingleDocument(props) {
             try {
                 setIsCharging(true)
                 const d = await API.getDocumentById(id)
-                console.log(d)
                 if (d !== false) {
                     // Simulate loading time
                     setTimeout(() => {
@@ -181,6 +180,7 @@ function SingleDocument(props) {
 
                             <button onClick={() => {
                                 props.setMode("save");
+                                props.setNavShow(false);
                                 props.setoriginalDocId(id);
                                 navigate("/linkDocuments")
                             }} className="text-white_text text-xl right-4 hover:text-gray-400">

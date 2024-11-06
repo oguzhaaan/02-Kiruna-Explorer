@@ -10,6 +10,7 @@ export default {
         text_gray: "#B7B7B7",
         customGray: "#D9D9D9",
         customBlue: "#4388B2",
+        customPill: "#14405b",
         customGray1: '#686868',
         customGray2: '#313131',
         customGray3: '#D9D9D9',

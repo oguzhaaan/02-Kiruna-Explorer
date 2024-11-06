@@ -124,8 +124,12 @@ const getAllAreas = async () => {
     }
     
     const result = await response.json();
-    const geoJson = JSON.parse(result);
-    return geoJson; 
+    
+    const geoJsonresult = result.map((r)=>{
+      r.geoJson = JSON.parse(r.geoJson)
+      return r
+    }); 
+    return geoJsonresult
     
   } catch (error) {
     console.error("Error in get all areas function:", error.message);

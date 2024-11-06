@@ -17,8 +17,10 @@ function GeoreferenceMap(props){
     const [showSave, setShowSave] = useState(false);
     const [showExit, setShowExit] = useState(true);
     const [showModal, setShowModal] = useState(false)
-    const [presentAreas, setPresentAreas] = useState([]);
-    const [clickedArea, setClickedArea] = useState(null)
+    const [showMuniAreas, setShowMuniAreas] = useState(true)
+    const [presentAreas, setPresentAreas] = useState(null);
+    const [clickedArea, setClickedArea] = useState(null);
+    const [alertMessage, setAlertMessage] = useState("");
 
     useEffect(() => {
         props.setNavShow(false); 
@@ -30,6 +32,15 @@ function GeoreferenceMap(props){
 
     const redCenter = L.icon({
         iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+        });
+
+    const GenericPoints = L.icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
         shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
         iconSize: [25, 41],
         iconAnchor: [12, 41],
@@ -49,9 +60,11 @@ function GeoreferenceMap(props){
       ];
 
       const handleClick = (e, content) => {
-        setPopupContent(content);
+        setPopupContent("Area N."+content);
+        setAlertMessage(`You selected Area N.${content}`)
         setPopupPosition(e.latlng);
         setClickedArea(content)
+        setShowSave(true)
       };
     
       const handleMouseOver = (e) => {
@@ -75,20 +88,9 @@ function GeoreferenceMap(props){
       };
 
     const onCreated = (e) => {
-        const { layerType, layer } = e;
-        
-        if (layerType === 'polygon') {
-            const newPolygon = layer.getLatLngs()[0].map(latlng => [latlng.lat, latlng.lng]);
-            const geoJson = layer.toGeoJSON();
-            setDrawnObject(geoJson);
-            console.log(geoJson);
-        }
-        else if (layerType === 'marker') {
-          const newPoint = [layer.getLatLng().lat, layer.getLatLng().lng]
-          const geoJson  = layer.toGeoJSON()
-          console.log(geoJson);
-          setDrawnObject(geoJson);
-        }
+        const { layer } = e;
+        const geoJson  = layer.toGeoJSON()  
+        setDrawnObject(geoJson);
     };
     
     const onEdited = (e) => {
@@ -104,22 +106,34 @@ function GeoreferenceMap(props){
         setDrawnObject(null);
         setShowExit(true)
         setShowSave(false)
+        setShowMuniAreas(true)
+        setAlertMessage("");
     }
 
     const onDrawStart = () =>{
         setShowExit(false)
+        setPresentAreas(null)
+        setShowMuniAreas(false)
+        setAlertMessage("");
     }
 
     const onEditStop = () =>{
         setShowExit(true)
         setShowSave(true)
+        setAlertMessage(`You selected new Custom Area`)
     }
 
     const handleMunicipalAreas = async () =>{
       try{
-        const allAreas = await API.getAllAreas()
-        console.log(allAreas)
-        setPresentAreas(allAreas)
+        if (!presentAreas){
+          const allAreas = await API.getAllAreas()
+          console.log(allAreas)
+          setPresentAreas(allAreas)
+        }
+        else{
+          setPresentAreas(null)
+        }
+        
       }catch(err){
         console.log(err)
       }
@@ -190,17 +204,41 @@ function GeoreferenceMap(props){
             </FeatureGroup>
             {/* Visualize All present Areas*/}
             {
-              presentAreas && presentAreas.map((coordinates)=>{
-                <Polygon
-                  key={coordinates.id}
-                  positions={coordinates.geoJson}
-                  pathOptions={{ color: 'blue' }}
-                  eventHandlers={{
-                    mouseover: (e) => handleMouseOver(e),
-                    click: (e) => handleClick(e, coordinates.id),
-                    mouseout: (e) => handleMouseOut(e)
-                  }}
-                />
+              presentAreas && presentAreas.map((area)=>{
+                const geometry = area.geoJson.geometry;
+                
+                if (geometry.type === 'Polygon' || geometry.type === 'MultiPolygon') {
+                  // Rendi un poligono
+                  return (
+                    <Polygon
+                      key={area.id}
+                      positions={
+                        geometry.coordinates[0].map(coord => [coord[1], coord[0]]) // Inverti le coordinate per Leaflet
+                      }
+                      pathOptions={{ color: 'blue' }}
+                      eventHandlers={{
+                        mouseover: (e) => handleMouseOver(e),
+                        click: (e) => handleClick(e, area.id),
+                        mouseout: (e) => handleMouseOut(e)
+                      }}
+                    />
+                  );
+                } else if (geometry.type === 'Point') {
+                  // Rendi un punto
+                  return (
+                    <Marker
+                      key={area.id}
+                      position={[geometry.coordinates[1], geometry.coordinates[0]]} // Inverti lat/lng per Leaflet
+                      icon={GenericPoints} // Puoi scegliere di usare un'icona personalizzata per i punti
+                      eventHandlers={{
+                        click: (e) => handleClick(e, area.id)
+                      }}
+                    >
+                      <Popup>{`Area ID: ${area.id}`}</Popup>
+                    </Marker>
+                  );
+                }
+                return null; // Gestione nel caso in cui il tipo di geometria non sia supportato
               })
             }
           
@@ -217,7 +255,7 @@ function GeoreferenceMap(props){
             )}
           </MapContainer>
 
-          <div style={{
+          {showMuniAreas && <div style={{
                 position: "absolute",
                 justifySelf: "center",
                 top: "30%",
@@ -231,7 +269,7 @@ function GeoreferenceMap(props){
               type="button"
               className="w-15 bg-[#4388B2] shadow text-sm font-normal rounded-xl p-2 hover:bg-[#317199]"
             > <i className="bi bi-house-door fs-5"></i> <br/> Municipal <br/> Area</button>
-        </div>
+        </div>}
 
         <div style={{
                 position: "absolute",
@@ -279,6 +317,24 @@ function GeoreferenceMap(props){
           </div>
         </div>
         }
+
+        {/* Messaggio di avviso in basso al centro */}
+        {alertMessage && (
+            <div style={{
+              position: "fixed",
+              bottom: "20px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              backgroundColor: "rgba(0, 0, 0, 0.7)",
+              color: "#fff",
+              padding: "10px 20px",
+              borderRadius: "10px",
+              fontSize: "20px",
+              zIndex: 1000,
+            }}>
+              {alertMessage}
+            </div>
+          )}
         </>
     )
 }

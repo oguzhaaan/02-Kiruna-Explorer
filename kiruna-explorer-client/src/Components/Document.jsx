@@ -466,7 +466,8 @@ function Document(props) {
                             </div>
 
                             <div className="input-map mb-4 w-full">
-                                <label className="text-white mb-1 text-xl w-full ml-2 text-left">Georeference: choose {props.newAreaId}</label>
+                                <label className="text-white mb-1 text-xl w-full ml-2 text-left">Georeference</label>
+                                {props.newAreaId && <label className="text-white mb-1 text-l w-full ml-2 text-left"><i className="bi bi-check-lg align-middle text-green-400 fs-4"></i> You selected Area N.{props.newAreaId}</label>}
                                 <button
                                     onClick={() => {
                                         navigate("/map")

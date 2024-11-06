@@ -4,7 +4,8 @@ import { body, param, validationResult } from "express-validator";
 import AreaDAO from "../dao/AreaDAO.mjs";
 import Area from "../models/Area.mjs";
 import { isLoggedIn } from "../auth/authMiddleware.mjs";
-
+import { InvalidArea, AreaNotFound } from "../models/Area.mjs";
+import { DocumentNotFound } from "../models/Document.mjs";
 const router = express.Router();
 const DocumentDao = new DocumentDAO();
 const AreaDao = new AreaDAO();
@@ -34,6 +35,40 @@ router.get("/:DocId", isLoggedIn,
             res.status(err.status).json({ error: err });
         }
     })
+
+/* GET /api/documents/area/:areaId */
+router.get("/area/:areaId", isLoggedIn,
+    [
+        param("areaId")
+            .isInt().withMessage("Area ID must be a valid integer")
+    ],
+    async (req, res) => {
+
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        try {
+            const areaId = parseInt(req.params.areaId, 10);
+            const documents = await DocumentDao.getDocumentsByAreaId(areaId);
+            res.status(200).json(documents);
+        } catch (err) {
+            console.error("Error fetching documents by area:", err);
+
+            if (err instanceof InvalidArea) {
+                res.status(400).json({ error: "Invalid area ID" });
+            } else if (err instanceof DocumentNotFound) {
+                res.status(404).json({ error: "No documents found for this area" });
+            } else if (err instanceof AreaNotFound) {
+                res.status(404).json({ error: "Area not found" });
+            } else {
+                res.status(500).json({ error: "Internal server error" });
+            }
+        }
+    });
+
+
 const validStakeholders = ["lkab", "municipality", "regional authority", "architecture firms", "citizens", "others" ];
 
 router.post("/",

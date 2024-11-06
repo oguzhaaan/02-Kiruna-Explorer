@@ -330,7 +330,7 @@ function Document(props) {
                     <button
                         className="bg-[#2E6A8E] text-white grid justify-items-end py-2 px-5 mb-20 mx-3 rounded-[77px] mt-4"
                         onClick={() => {
-                            navigate("/documents/4")
+                            navigate("/documents/1")
                         }}>
                         document
                     </button>

@@ -138,9 +138,9 @@ describe("Integration Test POST / - Add Document", () => {
             .expect('Content-Type', /json/)
             .expect(400);
 
-        expect(result.body.errors).toEqual(
+        expect(result.body.message).toEqual(
             expect.arrayContaining([
-                expect.objectContaining({ msg: "Title is required" })
+               "Title is required"
             ])
         );
     });

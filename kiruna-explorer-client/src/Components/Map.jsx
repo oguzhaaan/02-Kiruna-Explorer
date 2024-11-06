@@ -15,6 +15,7 @@ function GeoreferenceMap(props){
     const [drawnObject, setDrawnObject] = useState(null);
     const [showSave, setShowSave] = useState(false);
     const [showExit, setShowExit] = useState(true);
+    const [showModal, setShowModal] = useState(false)
 
     useEffect(() => {
         props.setNavShow(false); 
@@ -175,7 +176,7 @@ function GeoreferenceMap(props){
                 zIndex: "1000"
             }}>
             {showExit && <button
-              onClick={()=>{setDrawnObject(null),navigate(-1)}}
+              onClick={()=>{setShowModal(true)}}
               type="button"
               className="w-44 h-14 bg-[#D9D9D9] bg-opacity-60 shadow text-2xl  font-normal text-black rounded-full hover:bg-[#938888]"
             >
@@ -189,6 +190,29 @@ function GeoreferenceMap(props){
               Save
             </button>}
           </div>
+
+        {showModal &&
+          <div className="fixed inset-0 flex items-center justify-center ">
+          <div className="flex flex-col items-center bg-box_color backdrop-blur-2xl drop-shadow-xl w-1/3 h-1/3 p-6 rounded-3xl text-white relative font-sans">
+            <div className="text-2xl mb-2 font-bold">Are you really sure to exit?</div>
+            <div className="text-l font-bold">Your changes will be discarded</div>
+            <div className="flex justify-center space-x-2 mt-10">
+              <button
+                onClick={()=>setShowModal(false)}
+                className="bg-customGray text-black w-40 h-16 opacity-60 px-4 py-2 rounded-full text-2xl"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={()=>{navigate(-1),setDrawnObject(null)}}
+                className="bg-customBlue  text-white w-40 h-16 px-4 py-2 rounded-full text-2xl"
+              >
+                Exit
+              </button>
+            </div>
+          </div>
+        </div>
+        }
         </>
     )
 }

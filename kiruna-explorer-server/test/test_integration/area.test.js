@@ -24,6 +24,23 @@ const login = async (userInfo) => {
       });
   });
 };
+
+const createDocument = async (usercookie,doc) =>{
+  return new Promise((resolve,reject)=>{
+      request(app)
+      .post(`${docPath}`)
+      .send(doc)
+      .set("Cookie",usercookie)
+      .expect(201)
+      .end((err, res) => {
+          if (err) {
+              reject(err)
+          }
+          resolve(res.body.lastId)
+      })
+  })
+}
+//example for a mockdocument
 // Example Parameters for the tests
 const urbanPlannerUser = {
   id: 1,
@@ -51,17 +68,18 @@ describe("Integration Test POST /api/areas - Create a new area", () => {
   });
 
   test("Should create a new area for an authorized user", async () => {
-    const geoJson =
-      '{"type":"Feature","geometry":{"type":"Point","coordinates":[125.6, 10.1]}}';
+    const geoJson = {
+        geoJson:  '{"type":"Feature","geometry":{"type":"Point","coordinates":[125.6, 10.1]}}'
+    };
 
     const res = await request(app)
       .post(areaPath)
       .set("Cookie", urbanplanner_cookie) // Authorized role
-      .send({ geoJson })
+      .send( geoJson )
       .expect(201);
 
-    expect(res.body).toHaveProperty("id"); // Check if the response has an id for the new area
-    expect(res.body.geoJson).toBe(geoJson);
+      expect(typeof res.body).toBe("number"); // Controlla che sia effettivamente un numero
+      expect(res.body).toBeGreaterThan(0); // Should return lastid
   });
 
   test("Should return 400 for invalid geoJson data", async () => {
@@ -124,10 +142,34 @@ describe("Integration Test GET /api/documents/area/:areaId", () => {
   });
 
   test("Should retrieve documents for a valid areaId", async () => {
-    const validAreaId = 1; // Assume this area exists in your mock data setup
+    const geoJson = {
+      geoJson:  '{"type":"Feature","geometry":{"type":"Point","coordinates":[125.6, 10.1]}}'
+    };
+    //create new area
+    const resarea = await request(app)
+      .post(areaPath)
+      .set("Cookie", urbanplanner_cookie) // Authorized role
+      .send( geoJson )
+      .expect(201);
+    const areaId = resarea.body
+    //create document in that area
+      const mockDocumentbody = {
+        title: 'Test Document',
+        scale: 'plan',
+        date: '2023-01-01',
+        type: 'design',
+        language: 'English',
+        pages: 3,
+        description: 'A test document',
+        stakeholders: ['lkab','municipality'],
+        planNumber: 10,
+        areaId: areaId
+    };
+    await createDocument(urbanplanner_cookie,mockDocumentbody)
 
+    //take documents from area  
     const res = await request(app)
-      .get(`${docPath}/area/${validAreaId}`)
+      .get(`${docPath}/area/${areaId}`)
       .set("Cookie", urbanplanner_cookie) // Authenticated user
       .expect(200);
 
@@ -135,15 +177,24 @@ describe("Integration Test GET /api/documents/area/:areaId", () => {
     res.body.forEach((doc) => {
       expect(doc).toHaveProperty("id");
       expect(doc).toHaveProperty("title");
-      expect(doc).toHaveProperty("areaId", validAreaId);
+      expect(doc).toHaveProperty("areaId", areaId);
     });
   });
 
   test("Should return 404 if no documents found for the given areaId", async () => {
-    const noDocsAreaId = 2; // Assume this area exists but has no documents
+    const geoJson = {
+      geoJson:  '{"type":"Feature","geometry":{"type":"Point","coordinates":[125.6, 10.1]}}'
+    };
+    //create new area but without document connected
+    const resarea = await request(app)
+      .post(areaPath)
+      .set("Cookie", urbanplanner_cookie) // Authorized role
+      .send( geoJson )
+      .expect(201);
 
+    const areaId = resarea.body
     const res = await request(app)
-      .get(`${docPath}/area/${noDocsAreaId}`)
+      .get(`${docPath}/area/${areaId}`)
       .set("Cookie", urbanplanner_cookie)
       .expect(404);
 

@@ -9,13 +9,17 @@ import { HomePage } from "./Components/HomePage.jsx";
 import { Document } from "./Components/Document.jsx";
 import { SingleDocument } from "./Components/SingleDocument.jsx";
 import LinkDocuments from "./Components/LinkDocuments.jsx";
+import { GeoreferenceMap } from "./Components/Map.jsx";
 import DocumentClass from "./classes/Document.mjs";
 
 function App() {
   const { user, isLoggedIn, checkAuth } = useUserContext();
 
   const [navShow, setNavShow] = useState(true);
-  const [newDocument, setNewDocument] = useState(new DocumentClass())
+  const [newAreaId, setnewAreaId] = useState(null);
+  const [newDocument, setNewDocument] = useState(new DocumentClass());
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
 
   useEffect(() => {
     try{
@@ -45,9 +49,11 @@ function App() {
 
         <Route path="/login" element={isLoggedIn ? <Navigate replace to="/documents" /> : <LoginPage setNavShow={setNavShow}/>}/>
 
-        <Route path="/documents" element={isLoggedIn ? <Document setNewDocument={setNewDocument} newDocument={newDocument} /> : <Navigate replace to="/" />}/>
+        <Route path="/documents" element={isLoggedIn ? <Document setNavShow={setNavShow} setIsModalOpen={setIsModalOpen} isModalOpen={isModalOpen} newAreaId={newAreaId} setNewDocument={setNewDocument} newDocument={newDocument} /> : <Navigate replace to="/" />}/>
 
-        <Route path="/documents/:id" element={isLoggedIn && <Document />}/>
+        <Route path="/documents/:id" element={isLoggedIn ? <Document setNavShow={setNavShow} setIsModalOpen={setIsModalOpen} isModalOpen={isModalOpen} newAreaId={newAreaId} setNewDocument={setNewDocument} newDocument={newDocument} />: <Navigate replace to="/" />}/>
+
+        <Route path="/map" element={isLoggedIn ? <GeoreferenceMap setNavShow={setNavShow} setnewAreaId={setnewAreaId} />: <Navigate replace to="/" />}/>
         
         <Route path="/linkDocuments" element={<LinkDocuments />}/>
         

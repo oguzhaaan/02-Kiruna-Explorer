@@ -12,7 +12,7 @@ sections:
 ### Macro statistics
 
 - Number of stories committed vs. done
-  - 47 vs. 47
+  - 3 vs. 3
 - Total points committed vs. done
   - 29 vs. 29
 - Nr of hours planned vs. spent (as a team)
@@ -52,34 +52,45 @@ sections:
 ## QUALITY MEASURES
 
 - Unit Testing:
-  - Total hours estimated
-  - Total hours spent
-  - Nr of automated unit test cases
-  - Coverage (if available)
-- E2E testing:
-  - Total hours estimated
-  - Total hours spent
+  - Total hours estimated:
+    -  5h 30m
+  - Total hours spent:
+    - 5h 25m
+  - Nr of automated unit test cases:
+    - 78
+  - Coverage (if available):
+    - 93.18 %
 - Code review
   - Total hours estimated
+    - 3h
   - Total hours spent
+    - 3h
+- Integration testing:
+  - Total hours estimated
+    - 6h
+  - Total hours spent
+    - 7h 20m
+  - Coverage:
+    - 93%
 
 ## ASSESSMENT
 
 - What caused your errors in estimation (if any)?
 
-  - Our estimations were more or less similiar with spent time
+  - Our estimations were generally in line with the actual time spent, with only minor deviations.
 
 - What lessons did you learn (both positive and negative) in this sprint?
-
-  - We learned how to well organize git and knew each other better since we already made a project before. We could estimate the time of tasks in more accurate way.
-  - Also we learned the features that a web application should have on its front-end part for user convenience. For example usage of smaller letters and avoiding scrolling much.
+  - We learned how to better organize our Git workflow and strengthened our understanding of each other’s working styles, having collaborated on a previous project. Additionally, we became more accurate in estimating the time needed for tasks.
+  - We also realized the importance of everyone on the team having a clear and complete understanding of the story requirements. This helps prevent implementation errors that would need to be corrected later, avoiding unnecessary time wastage.
 
 - Which improvement goals set in the previous retrospective were you able to achieve?
-  - Usage of git, better communication, prediction of time spent
+  - We improved our usage of Git, enhanced team communication, made more accurate time predictions, and adopted better naming conventions for branches, making them more consistent and descriptive.
+
 - Which ones you were not able to achieve? Why?
+  - We weren’t fully able to achieve the goal of setting up a robust and well-structured database from the start or strictly adhering to the initial API specifications. This was primarily due to evolving project requirements and unexpected adjustments that had to be made along the way.
 
 - Improvement goals for the next sprint and how to achieve them (technical tasks, team coordination, etc.)
-
-  - Documentation part should be improved. Our readme file was not very clear at some point so we had to change some important and fundemental things like database's attributes so that some already written functions were effected, that caused to wasting of time.
+  - One of our improvement goals for the next sprint is to enhance our documentation. The README file was unclear in some areas, which led to changes in fundamental aspects like database attributes. This affected previously written functions and resulted in time wasted on corrections. To avoid this, we’ll ensure clearer and more comprehensive documentation moving forward.
 
 - One thing you are proud of as a Team!!
+  - As a team, we’re proud of our strong collaboration. We were able to work closely together, share ideas effectively, and support each other throughout the sprint.

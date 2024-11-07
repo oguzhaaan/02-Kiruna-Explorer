@@ -290,9 +290,10 @@ router.post("/link",
     ],
 
     async (req, res) => {
-
+        console.log(req.body)
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
+            console.log(errors.array().map((e) => e.msg));
             return res.status(400).json({ errors: errors.array() });
         }
         //check if connection type is valid
@@ -316,22 +317,19 @@ router.post("/link",
         //check if documents exist
         try {
             const doc1Exists = await DocumentDao.getDocumentById(req.body.doc1Id);
-            if (!doc1Exists) {
-                return res.status(404).json({ error: "Document 1 not found" });
-            }
+            
             const doc2Exists = await DocumentDao.getDocumentById(req.body.doc2Id);
-            if (!doc2Exists) {
-                return res.status(405).json({ error: "Document 2 not found" });
-            }
+            
         } catch (error) {
             console.error("Error in isLink function:", error.message);
-            throw new Error("Unable to check if documents exist. Please check your connection and try again.");
+            return res.status(404).json({ error: "Document 1 or 2 not found" });
+          //  throw new Error("Unable to check if documents exist. Please check your connection and try again.");
         }
 
         try {
 
             const result = await DocumentLinksDao.addLinktoDocument(newLink);
-            res.json({ message: "Link added successfully" });
+            res.status(200).json({ message: "Link added successfully" });
 
         } catch (error) {
             console.error("Error in addLinktoDocument function:", error.message);
@@ -376,6 +374,7 @@ router.post("/links",
         try {
             // Controlliamo che ogni documenti esista
             for (const link of links) {
+                console.log
                 const doc1Exists = await DocumentDao.getDocumentById(link.originalDocId);
                 if (!doc1Exists) {
                     return res.status(404).json({ error: `Document with ID ${link.originalDocId} not found` });
@@ -388,7 +387,7 @@ router.post("/links",
             }
         } catch (error) {
             console.error("Error in isLink function:", error.message);
-            return res.status(500).json({ error: "Unable to check if documents exist. Please try again later." });
+            return res.status(404).json({ error: "Unable to check if documents exist. Please try again later." });
         }
 
         // Aggiungi i nuovi link, ma solo se non esistono 
@@ -408,7 +407,7 @@ router.post("/links",
                         date: link.date,
                         connection: link.connectionType
                     };
-                    console.log(link);
+                    //console.log(link);
                     await DocumentLinksDao.addLinktoDocument(newLink); // Aggiungi ogni link al database
                 }
             }

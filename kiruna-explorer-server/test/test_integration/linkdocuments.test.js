@@ -39,8 +39,44 @@ const no_profile = { id:3, username: "user1", password: "pass1", role: null}
 let resident_cookie
 let urbanplanner_cookie
 // Mock data for testing
-const mockDocumentbody = {
-    title: 'Test Document',
+const mockDocumentbody1 = {
+    title: 'Test Document1',
+    scale: 'plan',
+    date: '2023-01-01',
+    type: 'design',
+    language: 'English',
+    pages: 3,
+    description: 'A test document',
+    stakeholders: ['lkab','municipality'],
+    planNumber: 10,
+};
+
+const mockDocumentbody2 = {
+    title: 'Test Document2',
+    scale: 'plan',
+    date: '2023-01-01',
+    type: 'design',
+    language: 'English',
+    pages: 3,
+    description: 'A test document',
+    stakeholders: ['lkab','municipality'],
+    planNumber: 10,
+};
+
+const mockDocumentbody3 = {
+    title: 'Test Document3',
+    scale: 'plan',
+    date: '2023-01-01',
+    type: 'design',
+    language: 'English',
+    pages: 3,
+    description: 'A test document',
+    stakeholders: ['lkab','municipality'],
+    planNumber: 10,
+};
+
+const mockDocumentbody4 = {
+    title: 'Test Document3',
     scale: 'plan',
     date: '2023-01-01',
     type: 'design',
@@ -148,17 +184,155 @@ describe("Integration Test POST /link", () => {
             .set("Cookie", resident_cookie)
             .expect(404);
     });
-    /*
+    
     test("should return 200 if link is valid", async () => {
-        const d1 =  await createDocument(urbanplanner_cookie, mockDocumentbody)
-        const d2 = await createDocument(urbanplanner_cookie, {...mockDocumentbody, title: 'Test Document 2'})
-        console.log(d1, d2)
-        const link = await createLink(urbanplanner_cookie, d1, d2)
-        console.log(link)
+        const d1 =  await createDocument(urbanplanner_cookie, mockDocumentbody1)
+        const d2 = await createDocument(urbanplanner_cookie,mockDocumentbody2)
+        
         const result = await request(app)
             .post(`${basePath}/link`)
-            .send(link)
+            .send({
+                doc1Id: d1,
+                doc2Id: d2,
+                connection: "direct_consequence",
+                date: "2023-01-01",
+            })
             .set("Cookie", urbanplanner_cookie)
             .expect(200);
-    });*/
+
+            expect(result.body).toEqual({ message: "Link added successfully" });
+    });
+
+
 })
+
+
+describe("Integration Test POST /links", () => {
+    beforeEach(async () => {
+        // Resetta i dati
+        await cleanup();
+        // Login per ottenere il cookie di autenticazione
+        urbanplanner_cookie = await login(urbanplannerUser);
+    });
+
+    test("should return 200 if links array is valid", async () => {
+        const d1 =  await createDocument(urbanplanner_cookie, mockDocumentbody1)
+        const d2 = await createDocument(urbanplanner_cookie,mockDocumentbody2)
+        const d3 = await createDocument(urbanplanner_cookie,mockDocumentbody3)
+        const d4 = await createDocument(urbanplanner_cookie,mockDocumentbody3)
+        
+        const validLinks = [
+            {
+                originalDocId: d1,
+                selectedDocId: d2,
+                connectionType: "prevision",
+                date: "2023-01-01",
+            },
+            {
+                originalDocId: d3,
+                selectedDocId: d4,
+                connectionType: "direct_consequence",
+                date: "2023-01-02",
+            }
+        ];
+
+        const result = await request(app)
+            .post(`${basePath}/links`)
+            .send({ links: validLinks })
+            .set("Cookie", urbanplanner_cookie)
+            .expect(200);
+
+        expect(result.body).toEqual({ message: "Links added successfully" });
+    });
+
+    test("should return 402 if any link has an invalid connection type", async () => {
+        const invalidLinks = [
+            {
+                originalDocId: 1,
+                selectedDocId: 2,
+                connectionType: "invalid_type",
+                date: "2023-01-01",
+            },
+            {
+                originalDocId: 3,
+                selectedDocId: 4,
+                connectionType: "direct_consequence",
+                date: "2023-01-02",
+            }
+        ];
+
+        const result = await request(app)
+            .post(`${basePath}/links`)
+            .send({ links: invalidLinks })
+            .set("Cookie", urbanplanner_cookie)
+            .expect(402);
+
+        expect(result.body.error).toBe("Invalid connection type for the following links");
+        expect(result.body.invalidLinks).toEqual([
+            {
+                originalDocId: 1,
+                selectedDocId: 2,
+                connectionType: "invalid_type",
+                date: "2023-01-01",
+            }
+        ]);
+    });
+});
+
+
+describe("GET /:DocId/links", () => {
+    test("should return 200 with linked documents if DocId is valid", async () => {
+        // Prima crea documenti e link per il test
+        const d1 =  await createDocument(urbanplanner_cookie, mockDocumentbody1)
+        const d2 = await createDocument(urbanplanner_cookie,mockDocumentbody2)
+        const d3 = await createDocument(urbanplanner_cookie,mockDocumentbody3)
+
+        await createLink(urbanplanner_cookie,d1,d2)
+        await createLink(urbanplanner_cookie,d1,d3)
+        
+        const linkedDocs = [
+            { id: d2, title: "Test Document2", type: "design", connection: "update" },
+            { id: d3, title: "Test Document3", type: "design", connection: "update" },
+        ];
+
+        const result = await request(app)
+            .get(`${basePath}/${d1}/links`)
+            .set("Cookie", urbanplanner_cookie)
+            .expect(200);
+
+        expect(result.body).toEqual(linkedDocs);
+    });
+
+    test("should return 400 if DocId is not valid", async () => {
+        const result = await request(app)
+            .get(`${basePath}/invalidId/links`)
+            .set("Cookie", urbanplanner_cookie)
+            .expect(400);
+
+        expect(result.body.errors[0].msg).toBe("Document ID must be a valid number");
+    });
+});
+
+describe("DELETE /:DocId/links", () => {
+    test("should return 200 and delete all links if DocId is valid", async () => {
+        const d1 =  await createDocument(urbanplanner_cookie, mockDocumentbody1)
+        const d2 = await createDocument(urbanplanner_cookie,mockDocumentbody2)
+        await createLink(urbanplanner_cookie,d1,d2)
+
+        const result = await request(app)
+            .delete(`${basePath}/${d1}/links`)
+            .set("Cookie", urbanplanner_cookie)
+            .expect(200);
+
+        expect(result.body).toEqual({ message: "All links deleted successfully" });
+    });
+
+    test("should return 400 if DocId is not valid", async () => {
+        const result = await request(app)
+            .delete(`${basePath}/invalidId/links`)
+            .set("Cookie", urbanplanner_cookie)
+            .expect(400);
+
+        expect(result.body.errors[0].msg).toBe("Document ID must be a valid number");
+    });
+});

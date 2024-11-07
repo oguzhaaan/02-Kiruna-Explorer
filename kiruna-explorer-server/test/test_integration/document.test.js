@@ -109,6 +109,36 @@ describe("Integration Test GET /:DocId - Get Document by ID", () => {
 
 });
 
+describe("Integration Test GET / - Get All documents", () => {
+    beforeEach(async () => {
+        await cleanup();
+        urbanplanner_cookie = await login(urbanplannerUser);
+    });
+
+    test("should return a document for a valid document ID", async () => {
+        // Mock the getDocumentById method
+        mockDocId = await createDocument(urbanplanner_cookie);
+
+        const result = await request(app)
+            .get(`${basePath}/`)
+            .expect('Content-Type', /json/)
+            .expect(200);
+
+            expect(result.body).toEqual([{id:mockDocId, areaId: null, ...mockDocumentbody}]);
+        });
+
+    test("should return empty array if there are no documents", async () => {
+    
+        const result = await request(app)
+            .get(`${basePath}/`)
+            .expect('Content-Type', /json/)
+            .expect(200)
+    
+        expect(result.body).toEqual([]);
+    });
+
+});
+
 describe("Integration Test POST / - Add Document", () => {
     beforeEach(async () => {
         await cleanup();

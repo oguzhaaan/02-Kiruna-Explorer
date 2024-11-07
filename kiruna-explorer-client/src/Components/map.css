@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
+/*------ Variables (To be defined) --------*/
+:root {
+    --search-gray-color: #f4f4f4ad;
+    --box-gray-color: #373737a6;
+    --background-color: #131313;
+    --input-color: #d9d9d93f;
+    --placeholder-input-color: #A2A2A2;
+    --white-text: #F4F4F4;
+    --navbar-bg: #2b2b2b80;
+    --my-green: #17F381;
+    --my-red: #E63232;
+    --my-orange: #f09711;
+    --box-high-opacity: rgba(217, 217, 217, 0.1);
+    --document-item-gradient-grey: linear-gradient(90deg, #686868 21%, #313131 100%);
+    --document-item-gradient-blue: linear-gradient(90deg, #166595 1%, #092A3E 100%);
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+  /* Style individual buttons */
+  .leaflet-draw-draw-polygon {
+    background-color: #8ec7de !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .leaflet-draw-draw-marker {
+    background-color: #8ec7de !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .leaflet-draw-edit-edit {
+    background-color: #92ff90 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .leaflet-draw-edit-remove {
+    background-color: #ffb290 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  /* Button hover effect */
+  .leaflet-draw-draw-marker:hover {
+    background-color: #6dbedf !important;
+  }
+
+  .leaflet-draw-draw-polygon:hover {
+    background-color: #6dbedf !important;
+  }
+
+  .leaflet-draw-edit-edit:hover {
+    background-color: #8ede93 !important;
+  }
+
+  .leaflet-draw-edit-remove:hover {
+    background-color: #deab8e !important;
+  }
+
+  .leaflet-control-zoom-in:hover, .leaflet-control-zoom-out:hover {
+    background-color: #6dbedf !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .leaflet-draw-actions-bottom a[title="Save changes"] {
+    display: none;
+}

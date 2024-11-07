@@ -1,7 +1,8 @@
 import React, { useRef, useState, useEffect } from "react";
-import { MapContainer, TileLayer, Polygon, Popup, Marker } from "react-leaflet";
+import { MapContainer, TileLayer, Polygon, Popup, Marker, ZoomControl } from "react-leaflet";
 import { EditControl } from "react-leaflet-draw";
 import { FeatureGroup } from "react-leaflet";
+import "./map.css"
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
 import L, { geoJSON } from "leaflet";
@@ -22,6 +23,8 @@ function GeoreferenceMap(props){
     const [clickedArea, setClickedArea] = useState(null);
     const [alertMessage, setAlertMessage] = useState("");
 
+    const mapRef = useRef(null);
+
     useEffect(() => {
         props.setNavShow(false); 
     }, []);
@@ -29,15 +32,6 @@ function GeoreferenceMap(props){
     useEffect(()=>{
         //refresh
     },[showExit,showSave,presentAreas])
-
-    const redCenter = L.icon({
-        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
-        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
-        });
 
     const GenericPoints = L.icon({
         iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
@@ -48,7 +42,6 @@ function GeoreferenceMap(props){
         shadowSize: [41, 41]
         });
 
-    const mapRef = useRef(null);
     const latitude = 67.8524;
     const longitude = 20.2438;
 
@@ -60,6 +53,7 @@ function GeoreferenceMap(props){
       ];
 
       const handleClick = (e, content) => {
+        
         setPopupContent("Area N."+content);
         setAlertMessage(`You selected Area N.${content}`)
         setPopupPosition(e.latlng);
@@ -68,6 +62,7 @@ function GeoreferenceMap(props){
       };
     
       const handleMouseOver = (e) => {
+        
         //setPopupContent((prevContent) => prevContent ? `${prevContent}, ${content}` : content);
         //setPopupPosition(null);
         e.target.setStyle({
@@ -78,6 +73,7 @@ function GeoreferenceMap(props){
       };
     
       const handleMouseOut = (e) => {
+        
         //setPopupContent("");
         //setPopupPosition(null);
         e.target.setStyle({
@@ -87,41 +83,65 @@ function GeoreferenceMap(props){
         e.target.bringToBack();
       };
 
-    const onCreated = (e) => {
+      const onCreated = (e) => {
         const { layer } = e;
-        const geoJson  = layer.toGeoJSON()  
+    
+        if (layer instanceof L.Polygon) {
+            setAlertMessage("You selected a new custom area");
+        } else if (layer instanceof L.Marker) {
+            setAlertMessage("You selected a new custom point");
+        }
+    
+        const geoJson = layer.toGeoJSON();  
         setDrawnObject(geoJson);
+        setShowExit(true);
+        setShowSave(true);
     };
     
     const onEdited = (e) => {
+        console.log("onEdited", e);
+    
         const layers = e.layers;
         layers.eachLayer((layer) => {
-            const newPolygon = layer.getLatLngs()[0].map(latlng => [latlng.lat, latlng.lng]);
-            setDrawnObject(newPolygon);
-            print(newPolygon)
+            if (layer instanceof L.Polygon) {
+                const newPolygon = layer.getLatLngs()[0].map(latlng => [latlng.lat, latlng.lng]);
+                setDrawnObject(newPolygon);
+                setAlertMessage("You edited the custom area");
+                console.log("Modificato un poligono:", newPolygon);
+            } else if (layer instanceof L.Marker) {
+                const markerPosition = layer.getLatLng();
+                setDrawnObject(markerPosition);
+                setAlertMessage("You edited the point position");
+                console.log("Modificato un marker:", markerPosition);
+            } else {
+                console.warn("Tipo di layer non supportato.");
+            }
         });
+        setShowExit(true);
+        setShowSave(true);
     };
-        
+    
     const onDeleted = (e) => {
         setDrawnObject(null);
-        setShowExit(true)
-        setShowSave(false)
-        setShowMuniAreas(true)
+        setShowExit(true);
+        setShowSave(false);
+        setShowMuniAreas(true);
         setAlertMessage("");
-    }
-
-    const onDrawStart = () =>{
-        setShowExit(false)
-        setPresentAreas(null)
-        setShowMuniAreas(false)
-        setAlertMessage("");
-    }
-
-    const onEditStop = () =>{
-        setShowExit(true)
-        setShowSave(true)
-        setAlertMessage(`You selected new Custom Area`)
-    }
+    };
+    
+    const onDrawStart = () => {
+        setShowExit(false);
+        setPresentAreas(null);
+        setShowMuniAreas(false);
+        setAlertMessage("Click the map to set area points or set your point");
+    };
+    
+    
+    const onEditStart = () => {
+        setAlertMessage("Edit your area or move the point as needed.");
+        setShowExit(false);
+        setShowSave(false);
+    };
 
     const handleMunicipalAreas = async () =>{
       try{
@@ -169,23 +189,25 @@ function GeoreferenceMap(props){
 
     return(
         <>
-        <button style={{position: "absolute", zIndex: "100", marginTop: "5.5rem", marginLeft: "0.6rem"}}>
-          Save
-        </button>
           <MapContainer
+          
             center={[latitude, longitude]}
             zoom={13} ref={mapRef}
+            zoomControl={false} // Disabilita il controllo zoom di default
             style={{ height: "100vh", 
               width: "100vw", 
               filter: "invert(100%) hue-rotate(180deg) brightness(200%) contrast(90%)" 
             }}
             maxBounds={cityBounds}
-            minZoom={12}>
+            minZoom={12}
+            
+            >
     
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
             />
+            <ZoomControl position="topright" />
             <FeatureGroup>
               <EditControl
                 key={drawnObject}
@@ -194,7 +216,7 @@ function GeoreferenceMap(props){
                 onEdited={onEdited}
                 onDeleted={onDeleted}
                 onDrawStart={onDrawStart}
-                onEditStop={onEditStop}
+                onEditStart={onEditStart}
                 draw={{
                   rectangle: false,
                   circle: false,
@@ -262,12 +284,6 @@ function GeoreferenceMap(props){
               })
             */}
           
-            <Marker position={[latitude, longitude]}
-            icon={redCenter}>
-                <Popup>
-                <div>{"Center Of Kiruna"}</div>
-              </Popup>
-            </Marker>
             {popupPosition && (
               <Popup position={popupPosition}>
                 <div>{popupContent}</div>
@@ -278,7 +294,7 @@ function GeoreferenceMap(props){
           {showMuniAreas && <div style={{
                 position: "absolute",
                 justifySelf: "center",
-                top: "30%",
+                top: "50%",
                 right: "20px",
                 display: "flex",
                 gap: "10px",
@@ -287,7 +303,7 @@ function GeoreferenceMap(props){
             <button
               onClick={()=>handleMunicipalAreas()}
               type="button"
-              className="w-15 bg-[#4388B2] shadow text-sm font-normal rounded-xl p-2 hover:bg-[#317199]"
+              className="w-15 bg-customBlue text-white_text shadow text-sm font-normal rounded-xl p-2 hover:bg-[#63addb]"
             > <i className="bi bi-house-door fs-5"></i> <br/> Municipal <br/> Area</button>
         </div>}
 
@@ -309,7 +325,7 @@ function GeoreferenceMap(props){
             {showSave && <button
               onClick={()=>handleSave()}
               type="button"
-              className="w-44 h-14  bg-[#4388B2] bg-opacity-100 shadow text-2xl  font-normal rounded-full hover:bg-[#317199]"
+              className="w-44 h-14  bg-customBlue text-white_text bg-opacity-100 shadow text-2xl  font-normal rounded-full hover:bg-[#317199]"
             >
               Save
             </button>}
@@ -329,7 +345,7 @@ function GeoreferenceMap(props){
               </button>
               <button
                 onClick={()=>{navigate(-1),setDrawnObject(null)}}
-                className="bg-customBlue  text-white w-40 h-16 px-4 py-2 rounded-full text-2xl"
+                className="bg-customBlue  text-white_text w-40 h-16 px-4 py-2 rounded-full text-2xl"
               >
                 Exit
               </button>

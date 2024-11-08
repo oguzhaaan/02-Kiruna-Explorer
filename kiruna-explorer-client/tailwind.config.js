@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'selector',
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
@@ -7,6 +8,7 @@ export default {
         sans: ["Inter", "sans-serif"],
       },
       colors: {
+        selectedPage: "rgba(217,217,217,0.34)",
         text_gray: "#B7B7B7",
         customGray: "#D9D9D9",
         customBlue: "#4388B2",
@@ -18,10 +20,12 @@ export default {
         primary_color: 'var(--primary-color)',
         search_color: 'var(--search-gray-color)',
         box_color: 'var(--box-gray-color)',
+        box_white_color: 'var(--box-white-color)',
         background_color: 'var(--background-color)',
         input_color: 'var(--input-color)',
         placeholder_color: 'var(--placeholder-input-color)',
         white_text: 'var(--white-text)',
+        black_text: 'var(--black-text)',
         my_green: 'var(--my-green)',
         my_red: 'var(--my-red)',
         my_orange: 'var(--my-orange)',

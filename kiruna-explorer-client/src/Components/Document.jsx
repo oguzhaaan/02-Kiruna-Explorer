@@ -1,17 +1,17 @@
-import { useState, useEffect } from "react";
+import {useState, useEffect} from "react";
 import dayjs from "dayjs";
 import "./document.css";
 import Alert from "./Alert";
 import API from "../API/API.mjs";
-import { SingleDocument } from "./SingleDocument.jsx";
-import { useNavigate } from "react-router-dom";
+import {SingleDocument} from "./SingleDocument.jsx";
+import {useNavigate} from "react-router-dom";
 import Select from "react-select";
 import DocumentClass from "../classes/Document.mjs";
+import {useTheme} from "../contexts/ThemeContext.jsx";
 
 function Document(props) {
 
-    console.log("Connections:\n");
-    console.log(props.connections);
+    const {isDarkMode, toggleTheme} = useTheme();
 
     useEffect(() => {
         props.setNavShow(true);
@@ -24,19 +24,18 @@ function Document(props) {
         control: (provided, state) => ({
             ...provided,
             backgroundColor: '#d9d9d93f',     // Sfondo del campo
-            borderRadius: '40px',             // Bordo arrotondato come richiesto
+            borderRadius: '0.375rem',         // Bordo arrotondato come richiesto
             borderColor: 'transparent',        // Bordo attivo se selezionato
             padding: '0px 5px',               // Padding interno per centrare il testo
             boxShadow: 'none',                // Rimozione ombra
-            minHeight: '48px',                // Altezza minima
             cursor: 'pointer',
-            fontSize: '20px',
+            fontSize: '1rem',
 
         }),
         singleValue: (provided) => ({
             ...provided,
             color: 'white',                   // Testo bianco per leggibilità
-            fontSize: '16px',                 // Testo uniforme e visibile
+            fontSize: '1rem',                 // Testo uniforme e visibile
         }),
         placeholder: (provided) => ({
             ...provided,
@@ -66,44 +65,43 @@ function Document(props) {
             ...provided,
             backgroundColor: state.isSelected ? '#373737a6' : '#373737a6',  // Sfondo opzione selezionata
             color: 'white',                   // Testo bianco
-            padding: '5px 15px',             // Spaziatura interna
             cursor: 'pointer',
-            fontSize: '19px',                 // Aumenta la dimensione del testo delle opzioni
+            fontSize: '1rem',                 // Aumenta la dimensione del testo delle opzioni
             '&:hover': {
                 backgroundColor: '#1e90ff',   // Colore blu al passaggio del mouse
             },
         }),
         multiValue: (provided) => ({
             ...provided,
-            borderRadius: '40px',              // Bordi arrotondati per il tag
-            padding: '10px 10px',               // Padding per rendere i tag più "pillole"
+            borderRadius: '0.375rem',              // Bordi arrotondati per il tag
+            padding: '7px 7px',               // Padding per rendere i tag più "pillole"
             margin: '10px 5px',
         }),
     };
 
     const stakeholderOptions = [
-        { value: "lkab", label: "LKAB" },
-        { value: "municipality", label: "Municipality" },
-        { value: "regional authority", label: "Regional authority" },
-        { value: "architecture firms", label: "Architecture firms" },
-        { value: "citizens", label: "Citizens" },
-        { value: "others", label: "Others" },
+        {value: "lkab", label: "LKAB"},
+        {value: "municipality", label: "Municipality"},
+        {value: "regional authority", label: "Regional authority"},
+        {value: "architecture firms", label: "Architecture firms"},
+        {value: "citizens", label: "Citizens"},
+        {value: "others", label: "Others"},
     ];
 
     const popularLanguages = [
-        { code: "en", name: "English" },
-        { code: "sv", name: "Swedish" },
-        { code: "se", name: "Northern Sami" },
-        { code: "fi", name: "Finnish" },
-        { code: "es", name: "Spanish" },
-        { code: "zh", name: "Chinese" },
-        { code: "fr", name: "French" },
-        { code: "de", name: "German" },
-        { code: "ja", name: "Japanese" },
-        { code: "ru", name: "Russian" },
-        { code: "pt", name: "Portuguese" },
-        { code: "ar", name: "Arabic" },
-        { code: "it", name: "Italian" },
+        {code: "en", name: "English"},
+        {code: "sv", name: "Swedish"},
+        {code: "se", name: "Northern Sami"},
+        {code: "fi", name: "Finnish"},
+        {code: "es", name: "Spanish"},
+        {code: "zh", name: "Chinese"},
+        {code: "fr", name: "French"},
+        {code: "de", name: "German"},
+        {code: "ja", name: "Japanese"},
+        {code: "ru", name: "Russian"},
+        {code: "pt", name: "Portuguese"},
+        {code: "ar", name: "Arabic"},
+        {code: "it", name: "Italian"},
     ];
 
     const [alertMessage, setAlertMessage] = useState(['', '']);
@@ -138,7 +136,7 @@ function Document(props) {
 
         if (event.target.value) {
             setErrors((prevErrors) => {
-                const { title, ...remainingErrors } = prevErrors;
+                const {title, ...remainingErrors} = prevErrors;
                 return remainingErrors;
             });
         }
@@ -152,7 +150,7 @@ function Document(props) {
 
         if (selectedOptions.length > 0) {
             setErrors((prevErrors) => {
-                const { stakeholder, ...remainingErrors } = prevErrors;
+                const {stakeholder, ...remainingErrors} = prevErrors;
                 return remainingErrors;
             });
         }
@@ -166,7 +164,7 @@ function Document(props) {
 
         if (event.target.value !== "none") {
             setErrors((prevErrors) => {
-                const { scale, ...remainingErrors } = prevErrors;
+                const {scale, ...remainingErrors} = prevErrors;
                 return remainingErrors;
             });
         }
@@ -180,7 +178,7 @@ function Document(props) {
 
         if (event.target.value) {
             setErrors((prevErrors) => {
-                const { planNumber, ...remainingErrors } = prevErrors;
+                const {planNumber, ...remainingErrors} = prevErrors;
                 return remainingErrors;
             });
         }
@@ -195,7 +193,7 @@ function Document(props) {
 
         if (selectedDate) {
             setErrors((prevErrors) => {
-                const { date, ...remainingErrors } = prevErrors;
+                const {date, ...remainingErrors} = prevErrors;
                 return remainingErrors;
             });
         }
@@ -209,7 +207,7 @@ function Document(props) {
 
         if (event.target.value !== "none") {
             setErrors((prevErrors) => {
-                const { type, ...remainingErrors } = prevErrors;
+                const {type, ...remainingErrors} = prevErrors;
                 return remainingErrors;
             });
         }
@@ -238,7 +236,7 @@ function Document(props) {
 
         if (event.target.value) {
             setErrors((prevErrors) => {
-                const { description, ...remainingErrors } = prevErrors;
+                const {description, ...remainingErrors} = prevErrors;
                 return remainingErrors;
             });
         }
@@ -297,16 +295,17 @@ function Document(props) {
     const navigate = useNavigate();
 
     return (
-        <>
-            <div className="bg-background_color min-h-screen flex justify-center">
-                <SingleDocument setNavShow={props.setNavShow} setMode={props.setMode} setoriginalDocId={props.setoriginalDocId}></SingleDocument>
+        <div className={isDarkMode ? 'dark' : 'light'}>
+            <div className="bg-background_color dark:bg-red-500 min-h-screen flex flex-row justify-center">
+                <SingleDocument setNavShow={props.setNavShow} setMode={props.setMode}
+                                setoriginalDocId={props.setoriginalDocId}></SingleDocument>
                 <Alert message={alertMessage[0]} type={alertMessage[1]}
-                    clearMessage={() => setAlertMessage(['', ''])}></Alert>
-                <div className="flex items-center justify-between w-full h-16">
+                       clearMessage={() => setAlertMessage(['', ''])}></Alert>
+                <div className="flex flex-row justify-content-between align-items-center w-full h-16 px-3">
 
-                    <div className="flex items-center gap-3 mr-3 ml-20 mt-4">
+                    <div className="flex flex-row items-center ml-14 gap-3">
                         <div className="z-[0] relative">
-                            <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-black">
                                 <i className="bi bi-search"></i>
                             </span>
                             <input
@@ -321,46 +320,61 @@ function Document(props) {
                         </button>
                     </div>
 
-                    <button onClick={toggleModal}
-                        className="bg-[#2E6A8E] text-white grid justify-items-end py-2 px-4 mx-3 rounded-[77px] mt-4">
-                        <span><i className="bi bi-file-earmark-plus"></i>  Add document</span>
-                    </button>
-                </div>
-                <div>
-                    <button
-                        className="bg-[#2E6A8E] text-white grid justify-items-end py-2 px-5 mb-20 mx-3 rounded-[77px] mt-4"
-                        onClick={() => {
-                            navigate("/documents/1")
-                        }}>
-                        document
-                    </button>
+                    <div className="flex flex-row justify-content-end gap-3 align-items-center">
+                        <button onClick={toggleModal}
+                                className="bg-[#2E6A8E] hover:bg-[#2E6A8E66] transition text-white grid justify-items-end py-2 px-4 rounded-md">
+                            <span className="text-base"><i className="bi bi-file-earmark-plus"></i> Add document</span>
+                        </button>
+
+                            {/* Change Theme Button */}
+                        <button
+                            className="text-white grid justify-items-center transition-transform transform hover:scale-105 active:scale-95"
+                            onClick={() => {
+                                toggleTheme();
+                            }}>
+                            <div className="flex justify-center items-center gap-2 relative">
+                                <i className="bi bi-sun-fill transition-opacity duration-300 ease-in-out text-2xl"
+                                   style={{opacity: isDarkMode ? 0.2 : 1}}></i>
+                                <i className="bi bi-moon-fill transition-opacity duration-300 ease-in-out text-2xl"
+                                   style={{opacity: isDarkMode ? 1 : 0.2}}></i>
+                            </div>
+                        </button>
+
+                        <button
+                            className="bg-[#2E6A8E] justify-items-end text-white py-2 px-5 rounded-md"
+                            onClick={() => {
+                                navigate("/documents/1")
+                            }}>
+                            document
+                        </button>
+                    </div>
                 </div>
             </div>
 
             {props.isModalOpen && (
-                <div className="fixed inset-0 flex items-center justify-center scrollbar-thin scrollbar-webkit">
+                <div className="py-4 fixed inset-0 flex items-center justify-center scrollbar-thin scrollbar-webkit">
 
                     <div
-                        className="bg-box_color backdrop-blur-2xl drop-shadow-xl  w-1/3 p-6 h-2/3 overflow-y-auto rounded-lg flex flex-col items-center relative scrollbar-thin scrollbar-webkit">
-                        <h2 className="text-white text-3xl font-bold ">Add New Document</h2>
+                        className="bg-box_color backdrop-blur-2xl drop-shadow-xl w-3/6 p-6 h-full overflow-y-auto rounded-lg flex flex-col items-center relative scrollbar-thin scrollbar-webkit">
+                        <h2 className="text-white text-xl font-bold ">Add New Document</h2>
                         <button onClick={toggleModal}
-                            className="absolute top-5 text-white text-xl right-4 hover:text-gray-600">
-                            <i className="bi bi-x-lg"></i>
+                                className="absolute top-5 text-white right-4 hover:text-gray-600">
+                            <i className="bi bi-x-lg text-2xl"></i>
                         </button>
 
                         <div className="input-title mb-4 w-full">
-                            <label className="text-white w-full ml-2 mb-1 text-xl text-left">Title*</label>
+                            <label className="text-white w-full ml-2 mb-1 text-base text-left">Title*</label>
                             <input
                                 type="text"
                                 placeholder="Title"
                                 value={props.newDocument.title}
                                 onChange={handleTitle}
-                                className={`w-full px-3 text-xl py-2 text-white placeholder:text-placeholder_color bg-input_color rounded-[40px] ${errors.title ? 'border-red-500 border-1' : ''}`}
+                                className={`w-full px-3 text-base py-2 text-white placeholder:text-placeholder_color bg-input_color rounded-md ${errors.title ? 'border-red-500 border-1' : ''}`}
                             />
                         </div>
 
                         <div className="input-stakeholder mb-4 w-full">
-                            <label className="text-white mb-1 text-xl w-full ml-2 text-left">Stakeholders*</label>
+                            <label className="text-white mb-1 text-base w-full ml-2 text-left">Stakeholders*</label>
                             <Select
                                 isMulti
                                 options={stakeholderOptions}
@@ -375,14 +389,13 @@ function Document(props) {
                             />
                         </div>
 
-
                         <div className="input-scale mb-4 w-full">
-                            <label className="text-white mb-1 text-xl w-full ml-2 text-left">Scale*</label>
+                            <label className="text-white mb-1 text-base w-full ml-2 text-left">Scale*</label>
                             <select
                                 id="document-type"
                                 value={props.newDocument.scale}
                                 onChange={handleScale}
-                                className={`w-full px-3 text-xl py-2 text-white bg-input_color rounded-[40px] ${errors.scale ? 'border-red-500 border-1' : ''}`}>
+                                className={`w-full px-3 text-base py-2 text-white bg-input_color rounded-md ${errors.scale ? 'border-red-500 border-1' : ''}`}>
                                 <option value="none">None</option>
                                 <option value="text">Text</option>
                                 <option value="concept">Concept</option>
@@ -393,7 +406,7 @@ function Document(props) {
 
                         {props.newDocument.scale === 'plan' &&
                             <div className="input-plan mb-4 w-full">
-                                <label className="text-white mb-1 text-xl w-full ml-2 text-left">Enter the scale
+                                <label className="text-white mb-1 text-base w-full ml-2 text-left">Enter the scale
                                     1:n</label>
                                 <input
                                     id="number-input"
@@ -401,28 +414,29 @@ function Document(props) {
                                     value={props.newDocument.planNumber}
                                     placeholder="n"
                                     onChange={handlePlanNumber}
-                                    className={`w-full text-xl px-3 py-2 text-white bg-input_color rounded-[40px] ${errors.planNumber ? 'border-red-500 border-1' : ''}`}>
+                                    className={`w-full text-base px-3 py-2 text-white bg-input_color rounded-md ${errors.planNumber ? 'border-red-500 border-1' : ''}`}>
                                 </input>
                             </div>}
 
                         <div className="input-date mb-4 w-full">
-                            <label className="text-white mb-1 text-xl w-full ml-2 text-left">Issuance date*</label>
+                            <label className="text-white mb-1 text-base w-full ml-2 text-left">Issuance
+                                date*</label>
                             <input
                                 id="document-date"
                                 type="date"
                                 value={props.newDocument.date}
                                 onChange={handleDate}
-                                className={`w-full px-3 text-xl py-2 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color rounded-[40px]  ${errors.date ? 'border-red-500 border-1' : ''}`}>
+                                className={`w-full px-3 text-base py-2 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color rounded-md  ${errors.date ? 'border-red-500 border-1' : ''}`}>
                             </input>
                         </div>
 
                         <div className="input-type mb-4 w-full">
-                            <label className="text-white mb-1 text-xl w-full ml-2 text-left">Type*</label>
+                            <label className="text-white mb-1 text-base w-full ml-2 text-left">Type*</label>
                             <select
                                 id="document-type"
                                 value={props.newDocument.type}
                                 onChange={handleType}
-                                className={`w-full px-3 text-xl py-2 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color rounded-[40px] ${errors.type ? 'border-red-500 border-1' : ''}`}>
+                                className={`w-full px-3 text-base py-2 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color rounded-md ${errors.type ? 'border-red-500 border-1' : ''}`}>
                                 <option value="none">None</option>
                                 <option value="design">Design document</option>
                                 <option value="informative">Informative document</option>
@@ -436,12 +450,12 @@ function Document(props) {
                         </div>
 
                         <div className="input-language mb-4 w-full">
-                            <label className="text-white mb-1 text-xl w-full ml-2 text-left">Language</label>
+                            <label className="text-white mb-1 text-base w-full ml-2 text-left">Language</label>
                             <select
                                 id="document-language"
                                 value={props.newDocument.language}
                                 onChange={handleLanguage}
-                                className="w-full px-3 text-xl py-2 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color  rounded-[40px]">
+                                className="w-full px-3 text-base py-2 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color rounded-md">
                                 <option value="">None</option>
                                 {popularLanguages.map((lang) => (
                                     <option key={lang.code} value={lang.code}>
@@ -453,43 +467,45 @@ function Document(props) {
 
 
                         <div className="input-number mb-4 w-full">
-                            <label className="text-white mb-1 text-xl w-full ml-2 text-left">Pages</label>
+                            <label className="text-white mb-1 text-base w-full ml-2 text-left">Pages</label>
                             <input
                                 id="number-input"
                                 type="number"
                                 value={props.newDocument.pages}
                                 placeholder="Select a number"
                                 onChange={handleNumber}
-                                className="w-full text-xl px-3 py-2 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color rounded-[40px]">
+                                className="w-full text-base px-3 py-2 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color rounded-md">
                             </input>
                         </div>
 
                         <div className="input-description mb-4 w-full">
-                            <label className="text-white mb-1 text-xl w-full ml-2 text-left">Description*</label>
+                            <label className="text-white mb-1 text-base w-full ml-2 text-left">Description*</label>
                             <textarea
                                 placeholder="Description"
                                 value={props.newDocument.description}
                                 onChange={handleDescription}
-                                className={`w-full p-2 px-3 py-2 text-xl text-white border-gray-300 placeholder:text-placeholder_color bg-input_color ${errors.description ? 'border-red-500 border-1' : ''}`}
+                                className={`w-full p-2 px-3 py-2 text-base text-white border-gray-300 placeholder:text-placeholder_color bg-input_color ${errors.description ? 'border-red-500 border-1' : ''}`}
                                 rows="4"
                             ></textarea>
                         </div>
 
-
                         <div className="input-map mb-4 w-full">
-                            <label className="text-white mb-1 text-xl w-full ml-2 text-left">Georeference</label>
-                            {props.newAreaId && <label className="text-white mb-1 text-l w-full ml-2 text-left"><i className="bi bi-check-lg align-middle text-green-400 fs-4"></i> You selected {props.newAreaId===1? "Municipality Area":`Area N. ${props.newAreaId}`} </label>}
+                            <label className="text-white mb-1 text-base w-full ml-2 text-left">Georeference</label>
+                            {props.newAreaId && <label className="text-white text-base w-full text-left py-1"><i
+                                className="bi bi-check-lg align-middle text-green-400"></i> You
+                                selected {props.newAreaId === 1 ? "Municipality Area" : `Area N. ${props.newAreaId}`}
+                            </label>}
                             <button
                                 onClick={() => {
                                     navigate("/map")
                                 }}
-                                className="w-full p-2 text-xl text-black border border-gray-300 focus:outline-none bg-[#D9D9D9] rounded-[40px]">
+                                className="w-full p-2 text-base text-black border border-gray-300 focus:outline-none bg-[#D9D9D9] rounded-md">
                                 <i className="bi bi-globe-europe-africa"></i> Open the Map
                             </button>
                         </div>
 
                         <div className="input-link mb-4 w-full">
-                            <label className="text-white mb-1 text-xl w-full ml-2 text-left">Linking</label>
+                            <label className="text-white mb-1 text-base w-full ml-2 text-left">Linking</label>
                             {
                                 props.connections && props.connections.length > 0 &&
                                 <p className="m-0 px-2 py-1 text-gray-500">{(props.connections.length) + " connections selected"}</p>
@@ -500,14 +516,14 @@ function Document(props) {
                                     props.setMode("return");
                                     navigate("/linkDocuments");
                                 }}
-                                className="w-full p-2 text-black border text-xl border-gray-300 focus:outline-none bg-[#D9D9D9] rounded-[40px]"> Select
+                                className="w-full p-2 text-black border text-base border-gray-300 focus:outline-none bg-[#D9D9D9] rounded-md"> Select
                                 Documents to Link
                             </button>
                         </div>
 
                         {/* Save button */}
                         <button
-                            className="bg-[#1A5F88] w-full font-bold text-[28px]  text-white py-2 px-4 rounded-lg mt-4"
+                            className="bg-[#1A5F88] w-full font-bold text-lg  text-white py-2 px-4 rounded-lg mt-4"
                             onClick={handleConfirm}>
                             Confirm
                         </button>
@@ -516,8 +532,8 @@ function Document(props) {
                 </div>
             )}
 
-        </>
+        </div>
     );
 }
 
-export { Document };
+export {Document};

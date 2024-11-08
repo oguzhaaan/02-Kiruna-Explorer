@@ -2,9 +2,10 @@ import {Navbar,Nav, Container, Offcanvas, Row, Col} from "react-bootstrap"
 import { Link } from "react-router-dom"
 import { useUserContext } from "../contexts/UserContext"
 import { useNavigate, useLocation } from "react-router-dom";
-import { useState } from "react";
+import {useTheme} from "../contexts/ThemeContext.jsx";
 
 function NavHeader (props) {
+    const { isDarkMode } = useTheme();
 
     const navigate = useNavigate();
     const location = useLocation()
@@ -12,12 +13,12 @@ function NavHeader (props) {
     const { user, isLoggedIn, logOut } = useUserContext();
 
     return(
-        <>
+        <div className={`${isDarkMode ? 'dark' : 'light'}`}>
         {!isLoggedIn ? 
         props.navShow && 
         <Navbar expand="false" className="fixed z-[2000]">
             <Container fluid className="text-center w-screen justify-end">
-                <Navbar.Brand className="text-white_text text-2xl flex items-center justify-center mt-4 mr-10">
+                <Navbar.Brand className="text-white_text text-xl flex items-center justify-center mt-4 mr-10">
                     <Link to="login" className="text-inherit no-underline hover:text-slate-300" onClick={()=>props.setNavShow(false)}>
                         <i className="bi bi-person fs-2 align-middle mx-2"></i>
                         Login
@@ -30,7 +31,7 @@ function NavHeader (props) {
         <Navbar expand="false" className="fixed z-[20000]">
           <Container fluid>
             <Navbar.Toggle
-                className="navbar-toggler custom-toggler mt-4"
+                className="navbar-toggler custom-toggler mt-2.5"
                 aria-controls="basic-navbar-nav"
                 >
                 <span className="toggler-bar"></span>
@@ -56,25 +57,25 @@ function NavHeader (props) {
                         </Col>
                     </Row>
                     <div className="separator"></div>
-                    <Row className={`offcanvas-item w-100 p-1 border-3 ${currentRoute.includes("documents")? " border-[#2E6A8E] ":""}`} onClick={() => {navigate("/documents")}}>
+                    <Row className={`offcanvas-item w-100 p-1 ${currentRoute.includes("documents")? "bg-customBlue":""}`} onClick={() => {navigate("/documents")}}>
                         <Col xs="auto">
-                            <i className="bi bi-journals fs-2 align-middle"></i>
+                            <i className="bi bi-journals fs-3 align-middle"></i>
                         </Col>
                         <Col className="my-auto">
                             Documents
                         </Col>
                     </Row>
-                    <Row className={`offcanvas-item w-100 p-1 border-3 ${currentRoute.includes("map")? " border-[#2E6A8E] ":""}`} onClick={() => {}} >
+                    <Row className={`offcanvas-item w-100 p-1 ${currentRoute.includes("map")? "bg-customBlue":""}`} onClick={() => {}} >
                         <Col xs="auto">
-                            <i className="bi bi-globe-americas fs-2 align-middle"></i>
+                            <i className="bi bi-globe-americas fs-3 align-middle"></i>
                         </Col>
                         <Col className="my-auto">
                             Map
                         </Col>
                     </Row>
-                    <Row className={`offcanvas-item w-100 p-1 border-3 ${currentRoute.includes("diagram")? " border-[#2E6A8E] ":""}`} onClick={() => {}}>
+                    <Row className={`offcanvas-item w-100 p-1 ${currentRoute.includes("diagram")? "bg-customBlue":""}`} onClick={() => {}}>
                         <Col xs="auto">
-                            <i className="bi bi-diagram-3 fs-2 align-middle"></i>
+                            <i className="bi bi-diagram-3 fs-3 align-middle"></i>
                         </Col>
                         <Col className="my-auto">
                             Diagram
@@ -82,9 +83,9 @@ function NavHeader (props) {
                     </Row>
                 </div>
                 <div className="offcanvas-content" onClick={()=>{logOut(),props.setNavShow(true)}}>
-                    <Row className="offcanvas-item w-100 p-1 border-3">
+                    <Row className="offcanvas-item w-100 p-1">
                         <Col xs="auto">
-                            <i className="bi bi-door-open-fill fs-2 align-middle"></i>
+                            <i className="bi bi-door-open-fill fs-3 align-middle"></i>
                         </Col>
                         <Col className="my-auto">
                             Logout
@@ -96,7 +97,7 @@ function NavHeader (props) {
           </Container>
         </Navbar>
         }
-        </>
+        </div>
     )
 }
 

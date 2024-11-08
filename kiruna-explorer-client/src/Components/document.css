@@ -23,9 +23,9 @@
     -webkit-appearance: none;
     -moz-appearance: none;
     background-image: url('../assets/arrow_down.svg'); /* usa l'icona SVG che preferisci */
-    background-size: 1.8rem; /* aumenta le dimensioni della freccia */
+    background-size: 1.4rem; /* aumenta le dimensioni della freccia */
     background-repeat: no-repeat;
-    background-position: right 1.0rem center; /* posizione della freccia */
+    background-position: right 0.9rem center; /* posizione della freccia */
 }
 
 /* Hide the default date picker icon */
@@ -35,7 +35,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .select {
   background-image: url('../assets/arrow_down.svg'); /* usa l'icona SVG che preferisci */
-  background-size: 1.8rem; /* aumenta le dimensioni della freccia */
+  background-size: 1.4rem; /* aumenta le dimensioni della freccia */
   background-repeat: no-repeat;
-  background-position: right 1.0rem center; /* posizione della freccia */
+  background-position: right 0.9rem center; /* posizione della freccia */
 }

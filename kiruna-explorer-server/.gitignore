@@ -131,3 +131,6 @@ dist
 
 
 package-lock.json
+
+database_test.db
+database.db

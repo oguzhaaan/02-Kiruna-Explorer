@@ -11,6 +11,7 @@
       - [Add Document](#add-document)
       - [Link Document:](#link-document)
       - [Geolocate Document:](#geolocate-document)
+    - [5. Users Credentials](#5-users-credentials)
 
 ### 1. Introduction
 
@@ -42,7 +43,7 @@
   - `language` (String)
   - `description` (String)
   - `scale` (String)
-  - `pages` (number) 
+  - `pages` (number)
   - `planNumber` (number)
   - `areaId` (String) - (Foreign Key)
 
@@ -89,11 +90,11 @@ If not already present area, first he has to create one
 
   - req param: Document Id
   - return: Id, title and type of linked documents
-  
+
 - **GET** `api/documents/links`
 
   - No body
-  - return all documents 
+  - return all documents
 
 #### Geolocate Document:
 
@@ -111,3 +112,17 @@ If not already present area, first he has to create one
 
   - No body
   - return all documents in a specific area
+
+### 5. Users Credentials
+
+| username | Password | Role          |
+| -------- | -------- | ------------- |
+| Romeo    | 1111     | urban planner |
+| Juliet   | 2222     | resident      |
+
+## LICENSE
+
+[![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
+
+[cc-by-nc]: https://creativecommons.org/licenses/by-nc/4.0/
+[cc-by-nc-shield]: https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg

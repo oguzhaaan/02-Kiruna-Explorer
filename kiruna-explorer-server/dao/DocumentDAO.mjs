@@ -5,6 +5,7 @@ import AreaDAO from "./AreaDAO.mjs";
 import { AreaNotFound } from "../models/Area.mjs";
 import { InvalidArea } from "../models/Area.mjs";
 
+const areaDAO = new AreaDAO();
 export default function DocumentDAO() {
     this.getAllDocuments = () => {
         const query = "SELECT * FROM document";
@@ -60,6 +61,72 @@ export default function DocumentDAO() {
             });
         });
     }
+
+    this.deleteAreaById = (id) => {
+        const query = "DELETE FROM areas WHERE id = ?";
+    
+        return new Promise((resolve, reject) => {
+            db.run(query, [id], function (err) {
+                if (err) {
+                    return reject(err);
+                }
+                // Check if any row was affected (i.e., if the area was deleted)
+                if (this.changes === 0) {
+                    return reject(new AreaNotFound());
+                }
+                resolve("Area deleted successfully.");
+            });
+        });
+    };
+
+    this.updateDocumentAreaId = (documentId, newAreaId) => {
+        return new Promise((resolve, reject) => {
+            // Fetch oldAreaId, areaIdsInDoc, and allAreas at the same time
+            Promise.all([
+                this.getDocumentById(documentId).then(document => document.areaId),
+                this.getAllDocuments().then(documents => documents.map(doc => doc.areaId))
+            ]).then(([oldAreaId, areaIdsInDoc]) => {
+                if(!Number.isInteger(newAreaId)){
+                    return reject(new InvalidArea());
+                }
+                
+                // Check if oldAreaId exists in areaIdsInDoc
+                if (!areaIdsInDoc.includes(oldAreaId)) {
+                    return reject(new AreaNotFound());
+                }
+    
+                // proceed to update the document's areaId to newAreaId
+                const updateQuery = "UPDATE document SET areaId = ? WHERE id = ?";
+                db.run(updateQuery, [newAreaId, documentId], (err) => {
+                    if (err) {
+                        return reject(err);
+                    }
+    
+                    // re-fetch documents to check if oldAreaId is still in use
+                    this.getAllDocuments().then(updatedDocuments => {
+                        const updatedAreaIdsInDoc = updatedDocuments.map(doc => doc.areaId);
+                        
+                        if (!updatedAreaIdsInDoc.includes(oldAreaId)) {
+                            // if oldAreaId is no longer in use, delete it from the area table
+                            const deleteQuery = "DELETE FROM area WHERE id = ?";
+                            db.run(deleteQuery, [oldAreaId], (deleteErr) => {
+                                if (deleteErr) {
+                                    return reject(deleteErr);
+                                }
+                                console.log("Unused area deleted successfully.");
+                                resolve(true);
+                            });
+                        } else {
+                            console.log("Area ID is still in use; not deleted.");
+                            resolve(true); // resolve without deleting if still in use
+                        }
+                    }).catch(reject); // catch errors from re-fetching documents
+                });
+            }).catch(reject); // catch errors from initial promises
+        });
+    };
+    
+
 
     this.addDocument = (documentData) => {
         // Converti il documento per l'inserimento nel database

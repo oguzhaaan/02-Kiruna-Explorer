@@ -6,8 +6,11 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+//The environment variable is set in the package.json file in the test script.
+let env = process.env.NODE_ENV ? process.env.NODE_ENV.trim() : "development"
+
 // Construct the path to the database file
-const dbPath = path.resolve(__dirname, "database.db");
+const dbPath = env === "test" ? path.resolve(__dirname, "database_test.db") : path.resolve(__dirname, "database.db");
 
 // Log the database path to verify
 console.log("Using database at:", dbPath);

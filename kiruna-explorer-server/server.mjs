@@ -7,6 +7,9 @@ import passport from "passport";
 import session from "express-session";
 
 import authRoutes from "./auth/authRoutes.mjs";
+import DocumentRoutes from "./routes/DocumentRoutes.mjs";
+import AreaRoutes from "./routes/AreaRoutes.mjs";
+
 
 // --- Middlewares ---
 const app = express();
@@ -31,6 +34,12 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
+// --- Routes ---
+app.use(authRoutes);
+app.use('/api/documents', DocumentRoutes);
+app.use('/api/areas', AreaRoutes);
+
+
 // --- Server Activation ---
 const PORT = 3000;
 app.listen(PORT, () =>
@@ -39,5 +48,5 @@ app.listen(PORT, () =>
 
 // --- Routes ---
 app.use(authRoutes);
-
+app.use('/api/documents', DocumentRoutes);
 export { app };

@@ -7,13 +7,35 @@ export default {
         sans: ["Inter", "sans-serif"],
       },
       colors: {
-        primary_color: "var(--primary-color)",
-      },
-      colors: {
+        text_gray: "#B7B7B7",
         customGray: "#D9D9D9",
         customBlue: "#4388B2",
+        customPill: "#14405b",
+        customGray1: '#686868',
+        customGray2: '#313131',
+        customGray3: '#D9D9D9',
+        customGray3_30: 'rgba(217, 217, 217, 0.3)',
+        primary_color: 'var(--primary-color)',
+        search_color: 'var(--search-gray-color)',
+        box_color: 'var(--box-gray-color)',
+        background_color: 'var(--background-color)',
+        input_color: 'var(--input-color)',
+        placeholder_color: 'var(--placeholder-input-color)',
+        white_text: 'var(--white-text)',
+        my_green: 'var(--my-green)',
+        my_red: 'var(--my-red)',
+        my_orange: 'var(--my-orange)',
+        box_high_opacity: 'var(--box-high-opacity)'
+      },
+      backgroundImage: {
+        document_item_radient_grey: 'var(--document-item-gradient-grey)',
+        document_item_radient_blue: "var(--document-item-gradient-blue)",
+      },
+      backgroundColor: {
+        navbar: 'var(--navbar-bg)',
       },
     },
   },
   plugins: [],
-};
+  important: true
+}

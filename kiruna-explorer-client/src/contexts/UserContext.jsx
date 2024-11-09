@@ -1,6 +1,6 @@
-import React, { useState, useContext, createContext } from "react";
+import {React, useState, useContext, createContext } from "react";
 
-import API from "../api/API.mjs";
+import API from "../API/API.mjs"
 
 const UserContext = createContext();
 
@@ -27,9 +27,14 @@ export const UserProvider = ({ children }) => {
   };
 
   const checkAuth = async () => {
+    try{
     const user = await API.getUserInfo();
     setIsLoggedIn(true);
     setUser(user);
+    }
+    catch(err){
+      console.log(err)
+    }
   };
 
   return (

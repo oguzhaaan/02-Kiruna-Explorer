@@ -2,11 +2,16 @@
 
 ## Table of Contents
 
-1. [Introduction](#1-introduction)
-2. [Technologies Used](#2-technologies-used)
-3. [Database Structure](#3-database-structure)
-4. [API Documentation](#4-api-documentation)
-5. [Users Credentials](#5-users-credentials)
+- [Kiruna Explorer](#kiruna-explorer)
+  - [Table of Contents](#table-of-contents)
+    - [1. Introduction](#1-introduction)
+    - [2. Technologies Used](#2-technologies-used)
+    - [3. Database Structure](#3-database-structure)
+    - [4. API Documentation](#4-api-documentation)
+      - [Add Document](#add-document)
+      - [Link Document:](#link-document)
+      - [Geolocate Document:](#geolocate-document)
+    - [5. Users Credentials](#5-users-credentials)
 
 ### 1. Introduction
 
@@ -25,6 +30,7 @@
   - `username` (String)
   - `password` (String)
   - `salt` (String)
+  - `avatar_url` (String)
 
 - **document Table**
 
@@ -32,9 +38,13 @@
   - `title` (String)
   - `stakeholders` (String)
   - `date` (String) - Issuance date
-  - `type` (String) - limited to "design", "informative", "prescriptive", and "technical".
+  - `type` (String) - limited to "design", "informative", "prescriptive", "technical", "agreement", "conflict", "consultation", and "material effects"
+
   - `language` (String)
   - `description` (String)
+  - `scale` (String)
+  - `pages` (number)
+  - `planNumber` (number)
   - `areaId` (String) - (Foreign Key)
 
 - **area Table**
@@ -71,15 +81,20 @@ If not already present area, first he has to create one
 
 #### Link Document:
 
-- **POST** `api/documents/link`
+- **POST** `api/documents/:DocId/links`
 
   - Body: DocId1 , DocId2, type, date
   - return success
 
-- **GET** `api/documents/link/:DocId`
+- **GET** `api/documents/:DocId/links`
 
   - req param: Document Id
   - return: Id, title and type of linked documents
+
+- **GET** `api/documents/links`
+
+  - No body
+  - return all documents
 
 #### Geolocate Document:
 
@@ -104,7 +119,6 @@ If not already present area, first he has to create one
 | -------- | -------- | ------------- |
 | Romeo    | 1111     | urban planner |
 | Juliet   | 2222     | resident      |
-
 
 ## LICENSE
 

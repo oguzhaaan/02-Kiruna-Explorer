@@ -22,6 +22,8 @@ function GeoreferenceMap(props){
     const [presentAreas, setPresentAreas] = useState(null);
     const [clickedArea, setClickedArea] = useState(null);
     const [alertMessage, setAlertMessage] = useState("");
+    const [lat, setLat] = useState(null);
+    const [lng, setLng] = useState(null);
 
     const mapRef = useRef(null);
 
@@ -31,7 +33,7 @@ function GeoreferenceMap(props){
 
     useEffect(()=>{
         //refresh
-    },[showExit,showSave,presentAreas])
+    },[showExit,showSave,presentAreas,lat,lng])
 
     const GenericPoints = L.icon({
         iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
@@ -89,6 +91,9 @@ function GeoreferenceMap(props){
         if (layer instanceof L.Polygon) {
             setAlertMessage("You selected a new custom area");
         } else if (layer instanceof L.Marker) {
+            const markerPosition = layer.getLatLng();
+            setLat(markerPosition.lat);
+            setLng(markerPosition.lng);
             setAlertMessage("You selected a new custom point");
         }
     
@@ -99,26 +104,27 @@ function GeoreferenceMap(props){
     };
     
     const onEdited = (e) => {
-        console.log("onEdited", e);
-    
-        const layers = e.layers;
-        layers.eachLayer((layer) => {
-            if (layer instanceof L.Polygon) {
-                const newPolygon = layer.getLatLngs()[0].map(latlng => [latlng.lat, latlng.lng]);
-                setDrawnObject(newPolygon);
-                setAlertMessage("You edited the custom area");
-                console.log("Modificato un poligono:", newPolygon);
-            } else if (layer instanceof L.Marker) {
-                const markerPosition = layer.getLatLng();
-                setDrawnObject(markerPosition);
-                setAlertMessage("You edited the point position");
-                console.log("Modificato un marker:", markerPosition);
-            } else {
-                console.warn("Tipo di layer non supportato.");
-            }
-        });
-        setShowExit(true);
-        setShowSave(true);
+      console.log("onEdited", e);
+  
+      const layers = e.layers;
+      layers.eachLayer((layer) => {
+        const geoJson = layer.toGeoJSON();  
+        setDrawnObject(geoJson);
+        if (layer instanceof L.Polygon) {
+          setAlertMessage("You edited the custom area");
+          console.log("Modificato un poligono:", geoJson);
+        } else if (layer instanceof L.Marker) {
+          const markerPosition = layer.getLatLng();
+          setLat(markerPosition.lat);
+          setLng(markerPosition.lng);
+          setAlertMessage("You edited the point position");
+          console.log("Modificato un marker:", geoJson);
+        } else {
+          console.warn("Tipo di layer non supportato.");
+        }
+      });
+      setShowExit(true);
+      setShowSave(true);
     };
     
     const onDeleted = (e) => {
@@ -127,6 +133,8 @@ function GeoreferenceMap(props){
         setShowSave(false);
         setShowMuniAreas(true);
         setAlertMessage("");
+        setLat(null)
+        setLng(null)
     };
     
     const onDrawStart = () => {
@@ -142,6 +150,27 @@ function GeoreferenceMap(props){
         setShowExit(false);
         setShowSave(false);
     };
+
+    const handleLng = (event) =>{
+      setLng(event.target.value)
+    }
+
+    const handleLat = (event) =>{
+      setLat(event.target.value)
+    }
+
+    const handleDoneManually = () =>{
+      const geoJson = {
+        type:"Feature",
+        properties:{},
+        geometry:{
+          type:"Point",
+          coordinates:[lng,lat]
+        }
+      }
+
+      setDrawnObject(geoJson)
+    }
 
     const handleMunicipalAreas = async () =>{
       try{
@@ -200,7 +229,6 @@ function GeoreferenceMap(props){
             }}
             maxBounds={cityBounds}
             minZoom={12}
-            
             >
     
             <TileLayer
@@ -354,11 +382,11 @@ function GeoreferenceMap(props){
         </div>
         }
 
-        {/* Messaggio di avviso in basso al centro */}
+        {/* Messaggio di avviso in alto al centro */}
         {alertMessage && (
             <div style={{
               position: "fixed",
-              bottom: "20px",
+              top: "20px",
               left: "50%",
               transform: "translateX(-50%)",
               backgroundColor: "rgba(0, 0, 0, 0.7)",
@@ -371,6 +399,44 @@ function GeoreferenceMap(props){
               {alertMessage}
             </div>
           )}
+
+        {/*Editable coordinates*/}
+        { drawnObject &&
+          <div style={{
+            position: "absolute",
+            bottom: "20px",
+            left: "20px",
+            display: "flex",
+            gap: "10px",
+            zIndex: "1000"
+          }}>
+            <div className="flex flex-col">
+              <label className="text-white mb-1 text-l text-left">Longitude</label>
+              <input
+                  id="lon"
+                  value={lng}
+                  onChange={handleLng}
+                  className={`px-2 text-l py-1 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color rounded-[40px]  `}>
+              </input>
+            </div>
+            <div className="flex flex-col">
+              <label className="text-white mb-1 text-l text-left">Latitude</label>
+              <div className="flex flex-row">
+              <input
+                  id="lat"
+                  value={lat}
+                  onChange={handleLat}
+                  className={`px-2 text-l py-1 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color rounded-[40px]  `}>
+              </input>
+              <button 
+              onClick={handleDoneManually}
+              className="px-3 text-l py-1 mx-1 rounded-[40px] text-white_text bg-customBlue">
+                  Done
+              </button>
+              </div>
+            </div>
+          </div>
+        }
         </>
     )
 }

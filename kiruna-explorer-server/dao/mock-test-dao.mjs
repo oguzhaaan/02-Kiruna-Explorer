@@ -2,4 +2,4 @@ import DocumentDAO from "./DocumentDAO.mjs";
 
 const documentDao = new DocumentDAO();
 
-documentDao.updateDocumentAreaId(1,1);
+documentDao.updateDocumentAreaId(1,2);

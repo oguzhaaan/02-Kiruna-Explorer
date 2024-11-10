@@ -84,30 +84,36 @@ export default function DocumentDAO() {
             // Fetch oldAreaId, areaIdsInDoc, and allAreas at the same time
             Promise.all([
                 this.getDocumentById(documentId).then(document => document.areaId),
-                this.getAllDocuments().then(documents => documents.map(doc => doc.areaId))
-            ]).then(([oldAreaId, areaIdsInDoc]) => {
-                if(!Number.isInteger(newAreaId)){
+                this.getAllDocuments().then(documents => documents.map(doc => doc.areaId)),
+                areaDAO.getAllAreas().then(areas => areas.map(area => area.id)) // Get all valid area IDs
+            ]).then(([oldAreaId, areaIdsInDoc, allAreaIds]) => {
+                if (!Number.isInteger(newAreaId)) {
                     return reject(new InvalidArea());
                 }
-                
+    
                 // Check if oldAreaId exists in areaIdsInDoc
                 if (!areaIdsInDoc.includes(oldAreaId)) {
                     return reject(new AreaNotFound());
                 }
     
-                // proceed to update the document's areaId to newAreaId
+                // Check if newAreaId exists in allAreaIds
+                if (!allAreaIds.includes(newAreaId)) {
+                    return reject(new AreaNotFound());
+                }
+    
+                // Proceed to update the document's areaId to newAreaId
                 const updateQuery = "UPDATE document SET areaId = ? WHERE id = ?";
                 db.run(updateQuery, [newAreaId, documentId], (err) => {
                     if (err) {
                         return reject(err);
                     }
     
-                    // re-fetch documents to check if oldAreaId is still in use
+                    // Re-fetch documents to check if oldAreaId is still in use
                     this.getAllDocuments().then(updatedDocuments => {
                         const updatedAreaIdsInDoc = updatedDocuments.map(doc => doc.areaId);
-                        
+    
                         if (!updatedAreaIdsInDoc.includes(oldAreaId)) {
-                            // if oldAreaId is no longer in use, delete it from the area table
+                            // If oldAreaId is no longer in use, delete it from the area table
                             const deleteQuery = "DELETE FROM area WHERE id = ?";
                             db.run(deleteQuery, [oldAreaId], (deleteErr) => {
                                 if (deleteErr) {
@@ -118,13 +124,14 @@ export default function DocumentDAO() {
                             });
                         } else {
                             console.log("Area ID is still in use; not deleted.");
-                            resolve(true); // resolve without deleting if still in use
+                            resolve(true); // Resolve without deleting if still in use
                         }
-                    }).catch(reject); // catch errors from re-fetching documents
+                    }).catch(reject); // Catch errors from re-fetching documents
                 });
-            }).catch(reject); // catch errors from initial promises
+            }).catch(reject); // Catch errors from initial promises
         });
     };
+    
     
 
 

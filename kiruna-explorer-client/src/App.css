@@ -2,11 +2,14 @@
 
 /*------ Variables (To be defined) --------*/
 :root {
-    --search-gray-color: #f4f4f4ad;
+    --search-dark-color: #f4f4f4ad;
+    --search-light-color: rgba(0, 0, 0, 0.65);
     --box-gray-color: #373737a6;
-    --box-white-color: rgba(241, 241, 241, 0.65);
+    --box-white-color: rgba(212, 212, 212, 0.65);
     --background-color: #222222;
-    --input-color: #d9d9d93f;
+    --background-color-light: #ffffff;
+    --input-color-dark: #d9d9d93f;
+    --input-color-light: rgba(255, 255, 255, 0.89);
     --placeholder-input-color: #A2A2A2;
     --white-text: #F4F4F4;
     --black-text: #0e0e0e;
@@ -43,7 +46,11 @@ body {
 
 /*------ General--------*/
 
-select option {
+.light-select option {
+    background-color: var(--background-color-light);
+}
+
+.dark-select option {
     background-color: #2e2e2ef7;
 }
 /*--NavBar--*/

@@ -68,6 +68,7 @@ function Document(props) {
             '&:hover': {
                 backgroundColor: '#1e90ff',   // Colore blu al passaggio del mouse
             },
+            color: isDarkMode ? '#F4F4F4' : '#0e0e0e',
         }),
         multiValue: (provided) => ({
             ...provided,
@@ -309,7 +310,7 @@ function Document(props) {
                             <input
                                 type="text"
                                 placeholder="Search"
-                                className="border-1 border-background_color bg-search_dark_color w-60 py-2 pl-10 pr-4 text-black_text rounded-[50px] focus:outline-none placeholder-black_text"
+                                className="outline outline-1 outline-customGray1 dark:outline-none bg-search_dark_color w-60 py-2 pl-10 pr-4 text-black_text rounded-[50px] focus:outline-none placeholder-black_text"
                             />
                         </div>
 
@@ -383,7 +384,7 @@ function Document(props) {
                                 placeholder="None"
                                 isClearable={false}
                                 isSearchable={false}
-                                className="select text-black_text dark:text-white_text"
+                                className="select text-black_text"
                             />
                         </div>
 

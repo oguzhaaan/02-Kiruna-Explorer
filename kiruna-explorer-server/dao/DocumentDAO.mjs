@@ -91,13 +91,8 @@ export default function DocumentDAO() {
                     return reject(new InvalidArea());
                 }
     
-                // Check if oldAreaId exists in areaIdsInDoc
-                if (!areaIdsInDoc.includes(oldAreaId)) {
-                    return reject(new AreaNotFound());
-                }
-    
-                // Check if newAreaId exists in allAreaIds
-                if (!allAreaIds.includes(newAreaId)) {
+                // Check if oldAreaId and newAreaId exists in areaIdsInDoc
+                if (!areaIdsInDoc.includes(oldAreaId) && !areaIdsInDoc.includes(newAreaId)) {
                     return reject(new AreaNotFound());
                 }
     
@@ -131,9 +126,6 @@ export default function DocumentDAO() {
             }).catch(reject); // Catch errors from initial promises
         });
     };
-    
-    
-
 
     this.addDocument = (documentData) => {
         // Converti il documento per l'inserimento nel database

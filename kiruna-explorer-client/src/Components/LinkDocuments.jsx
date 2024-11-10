@@ -220,7 +220,7 @@ const LinkDocuments = ({originalDocId, mode, setConnectionsInForm, setOriginalDo
                         <input
                             type="text"
                             placeholder="Search"
-                            className="outline outline-1 outline-customGray1 dark:outline-none bg-search_dark_color w-60 py-2 pl-10 pr-4 text-black_text rounded-[50px] focus:outline-none placeholder-black_text"
+                            className="outline outline-1 outline-customGray1 dark:outline-none bg-search_dark_color w-60 py-2 pl-10 pr-4 text-black_text rounded-[50px] placeholder-black_text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />

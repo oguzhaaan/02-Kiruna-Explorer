@@ -8,6 +8,9 @@ import Link from "../models/Link.mjs";
 import { isLoggedIn } from "../auth/authMiddleware.mjs";
 import { InvalidArea, AreaNotFound } from "../models/Area.mjs";
 import { DocumentNotFound } from "../models/Document.mjs";
+import { authorizeRoles } from "../auth/authMiddleware.mjs";
+
+
 const router = express.Router();
 const DocumentDao = new DocumentDAO();
 const AreaDao = new AreaDAO();
@@ -419,6 +422,25 @@ router.post("/links",
         }
     }
 );
+
+router.put('/:DocId/area', isLoggedIn, authorizeRoles('admin', 'urban_planner'), (req, res) => {
+    const { DocId } = req.params;
+    const { newAreaId } = req.body;
+
+    DocumentDao.updateDocumentAreaId(Number(DocId), Number(newAreaId))
+        .then(() => {
+            res.status(200).json({ message: 'Document areaId updated successfully' });
+        })
+        .catch((error) => {
+            if (error instanceof InvalidArea) {
+                res.status(400).json({ error: 'Invalid area ID' });
+            } else if (error instanceof AreaNotFound) {
+                res.status(404).json({ error: 'Area not found' });
+            } else {
+                res.status(500).json({ error: 'Internal server error' });
+            }
+        });
+});
 
 
 

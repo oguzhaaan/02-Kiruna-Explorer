@@ -1,5 +1,9 @@
 # Kiruna Explorer
 
+Here's the Table of Contents with all the APIs listed:
+
+---
+
 ## Table of Contents
 
 - [Kiruna Explorer](#kiruna-explorer)
@@ -9,9 +13,22 @@
     - [3. Database Structure](#3-database-structure)
     - [4. API Documentation](#4-api-documentation)
       - [Add Document](#add-document)
-      - [Link Document:](#link-document)
-      - [Geolocate Document:](#geolocate-document)
+      - [Get All Documents](#get-all-documents)
+      - [Get Document by Id](#get-document-by-id)
+      - [Get Documents by Area Id](#get-documents-by-area-id)
+      - [Link Document](#link-document)
+      - [Add Links to a Document](#add-links-to-a-document)
+      - [Get Linked Documents](#get-linked-documents)
+      - [Delete Links](#delete-links)
+      - [Get All Areas](#get-all-areas)
+      - [Add Area](#add-area)
+      - [Edit Area Id](#edit-area-id)
+      - [Add Attachments](#add-attachments)
+      - [Delete Attachments](#delete-attachments)
     - [5. Users Credentials](#5-users-credentials)
+    - [LICENSE](#license)
+
+
 
 ### 1. Introduction
 
@@ -377,7 +394,7 @@ Response body:
 ]
 ```
 
-#### **Add Area*:
+#### **Add Area**:
 
 **POST** `api/areas`
 
@@ -425,9 +442,9 @@ Response :
 
 Response body: None
 
-#### **Ad attachment**:
+#### **Add Attachments**:
 
-**PUT** `api/documents/:DocId/attachments`
+**POST** `api/documents/:DocId/attachments`
 
 Description : Add resources to a certain docuemnt identified by its <DocId>
 
@@ -458,7 +475,7 @@ Response :
 
 Response body: None
 
-#### **Delete attachments**
+#### **Delete Attachments**
 
 **DELETE** `api/documents/:DocId/attachments`
 

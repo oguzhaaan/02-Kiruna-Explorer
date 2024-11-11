@@ -61,57 +61,294 @@
 
 ### 4. API Documentation
 
-#### Add Document
+#### **Add Document**
 
-- **POST** `api/documents`
-  - Body: All document fields with or without area ID
-  - return: success
+**POST** `api/documents`
+
+  Description : Adds a new document
+
+  Request body :
+
+  - body with all fields:
+    ```
+    {
+      "title": "string",
+      "scale": "plan",
+      "date": "2022-01-01",
+      "language": "string",
+      "type": "design",
+      "pages": 1,
+      "description": "string",
+      "links":
+        [
+          {
+            "selectedDocId" : 1,
+            "date" : "2022-01-01",
+            "connectionType" : "direct_consequence"
+          }
+        ],
+      "areaId": 1,
+      "stakeholders": [
+        "lkab",
+        "municipality"
+      ],
+      "planNumber": 2
+    }
+    ```
+
+  - body without nullable fields
+    ```
+    {
+      "title": "string",
+      "scale": "plan",
+      "date": "string",
+      "type": "design",
+      "description": "string",
+      "stakeholders": [
+        "string",
+        "string"
+      ],
+      "planNumber": 2,
+    }
+    ``` 
+Response: 
+- `201 Created`;
+- `400 Bad Request` (a field has invalid value)
+- `400 Not Found` (area not found)
+- `500 Internal Server Error`
+
+Response body: 
+  ```
+  {
+    "lastId": 1,
+    "message": "Document added successfully"
+  }
+  ```
 
 If not already present area, first he has to create one
 
-- **GET** `api/documents`
+#### **Get All Documents**
+ **GET** `api/documents`
 
-  - No body
-  - Response: id, title, stakeholders, date, type
+  Description : Get all documents
 
-- **GET** `api/documents/:DocId`
+  Request body : none
 
-  - req param: Document Id
-  - returns all of document with id
+  Response : 
+  - `200 OK`
+  - `500 Internal Server Error`
+  
 
-#### Link Document:
+  Response body:
+  ```
+    [
+      {
+        "id": 1,
+        "title": "title",
+        "stakeholders": [
+          "municipality",
+          "architecture firms"
+        ],
+        "date": "2004-02-01",
+        "type": "conflict",
+        "language": "ar",
+        "description": "hello",
+        "areaId": 1,
+        "scale": "concept",
+        "pages": 102940,
+        "planNumber": ""
+      },
+      {
+        "id": 2,
+        "title": "title",
+        "stakeholders": [
+          "municipality",
+          "architecture firms"
+        ],
+        "date": "2004-02-01",
+        "type": "conflict",
+        "language": "ar",
+        "description": "hello",
+        "areaId": 1,
+        "scale": "concept",
+        "pages": 102940,
+        "planNumber": ""
+      }
+    ]
+  ```
 
-- **POST** `api/documents/:DocId/links`
+#### **Get Document by Id:**
 
-  - Body: DocId1 , DocId2, type, date
-  - return success
+**GET** `api/documents/:DocId`
 
-- **GET** `api/documents/:DocId/links`
+  Description : Retrieve information of a docuemnt given its `<DocId>`
 
-  - req param: Document Id
-  - return: Id, title and type of linked documents
+  Reuest parameters: Document Id
 
-- **GET** `api/documents/links`
+  Response : 
+  - `200 OK`
+  - `500 Internal Server Error`
+  - `400 Bad Request` (Document id not valid number)
 
-  - No body
-  - return all documents
+  Response body:
+  ```
+  {
+    "id": 1,
+    "title": "string",
+    "stakeholders": [
+      "municipality"
+    ],
+    "date": "string",
+    "type": "design",
+    "language": null,
+    "description": "string",
+    "areaId": null,
+    "scale": "plan",
+    "pages": null,
+    "planNumber": 2
+  }
+  ```
+#### **Get Documents by Id area :**
 
-#### Geolocate Document:
+**GET** `api/documents/area/:areaId`
 
-- **POST** `api/documents/area`
+  Description : Retrieve all documents belonging toa certain area given its `<areaId>`
 
-  - Body: Geo json
-  - return: success
+  Reuest parameters: Area Id
 
-- **GET** `api/documents/area`
+  Response : 
+  - `200 OK`
+  - `500 Internal Server Error`
+  - `400 Bad Request` (Area id not valid number)
+  - `404 Not Found` (Area not found)
+  - `404 Not Found` (No documents found for this area)
 
-  - No body
-  - return all areas
+  Response body:
+  ```
+  {
+    "id": 1,
+    "title": "string",
+    "stakeholders": [
+      "municipality"
+    ],
+    "date": "string",
+    "type": "design",
+    "language": null,
+    "description": "string",
+    "areaId": 1,
+    "scale": "plan",
+    "pages": null,
+    "planNumber": 2
+}
+```
 
-- **GET** `api/documents/area/:areaId`
 
-  - No body
-  - return all documents in a specific area
+#### **Link Document**:
+
+**POST** `api/documents/link`
+
+Description : Link two documents
+
+Request Body:
+
+```
+{
+  "doc1Id": 1,
+  "doc2Id": 2,
+  "connection": "update",
+  "date": "2023-01-01"
+}
+```
+
+Response :
+- `200 OK`
+- `500 Internal Server Error`
+- `400 Bad Request` (FIelds not valid)
+- `402 Bad Request` (Invalid connection type)
+- `403 Bad Request` (Link already exists)
+- `404 Not Found` (Document not found)
+
+Response body:
+
+#### **Add links to a document**
+
+**POST** `api/documents/links`
+
+Description : Add links to a document, receiving an array of links
+
+Request Body:
+
+```
+[
+  {
+    "originalDocId" : 1,
+    "selectedDocId" : 2,
+    "connectionType" : "direct_consequence",
+    "date" : "2023-01-01"
+  },
+  {
+    "originalDocId" : 3,
+    "selectedDocId" : 4,
+    "connectionType" : "prevision",
+    "date" : "2023-01-02"
+  }
+]
+```
+
+Response :
+- `200 OK`
+- `500 Internal Server Error`
+- `400 Bad Request` (Array is empty)
+- `402 Bad Request` (Invalid connection type)
+- `404 Not Found` (Document not found)
+
+#### **Get Linked Documents**
+
+**GET** `api/documents/:DocId/links`
+
+Description : Get all linked documents to a ceratin document with its <DocId>
+
+Requqest parameters: Document Id
+
+Response :
+- `200 OK`
+- `500 Internal Server Error`
+- `400 Bad Request` (Document id not valid number)
+
+Response body: 
+```
+[
+  {
+    "id": 1,
+    "title": "string",
+    "trype": "design",
+    "connection": "update"
+  },
+  {
+    "id": 2,
+    "title": "string",
+    "trype": "design",
+    "connection": "update"
+  }
+]
+```
+
+#### Delete links
+
+**DELETE** `api/documents/:DocId/links`
+
+Description : Delete all links associated to a document with its <DocId>
+
+Requqest parameters: Document Id
+
+Response :
+- `200 OK`
+- `500 Internal Server Error`
+
+Response body: None
+
+
+
 
 ### 5. Users Credentials
 

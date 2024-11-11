@@ -372,9 +372,9 @@ router.post("/links",
 
         // Controlla se i documenti esistono
         try {
-            // Controlliamo che ogni documenti esista
+            // Controlliamo che ogni documento esista
             for (const link of links) {
-                console.log
+                
                 const doc1Exists = await DocumentDao.getDocumentById(link.originalDocId);
                 if (!doc1Exists) {
                     return res.status(404).json({ error: `Document with ID ${link.originalDocId} not found` });

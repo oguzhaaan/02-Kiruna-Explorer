@@ -268,7 +268,7 @@ Response :
 - `403 Bad Request` (Link already exists)
 - `404 Not Found` (Document not found)
 
-Response body:
+Response body: None
 
 #### **Add links to a document**
 
@@ -333,6 +333,7 @@ Response body:
 ]
 ```
 
+
 #### Delete links
 
 **DELETE** `api/documents/:DocId/links`
@@ -347,7 +348,58 @@ Response :
 
 Response body: None
 
+#### **Get all areas**
 
+**GET** `api/areas`
+
+Description : Retrieve all areas
+
+Response :
+- `200 OK`
+- `500 Internal Server Error`
+- `404 Not Found` (Area not found)
+
+Response body: 
+```
+[
+  {
+    "id": 1,
+    "geojson" : {
+      ...
+    }
+  },
+  {
+    "id": 2,
+    "geojson" : {
+      ..-
+    }
+  }
+]
+```
+
+#### **Add Area*:
+
+**POST** `api/areas`
+
+Description : Adds a new area drawn  by the user or representing a single point on the map
+
+Request Body:
+
+```
+{
+  "geojson" : {
+    ...
+  }
+}
+```
+
+Response :
+- `201 Created`
+- `500 Internal Server Error`
+- `400 Bad Request` (FIelds not valid)
+- `404 Not Found` (Document not found)
+
+Response body: None
 
 
 ### 5. Users Credentials

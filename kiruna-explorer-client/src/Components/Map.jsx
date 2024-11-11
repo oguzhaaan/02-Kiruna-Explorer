@@ -262,6 +262,11 @@ function GeoreferenceMap(props){
         setAlertMessage(`You selected Municipality Area`)
         setClickedArea(1)
         setShowSave(true)
+        setShowManually(false)
+        settmpLat("")
+        settmpLng("")
+        setLaterr("")
+        setLngerr("")
       }
       else{
         setPresentAreas(null)
@@ -269,11 +274,11 @@ function GeoreferenceMap(props){
         setAlertMessage(null)
         setClickedArea(null)
         setShowSave(false)
+        setShowManually(true)
+        settmpLat(latitude)
+        settmpLng(longitude)
       }
-        settmpLat("")
-        settmpLng("")
-        setLaterr("")
-        setLngerr("")
+        
     }catch(err){
       console.log(err)
     }
@@ -290,8 +295,20 @@ function GeoreferenceMap(props){
             setDrawnObject(null)
           }
           //if he clicked an existing one
-          else{
+          else if (clickedArea){
             const area_id = clickedArea
+            props.setnewAreaId(area_id)
+          }
+          else{
+            const geoJson = {
+              type:"Feature",
+              properties:{},
+              geometry:{
+                type:"Point",
+                coordinates:[lng,lat]
+              }
+            }
+            const area_id = await API.addArea(geoJson) 
             props.setnewAreaId(area_id)
           }
           navigate(-1);

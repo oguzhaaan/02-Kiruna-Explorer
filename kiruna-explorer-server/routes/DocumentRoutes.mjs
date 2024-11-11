@@ -19,10 +19,10 @@ router.get("/",
         try {
             const documents = await DocumentDao.getAllDocuments();
 
-            res.json(documents);
+            res.status(200).json(documents);
         }
         catch (error) {
-            console.error("Error in getDocumentById function:", error.message);
+            console.error("Error in getAllDocuments function:", error.message);
             res.status(500).json({ error: err.message });
         }
     }

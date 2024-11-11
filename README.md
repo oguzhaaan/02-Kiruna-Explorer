@@ -401,6 +401,78 @@ Response :
 
 Response body: None
 
+#### **Edit area id**:
+
+**PUT** `api/documents/:DocId/area`
+
+Description : Modify the area id assinged to a document, deletes the previous one if not assigned to a document anymore
+
+Requqest parameters: Document Id
+
+Request Body:
+
+```
+{
+  "areaID" : 1
+}
+```
+
+Response :
+- `200 OK`
+- `500 Internal Server Error`
+- `400 Bad Request` (Document id  not valid)
+- `404 Not Found` (Area not found)
+
+Response body: None
+
+#### **Ad attachment**:
+
+**PUT** `api/documents/:DocId/attachments`
+
+Description : Add resources to a certain docuemnt identified by its <DocId>
+
+Requqest parameters: Document Id
+
+Request Body:
+
+```
+[
+  {
+    "name" : "name",
+    "trype" : "map",
+    "path" : "path/to/file"
+  },
+  {
+    "name" : "name2",
+    "trype" : "text",
+    "path" : "path/to/file2"
+  }
+]
+```
+
+Response :
+- `200 OK`
+- `500 Internal Server Error`
+- `400 Bad Request` (Document id  not valid)
+- `404 Not Found` (Document not found)
+
+Response body: None
+
+#### **Delete attachments**
+
+**DELETE** `api/documents/:DocId/attachments`
+
+Description : Delete all attachments associated to a document with its <DocId>
+
+Requqest parameters: Document Id
+
+Response :
+- `200 OK`
+- `404 Not Found`
+- `500 Internal Server Error`
+
+Response body: None
+
 
 ### 5. Users Credentials
 

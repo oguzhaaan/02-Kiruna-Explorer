@@ -196,7 +196,7 @@ const LinkDocuments = ({originalDocId, mode, setConnectionsInForm, setOriginalDo
     };
 
     return (
-        <div className={`${isDarkMode ? 'dark' : 'light'} min-h-screen bg-background_color px-3 text-white`}>
+        <div className={`${isDarkMode ? 'dark' : 'light'} min-h-screen background_color_light dark:bg-background_color px-3 text-black_text dark:text-white_text`}>
             {/* Navigation Bar */}
             <div className="flex items-center justify-between w-full h-16 mb-4">
                 <div className="flex items-center gap-3">
@@ -207,7 +207,7 @@ const LinkDocuments = ({originalDocId, mode, setConnectionsInForm, setOriginalDo
                             setSearchQuery(""); // Reset search query
                             navigate(-1); // Navigate back
                         }}
-                        className="text-white text-base right-4 hover:text-gray-600"
+                        className="text-black_text dark:text-white_text text-base right-4 hover:text-gray-600"
                     >
                         <i className="bi bi-arrow-left text-2xl"></i>
                     </button>
@@ -227,7 +227,7 @@ const LinkDocuments = ({originalDocId, mode, setConnectionsInForm, setOriginalDo
                     </div>
 
                     {/* Sort Button */}
-                    <button className="text-white text-2xl">
+                    <button className="text-black_text dark:text-white_text text-2xl">
                         <i className="bi bi-sort-down-alt"></i>
                     </button>
                 </div>
@@ -235,7 +235,7 @@ const LinkDocuments = ({originalDocId, mode, setConnectionsInForm, setOriginalDo
                 {/* Done Button */}
                 <button
                     onClick={handleDoneClick}
-                    className="bg-[#2E6A8E] hover:bg-[#2E6A8E66] transition text-white py-2 px-4 rounded-md"
+                    className="bg-primary_color_light dark:bg-primary_color_dark hover:bg-[#2E6A8E66] transition text-black_text dark:text-white_text py-2 px-4 rounded-md"
                 >
           <span>
             <i className="bi bi-file-earmark-plus"></i> Done
@@ -256,12 +256,13 @@ const LinkDocuments = ({originalDocId, mode, setConnectionsInForm, setOriginalDo
                             connectionOptions={defaultConnectionOptions}
                             selectedOption={Array.isArray(links[doc.id]) ? links[doc.id] : []}
                             onConnectionChange={(value) => handleConnectionChange(doc.id, value)}
+                            isDarkMode={isDarkMode}
                         />
                     ))}
                 </div>
 
-                <div className="px-3 py-3 space-y-3 w-5/12 rounded-md bg-[#0e2430]">
-                    <p className="m-0 p-0 text-white_text text-xl font-bold">Connected Documents</p>
+                <div className="px-3 py-3 space-y-3 w-5/12 rounded-md bg-gray-100 dark:bg-[#0e2430]">
+                    <p className="m-0 p-0 text-black_text dark:text-white_text text-xl font-normal">Connected Documents</p>
                     {documents && filteredDocuments.filter((doc) => links[doc.id] && links[doc.id].length > 0).map((doc) => (
                         <SelectedDocument
                             docId={doc.id}
@@ -274,6 +275,7 @@ const LinkDocuments = ({originalDocId, mode, setConnectionsInForm, setOriginalDo
                             selectedOption={Array.isArray(links[doc.id]) ? links[doc.id] : []}
                             onConnectionChange={(value) => handleConnectionChange(doc.id, value)}
                             getFilteredOptions={getFilteredOptions}
+                            isDarkMode = {isDarkMode}
                         />
                     ))}
                 </div>
@@ -296,19 +298,20 @@ const DocumentItem = ({
                           connectionOptions = [],
                           selectedOption = [],
                           onConnectionChange,
+                          isDarkMode
                       }) => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
 
     return (
         <div
-            className={`flex flex-wrap rounded-xl bg-document_item_radient_grey p-3`}
+            className={`flex flex-wrap rounded-xl bg-document_item_radient_grey_light dark:bg-document_item_radient_grey p-3`}
         >
             {/* Connection Section */}
             <div className="flex flex-col w-3/12">
                 <label>Connections:</label>
                 {selectedOption.length > 0 ? selectedOption.map((option, idx) => (
                     <div key={idx} className="flex items-center">
-                <span className="flex flex-row gap-2 rounded-lg px-3 py-1 bg-customPill text-white mr-2 mt-1">
+                <span className="flex flex-row gap-2 rounded-lg px-3 py-1 bg-primary_color_light dark:bg-customPill text-black_text dark:text-white_text mr-2 mt-1">
               {formatString(option)}
                     <button
                         className="text-my_red"
@@ -322,7 +325,7 @@ const DocumentItem = ({
                 {connectionOptions &&
                     <div className="mt-3 gap-2 align-items-center relative">
                         <button
-                            className="flex flex-row align-items-center bg-customGray3_30 text-white rounded-lg gap-2 px-2 py-1"
+                            className="flex flex-row align-items-center drop-shadow-lg bg-[#FFFFFFaa] dark:bg-customGray3_30 text-black_text dark:text-white_text rounded-lg gap-2 px-2 py-1"
                             onClick={() => setDropdownOpen(!dropdownOpen)}
                         >
                             <i className="bi bi-plus-circle text-base"></i>
@@ -330,11 +333,11 @@ const DocumentItem = ({
                         </button>
                         {dropdownOpen && (
                             <div
-                                className="absolute top-full mt-2 bg-customGray3_30 backdrop-blur-xl text-text_white rounded-xl drop-shadow-2xl z-10">
+                                className="absolute top-full mt-2 bg-[#FFFFFF60] dark:bg-customGray3_30 backdrop-blur-xl text-text_white rounded-xl drop-shadow-2xl z-10">
                                 {connectionOptions.map((option, idx) => (
                                     <div
                                         key={idx}
-                                        className={`px-4 py-2 hover:bg-gray-800 rounded-xl cursor-pointer`}
+                                        className={`px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl cursor-pointer`}
                                         onClick={() => {
                                             onConnectionChange(option);
                                             setDropdownOpen(false);
@@ -357,7 +360,7 @@ const DocumentItem = ({
                 <div>
                     <div className="text-base mb-3 font-normal">{formatString(title)}</div>
                     <div className="text-sm font-light flex items-center">
-                        <img src={getIcon({type})} className="w-8 mr-2" alt="type_icon"/>
+                        <img src={getIcon({type: type}, {darkMode: isDarkMode})} className="w-8 mr-2" alt="type_icon"/>
                         {formatString(type)}
                     </div>
                 </div>
@@ -372,7 +375,7 @@ const DocumentItem = ({
                     {stakeholders && stakeholders.map((stakeholder, idx) => (
                         <span
                             key={idx}
-                            className={`rounded-2xl px-3 py-1 text-sm text-white ${getStakeholderColor(
+                            className={`rounded-2xl px-3 py-1 text-sm text-white_text ${getStakeholderColor(
                                 {stakeholder}
                             )}`}
                         >
@@ -395,6 +398,7 @@ const SelectedDocument = ({
                               selectedOption = [], // Default to an empty array if not provided
                               onConnectionChange,
                               getFilteredOptions,
+                              isDarkMode
                           }) => {
     const filteredOptions = getFilteredOptions(docId);
 
@@ -409,13 +413,13 @@ const SelectedDocument = ({
     }, [filteredOptions]);
 
     return (
-        <div className={`flex flex-row rounded-xl bg-document_item_radient_blue p-3 gap-3`}>
+        <div className={`flex flex-row rounded-xl bg-document_item_radient_blue_light dark:bg-document_item_radient_blue p-3 gap-3`}>
             <div className="flex flex-col w-1/2 self-center">
                 <label>Connections:</label>
                 {selectedOption.map((option, idx) => (
                     <div key={idx} className="flex items-center">
             <span
-                className="flex flex-row align-items-center gap-2 rounded-md px-3 py-1 bg-customPill text-white mr-2 mt-1">
+                className="flex flex-row align-items-center gap-2 rounded-md px-3 py-1 bg-customPill_light dark:bg-customPill text-black_text dark:text-white_text mr-2 mt-1">
               {formatString(option)}
                 <button
                     className="text-my_red text-xl"
@@ -429,7 +433,7 @@ const SelectedDocument = ({
                 {filteredOptions && filteredOptions.length > 0 &&
                     <div className="mt-3 flex flex-row gap-2 align-items-center relative">
                         <button
-                            className="flex flex-row align-items-center bg-customBlue text-white rounded-md gap-2 px-2 py-1"
+                            className="flex flex-row align-items-center drop-shadow-lg bg-[#FFFFFFaa] dark:bg-customBlue text-black_text dark:text-white_text rounded-md gap-2 px-2 py-1"
                             onClick={() => setDropdownOpen(!dropdownOpen)}
                         >
                             <i className="bi bi-plus-circle text-base"></i>
@@ -437,11 +441,11 @@ const SelectedDocument = ({
                         </button>
                         {dropdownOpen && (
                             <div
-                                className="absolute top-full mt-2 bg-customGray3_30 backdrop-blur-xl text-text_white rounded-md drop-shadow-2xl z-10">
+                                className="absolute top-full mt-2 bg-customGray3_30 backdrop-blur-xl text-black_text dark:text-white_text rounded-md drop-shadow-2xl z-10">
                                 {filteredOptions.map((option, idx) => (
                                     <div
                                         key={idx}
-                                        className={`px-4 py-2 hover:bg-gray-800 rounded-md cursor-pointer`}
+                                        className={`px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md cursor-pointer`}
                                         onClick={() => {
                                             onConnectionChange(option);
                                             setDropdownOpen(false);
@@ -458,7 +462,7 @@ const SelectedDocument = ({
             <div className="mx-4 flex-col">
                 <div className="text-base mb-3 font-normal">{formatString(title)}</div>
                 <div className="text-sm font-light flex items-center">
-                    <img src={getIcon({type})} className="w-8 mr-2" alt="type_icon"/>
+                    <img src={getIcon({type: type}, {darkMode: isDarkMode})} className="w-8 mr-2" alt="type_icon"/>
                     {formatString(type)}
                 </div>
             </div>
@@ -483,7 +487,7 @@ const ConfirmationModal = ({onConfirm, onCancel}) => {
     return (
         <div className="fixed inset-0 flex items-center justify-center">
             <div
-                className="flex flex-col justify-items-center align-items-center bg-box_color backdrop-blur-2xl drop-shadow-xl rounded-xl text-white font-sans p-6">
+                className="flex flex-col justify-items-center align-items-center bg-box_color backdrop-blur-2xl drop-shadow-xl rounded-xl text-black_text dark:text-white_text font-sans p-6">
                 <div className="text-xl font-bold">Edit connections?</div>
                 <div className="flex justify-center space-x-3 mt-16">
                     <button
@@ -494,7 +498,7 @@ const ConfirmationModal = ({onConfirm, onCancel}) => {
                     </button>
                     <button
                         onClick={onConfirm}
-                        className="bg-customBlue hover:bg-[#317199] transition text-white w-40 h-16 px-4 py-2 rounded-xl text-xl"
+                        className="bg-customBlue hover:bg-[#317199] transition text-black_text dark:text-white_text w-40 h-16 px-4 py-2 rounded-xl text-xl"
                     >
                         Edit
                     </button>

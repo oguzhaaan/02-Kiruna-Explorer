@@ -14,6 +14,7 @@ export default {
         primary_color_light: "#99cae9",
         primary_color_dark: "#315f78",
         customBlue: "#4388B2",
+        customPill_light: "#a0c5e0",
         customPill: "#14405b",
         customGray1: '#686868',
         customGray2: '#313131',
@@ -39,6 +40,8 @@ export default {
       backgroundImage: {
         document_item_radient_grey: 'var(--document-item-gradient-grey)',
         document_item_radient_blue: "var(--document-item-gradient-blue)",
+        document_item_radient_grey_light: 'var(--document-item-gradient-grey-light)',
+        document_item_radient_blue_light: "var(--document-item-gradient-blue-light)",
       },
       backgroundColor: {
         navbar: 'var(--navbar-bg)',

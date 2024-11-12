@@ -13,8 +13,8 @@ const logIn = async (credentials) => {
     const user = await response.json();
     return user;
   } else {
-    const errDetails = await response.text();
-    throw errDetails;
+    const errDetails = await response.json();
+    throw new Error(errDetails.message);
   }
 };
 

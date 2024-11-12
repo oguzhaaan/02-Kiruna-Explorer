@@ -337,7 +337,7 @@ function GeoreferenceMap(props){
               url="https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
             />
             <ZoomControl position="topright" />
-            <FeatureGroup className="absolute ">
+            <FeatureGroup>
               <EditControl
                 key={drawnObject}
                 position="topright"

@@ -6,10 +6,13 @@ import { polygon, booleanPointInPolygon } from '@turf/turf';
 import "./map.css"
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
-import L, { geoJSON } from "leaflet";
-import { useNavigate } from "react-router-dom";
+import L, {geoJSON} from "leaflet";
+import {useNavigate} from "react-router-dom";
 import API from "../API/API.mjs";
+import {useTheme} from "../contexts/ThemeContext.jsx";
 
+function GeoreferenceMap(props){
+    const { isDarkMode } = useTheme();
 function CenterMap({ lat, lng }) {
   const map = useMap(); 
   map.panTo([lat, lng]);
@@ -63,7 +66,7 @@ function GeoreferenceMap(props){
 
     {/* Hide navbar at start*/}
     useEffect(() => {
-        props.setNavShow(false); 
+        props.setNavShow(false);
     }, []);
 
     {/* Refresh to show modifications*/}
@@ -88,14 +91,14 @@ function GeoreferenceMap(props){
         iconAnchor: [12, 41],
         popupAnchor: [1, -34],
         shadowSize: [41, 41]
-        });
+    });
 
     const cityBounds = [
         [67.92532085836797, 20.245374612817344],
         [67.85139867724654, 20.65936775042602],
         [67.77576380313107, 20.246345676166037],
         [67.86274503663387, 19.86795112123954]
-      ];
+    ];
 
     const BoundsConnected = polygon([[
       [20.245374612817344, 67.92532085836797],
@@ -362,13 +365,8 @@ function GeoreferenceMap(props){
                   polyline: false,
                   polygon: drawnObject == null
                 }}
-                edit={
-                  {
-                    remove: true
-                  }
-                }
-              />
-            </FeatureGroup>
+                maxBounds={cityBounds}
+                minZoom={12}
 
             {tmplat && tmplng && showManually &&
               <Marker
@@ -431,13 +429,6 @@ function GeoreferenceMap(props){
                 return null; // Gestione nel caso in cui il tipo di geometria non sia supportato
               })
             */}
-          
-            {popupPosition && (
-              <Popup position={popupPosition}>
-                <div>{popupContent}</div>
-              </Popup>
-            )}
-          </MapContainer>
 
         {/* Modal exit confirm */}
         {showModal &&

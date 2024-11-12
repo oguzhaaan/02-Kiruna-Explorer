@@ -4,7 +4,7 @@
 :root {
     --search-gray-color: #f4f4f4ad;
     --box-gray-color: #373737a6;
-    --background-color: #131313;
+    --background-color: rgb(34, 34, 34);
     --input-color: #d9d9d93f;
     --placeholder-input-color: #A2A2A2;
     --white-text: #F4F4F4;

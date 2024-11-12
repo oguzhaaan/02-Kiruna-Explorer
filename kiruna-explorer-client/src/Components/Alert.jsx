@@ -17,7 +17,7 @@ function Alert(props) {
     return (
             <div
                 className={`fixed z-[35000] top-0 left-0 overflow-hidden ${isVisible? "h-14" : "h-0" } w-full flex items-center justify-center bg- backdrop-blur-2xl bg-box_color rounded-b-xl transition-all`}>
-                <div className={`p-3 flex flex-col gap-4 ${color} text-2xl`}>
+                <div className={`p-3 flex flex-col gap-4 ${color} text-xl`}>
                     <div className="flex flex-col gap-2 overflow-hidden">
                         {
                             props.message

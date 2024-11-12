@@ -7,10 +7,10 @@ import { useUserContext } from "./contexts/UserContext.jsx";
 import { NavHeader } from "./Components/NavHeader.jsx"
 import { HomePage } from "./Components/HomePage.jsx";
 import { Document } from "./Components/Document.jsx";
-import { SingleDocument } from "./Components/SingleDocument.jsx";
 import LinkDocuments from "./Components/LinkDocuments.jsx";
 import { GeoreferenceMap } from "./Components/Map.jsx";
 import DocumentClass from "./classes/Document.mjs";
+import { ThemeProvider } from "./contexts/ThemeContext.jsx";
 
 function App() {
   const { user, isLoggedIn, checkAuth } = useUserContext();
@@ -34,6 +34,7 @@ function App() {
 
   return (
     <>
+      <ThemeProvider>
       <Routes>
 
         <Route element={
@@ -59,6 +60,7 @@ function App() {
 
         </Route>
       </Routes>
+        </ThemeProvider>
     </>
   );
 }

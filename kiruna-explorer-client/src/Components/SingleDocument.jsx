@@ -7,8 +7,12 @@ import { getIcon } from "./Utilities/DocumentIcons.jsx";
 import { getStakeholderColor } from "./Utilities/StakeholdersColors.jsx";
 import { getLanguageName } from "./Utilities/Languages.jsx";
 import API from "../API/API.mjs";
+import {useTheme} from "../contexts/ThemeContext.jsx";
 
 function SingleDocument(props) {
+
+    const {isDarkMode} = useTheme();
+
     const [collapsedSections, setCollapsedSections] = useState({});
     const [document, setDocument] = useState({});
     const [documenLinks, setDocumentLinks] = useState([]);
@@ -71,10 +75,10 @@ function SingleDocument(props) {
     }
 
     return (
-        id && <div className="fixed inset-0 z-[200] flex items-center justify-center scrollbar-thin scrollbar-webkit">
+        id && <div className={`${isDarkMode ? 'dark' : 'light'} fixed inset-0 z-[200] flex items-center justify-center scrollbar-thin scrollbar-webkit`}>
 
             <div
-                className="bg-box_color backdrop-blur-2xl drop-shadow-xl w-11/12 py-3 px-4 h-5/6 overflow-none rounded-2xl flex flex-col gap-3 items-center relative scrollbar-thin scrollbar-webkit">
+                className="bg-box_white_color dark:bg-box_color backdrop-blur-2xl drop-shadow-xl w-11/12 py-3 px-4 h-5/6 overflow-none rounded-2xl flex flex-col gap-3 items-center relative scrollbar-thin scrollbar-webkit">
 
                 {/* Charging */}
                 {isCharging && <Charging></Charging>}
@@ -83,28 +87,28 @@ function SingleDocument(props) {
                 <div className="w-100 flex flex-row justify-content-between">
                     <button onClick={() => {
                         navigate(-1);
-                    }} className="text-white text-xl right-4 hover:text-gray-600">
-                        <i className="bi bi-arrow-left text-3xl"></i>
+                    }} className="text-black_text dark:text-white_text text-base right-4 hover:text-gray-600">
+                        <i className="bi bi-arrow-left text-2xl"></i>
                     </button>
                     <button onClick={() => {
                         navigate("/documents");
-                    }} className="text-white text-xl right-4 hover:text-gray-600">
-                        <i className="bi bi-x-lg text-3xl"></i>
+                    }} className="text-black_text dark:text-white_text text-base right-4 hover:text-gray-600">
+                        <i className="bi bi-x-lg text-2xl"></i>
                     </button>
                 </div>
 
                 {/* Content + Links */}
-                <div className="flex flex-row w-100 h-100 text-white_text min-h-0">
+                <div className="flex flex-row w-100 h-100 text-black_text dark:text-white_text min-h-0">
 
                     {/* Content */}
                     <div className="w-4/6 h-100 min-h-0 flex flex-col justify-content-between">
                         <div
-                            className="flex flex-col gap-3 h-90 pt-3 pe-2 me-2 text-lg text-white_text overflow-y-auto">
+                            className="flex flex-col gap-3 h-90 pt-3 pe-2 me-2 text-sm text-black_text dark:text-white_text overflow-y-auto">
                             {/* Type */}
                             <div className="font-light">
-                                <div className="text-white text-xl flex flex-row align-items-center gap-3">
-                                    <img src={document.type ? getIcon({ type: document.type }) : getIcon("informative")}
-                                        className="w-12" alt={"type_icon"}></img>
+                                <div className="text-black_text dark:text-white_text text-base flex flex-row align-items-center gap-2">
+                                    <img src={document.type ? getIcon({ type: document.type}, {darkMode: isDarkMode }) : getIcon("informative", {darkMode: isDarkMode})}
+                                        className="w-9" alt={"type_icon"}></img>
                                     <p className="m-0 p-0">{document.type ? document.type.charAt(0).toUpperCase() + document.type.slice(1) : ''}</p>
                                 </div>
                             </div>
@@ -112,13 +116,13 @@ function SingleDocument(props) {
                             {/*TODO modify to see only the right stakeholders, it should be an array?
                              if it's only one then there is no need of map*/}
                             {/* Stakeholders*/}
-                            {<div className="font-normal flex flex-row gap-3">
+                            {<div className="font-normal flex flex-row gap-3 text-white_text">
                                 {
                                     document.stakeholders ? document.stakeholders.map((stakeholder, index) => {
                                         return (
                                             <div key={index}
                                                 className={`text-center ${getStakeholderColor({ stakeholder: stakeholder })} rounded-2xl py-1 px-3`}>
-                                                <p className="m-0 p-0 text-center mb-1">{capitalizeWords(stakeholder)}</p>
+                                                <p className="m-0 p-0 text-center">{capitalizeWords(stakeholder)}</p>
                                             </div>
                                         );
                                     }) : ""
@@ -127,45 +131,45 @@ function SingleDocument(props) {
 
 
                             {/* Title */}
-                            <div className="text-4xl font-bold">{document.title}</div>
+                            <div className="text-2xl font-bold">{document.title}</div>
 
                             {/* Info */}
                             <div className="flex flex-col font-normal">
                                 {/* Scale */}
                                 <div className="flex flex-row gap-2">
-                                    <p className="m-0 p-0 text-text_gray">Scale:</p>
+                                    <p className="m-0 p-0 text-customGray1 dark:text-text_gray">Scale:</p>
                                     {document.scale ? document.scale.charAt(0).toUpperCase() + document.scale.slice(1) : ''}
                                     {document.scale === "plan" ? " 1:" + document.planNumber : ""}
                                 </div>
                                 {/* Issuance Date */}
                                 <div className="flex flex-row gap-2">
-                                    <p className="m-0 p-0 text-text_gray">Issuance Date:</p>
+                                    <p className="m-0 p-0 text-customGray1 dark:text-text_gray">Issuance Date:</p>
                                     {document.date}
                                 </div>
                                 {/* Language */}
                                 <div className="flex flex-row gap-2">
-                                    <p className="m-0 p-0 text-text_gray">Language:</p>
+                                    <p className="m-0 p-0 text-customGray1 dark:text-text_gray">Language:</p>
                                     {document.language ? getLanguageName(document.language) : ''}
                                 </div>
                                 {/* Pages */}
                                 <div className="flex flex-row gap-2">
-                                    <p className="m-0 p-0 text-text_gray">Pages:</p>
+                                    <p className="m-0 p-0 text-customGray1 dark:text-text_gray">Pages:</p>
                                     {document.pages ? document.pages : '-'}
                                 </div>
                             </div>
 
                             {/* Description */}
-                            <div className="font-normal">{document.description}</div>
+                            <div className="font-normal text-base">{document.description}</div>
                         </div>
                         {/* Other Buttons */}
                         <div className="flex flex-row gap-3 font-normal pt-3">
                             <button
-                                className="flex flex-row gap-2 align-items-center text-white_text text-lg bg-[#D9D9D90E] hover:bg-[#D9D9D933] transition rounded-2xl px-3 py-2 drop-shadow-lg">
-                                <i className="bi bi-globe-europe-africa text-xl"></i>
+                                className="flex flex-row gap-2 align-items-center text-black_text dark:text-white_text text-sm bg-[#76767655] dark:bg-[#D9D9D90E] hover:bg-[#FFFFFF55] dark:hover:bg-[#D9D9D933] transition rounded-2xl px-3 py-2 drop-shadow-lg">
+                                <i className="bi bi-globe-europe-africa text-base"></i>
                                 <p className="m-0 p-0">See on the map</p>
                             </button>
                             <button
-                                className="flex flex-row gap-2 align-items-center text-white_text text-lg bg-[#D9D9D90E] hover:bg-[#D9D9D933] transition rounded-2xl px-3 py-2 drop-shadow-lg">
+                                className="flex flex-row gap-2 align-items-center text-black_text dark:text-white_text text-sm bg-[#76767655] dark:bg-[#D9D9D90E] hover:bg-[#FFFFFF55] dark:hover:bg-[#D9D9D933] transition rounded-2xl px-3 py-2 drop-shadow-lg">
                                 <p className="m-0 p-0">Original Document</p>
                             </button>
                         </div>
@@ -173,22 +177,22 @@ function SingleDocument(props) {
 
                     {/* Links */}
                     <div
-                        className="flex flex-col gap-3 w-2/6 h-100 bg-box_high_opacity rounded-xl py-3 px-4 overflow-y-auto">
+                        className="flex flex-col gap-3 w-2/6 h-100 bg-[#FFFFFF22] dark:bg-box_high_opacity rounded-xl py-3 px-4 overflow-y-auto">
                         {/* NavBar */}
                         <div className="flex flex-row justify-content-between align-items-center">
-                            <p className="m-0 p-0 text-2xl font-bold">Connections</p>
+                            <p className="m-0 p-0 text-xl font-bold">Connections</p>
 
                             <button onClick={() => {
                                 props.setMode("save");
                                 props.setNavShow(false);
                                 props.setoriginalDocId(id);
                                 navigate("/linkDocuments")
-                            }} className="text-white_text text-xl right-4 hover:text-gray-400">
-                                <i className="bi bi-plus-circle-fill text-4xl"></i>
+                            }} className="text-black_text dark:text-white_text text-base right-4 hover:text-gray-400">
+                                <i className="bi bi-pencil-square text-2xl"></i>
                             </button>
                         </div>
 
-                        <div className="w-full h-[2px] bg-[#79797980]">
+                        <div className="w-full h-[2px] bg-[#C3C3C3CC] dark:bg-[#79797980]">
 
                         </div>
                         {/* Connections */}
@@ -199,16 +203,16 @@ function SingleDocument(props) {
                             acc[connection.connection].push(connection);
                             return acc;
                         }, {})).map(([connectionType, connections], index) => (
-                            <div key={index} className="flex flex-col gap-3 bg-[#D9D9D90E] p-3 rounded-xl">
+                            <div key={index} className="flex flex-col gap-3 bg-[#FFFFFF33] dark:bg-[#D9D9D90E] p-3 rounded-xl">
                                 <div className="flex flex-row justify-content-between align-items-center cursor-pointer"
                                     onClick={() => setCollapsedSections(prevState => ({
                                         ...prevState,
                                         [connectionType]: !prevState[connectionType]
                                     }))}
                                 >
-                                    <h3 className="p-0 m-0 text-white_text text-lg">{connectionType ? formatString(connectionType) : ''}</h3>
+                                    <h3 className="p-0 m-0 text-black_text dark:text-white_text text-sm">{connectionType ? formatString(connectionType) : ''}</h3>
                                     <div
-                                        className="text-white_text text-xl right-4 hover:text-gray-400">
+                                        className="text-black_text dark:text-white_text text-base right-4 hover:text-gray-400">
                                         <i className={`bi ${collapsedSections[connectionType] ? 'bi-caret-down' : 'bi-caret-up'} text-2xl`}></i>
                                     </div>
                                 </div>
@@ -222,9 +226,9 @@ function SingleDocument(props) {
                                             onClick={() => {
                                                 navigate(`/documents/${connection.id}`);
                                             }}
-                                            className="flex flex-row gap-2 bg-box_high_opacity px-3 py-4 rounded-lg hover:bg-[#D9D9D950] transition cursor-pointer">
-                                            <img src={getIcon({type : connection.type})} className="w-8" alt={"type_icon"}></img>
-                                            <p className="m-0 p-0 text-white_text text-lg font-normal line-clamp-1">{connection.title}</p>
+                                            className="flex flex-row align-items-center gap-2 bg-[#FFFFFF77] dark:bg-box_high_opacity px-3 py-3 rounded-lg hover:bg-[#D9D9D950] transition cursor-pointer">
+                                            <img src={getIcon({type : connection.type}, {darkMode: isDarkMode})} className="w-7" alt={"type_icon"}></img>
+                                            <p className="m-0 p-0 text-black_text dark:text-white_text text-base font-normal line-clamp-1">{connection.title}</p>
                                         </div>
                                     </div>
                                 ))}

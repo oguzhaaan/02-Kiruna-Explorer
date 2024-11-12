@@ -1,41 +1,72 @@
+/* Impostazione della freccia per select e input */
+.input-stakeholder select,
+.input-scale select,
+.input-type select,
+.input-language select,
+.select {
+    appearance: none; /* rimuove la freccia predefinita */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image:  url('../assets/arrow_down-black.svg'); /* usa l'icona SVG che preferisci */
+    background-size: 1.4rem; /* aumenta le dimensioni della freccia */
+    background-repeat: no-repeat;
+    background-position: right 0.9rem center; /* posizione della freccia */
+}
+
+/* Modifica il colore delle icone in base al tema */
+.dark .input-stakeholder select,
+.dark .input-scale select,
+.dark .input-type select,
+.dark .input-language select,
+.dark .select {
+    appearance: none; /* rimuove la freccia predefinita */
+   -webkit-appearance: none;
+   -moz-appearance: none;
+    background-image: url('../assets/arrow_down.svg'); /* usa una versione diversa dell'icona SVG per il tema scuro */
+    background-size: 1.4rem; /* aumenta le dimensioni della freccia */
+    background-repeat: no-repeat;
+    background-position: right 0.9rem center; /* posizione della freccia */
+}
+
+/* Personalizzazione della scrollbar */
 ::-webkit-scrollbar {
   width: 11px;
 }
 
 ::-webkit-scrollbar-track { 
-  border-radius: 10px;
+  border-radius: 5px;
 }
- 
+
 ::-webkit-scrollbar-thumb {
   background: rgba(109, 109, 109, 0.6);
-  border-radius: 10px;
+}
+
+body.dark ::-webkit-scrollbar-thumb {
+  background: rgba(66, 66, 66, 0.6); /* Colore più scuro per la scrollbar in modalità scura */
 }
 
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(66, 66, 66, 0.6);
-  }
-
-  .input-stakeholder select,
-.input-scale select,
-.input-type select,
-.input-language select {
-    appearance: none; /* rimuove la freccia predefinita */
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-image: url('../assets/arrow_down.svg'); /* usa l'icona SVG che preferisci */
-    background-size: 1.8rem; /* aumenta le dimensioni della freccia */
-    background-repeat: no-repeat;
-    background-position: right 1.0rem center; /* posizione della freccia */
 }
 
-/* Hide the default date picker icon */
+body.dark ::-webkit-scrollbar-thumb:hover {
+    background: rgba(33, 33, 33, 0.8); /* Colore ancora più scuro quando la scrollbar è hoverata */
+}
+
+/* Aggiungi il colore personalizzato per il calendario */
+input[type="date"] {
+  background-color: transparent;
+}
+
 input[type="date"]::-webkit-calendar-picker-indicator {
-    color-scheme: dark;
+  color: transparent !important; /* Rendi invisibile l'icona predefinita */
+  background-color: transparent; /* Opzionale: rimuove il colore di sfondo dell'icona */
 }
 
-.select {
-  background-image: url('../assets/arrow_down.svg'); /* usa l'icona SVG che preferisci */
-  background-size: 1.8rem; /* aumenta le dimensioni della freccia */
-  background-repeat: no-repeat;
-  background-position: right 1.0rem center; /* posizione della freccia */
+input[type="date"].dark-mode::-webkit-calendar-picker-indicator {
+  filter: invert(100%) sepia(100%) saturate(0%) hue-rotate(180deg); /* Colore bianco per modalità scura */
+}
+
+input[type="date"].light-mode::-webkit-calendar-picker-indicator {
+  filter: none; /* Colore nativo per modalità chiara */
 }

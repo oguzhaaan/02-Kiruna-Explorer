@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
-import { MapContainer, TileLayer, Polygon, Popup, Marker, ZoomControl } from "react-leaflet";
+import { MapContainer, TileLayer, Polygon, Popup, Marker, ZoomControl, useMap } from "react-leaflet";
 import { EditControl } from "react-leaflet-draw";
 import { FeatureGroup } from "react-leaflet";
 import { polygon, booleanPointInPolygon } from '@turf/turf';
@@ -10,10 +10,17 @@ import L, { geoJSON } from "leaflet";
 import { useNavigate } from "react-router-dom";
 import API from "../API/API.mjs";
 
-const HomeButton = ({ map, handleMunicipalAreas }) => {
+function CenterMap({ lat, lng }) {
+  const map = useMap(); 
+  map.panTo([lat, lng]);
+  return null; 
+}
+
+const HomeButton = ({ handleMunicipalAreas }) => {
   return (
-    <div title="Municipal Area" className="custom-home-button" onClick={()=>handleMunicipalAreas()}>
-      <i className="bi bi-house-door-fill text-[#464646]"></i> {/* FontAwesome Icon */}
+    <div title="Municipal Area" className="custom-home-button" onClick={()=>{handleMunicipalAreas()}}>
+      <CenterMap lat={67.8524} lng={20.2438}></CenterMap>
+      <i className="bi bi-house-door-fill text-[#464646]"></i>
     </div>
   );
 };
@@ -21,8 +28,8 @@ const HomeButton = ({ map, handleMunicipalAreas }) => {
 function GeoreferenceMap(props){
     const navigate = useNavigate()
 
-    const latitude = 67.8524;
-    const longitude = 20.2438;
+    const latitude = 67.8558;
+    const longitude = 20.2253;
 
     const [popupContent, setPopupContent] = useState("");
     const [popupPosition, setPopupPosition] = useState(null);
@@ -237,6 +244,7 @@ function GeoreferenceMap(props){
       setLaterr(false)
       setLat(newLat);
       settmpLat(newLat)
+      
       setAlertMessage("You selected custom point")
     }
     else{
@@ -331,7 +339,7 @@ function GeoreferenceMap(props){
             maxBounds={cityBounds}
             minZoom={12}
             >
-            {mapRef.current && showMuniAreas && <HomeButton map={mapRef.current.leafletElement} handleMunicipalAreas={handleMunicipalAreas} />}
+            {mapRef.current && showMuniAreas && <HomeButton handleMunicipalAreas={handleMunicipalAreas} />}
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
@@ -367,8 +375,12 @@ function GeoreferenceMap(props){
               position={[lat,lng]}
               icon={GenericPoints} 
               > 
+              <CenterMap lat={lat} lng={lng}></CenterMap>
               </Marker>}
-
+            {
+              drawnObject && drawnObject.geometry.type==="Point" && 
+              <CenterMap lat={drawnObject.geometry.coordinates[1]} lng={drawnObject.geometry.coordinates[0]}></CenterMap>
+            }
             {presentAreas && <Polygon
               positions={
                 presentAreas[0].geoJson.geometry.coordinates[0].map(coord => [coord[1], coord[0]])
@@ -464,8 +476,9 @@ function GeoreferenceMap(props){
               borderRadius: "10px",
               fontSize: "20px",
               zIndex: 1000,
+              textAlign: "center"
             }}
-            className={`${(lngerr || laterr) && showManually && 'border-red-500 border-1'}`}
+            className={`${(lngerr || laterr) && showManually && 'border-red-500 border-1'} max-md:text-xs`}
             >
               {alertMessage}
             </div>
@@ -480,30 +493,28 @@ function GeoreferenceMap(props){
               display: "flex",
               marginLeft: "10px",
             }}
-            className="max-md:mb-4"
+            className="max-md:mb-4 max-md:w-1/2 max-md:flex-col"
           >
             <div className="flex flex-col">
-              <label className="text-white mb-1 text-l text-left">Longitude</label>
+              <label className="text-white mb-1 text-lg text-left max-md:text-sm">Longitude</label>
               <input
                 disabled={!showManually}
                 id="lon"
                 value={tmplng}
                 onChange={(e) => handleLng(e)}
                 className={`px-2 text-l py-1 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color rounded-[40px] ${
-                  lngerr && showManually ? "border-red-500 border-1" : ""
-                }`}
+                  lngerr && showManually ? "border-red-500 border-2" : "" } max-md:w-full max-md:h-5`}
               />
             </div>
             <div className="flex flex-col">
-              <label className="text-white mb-1 text-l text-left">Latitude</label>
+              <label className="text-white mb-1 text-lg text-left max-md:text-sm">Latitude</label>
               <input
                 disabled={!showManually}
                 id="lat"
                 value={tmplat}
                 onChange={(e) => handleLat(e)}
                 className={`px-2 text-l py-1 text-placeholder_color text-white placeholder:text-placeholder_color bg-input_color rounded-[40px] ${
-                  laterr && showManually ? "border-red-500 border-1" : ""
-                }`}
+                  laterr && showManually ? "border-red-500 border-2" : "" } max-md:w-full max-md:h-5`}
               />
             </div>
           </div>
@@ -515,6 +526,7 @@ function GeoreferenceMap(props){
             display: "flex",
             marginRight: "10px",
           }}
+          className="max-md:w-100 max-md:mx-3"
           >
             {showExit && (
               <button
@@ -522,7 +534,7 @@ function GeoreferenceMap(props){
                     setShowModal(true);
                 }}
                 type="button"
-                className="w-44 h-14 bg-[#D9D9D9] bg-opacity-60 shadow text-2xl font-normal text-black rounded-full hover:bg-[#938888]"
+                className="w-44 h-14 bg-[#D9D9D9] bg-opacity-60 shadow text-2xl font-normal text-black rounded-full hover:bg-[#938888] max-md:w-1/2 max-md:h-10"
               >
                 Exit
               </button>
@@ -531,7 +543,7 @@ function GeoreferenceMap(props){
               <button
                 onClick={() => handleSave()}
                 type="button"
-                className="w-44 h-14 bg-customBlue text-white_text bg-opacity-100 shadow text-2xl font-normal rounded-full hover:bg-[#317199]"
+                className="w-44 h-14 bg-customBlue text-white_text bg-opacity-100 shadow text-2xl font-normal rounded-full hover:bg-[#317199] max-md:w-1/2 max-md:h-10"
               >
                 Save
               </button>

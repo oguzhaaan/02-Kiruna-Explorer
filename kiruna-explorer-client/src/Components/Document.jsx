@@ -1,15 +1,15 @@
-import { useState, useEffect } from "react";
+import {useState, useEffect} from "react";
 import dayjs from "dayjs";
 import "./document.css";
 import Alert from "./Alert";
 import API from "../API/API.mjs";
-import { SingleDocument } from "./SingleDocument.jsx";
-import { useNavigate } from "react-router-dom";
+import {SingleDocument} from "./SingleDocument.jsx";
+import {useNavigate} from "react-router-dom";
 import Select from "react-select";
 import DocumentClass from "../classes/Document.mjs";
-import { useTheme } from "../contexts/ThemeContext.jsx";
-import { getStakeholderColor } from "./Utilities/StakeholdersColors";
-import { getIcon } from "./Utilities/DocumentIcons";
+import {useTheme} from "../contexts/ThemeContext.jsx";
+import {getStakeholderColor} from "./Utilities/StakeholdersColors";
+import {getIcon} from "./Utilities/DocumentIcons";
 
 function formatString(input) {
     return input
@@ -22,7 +22,7 @@ function formatString(input) {
 
 function Document(props) {
 
-    const { isDarkMode, toggleTheme } = useTheme();
+    const {isDarkMode, toggleTheme} = useTheme();
 
     // All Documents
     const [documents, setDocuments] = useState([]);
@@ -113,28 +113,28 @@ function Document(props) {
 
 
     const stakeholderOptions = [
-        { value: "lkab", label: "LKAB" },
-        { value: "municipality", label: "Municipality" },
-        { value: "regional authority", label: "Regional authority" },
-        { value: "architecture firms", label: "Architecture firms" },
-        { value: "citizens", label: "Citizens" },
-        { value: "others", label: "Others" },
+        {value: "lkab", label: "LKAB"},
+        {value: "municipality", label: "Municipality"},
+        {value: "regional authority", label: "Regional authority"},
+        {value: "architecture firms", label: "Architecture firms"},
+        {value: "citizens", label: "Citizens"},
+        {value: "others", label: "Others"},
     ];
 
     const popularLanguages = [
-        { code: "en", name: "English" },
-        { code: "sv", name: "Swedish" },
-        { code: "se", name: "Northern Sami" },
-        { code: "fi", name: "Finnish" },
-        { code: "es", name: "Spanish" },
-        { code: "zh", name: "Chinese" },
-        { code: "fr", name: "French" },
-        { code: "de", name: "German" },
-        { code: "ja", name: "Japanese" },
-        { code: "ru", name: "Russian" },
-        { code: "pt", name: "Portuguese" },
-        { code: "ar", name: "Arabic" },
-        { code: "it", name: "Italian" },
+        {code: "en", name: "English"},
+        {code: "sv", name: "Swedish"},
+        {code: "se", name: "Northern Sami"},
+        {code: "fi", name: "Finnish"},
+        {code: "es", name: "Spanish"},
+        {code: "zh", name: "Chinese"},
+        {code: "fr", name: "French"},
+        {code: "de", name: "German"},
+        {code: "ja", name: "Japanese"},
+        {code: "ru", name: "Russian"},
+        {code: "pt", name: "Portuguese"},
+        {code: "ar", name: "Arabic"},
+        {code: "it", name: "Italian"},
     ];
 
     const [alertMessage, setAlertMessage] = useState(['', '']);
@@ -169,7 +169,7 @@ function Document(props) {
 
         if (event.target.value) {
             setErrors((prevErrors) => {
-                const { title, ...remainingErrors } = prevErrors;
+                const {title, ...remainingErrors} = prevErrors;
                 return remainingErrors;
             });
         }
@@ -183,7 +183,7 @@ function Document(props) {
 
         if (selectedOptions.length > 0) {
             setErrors((prevErrors) => {
-                const { stakeholder, ...remainingErrors } = prevErrors;
+                const {stakeholder, ...remainingErrors} = prevErrors;
                 return remainingErrors;
             });
         }
@@ -197,7 +197,7 @@ function Document(props) {
 
         if (event.target.value !== "none") {
             setErrors((prevErrors) => {
-                const { scale, ...remainingErrors } = prevErrors;
+                const {scale, ...remainingErrors} = prevErrors;
                 return remainingErrors;
             });
         }
@@ -211,7 +211,7 @@ function Document(props) {
 
         if (event.target.value) {
             setErrors((prevErrors) => {
-                const { planNumber, ...remainingErrors } = prevErrors;
+                const {planNumber, ...remainingErrors} = prevErrors;
                 return remainingErrors;
             });
         }
@@ -226,7 +226,7 @@ function Document(props) {
 
         if (selectedDate) {
             setErrors((prevErrors) => {
-                const { date, ...remainingErrors } = prevErrors;
+                const {date, ...remainingErrors} = prevErrors;
                 return remainingErrors;
             });
         }
@@ -240,7 +240,7 @@ function Document(props) {
 
         if (event.target.value !== "none") {
             setErrors((prevErrors) => {
-                const { type, ...remainingErrors } = prevErrors;
+                const {type, ...remainingErrors} = prevErrors;
                 return remainingErrors;
             });
         }
@@ -269,7 +269,7 @@ function Document(props) {
 
         if (event.target.value) {
             setErrors((prevErrors) => {
-                const { description, ...remainingErrors } = prevErrors;
+                const {description, ...remainingErrors} = prevErrors;
                 return remainingErrors;
             });
         }
@@ -332,9 +332,9 @@ function Document(props) {
         <div className={isDarkMode ? 'dark' : 'light'}>
             <div className="bg-background_color_white dark:bg-background_color min-h-screen flex flex-col items-center">
                 <SingleDocument setNavShow={props.setNavShow} setMode={props.setMode}
-                    setoriginalDocId={props.setoriginalDocId}></SingleDocument>
+                                setoriginalDocId={props.setoriginalDocId}></SingleDocument>
                 <Alert message={alertMessage[0]} type={alertMessage[1]}
-                    clearMessage={() => setAlertMessage(['', ''])}></Alert>
+                       clearMessage={() => setAlertMessage(['', ''])}></Alert>
                 <div className="flex flex-row justify-content-between align-items-center w-full h-16 px-3">
 
                     <div className="flex flex-row items-center ml-14 gap-3">
@@ -356,7 +356,7 @@ function Document(props) {
 
                     <div className="flex flex-row justify-content-end gap-3 align-items-center">
                         <button onClick={toggleModal}
-                            className="bg-primary_color_light dark:bg-primary_color_dark hover:bg-[#2E6A8E66] transition text-black_text dark:text-white_text grid justify-items-end py-2 px-4 rounded-md">
+                                className="bg-primary_color_light dark:bg-primary_color_dark hover:bg-[#2E6A8E66] transition text-black_text dark:text-white_text grid justify-items-end py-2 px-4 rounded-md">
                             <span className="text-base"><i className="bi bi-file-earmark-plus"></i> Add document</span>
                         </button>
 
@@ -368,16 +368,16 @@ function Document(props) {
                             }}>
                             <div className="flex justify-center items-center gap-2 relative">
                                 <i className="bi bi-sun-fill transition-opacity duration-300 ease-in-out text-2xl"
-                                    style={{ opacity: isDarkMode ? 0.2 : 1 }}></i>
+                                   style={{opacity: isDarkMode ? 0.2 : 1}}></i>
                                 <i className="bi bi-moon-fill transition-opacity duration-300 ease-in-out text-2xl"
-                                    style={{ opacity: isDarkMode ? 1 : 0.2 }}></i>
+                                   style={{opacity: isDarkMode ? 1 : 0.2}}></i>
                             </div>
                         </button>
                     </div>
                 </div>
 
                 {/* Documents List */}
-                <div className="space-y-4 w-5/6 mt-8">
+                <div className="flex flex-col gap-3 p-3 w-100">
                     {documents.map((doc) => (
                         <DocumentItem
                             key={doc.id}
@@ -386,14 +386,16 @@ function Document(props) {
                             type={doc.type}
                             date={doc.date}
                             stakeholders={doc.stakeholders}
+                            isDarkMode={isDarkMode}
                         />
                     ))}
-                </div >
+                </div>
             </div>
             {/* Add Document Form */}
             {
                 props.isModalOpen && (
-                    <div className={`${isDarkMode ? "dark-select" : "light-select"} py-4 fixed inset-0 flex items-center justify-center scrollbar-thin scrollbar-webkit`}
+                    <div
+                        className={`${isDarkMode ? "dark-select" : "light-select"} py-4 fixed inset-0 flex items-center justify-center scrollbar-thin scrollbar-webkit`}
                         onClick={toggleModal}
                     >
 
@@ -403,12 +405,14 @@ function Document(props) {
                         >
                             <h2 className="text-black_text mb-4 dark:text-white_text text-2xl  ">Add New Document</h2>
                             <button onClick={toggleModal}
-                                className="absolute top-5 text-black_text dark:text-white_text right-4 hover:text-gray-600">
+                                    className="absolute top-5 text-black_text dark:text-white_text right-4 hover:text-gray-600">
                                 <i className="bi bi-x-lg text-2xl"></i>
                             </button>
 
                             <div className="input-title mb-4 w-full">
-                                <label className="text-black_text dark:text-white_text w-full ml-2 mb-1 text-base text-left">Title<span className="text-red-400">*</span></label>
+                                <label
+                                    className="text-black_text dark:text-white_text w-full ml-2 mb-1 text-base text-left">Title<span
+                                    className="text-red-400">*</span></label>
                                 <input
                                     type="text"
                                     placeholder="Title"
@@ -419,7 +423,9 @@ function Document(props) {
                             </div>
 
                             <div className="input-stakeholder mb-4 w-full">
-                                <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Stakeholders<span className="text-red-400">*</span></label>
+                                <label
+                                    className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Stakeholders<span
+                                    className="text-red-400">*</span></label>
                                 <Select
                                     isMulti
                                     options={stakeholderOptions}
@@ -434,7 +440,9 @@ function Document(props) {
                             </div>
 
                             <div className="input-scale mb-4 w-full">
-                                <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Scale<span className="text-red-400">*</span></label>
+                                <label
+                                    className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Scale<span
+                                    className="text-red-400">*</span></label>
                                 <select
                                     id="document-type"
                                     value={props.newDocument.scale}
@@ -450,7 +458,9 @@ function Document(props) {
 
                             {props.newDocument.scale === 'plan' &&
                                 <div className="input-plan mb-4 w-full">
-                                    <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Enter the scale
+                                    <label
+                                        className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Enter
+                                        the scale
                                         1:n</label>
                                     <input
                                         id="number-input"
@@ -463,7 +473,8 @@ function Document(props) {
                                 </div>}
 
                             <div className="input-date mb-4 w-full">
-                                <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Issuance
+                                <label
+                                    className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Issuance
                                     date<span className="text-red-400">*</span></label>
                                 <input
                                     id="document-date"
@@ -475,7 +486,9 @@ function Document(props) {
                             </div>
 
                             <div className="input-type mb-4 w-full">
-                                <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Type<span className="text-red-400">*</span></label>
+                                <label
+                                    className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Type<span
+                                    className="text-red-400">*</span></label>
                                 <select
                                     id="document-type"
                                     value={props.newDocument.type}
@@ -494,7 +507,8 @@ function Document(props) {
                             </div>
 
                             <div className="input-language mb-4 w-full">
-                                <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Language</label>
+                                <label
+                                    className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Language</label>
                                 <select
                                     id="document-language"
                                     value={props.newDocument.language}
@@ -511,7 +525,8 @@ function Document(props) {
 
 
                             <div className="input-number mb-4 w-full">
-                                <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Pages</label>
+                                <label
+                                    className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Pages</label>
                                 <input
                                     id="number-input"
                                     type="number"
@@ -523,7 +538,9 @@ function Document(props) {
                             </div>
 
                             <div className="input-description mb-4 w-full">
-                                <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Description<span className="text-red-400">*</span></label>
+                                <label
+                                    className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Description<span
+                                    className="text-red-400">*</span></label>
                                 <textarea
                                     placeholder="Description"
                                     value={props.newDocument.description}
@@ -534,9 +551,11 @@ function Document(props) {
                             </div>
 
                             <div className="input-map mb-4 w-full">
-                                <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Georeference</label>
+                                <label
+                                    className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Georeference</label>
                                 {
-                                    props.newAreaId && <label className="text-black_text dark:text-white_text text-base w-full text-left py-1"><i
+                                    props.newAreaId &&
+                                    <label className="text-black_text dark:text-white_text text-base w-full text-left py-1"><i
                                         className="bi bi-check-lg align-middle text-green-400"></i> You
                                         selected {props.newAreaId === 1 ? "Municipality Area" : `Area N. ${props.newAreaId}`}
                                     </label>
@@ -548,10 +567,11 @@ function Document(props) {
                                     className="w-full p-2 text-white_text dark:text-black_text text-base border-gray-300 focus:outline-none bg-customGray1 dark:bg-[#D9D9D9] hover:bg-[#000000] dark:hover:bg-customGray1 :transition rounded-md">
                                     <i className="bi bi-globe-europe-africa"></i> Open the Map
                                 </button>
-                            </div >
+                            </div>
 
                             <div className="input-link mb-4 w-full">
-                                <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Linking</label>
+                                <label
+                                    className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Linking</label>
                                 {
                                     props.connections && props.connections.length > 0 &&
                                     <p className="m-0 px-2 py-1 text-gray-500">{(props.connections.length) + " connections selected"}</p>
@@ -574,55 +594,65 @@ function Document(props) {
                                 Confirm
                             </button>
 
-                        </div >
-                    </div >
+                        </div>
+                    </div>
                 )
             }
-            </div>
+        </div>
     );
 }
 
-
 const DocumentItem = ({
-    documentId,
-    title,
-    type,
-    date,
-    stakeholders = [],
-
-}) => {
-
-    const { isDarkMode } = useTheme();
-    const navigate = useNavigate();
+                          documentId,
+                          title,
+                          type,
+                          date,
+                          stakeholders = [],
+                          isDarkMode
+                      }) => {
+    const navigate = useNavigate()
     return (
-        <div className="flex flex-row rounded-3xl bg-document_item_radient_grey p-3 relative text-white cursor-pointer" onClick={() => navigate(`/documents/${documentId}`)}>
-            {/* Document Title and Type */}
-            <div className="mx-4 flex-col">
-                <div className="text-xl mb-3 font-normal">{formatString(title)}</div>
-                <div className="text-lg font-light flex items-center">
-                    <img src={getIcon({ type }, { isDarkMode })} className="w-8 mr-2" alt="type_icon" />
-                    {formatString(type)}
+        <div className={isDarkMode ? "dark" : "light"}>
+            <div
+                className={`flex flex-wrap drop-shadow-xl rounded-xl bg-document_item_radient_grey_light dark:bg-document_item_radient_grey p-3 cursor-pointer`}
+                onClick={() => {
+                    navigate(/documents/ + documentId)
+                }}
+            >
+                {/* Document Title and Type */}
+                <div className="w-1/2 flex flex-row text-black_text dark:text-white_text">
+
+                    <div>
+                        <div className="text-base mb-3 font-normal">{formatString(title)}</div>
+                        <div className="text-sm font-light flex items-center">
+                            <img src={getIcon({type: type}, {darkMode: isDarkMode})} className="w-8 mr-2"
+                                 alt="type_icon"/>
+                            {formatString(type)}
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            {/* Date */}
-            <div className="absolute top-3 right-5 text-gray-400">{date}</div>
+                <div className="flex flex-col w-1/2 justify-content-between align-items-end">
+                    {/* Date */}
+                    <div className="text-sm top-3 right-5 text-gray-400">{date}</div>
 
-            {/* Stakeholders */}
-            <div className="flex space-x-2 absolute bottom-4 right-5">
-                {stakeholders && stakeholders.map((stakeholder, idx) => (
-                    <span
-                        key={idx}
-                        className={`rounded-full px-3 py-1 text-sm text-white ${getStakeholderColor(
-                            { stakeholder }
-                        )}`}
-                    >
-                        {formatString(stakeholder)}
-                    </span>
-                ))}
+                    {/* Stakeholders */}
+                    <div className="flex flex-wrap gap-2 bottom-4 right-5">
+                        {stakeholders && stakeholders.map((stakeholder, idx) => (
+                            <span
+                                key={idx}
+                                className={`rounded-2xl px-3 py-1 text-sm text-white_text ${getStakeholderColor(
+                                    {stakeholder}
+                                )}`}
+                            >
+            {formatString(stakeholder)}
+          </span>
+                        ))}
+                    </div>
+                </div>
             </div>
         </div>
     );
 };
 
-export { Document };
+export {Document};

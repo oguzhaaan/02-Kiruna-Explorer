@@ -180,7 +180,7 @@ function SingleDocument(props) {
                         className="flex flex-col gap-3 w-2/6 h-100 bg-[#FFFFFF22] dark:bg-box_high_opacity rounded-xl py-3 px-4 overflow-y-auto">
                         {/* NavBar */}
                         <div className="flex flex-row justify-content-between align-items-center">
-                            <p className="m-0 p-0 text-xl font-bold">Connections</p>
+                            <p className="m-0 p-0 text-xl font-medium">Connections</p>
 
                             <button onClick={() => {
                                 props.setMode("save");

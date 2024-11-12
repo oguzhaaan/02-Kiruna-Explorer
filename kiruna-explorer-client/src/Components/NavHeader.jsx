@@ -18,7 +18,12 @@ function NavHeader(props) {
                 props.navShow &&
                 <Navbar expand="false" className="fixed z-[2000]">
                     <Container fluid className="text-center w-screen justify-end">
-                        {/* Il codice del login rimane invariato */}
+                        <Navbar.Brand className="text-white_text text-xl flex items-center justify-center mt-4 mr-10">
+                            <Link to="login" className="text-inherit no-underline hover:text-slate-300" onClick={() => props.setNavShow(false)}>
+                                <i className="bi bi-person fs-2 align-middle mx-2"></i>
+                                Login
+                            </Link>
+                        </Navbar.Brand>
                     </Container>
                 </Navbar>
                 :
@@ -57,7 +62,7 @@ function NavHeader(props) {
                                             </Row>
                                         </Col>
                                     </Row>
-                                    <div className={`separator ${isDarkMode ? 'bg-white_text' : 'bg-black_text'}`}></div>
+                                    <div className={`separator ${isDarkMode ? 'bg-white_text' : 'bg-black_text'} opacity-20`}></div>
                                     <Row
                                         className={`offcanvas-item w-100 p-1 ${currentRoute.includes("documents") ? (isDarkMode ? 'bg-customBlue' : 'bg-blue-200') : ''}`}
                                         onClick={() => { navigate("/documents") }}

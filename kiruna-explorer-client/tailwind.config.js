@@ -11,7 +11,7 @@ export default {
         selectedPage: "rgba(217,217,217,0.34)",
         text_gray: "#B7B7B7",
         customGray: "#D9D9D9",
-        primary_color_light: "#99cae9",
+        primary_color_light: "#b1cae9",
         primary_color_dark: "#315f78",
         customBlue: "#4388B2",
         customPill_light: "#a0c5e0",

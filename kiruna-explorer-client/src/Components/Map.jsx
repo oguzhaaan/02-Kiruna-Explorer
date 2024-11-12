@@ -8,8 +8,10 @@ import "leaflet-draw/dist/leaflet.draw.css";
 import L, {geoJSON} from "leaflet";
 import {useNavigate} from "react-router-dom";
 import API from "../API/API.mjs";
+import {useTheme} from "../contexts/ThemeContext.jsx";
 
 function GeoreferenceMap(props) {
+    const { isDarkMode } = useTheme();
     const navigate = useNavigate()
 
     const [popupContent, setPopupContent] = useState("");
@@ -187,17 +189,17 @@ function GeoreferenceMap(props) {
     }
 
     return (
-        <>
+        <div className={isDarkMode ? "dark" : "light"}>
             {showModal &&
                 <div className="z-[500] fixed inset-0 flex items-center justify-center">
                     <div
-                        className="flex flex-col justify-items-center align-items-center bg-box_color backdrop-blur-2xl drop-shadow-xl rounded-3xl text-white font-sans p-6">
+                        className="flex flex-col justify-items-center align-items-center bg-box_white_color dark:bg-box_color backdrop-blur-2xl drop-shadow-xl rounded-xl text-black_text dark:text-white_text font-sans p-6">
                         <div className="text-xl mb-2 font-bold">Are you really sure to exit?</div>
                         <div className="text-sm font-normal">Your changes will be discarded</div>
                         <div className="flex justify-center space-x-2 mt-10">
                             <button
                                 onClick={() => setShowModal(false)}
-                                className="bg-customGray text-black w-32 opacity-60 py-2 rounded-full text-xl"
+                                className="bg-[#FFFFFFcc] dark:bg-customGray hover:bg-[#FFFFFFff] dark:hover:bg-[#938888] transition text-black w-40 h-16 opacity-60 px-4 py-2 rounded-xl text-xl"
                             >
                                 Cancel
                             </button>
@@ -206,7 +208,7 @@ function GeoreferenceMap(props) {
                                     navigate(-1);
                                     setDrawnObject(null)
                                 }}
-                                className="bg-customBlue  text-white_text w-32 py-2 rounded-full text-xl"
+                                className="bg-primary_color_light dark:bg-customBlue hover:bg-blue-300 dark:hover:bg-[#317199] transition text-black_text dark:text-white_text w-40 h-16 px-4 py-2 rounded-xl text-xl"
                             >
                                 Exit
                             </button>
@@ -378,7 +380,7 @@ function GeoreferenceMap(props) {
                     {alertMessage}
                 </div>
             )}
-        </>
+        </div>
     )
 }
 

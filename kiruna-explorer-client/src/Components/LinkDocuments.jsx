@@ -487,18 +487,18 @@ const ConfirmationModal = ({onConfirm, onCancel}) => {
     return (
         <div className="fixed inset-0 flex items-center justify-center">
             <div
-                className="flex flex-col justify-items-center align-items-center bg-box_color backdrop-blur-2xl drop-shadow-xl rounded-xl text-black_text dark:text-white_text font-sans p-6">
+                className="flex flex-col justify-items-center align-items-center bg-box_white_color dark:bg-box_color backdrop-blur-2xl drop-shadow-xl rounded-xl text-black_text dark:text-white_text font-sans p-6">
                 <div className="text-xl font-bold">Edit connections?</div>
                 <div className="flex justify-center space-x-3 mt-16">
                     <button
                         onClick={onCancel}
-                        className="bg-customGray hover:bg-[#938888] transition text-black w-40 h-16 opacity-60 px-4 py-2 rounded-xl text-xl"
+                        className="bg-[#FFFFFFcc] dark:bg-customGray hover:bg-[#FFFFFFff] dark:hover:bg-[#938888] transition text-black w-40 h-16 opacity-60 px-4 py-2 rounded-xl text-xl"
                     >
                         Go back
                     </button>
                     <button
                         onClick={onConfirm}
-                        className="bg-customBlue hover:bg-[#317199] transition text-black_text dark:text-white_text w-40 h-16 px-4 py-2 rounded-xl text-xl"
+                        className="bg-primary_color_light dark:bg-customBlue hover:bg-blue-300 dark:hover:bg-[#317199] transition text-black_text dark:text-white_text w-40 h-16 px-4 py-2 rounded-xl text-xl"
                     >
                         Edit
                     </button>

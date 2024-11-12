@@ -22,7 +22,7 @@
     --document-item-gradient-grey: linear-gradient(90deg, #686868 21%, #313131 100%);
     --document-item-gradient-blue: linear-gradient(90deg, #166595 1%, #092A3E 100%);
     --document-item-gradient-grey-light: linear-gradient(90deg, #cdcdcd 21%, #eeeeee 100%);
-    --document-item-gradient-blue-light: linear-gradient(90deg, #dfe5ea 1%, #a9ccea 100%);
+    --document-item-gradient-blue-light: linear-gradient(90deg, #dfe5ea 1%, #b8d5f2 100%);
 }
 
 @tailwind base;

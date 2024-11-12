@@ -443,7 +443,7 @@ function GeoreferenceMap(props) {
 
                 {/* Modal exit confirm */}
                 {showModal &&
-                    <div className="fixed z-[500] inset-0 flex items-center justify-center">
+                    <div className="fixed z-[2000] inset-0 flex items-center justify-center">
                         <div
                             className="flex flex-col justify-items-center align-items-center bg-box_white_color dark:bg-box_color backdrop-blur-2xl drop-shadow-xl rounded-xl text-black_text dark:text-white_text font-sans p-6">
                             <div className="text-2xl mb-2 font-bold">Are you really sure to exit?</div>

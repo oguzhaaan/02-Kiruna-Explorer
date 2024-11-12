@@ -7,8 +7,36 @@ import { SingleDocument } from "./SingleDocument.jsx";
 import { useNavigate } from "react-router-dom";
 import Select from "react-select";
 import DocumentClass from "../classes/Document.mjs";
+import { getStakeholderColor } from "./Utilities/StakeholdersColors";
+import { getIcon } from "./Utilities/DocumentIcons";
+
+function formatString(input) {
+    return input
+        .replace(/_/g, " ") // Replace underscores with spaces
+        .split(" ") // Split the string into an array of words
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
+        .join(" "); // Join the words back into a single string
+}
 
 function Document(props) {
+
+    // All Documents
+    const [documents, setDocuments] = useState([]);
+    const [refreshList, setRefreshList] = useState(0);
+    useEffect(() => {
+        const fetchDocuments = async () => {
+            try {
+                const allDocuments = await API.getAllDocuments();
+                setDocuments(allDocuments);
+            } catch (error) {
+                console.error("Error in getAllDocuments function:", error.message);
+                throw new Error(
+                    "Unable to get the documents."
+                );
+            }
+        };
+        fetchDocuments();
+    }, [refreshList]);
 
     console.log("Connections:\n");
     console.log(props.connections);
@@ -249,7 +277,8 @@ function Document(props) {
     };
 
     const handleConfirm = async () => {
-
+        // Refresh the list of the documents
+        setRefreshList(prev => prev + 1)
         //CAMPI OPZIONALI: PAGE + LANGUAGE + GIORNO DELLA DATA(?) + COORDINATES
         //CAMPI OBBLIGATORI: TITLE + STAKEHOLDER + SCALE(PLANE NUMBER IN CASE) + DATE + DESCRIPTION + TYPE 
 
@@ -298,7 +327,7 @@ function Document(props) {
 
     return (
         <>
-            <div className="bg-background_color min-h-screen flex justify-center">
+            <div className="bg-background_color min-h-screen flex flex-col items-center">
                 <SingleDocument setNavShow={props.setNavShow} setMode={props.setMode} setoriginalDocId={props.setoriginalDocId}></SingleDocument>
                 <Alert message={alertMessage[0]} type={alertMessage[1]}
                     clearMessage={() => setAlertMessage(['', ''])}></Alert>
@@ -326,17 +355,22 @@ function Document(props) {
                         <span><i className="bi bi-file-earmark-plus"></i>  Add document</span>
                     </button>
                 </div>
-                <div>
-                    <button
-                        className="bg-[#2E6A8E] text-white grid justify-items-end py-2 px-5 mb-20 mx-3 rounded-[77px] mt-4"
-                        onClick={() => {
-                            navigate("/documents/1")
-                        }}>
-                        document
-                    </button>
+                {/* Documents List */}
+                <div className="space-y-3 w-full mt-8">
+                    {documents.map((doc) => (
+                        <DocumentItem
+                            key={doc.id}
+                            documentId={doc.id}
+                            title={doc.title}
+                            type={doc.type}
+                            date={doc.date}
+                            stakeholders={doc.stakeholders}
+                        />
+                    ))}
                 </div>
             </div>
 
+            {/* Add Document Form */}
             {props.isModalOpen && (
                 <div className="fixed inset-0 flex items-center justify-center scrollbar-thin scrollbar-webkit">
 
@@ -478,7 +512,7 @@ function Document(props) {
 
                         <div className="input-map mb-4 w-full">
                             <label className="text-white mb-1 text-xl w-full ml-2 text-left">Georeference</label>
-                            {props.newAreaId && <label className="text-white mb-1 text-l w-full ml-2 text-left"><i className="bi bi-check-lg align-middle text-green-400 fs-4"></i> You selected {props.newAreaId===1? "Municipality Area":`Area N. ${props.newAreaId}`} </label>}
+                            {props.newAreaId && <label className="text-white mb-1 text-l w-full ml-2 text-left"><i className="bi bi-check-lg align-middle text-green-400 fs-4"></i> You selected {props.newAreaId === 1 ? "Municipality Area" : `Area N. ${props.newAreaId}`} </label>}
                             <button
                                 onClick={() => {
                                     navigate("/map")
@@ -519,5 +553,46 @@ function Document(props) {
         </>
     );
 }
+
+
+const DocumentItem = ({
+    documentId,
+    title,
+    type,
+    date,
+    stakeholders = [],
+}) => {
+
+    const navigate = useNavigate();
+    return (
+        <div className="flex flex-row rounded-3xl bg-document_item_radient_grey p-3 relative text-white">
+            {/* Document Title and Type */}
+            <div className="mx-4 flex-col">
+                <div className="text-xl mb-3 font-normal cursor-pointer" onClick={() => navigate(`/documents/${documentId}`)}>{formatString(title)}</div>
+                <div className="text-lg font-light flex items-center">
+                    <img src={getIcon({ type })} className="w-8 mr-2" alt="type_icon" />
+                    {formatString(type)}
+                </div>
+            </div>
+
+            {/* Date */}
+            <div className="absolute top-3 right-5 text-gray-400">{date}</div>
+
+            {/* Stakeholders */}
+            <div className="flex space-x-2 absolute bottom-4 right-5">
+                {stakeholders && stakeholders.map((stakeholder, idx) => (
+                    <span
+                        key={idx}
+                        className={`rounded-full px-3 py-1 text-sm text-white ${getStakeholderColor(
+                            { stakeholder }
+                        )}`}
+                    >
+                        {formatString(stakeholder)}
+                    </span>
+                ))}
+            </div>
+        </div>
+    );
+};
 
 export { Document };

@@ -20,7 +20,7 @@ const HomeButton = ({ handleMunicipalAreas }) => {
   return (
     <div title="Municipal Area" className="custom-home-button" onClick={()=>{handleMunicipalAreas()}}>
       <CenterMap lat={67.8524} lng={20.2438}></CenterMap>
-      <i className="bi bi-house-door-fill"></i> 
+      <i className="bi bi-house-door-fill text-[#464646]"></i>
     </div>
   );
 };
@@ -260,7 +260,7 @@ function GeoreferenceMap(props){
   };
 
   {/* Get all areas to diplay them, the first (presentAreas[0]) should be the municipality one */}
-  const handleMunicipalAreas = async () =>{
+  const handleMunicipalAreas = async () => {
     try{
       if (!presentAreas){
         const allAreas = await API.getAllAreas()
@@ -334,7 +334,7 @@ function GeoreferenceMap(props){
             zoomControl={false}
             style={{ height: "100vh", 
               width: "100vw", 
-              filter: "invert(100%) hue-rotate(180deg) brightness(200%) contrast(90%)" 
+              filter: ""
             }}
             maxBounds={cityBounds}
             minZoom={12}
@@ -441,7 +441,7 @@ function GeoreferenceMap(props){
 
         {/* Modal exit confirm */}
         {showModal &&
-          <div className="fixed inset-0 flex items-center justify-center">
+          <div className="fixed z-[500] inset-0 flex items-center justify-center">
             <div className="flex flex-col justify-items-center align-items-center bg-box_color backdrop-blur-2xl drop-shadow-xl rounded-3xl text-white font-sans p-6">
             <div className="text-2xl mb-2 font-bold">Are you really sure to exit?</div>
             <div className="text-l font-bold">Your changes will be discarded</div>
@@ -531,7 +531,7 @@ function GeoreferenceMap(props){
             {showExit && (
               <button
                 onClick={() => {
-                  setShowModal(true);
+                    setShowModal(true);
                 }}
                 type="button"
                 className="w-44 h-14 bg-[#D9D9D9] bg-opacity-60 shadow text-2xl font-normal text-black rounded-full hover:bg-[#938888] max-md:w-1/2 max-md:h-10"

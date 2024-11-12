@@ -45,6 +45,7 @@ export default {
       },
       backgroundColor: {
         navbar: 'var(--navbar-bg)',
+        navbar_light: 'var(--navbar-bg-light)'
       },
     },
   },

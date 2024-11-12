@@ -157,7 +157,6 @@ body {
 
   .separator {
     height: 1px;              /* Spessore della linea */
-    background-color: var(--white-text);
     margin: 15px 0;           /* Margine sopra e sotto la linea */
     width: 80%;              /* Larghezza della linea */
     border-radius: 20px;

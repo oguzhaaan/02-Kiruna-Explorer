@@ -1,17 +1,17 @@
-import {useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import "./document.css";
 import Alert from "./Alert";
 import API from "../API/API.mjs";
-import {SingleDocument} from "./SingleDocument.jsx";
-import {useNavigate} from "react-router-dom";
+import { SingleDocument } from "./SingleDocument.jsx";
+import { useNavigate } from "react-router-dom";
 import Select from "react-select";
 import DocumentClass from "../classes/Document.mjs";
-import {useTheme} from "../contexts/ThemeContext.jsx";
+import { useTheme } from "../contexts/ThemeContext.jsx";
 
 function Document(props) {
 
-    const {isDarkMode, toggleTheme} = useTheme();
+    const { isDarkMode, toggleTheme } = useTheme();
 
     useEffect(() => {
         props.setNavShow(true);
@@ -19,88 +19,90 @@ function Document(props) {
 
     //className={`w-full px-3 text-xl py-2 text-white bg-input_color rounded-[40px] ${errors.scale ? 'border-red-500 border-1' : ''}`}>
 
-
     const customDropdownStyles = {
         control: (provided, state) => ({
             ...provided,
-            backgroundColor: isDarkMode ? '#d9d9d93f' : '#FFFFFFE2',     // Sfondo del campo
-            borderRadius: '0.375rem',         // Bordo arrotondato come richiesto
-            borderColor: 'transparent',        // Bordo attivo se selezionato
-            padding: '0px 5px',               // Padding interno per centrare il testo
-            boxShadow: 'none',                // Rimozione ombra
+            backgroundColor: isDarkMode ? '#d9d9d93f' : '#FFFFFFE2', // Sfondo del campo
+            borderRadius: '0.375rem', // Bordo arrotondato
+            borderColor: 'transparent', // Bordo trasparente
+            padding: '0px 5px', // Padding per centrare il testo
+            boxShadow: 'none', // Rimuove l'ombra
             cursor: 'pointer',
             fontSize: '1rem',
-
         }),
         singleValue: (provided) => ({
             ...provided,
-            color: 'white',                   // Testo bianco per leggibilità
-            fontSize: '1rem',                 // Testo uniforme e visibile
+            color: 'white', // Testo bianco per leggibilità
+            fontSize: '1rem', // Testo uniforme e visibile
         }),
         placeholder: (provided) => ({
             ...provided,
+            color: isDarkMode ? 'white' : 'black'
         }),
         dropdownIndicator: () => ({
-            display: 'none',                  // Rimuove la freccia predefinita
+            display: 'none', // Rimuove la freccia predefinita
         }),
         indicatorSeparator: () => ({
-            display: 'none',                  // Rimuove la linea separatrice
+            display: 'none', // Rimuove la linea separatrice
         }),
         menu: (provided) => ({
             ...provided,
-            backgroundColor: '#2b2b2b',       // Sfondo opaco per il menu
-            borderRadius: '10px',             // Bordo arrotondato del menu
-            marginTop: '8px',                 // Spazio tra campo e menu
-            padding: '0',                     // Rimuove padding extra
-            overflow: 'hidden',               // Rimuove eventuali scroll imprevisti
-            border: ' 0px solid white'
+            backgroundColor: isDarkMode ? '#2b2b2b' : '#FFFFFF', // Sfondo del menu (bianco in modalità chiara)
+            borderRadius: '8px', // Bordo arrotondato del menu
+            overflow: 'hidden', // Rimuove eventuali scroll imprevisti
+            border: '0px solid white',
         }),
         menuList: (provided) => ({
             ...provided,
-            padding: '0',                     // Rimuove padding extra
-
+            padding: '0', // Rimuove padding extra
         }),
         option: (provided, state) => ({
             ...provided,
-            backgroundColor: state.isSelected ? '#373737a6' : '#373737a6',  // Sfondo opzione selezionata
+            backgroundColor: state.isSelected
+                ? isDarkMode
+                    ? '#373737a6' // Sfondo opzione selezionata in modalità scura
+                    : '#d3d3d3' // Sfondo opzione selezionata in modalità chiara
+                : isDarkMode
+                    ? '#373737a6' // Sfondo opzione non selezionata in modalità scura
+                    : '#FFFFFF', // Sfondo opzione non selezionata in modalità chiara
             cursor: 'pointer',
-            fontSize: '1rem',                 // Aumenta la dimensione del testo delle opzioni
+            fontSize: '0.9rem', // Aumenta la dimensione del testo delle opzioni
             '&:hover': {
-                backgroundColor: '#1e90ff',   // Colore blu al passaggio del mouse
+                backgroundColor: '#1e90ff', // Colore blu al passaggio del mouse
             },
-            color: isDarkMode ? '#F4F4F4' : '#0e0e0e',
+            color: isDarkMode ? '#F4F4F4' : '#0e0e0e', // Colore del testo
         }),
         multiValue: (provided) => ({
             ...provided,
-            borderRadius: '0.375rem',              // Bordi arrotondati per il tag
-            padding: '7px 7px',               // Padding per rendere i tag più "pillole"
-            margin: '10px 5px',
+            marginLeft: '-10px',
+            marginRight: '15px'
         }),
     };
 
+
     const stakeholderOptions = [
-        {value: "lkab", label: "LKAB"},
-        {value: "municipality", label: "Municipality"},
-        {value: "regional authority", label: "Regional authority"},
-        {value: "architecture firms", label: "Architecture firms"},
-        {value: "citizens", label: "Citizens"},
-        {value: "others", label: "Others"},
+        { value: "lkab", label: "LKAB" },
+        { value: "municipality", label: "Municipality" },
+        { value: "regional authority", label: "Regional authority" },
+        { value: "architecture firms", label: "Architecture firms" },
+        { value: "citizens", label: "Citizens" },
+        { value: "others", label: "Others" },
     ];
 
     const popularLanguages = [
-        {code: "en", name: "English"},
-        {code: "sv", name: "Swedish"},
-        {code: "se", name: "Northern Sami"},
-        {code: "fi", name: "Finnish"},
-        {code: "es", name: "Spanish"},
-        {code: "zh", name: "Chinese"},
-        {code: "fr", name: "French"},
-        {code: "de", name: "German"},
-        {code: "ja", name: "Japanese"},
-        {code: "ru", name: "Russian"},
-        {code: "pt", name: "Portuguese"},
-        {code: "ar", name: "Arabic"},
-        {code: "it", name: "Italian"},
+        { code: "en", name: "English" },
+        { code: "sv", name: "Swedish" },
+        { code: "se", name: "Northern Sami" },
+        { code: "fi", name: "Finnish" },
+        { code: "es", name: "Spanish" },
+        { code: "zh", name: "Chinese" },
+        { code: "fr", name: "French" },
+        { code: "de", name: "German" },
+        { code: "ja", name: "Japanese" },
+        { code: "ru", name: "Russian" },
+        { code: "pt", name: "Portuguese" },
+        { code: "ar", name: "Arabic" },
+        { code: "it", name: "Italian" },
     ];
 
     const [alertMessage, setAlertMessage] = useState(['', '']);
@@ -135,7 +137,7 @@ function Document(props) {
 
         if (event.target.value) {
             setErrors((prevErrors) => {
-                const {title, ...remainingErrors} = prevErrors;
+                const { title, ...remainingErrors } = prevErrors;
                 return remainingErrors;
             });
         }
@@ -149,7 +151,7 @@ function Document(props) {
 
         if (selectedOptions.length > 0) {
             setErrors((prevErrors) => {
-                const {stakeholder, ...remainingErrors} = prevErrors;
+                const { stakeholder, ...remainingErrors } = prevErrors;
                 return remainingErrors;
             });
         }
@@ -163,7 +165,7 @@ function Document(props) {
 
         if (event.target.value !== "none") {
             setErrors((prevErrors) => {
-                const {scale, ...remainingErrors} = prevErrors;
+                const { scale, ...remainingErrors } = prevErrors;
                 return remainingErrors;
             });
         }
@@ -177,7 +179,7 @@ function Document(props) {
 
         if (event.target.value) {
             setErrors((prevErrors) => {
-                const {planNumber, ...remainingErrors} = prevErrors;
+                const { planNumber, ...remainingErrors } = prevErrors;
                 return remainingErrors;
             });
         }
@@ -192,7 +194,7 @@ function Document(props) {
 
         if (selectedDate) {
             setErrors((prevErrors) => {
-                const {date, ...remainingErrors} = prevErrors;
+                const { date, ...remainingErrors } = prevErrors;
                 return remainingErrors;
             });
         }
@@ -206,7 +208,7 @@ function Document(props) {
 
         if (event.target.value !== "none") {
             setErrors((prevErrors) => {
-                const {type, ...remainingErrors} = prevErrors;
+                const { type, ...remainingErrors } = prevErrors;
                 return remainingErrors;
             });
         }
@@ -235,7 +237,7 @@ function Document(props) {
 
         if (event.target.value) {
             setErrors((prevErrors) => {
-                const {description, ...remainingErrors} = prevErrors;
+                const { description, ...remainingErrors } = prevErrors;
                 return remainingErrors;
             });
         }
@@ -297,9 +299,9 @@ function Document(props) {
         <div className={isDarkMode ? 'dark' : 'light'}>
             <div className="bg-background_color_white dark:bg-background_color min-h-screen flex flex-row justify-center">
                 <SingleDocument setNavShow={props.setNavShow} setMode={props.setMode}
-                                setoriginalDocId={props.setoriginalDocId}></SingleDocument>
+                    setoriginalDocId={props.setoriginalDocId}></SingleDocument>
                 <Alert message={alertMessage[0]} type={alertMessage[1]}
-                       clearMessage={() => setAlertMessage(['', ''])}></Alert>
+                    clearMessage={() => setAlertMessage(['', ''])}></Alert>
                 <div className="flex flex-row justify-content-between align-items-center w-full h-16 px-3">
 
                     <div className="flex flex-row items-center ml-14 gap-3">
@@ -321,11 +323,11 @@ function Document(props) {
 
                     <div className="flex flex-row justify-content-end gap-3 align-items-center">
                         <button onClick={toggleModal}
-                                className="bg-primary_color_light dark:bg-primary_color_dark hover:bg-[#2E6A8E66] transition text-black_text dark:text-white_text grid justify-items-end py-2 px-4 rounded-md">
+                            className="bg-primary_color_light dark:bg-primary_color_dark hover:bg-[#2E6A8E66] transition text-black_text dark:text-white_text grid justify-items-end py-2 px-4 rounded-md">
                             <span className="text-base"><i className="bi bi-file-earmark-plus"></i> Add document</span>
                         </button>
 
-                            {/* Change Theme Button */}
+                        {/* Change Theme Button */}
                         <button
                             className="text-black_text dark:text-white_text grid justify-items-center transition-transform transform hover:scale-105 active:scale-95"
                             onClick={() => {
@@ -333,14 +335,14 @@ function Document(props) {
                             }}>
                             <div className="flex justify-center items-center gap-2 relative">
                                 <i className="bi bi-sun-fill transition-opacity duration-300 ease-in-out text-2xl"
-                                   style={{opacity: isDarkMode ? 0.2 : 1}}></i>
+                                    style={{ opacity: isDarkMode ? 0.2 : 1 }}></i>
                                 <i className="bi bi-moon-fill transition-opacity duration-300 ease-in-out text-2xl"
-                                   style={{opacity: isDarkMode ? 1 : 0.2}}></i>
+                                    style={{ opacity: isDarkMode ? 1 : 0.2 }}></i>
                             </div>
                         </button>
 
                         <button
-                            className="bg-[#2E6A8E] justify-items-end text-black_text dark:text-white_text py-2 px-5 rounded-md"
+                            className="bg-primary_color_light dark:bg-primary_color_dark hover:bg-[#2E6A8E66] justify-items-end text-black_text dark:text-white_text py-2 px-5 rounded-md"
                             onClick={() => {
                                 navigate("/documents/1")
                             }}>
@@ -351,35 +353,38 @@ function Document(props) {
             </div>
 
             {props.isModalOpen && (
-                <div className={`${isDarkMode ? "dark-select" : "light-select"} py-4 fixed inset-0 flex items-center justify-center scrollbar-thin scrollbar-webkit`}>
+                <div className={`${isDarkMode ? "dark-select" : "light-select"} py-4 fixed inset-0 flex items-center justify-center scrollbar-thin scrollbar-webkit`}
+                    onClick={toggleModal}
+                >
 
                     <div
-                        className="bg-box_white_color dark:bg-box_color backdrop-blur-2xl drop-shadow-xl w-3/6 p-6 h-full overflow-y-auto rounded-lg flex flex-col items-center relative scrollbar-thin scrollbar-webkit">
-                        <h2 className="text-black_text dark:text-white_text text-xl font-bold ">Add New Document</h2>
+                        className="bg-box_white_color dark:bg-box_color backdrop-blur-2xl drop-shadow-xl w-3/6 px-16 py-10 h-full overflow-y-auto rounded-lg flex flex-col relative scrollbar-thin scrollbar-webkit"
+                        onClick={(e) => e.stopPropagation()}
+                        >
+                        <h2 className="text-black_text mb-4 dark:text-white_text text-2xl  ">Add New Document</h2>
                         <button onClick={toggleModal}
-                                className="absolute top-5 text-black_text dark:text-white_text right-4 hover:text-gray-600">
+                            className="absolute top-5 text-black_text dark:text-white_text right-4 hover:text-gray-600">
                             <i className="bi bi-x-lg text-2xl"></i>
                         </button>
 
                         <div className="input-title mb-4 w-full">
-                            <label className="text-black_text dark:text-white_text w-full ml-2 mb-1 text-base text-left">Title*</label>
+                            <label className="text-black_text dark:text-white_text w-full ml-2 mb-1 text-base text-left">Title<span className="text-red-400">*</span></label>
                             <input
                                 type="text"
                                 placeholder="Title"
                                 value={props.newDocument.title}
                                 onChange={handleTitle}
-                                className={`w-full px-3 text-base py-2 text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md ${errors.title ? 'border-red-500 border-1' : ''}`}
+                                className={`w-full px-3 text-base py-2 text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md ${errors.title ? 'border-red-500 border-1' : 'focus:border-blue-400 border-1 border-transparent'} focus:outline-none`}
                             />
                         </div>
 
                         <div className="input-stakeholder mb-4 w-full">
-                            <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Stakeholders*</label>
+                            <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Stakeholders<span className="text-red-400">*</span></label>
                             <Select
                                 isMulti
                                 options={stakeholderOptions}
                                 value={props.newDocument.stakeholders}
                                 onChange={handleStakeholder}
-                                classNamePrefix="react-select"
                                 styles={customDropdownStyles}
                                 placeholder="None"
                                 isClearable={false}
@@ -389,12 +394,12 @@ function Document(props) {
                         </div>
 
                         <div className="input-scale mb-4 w-full">
-                            <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Scale*</label>
+                            <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Scale<span className="text-red-400">*</span></label>
                             <select
                                 id="document-type"
                                 value={props.newDocument.scale}
                                 onChange={handleScale}
-                                className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text bg-input_color_light dark:bg-input_color_dark rounded-md ${errors.scale ? 'border-red-500 border-1' : ''}`}>
+                                className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text bg-input_color_light dark:bg-input_color_dark rounded-md ${errors.title ? 'border-red-500 border-1' : 'focus:border-blue-400 border-1 border-transparent'} focus:outline-none`}>
                                 <option value="none">None</option>
                                 <option value="text">Text</option>
                                 <option value="concept">Concept</option>
@@ -413,29 +418,29 @@ function Document(props) {
                                     value={props.newDocument.planNumber}
                                     placeholder="n"
                                     onChange={handlePlanNumber}
-                                    className={`w-full text-base px-3 py-2 text-text-black_text dark:text-white_text bg-input_color_light dark:bg-input_color_dark rounded-md ${errors.planNumber ? 'border-red-500 border-1' : ''}`}>
+                                    className={`w-full text-base px-3 py-2 text-text-black_text dark:text-white_text bg-input_color_light dark:bg-input_color_dark rounded-md ${errors.title ? 'border-red-500 border-1' : 'focus:border-blue-400 border-1 border-transparent'} focus:outline-none`}>
                                 </input>
                             </div>}
 
                         <div className="input-date mb-4 w-full">
                             <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Issuance
-                                date*</label>
+                                date<span className="text-red-400">*</span></label>
                             <input
                                 id="document-date"
                                 type="date"
                                 value={props.newDocument.date}
                                 onChange={handleDate}
-                                className={`w-full px-3 text-base py-2 text-placeholder_color text-text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md  ${errors.date ? 'border-red-500 border-1' : ''}`}>
-                            </input>
+                                className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md ${isDarkMode ? 'dark-mode' : 'light-mode'} ${errors.title ? 'border-red-500 border-1' : 'focus:border-blue-400 border-1 border-transparent'} focus:outline-none`}
+                            />
                         </div>
 
                         <div className="input-type mb-4 w-full">
-                            <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Type*</label>
+                            <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Type<span className="text-red-400">*</span></label>
                             <select
                                 id="document-type"
                                 value={props.newDocument.type}
                                 onChange={handleType}
-                                className={`w-full px-3 text-base py-2 text-black_text dark:text-white_text bg-input_color_light dark:bg-input_color_dark rounded-md ${errors.type ? 'border-red-500 border-1' : ''}`}>
+                                className={`w-full px-3 text-base py-2 text-black_text dark:text-white_text bg-input_color_light dark:bg-input_color_dark rounded-md ${errors.title ? 'border-red-500 border-1' : 'focus:border-blue-400 border-1 border-transparent'} focus:outline-none`}>
                                 <option value="none">None</option>
                                 <option value="design">Design document</option>
                                 <option value="informative">Informative document</option>
@@ -454,7 +459,7 @@ function Document(props) {
                                 id="document-language"
                                 value={props.newDocument.language}
                                 onChange={handleLanguage}
-                                className="w-full px-3 text-base py-2 text-placeholder_color text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md">
+                                className="w-full px-3 text-base py-2 text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md focus:border-blue-400 border-1 border-transparent focus:outline-none">
                                 <option value="">None</option>
                                 {popularLanguages.map((lang) => (
                                     <option key={lang.code} value={lang.code}>
@@ -473,17 +478,17 @@ function Document(props) {
                                 value={props.newDocument.pages}
                                 placeholder="Select a number"
                                 onChange={handleNumber}
-                                className="w-full text-base px-3 py-2 text-placeholder_color text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md">
+                                className="w-full text-base px-3 py-2 text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md focus:border-blue-400 border-1 border-transparent :outline-none">
                             </input>
                         </div>
 
                         <div className="input-description mb-4 w-full">
-                            <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Description*</label>
+                            <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Description<span className="text-red-400">*</span></label>
                             <textarea
                                 placeholder="Description"
                                 value={props.newDocument.description}
                                 onChange={handleDescription}
-                                className={`w-full p-2 px-3 py-2 text-base text-text-black_text dark:text-white_text border-gray-300 placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark ${errors.description ? 'border-red-500 border-1' : ''}`}
+                                className={`w-full p-2 px-3 py-2 text-base text-text-black_text dark:text-white_text border-gray-300 placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark  ${errors.title ? 'border-red-500 border-1' : 'focus:border-blue-400 border-1 border-transparent'} focus:outline-none`}
                                 rows="4"
                             ></textarea>
                         </div>
@@ -498,7 +503,7 @@ function Document(props) {
                                 onClick={() => {
                                     navigate("/map")
                                 }}
-                                className="w-full p-2 text-base text-white_text dark:text-black_text border border-gray-300 focus:outline-none bg-customGray1 dark:bg-[#D9D9D9] rounded-md">
+                                className="w-full p-2 text-white_text dark:text-black_text text-base border-gray-300 focus:outline-none bg-customGray1 dark:bg-[#D9D9D9] hover:bg-[#000000] dark:hover:bg-customGray1 :transition rounded-md">
                                 <i className="bi bi-globe-europe-africa"></i> Open the Map
                             </button>
                         </div>
@@ -515,14 +520,14 @@ function Document(props) {
                                     props.setMode("return");
                                     navigate("/linkDocuments");
                                 }}
-                                className="w-full p-2 text-white_text dark:text-black_text border text-base border-gray-300 focus:outline-none bg-customGray1 dark:bg-[#D9D9D9] rounded-md"> Select
+                                className="w-full p-2 text-white_text dark:text-black_text text-base border-gray-300 focus:outline-none bg-customGray1 dark:bg-[#D9D9D9] hover:bg-[#000000] dark:hover:bg-customGray1 :transition rounded-md"> Select
                                 Documents to Link
                             </button>
                         </div>
 
                         {/* Save button */}
                         <button
-                            className="bg-primary_color_dark w-full font-bold text-lg text-white_text py-2 px-4 rounded-lg mt-4"
+                            className="bg-primary_color_light dark:bg-primary_color_dark w-full hover:bg-[#2E6A8E66] transition  text-lg dark:text-white_text text-black_text py-2 px-4 rounded-lg mt-4"
                             onClick={handleConfirm}>
                             Confirm
                         </button>
@@ -535,4 +540,4 @@ function Document(props) {
     );
 }
 
-export {Document};
+export { Document };

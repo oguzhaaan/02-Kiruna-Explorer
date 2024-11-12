@@ -10,6 +10,7 @@ import markerpin from "../assets/marker-pin.svg"
 import polygonpin from "../assets/polygon-pin.svg"
 import municipalarea from "../assets/municipal-area.svg"
 import { useTheme } from "../contexts/ThemeContext.jsx";
+import { getIcon } from "./Utilities/DocumentIcons.jsx";
 
 
 function CenterMap({ lat, lng }) {
@@ -208,6 +209,8 @@ function Markers({ area, handleClick, clickedArea }) {
   const map = useMap()
   const [areaDoc, setAreaDoc] = useState([])
   const geometry = area.geoJson.geometry;
+  const { isDarkMode } = useTheme();
+
 
   console.log(geometry.coordinates[0])
   const GenericPoints = L.icon({
@@ -236,6 +239,7 @@ function Markers({ area, handleClick, clickedArea }) {
       try {
         const docs = await API.getDocumentsFromArea(area.id)
         setAreaDoc(docs)
+        console.log(docs);
       }
       catch (err) {
         setAreaDoc("")
@@ -261,12 +265,22 @@ function Markers({ area, handleClick, clickedArea }) {
               }
             }}
           >
-            <Tooltip
-              permanent
-            >
-              {/* Permanent mantiene il Tooltip sempre visibile */}
-              Descrizione del marker
+            <Tooltip permanent>
+              {/* Contenitore principale con flexbox per disporre gli elementi in riga */}
+              <div className="flex flex-row items-center space-x-2 flex-wrap max-w-full">
+                {areaDoc.map((doc, index) => (
+                  <React.Fragment key={index}>
+                    <img
+                      src={getIcon({ type: doc.type }, { isDarkMode })} // Usa l'icona corrispondente o una di default
+                      alt={doc.type}
+                      className="w-[30px] h-[30px]"
+                    />
+                    <span className="counter-documents text-lg">1</span>
+                  </React.Fragment>
+                ))}
+              </div>
             </Tooltip>
+
           </Marker>
           {
             clickedArea === area.id &&
@@ -294,11 +308,18 @@ function Markers({ area, handleClick, clickedArea }) {
               }
             }}
           >
-            <Tooltip
-              permanent
-            >
-              {/* Permanent mantiene il Tooltip sempre visibile */}
-              Descrizione del marker
+            <Tooltip permanent>
+              {/* Mappa i documenti per mostrare le icone con i numeri */}
+              {areaDoc.map((doc, index) => (
+                <div key={index} style={{ display: 'flex', minWidth: '4em', minHeight: '1.5em', alignItems: 'col', marginBottom: '5px' }}>
+                  <img
+                    src={getIcon({ type: doc.type }, { isDarkMode })} // Usa l'icona corrispondente o una di default
+                    alt={doc.type}
+                    style={{ width: '30px', height: '30px', marginRight: '5px' }}
+                  />
+                  <span className="counter-documents text-lg ">1</span>
+                </div>
+              ))}
             </Tooltip>
           </Marker>
         </>

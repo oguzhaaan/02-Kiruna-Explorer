@@ -64,7 +64,7 @@ function NavHeader (props) {
                             Documents
                         </Col>
                     </Row>
-                    <Row className={`offcanvas-item w-100 p-1 border-3 ${currentRoute.includes("map")? " border-[#2E6A8E] ":""}`} onClick={() => {}} >
+                    <Row className={`offcanvas-item w-100 p-1 border-3 ${currentRoute.includes("map")? " border-[#2E6A8E] ":""}`} onClick={() => {navigate("/mapDocuments")}} >
                         <Col xs="auto">
                             <i className="bi bi-globe-americas fs-2 align-middle"></i>
                         </Col>

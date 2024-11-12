@@ -280,8 +280,7 @@ function Document(props) {
     };
 
     const handleConfirm = async () => {
-        // Refresh the list of the documents
-        setRefreshList(prev => prev + 1)
+
         //CAMPI OPZIONALI: PAGE + LANGUAGE + GIORNO DELLA DATA(?) + COORDINATES
         //CAMPI OBBLIGATORI: TITLE + STAKEHOLDER + SCALE(PLANE NUMBER IN CASE) + DATE + DESCRIPTION + TYPE 
 
@@ -320,6 +319,9 @@ function Document(props) {
             console.log(error);
             setAlertMessage([error.message, 'error']);
         }
+
+        // Refresh the list of the documents
+        setRefreshList(prev => prev + 1)
     }
 
     const resetForm = () => {

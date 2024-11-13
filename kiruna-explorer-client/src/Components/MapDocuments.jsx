@@ -12,13 +12,6 @@ import municipalarea from "../assets/municipal-area.svg"
 import { useTheme } from "../contexts/ThemeContext.jsx";
 import { getIcon } from "./Utilities/DocumentIcons.jsx";
 
-
-function CenterMap({ lat, lng }) {
-  const map = useMap();
-  map.panTo([lat, lng]);
-  return null;
-}
-
 function GeoreferenceMapDoc(props) {
   const { isDarkMode } = useTheme();
   const navigate = useNavigate()
@@ -26,12 +19,12 @@ function GeoreferenceMapDoc(props) {
   const latitude = 67.8558;
   const longitude = 20.2253;
 
-  const [popupContent, setPopupContent] = useState("");
-  const [popupPosition, setPopupPosition] = useState(null);
   const [showExit, setShowExit] = useState(true);
   const [presentAreas, setPresentAreas] = useState(null);
   const [clickedArea, setClickedArea] = useState(null);
   const [alertMessage, setAlertMessage] = useState("");
+  const [showDocModal, setShowDocModal] = useState(false)
+  const [currDocs, setCurrDocs] = useState([])
 
   const mapRef = useRef(null);
 
@@ -58,7 +51,7 @@ function GeoreferenceMapDoc(props) {
   {/* Refresh to show modifications*/ }
   useEffect(() => {
     //refresh
-  }, [showExit, presentAreas])
+  }, [showExit, presentAreas, showDocModal])
 
   const cityBounds = [
     [67.92532085836797, 20.245374612817344],
@@ -73,29 +66,15 @@ function GeoreferenceMapDoc(props) {
     if (content === clickedArea) {
       setClickedArea(null)
     } else {
-      setAlertMessage(`You selected Area N.${content}`)
+      if (content===1){
+        setAlertMessage(`Municipal Area`)
+      }
+      else{
+        setAlertMessage(`Area N.${content}`)
+      }
       setClickedArea(content)
     }
 
-  };
-
-  {/* Mouse over and out area */ }
-  const handleMouseOver = (e) => {
-
-    e.target.setStyle({
-      fillOpacity: 0.7,
-      opacity: 0.7
-    });
-    e.target.bringToFront();
-  };
-
-  const handleMouseOut = (e) => {
-
-    e.target.setStyle({
-      fillOpacity: 0.1,
-      opacity: 0.1
-    });
-    e.target.bringToBack();
   };
 
   return (
@@ -123,17 +102,27 @@ function GeoreferenceMapDoc(props) {
           {/* Visualize All present Areas*/}
           {
             presentAreas && presentAreas.map((area, index) =>
-              <Markers key={index} area={area} handleClick={handleClick} clickedArea={clickedArea}></Markers>
+              <Markers key={index} area={area} handleClick={handleClick} clickedArea={clickedArea} setShowDocModal={setShowDocModal} setCurrDocs={setCurrDocs}></Markers>
             )
           }
-
-          {popupPosition && (
-            <Popup position={popupPosition}>
-              <div>{popupContent}</div>
-            </Popup>
-          )}
         </MapContainer>
 
+        {/* Documents modal */}
+        { showDocModal &&
+          <div className={`${isDarkMode ? 'dark' : 'light'} fixed inset-0 z-[2000] flex items-center justify-center scrollbar-thin scrollbar-webkit`}>
+            <div className="flex flex-col justify-items-center align-items-center bg-box_white_color dark:bg-box_color backdrop-blur-2xl drop-shadow-xl rounded-xl text-black_text dark:text-white_text font-sans p-6">
+            {/* NavBar (X) */}
+            <div className="w-100 flex flex-row justify-content-end">
+                    <button onClick={() => {
+                        setShowDocModal(false);
+                        setCurrDocs([])
+                    }} className="text-black_text dark:text-white_text text-base right-4 hover:text-gray-600">
+                        <i className="bi bi-x-lg text-2xl"></i>
+                    </button>
+                </div>
+              </div>
+          </div>
+        }
         {/* Alert message */}
         {alertMessage && (
           <div style={{
@@ -157,7 +146,7 @@ function GeoreferenceMapDoc(props) {
 
         <div className="absolute flex flex-row bottom-5 w-100 justify-end z-[1000] max-md:flex-col max-md:block">
 
-          {/* Exit and Save buttons */}
+          {/* Exit button */}
           <div
             style={{
               gap: "10px",
@@ -205,156 +194,171 @@ function calculateCentroid(coordinates) {
   return [centroidY, centroidX]; // Restituisci in formato [latitudine, longitudine]
 }
 
-function Markers({ area, handleClick, clickedArea }) {
+function Markers({ area, handleClick, clickedArea, setShowDocModal, setCurrDocs }) {
   const map = useMap()
   const [areaDoc, setAreaDoc] = useState([])
   const geometry = area.geoJson.geometry;
   const [tooltipVisible, setTooltipVisible] = useState(true); // Stato per visibilità del Tooltip
   const [isZoomLevelLow, setIsZoomLevelLow] = useState(false); // Stato per controllare il livello di zoom
   const { isDarkMode } = useTheme();
+  const [groupedDocs, setGroupedDocs] = useState([])
 
   console.log(geometry.coordinates[0])
   const GenericPoints = L.icon({
-    iconUrl: markerpin,
-    iconSize: [35, 45],
-    iconAnchor: [20, 40], // Imposta l'ancoraggio (es. al centro-inferiore dell'icona)
-    shadowSize: [41, 41]
+      iconUrl: markerpin,
+      iconSize: [35, 45],
+      iconAnchor: [20, 40], // Imposta l'ancoraggio (es. al centro-inferiore dell'icona)
+      shadowSize: [41, 41]
   });
 
   const GenericPolygon = L.icon({
-    iconUrl: polygonpin,
-    iconSize: [30, 41],
-    iconAnchor: [20, 40], // Imposta l'ancoraggio (es. al centro-inferiore dell'icona)
-    shadowSize: [41, 41]
+      iconUrl: polygonpin,
+      iconSize: [30, 41],
+      iconAnchor: [20, 40], // Imposta l'ancoraggio (es. al centro-inferiore dell'icona)
+      shadowSize: [41, 41]
   });
 
   const MunicipalArea = L.icon({
-    iconUrl: municipalarea,
-    iconSize: [30, 41],
-    iconAnchor: [20, 40], // Imposta l'ancoraggio (es. al centro-inferiore dell'icona)
-    shadowSize: [41, 41]
+      iconUrl: municipalarea,
+      iconSize: [30, 41],
+      iconAnchor: [20, 40], // Imposta l'ancoraggio (es. al centro-inferiore dell'icona)
+      shadowSize: [41, 41]
   });
 
   useEffect(() => {
-    const takeDocumentsArea = async () => {
-      try {
-        const docs = await API.getDocumentsFromArea(area.id)
-        setAreaDoc(docs)
-      } catch (err) {
-        setAreaDoc([])
+      const takeDocumentsArea = async () => {
+          try {
+              const docs = await API.getDocumentsFromArea(area.id)
+              setAreaDoc(docs)
+              const groupedByType = docs.reduce((acc,item)=>{
+                  if (!acc[item.type]) {
+                      acc[item.type] = 0;
+                  }
+                  // Incrementa il conteggio per il tipo corrente
+                  acc[item.type]++;
+                  return acc;
+              },{})
+              console.log(groupedByType)
+              setGroupedDocs(Object.entries(groupedByType))
+          } catch (err) {
+              setAreaDoc([])
+          }
       }
-    }
-    takeDocumentsArea()
+      takeDocumentsArea()
   }, [])
 
   useEffect(() => {
-    // Funzione per monitorare il livello di zoom
-    const handleZoom = () => {
-      if (map.getZoom() <= 13) {
-        setIsZoomLevelLow(true); // Livello di zoom basso, mostra solo il numero di documenti
-      } else {
-        setIsZoomLevelLow(false); // Livello di zoom alto, mostra anche le icone
-      }
-    };
+      // Funzione per monitorare il livello di zoom
+      const handleZoom = () => {
+          if (map.getZoom() <= 13) {
+              setIsZoomLevelLow(true); // Livello di zoom basso, mostra solo il numero di documenti
+          } else {
+              setIsZoomLevelLow(false); // Livello di zoom alto, mostra anche le icone
+          }
+      };
 
-    map.on('zoomend', handleZoom);
-    // Controllo iniziale del livello di zoom
-    handleZoom();
+      map.on('zoomend', handleZoom);
+      // Controllo iniziale del livello di zoom
+      handleZoom();
 
-    // Pulizia del listener quando il componente viene smontato
-    return () => {
-      map.off('zoomend', handleZoom);
-    };
+      // Pulizia del listener quando il componente viene smontato
+      return () => {
+          map.off('zoomend', handleZoom);
+      };
   }, [map]);
 
   return (
-    geometry.type === 'Polygon' ? (
-      areaDoc && (
-        <>
-          <Marker
-            position={calculateCentroid(geometry.coordinates[0])} // Inverti lat/lng per Leaflet
-            icon={area.id === 1 ? MunicipalArea : GenericPolygon} // Puoi scegliere di usare un'icona personalizzata per i punti
-            eventHandlers={{
-              click: (e) => {
-                handleClick(e, area.id),
-                  map.panTo(calculateCentroid(geometry.coordinates[0]))
-              }
-            }}
-          >
-            {tooltipVisible && (
-              <Tooltip permanent>
-                {/* Se il livello di zoom è basso, mostra solo il numero di documenti */}
-                {isZoomLevelLow ? (
-                  <span className="w-full counter-documents text-lg">{areaDoc.length}</span>
-                ) : (
-                  <div className=" flex flex-row ">
-                  {
-                    areaDoc.map((doc, index) => (
-                      <div key={index} style={{ display: 'flex', minWidth: '4em', minHeight: '1.5em', margin: '5px', flexDirection: 'row' }}>
-                        <img
-                          src={getIcon({ type: doc.type }, { isDarkMode })}
-                          alt={doc.type}
-                          style={{ width: '30px', height: '30px', marginRight: '5px' }}
-                        />
-                        <span className="counter-documents text-lg">1</span>
-                      </div>
-                    ))
-                  }
-                  </div>
-                )}
-              </Tooltip>
-            )}
-          </Marker>
+      geometry.type === 'Polygon' ? (
+          areaDoc && (
+              <>
+                  <Marker
+                      position={calculateCentroid(geometry.coordinates[0])} // Inverti lat/lng per Leaflet
+                      icon={area.id === 1 ? MunicipalArea : GenericPolygon} // Puoi scegliere di usare un'icona personalizzata per i punti
+                      eventHandlers={{
+                          click: (e) => {
+                              handleClick(e, area.id),
+                                  map.panTo(calculateCentroid(geometry.coordinates[0]))
+                          }
+                      }}
+                  >
+                      {tooltipVisible && (
+                          <Tooltip permanent onClick={()=>setShowDocModal(true)} className=" cursor-pointer">
+                            <div onClick={() => {setCurrDocs(areaDoc),setShowDocModal(true)}} style={{ cursor: 'pointer', pointerEvents: 'auto' }}>
+                              {/* Se il livello di zoom è basso, mostra solo il numero di documenti */}
+                              {isZoomLevelLow ? (
+                                  <span className="w-full counter-documents text-lg">{areaDoc.length}</span>
+                              ) : (
+                                  <div className=" flex flex-row ">
+                                      {
+                                          groupedDocs.map(([type,num]) => (
+                                              <div key={type} style={{ display: 'flex', minWidth: '4em', minHeight: '1.5em', margin: '5px', flexDirection: 'row'}}>
+                                                  <img
+                                                      src={getIcon({ type: type }, { isDarkMode })}
+                                                      alt={type}
+                                                      style={{ width: '30px', height: '30px', marginRight: '5px' }}
+                                                  />
+                                                  <span className="counter-documents text-lg">{num}</span>
+                                              </div>
+                                          ))
+                                      }
+                                  </div>
+                              )}
+                              </div>
+                          </Tooltip>
+                      )}
+                  </Marker>
 
-          {clickedArea === area.id && (
-            <Polygon
-              positions={geometry.coordinates[0].map(coord => [coord[1], coord[0]])} // Inverti le coordinate per Leaflet
-              pathOptions={{ color: 'blue' }}
-            />
-          )}
-        </>
+                  {clickedArea === area.id && (
+                      <Polygon
+                          positions={geometry.coordinates[0].map(coord => [coord[1], coord[0]])} // Inverti le coordinate per Leaflet
+                          pathOptions={{ color: 'blue' }}
+                      />
+                  )}
+              </>
+          )
+      ) : (
+          areaDoc && (
+              <>
+                  <Marker
+                      key={area.id}
+                      position={[geometry.coordinates[1], geometry.coordinates[0]]} // Inverti lat/lng per Leaflet
+                      icon={GenericPoints} // Puoi scegliere di usare un'icona personalizzata per i punti
+                      eventHandlers={{
+                          click: (e) => {
+                              handleClick(e, area.id),
+                                  map.panTo([geometry.coordinates[1], geometry.coordinates[0]])
+                          }
+                      }}
+                  >
+                      {tooltipVisible && (
+                          <Tooltip permanent onClick={()=>setShowDocModal(true)} className=" cursor-pointer">
+                            <div onClick={() =>  {setCurrDocs(areaDoc),setShowDocModal(true)}} style={{ cursor: 'pointer', pointerEvents: 'auto' }}>
+                              {/* Se il livello di zoom è basso, mostra solo il numero di documenti */}
+                              {isZoomLevelLow ? (
+                                  <span className="w-full counter-documents text-lg">{areaDoc.length}</span>
+                              ) : (
+                                  <div className=" flex flex-row ">
+                                      {
+                                          groupedDocs.map(([type,num]) => (
+                                              <div key={type} style={{ display: 'flex', minWidth: '4em', minHeight: '1.5em', margin: '5px', flexDirection: 'row'}}>
+                                                  <img
+                                                      src={getIcon({ type: type }, { isDarkMode })}
+                                                      alt={type}
+                                                      style={{ width: '30px', height: '30px', marginRight: '5px' }}
+                                                  />
+                                                  <span className="counter-documents text-lg">{num}</span>
+                                              </div>
+                                          ))
+                                      }
+                                  </div>
+                              )}
+                              </div>
+                          </Tooltip>
+                      )}
+                  </Marker>
+              </>
+          )
       )
-    ) : (
-      areaDoc && (
-        <>
-          <Marker
-            key={area.id}
-            position={[geometry.coordinates[1], geometry.coordinates[0]]} // Inverti lat/lng per Leaflet
-            icon={GenericPoints} // Puoi scegliere di usare un'icona personalizzata per i punti
-            eventHandlers={{
-              click: (e) => {
-                handleClick(e, area.id),
-                  map.panTo([geometry.coordinates[1], geometry.coordinates[0]])
-              }
-            }}
-          >
-             {tooltipVisible && (
-              <Tooltip permanent>
-                {/* Se il livello di zoom è basso, mostra solo il numero di documenti */}
-                {isZoomLevelLow ? (
-                  <span className="w-full counter-documents text-lg">{areaDoc.length}</span>
-                ) : (
-                  <div className=" flex flex-row ">
-                  {
-                    areaDoc.map((doc, index) => (
-                      <div key={index} style={{ display: 'flex', minWidth: '4em', minHeight: '1.5em', margin: '5px', flexDirection: 'row' }}>
-                        <img
-                          src={getIcon({ type: doc.type }, { isDarkMode })}
-                          alt={doc.type}
-                          style={{ width: '30px', height: '30px', marginRight: '5px' }}
-                        />
-                        <span className="counter-documents text-lg">1</span>
-                      </div>
-                    ))
-                  }
-                  </div>
-                )}
-              </Tooltip>
-            )}
-          </Marker>
-        </>
-      )
-    )
   );
 }
 

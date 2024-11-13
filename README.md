@@ -508,7 +508,7 @@ $docker compose build
 $docker compose up
 ```
 
-**note**: You need to have Docker Desktop installed 
+**note**: You need to have Docker Desktop installed and opened in background
 
 ## LICENSE
 

@@ -6,14 +6,7 @@ import {getIcon} from "./Utilities/DocumentIcons";
 import API from "../API/API.mjs";
 import PropTypes from 'prop-types';
 import {useTheme} from "../contexts/ThemeContext.jsx";
-
-function formatString(input) {
-    return input
-        .replace(/_/g, " ") // Replace underscores with spaces
-        .split(" ") // Split the string into an array of words
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
-        .join(" "); // Join the words back into a single string
-}
+import { formatString } from "./Utilities/StringUtils.js";
 
 const LinkDocuments = ({originalDocId, mode, setConnectionsInForm, setOriginalDocId}) => {
     const navigate = useNavigate();

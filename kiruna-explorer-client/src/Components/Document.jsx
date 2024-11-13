@@ -10,21 +10,16 @@ import DocumentClass from "../classes/Document.mjs";
 import {useTheme} from "../contexts/ThemeContext.jsx";
 import {getStakeholderColor} from "./Utilities/StakeholdersColors";
 import {getIcon} from "./Utilities/DocumentIcons";
-
-function formatString(input) {
-    return input
-        .replace(/_/g, " ") // Replace underscores with spaces
-        .split(" ") // Split the string into an array of words
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
-        .join(" "); // Join the words back into a single string
-}
+import { formatString } from "./Utilities/StringUtils.js";
 
 
 function Document(props) {
 
-    const {isDarkMode, toggleTheme} = useTheme();
+    const navigate = useNavigate();
 
-    // All Documents
+    const { isDarkMode, toggleTheme } = useTheme();
+
+    // --- Update Documents List ---
     const [documents, setDocuments] = useState([]);
     const [refreshList, setRefreshList] = useState(0);
     useEffect(() => {
@@ -42,15 +37,119 @@ function Document(props) {
         fetchDocuments();
     }, [refreshList]);
 
-    console.log("Connections:\n");
-    console.log(props.connections);
+    // --- Handle Fields Changes ---
+    const handleFieldChange = (field, value) => {
+        props.setNewDocument(prevDoc => ({
+            ...prevDoc,
+            [field]: value
+        }));
+        if (value && value !== "none") {
+            setErrors(prevErrors => {
+                const { [field]: removedError, ...remainingErrors } = prevErrors;
+                return remainingErrors;
+            });
+        }
+    };
 
+    const handleTitle = (event) => handleFieldChange("title", event.target.value);
+    const handleStakeholder = (selectedOptions) => handleFieldChange("stakeholders", selectedOptions || []);
+    const handleScale = (event) => handleFieldChange("scale", event.target.value);
+    const handlePlanNumber = (event) => handleFieldChange("planNumber", event.target.value);
+    const handleDate = (event) => {
+        const selectedDate = dayjs(event.target.value).format("YYYY/MM/DD");
+        handleFieldChange("date", selectedDate);
+    };
+    const handleType = (event) => handleFieldChange("type", event.target.value);
+    const handleLanguage = (event) => handleFieldChange("language", event.target.value);
+    const handleNumber = (event) => handleFieldChange("pages", event.target.value);
+    const handleDescription = (event) => handleFieldChange("description", event.target.value);
+
+    // --- Errors ---
+    const [errors, setErrors] = useState({});
+    const validateFields = () => {
+        const newErrors = {
+            ...(props.newDocument.title ? {} : { title: "Title is required" }),
+            ...(props.newDocument.stakeholders?.length > 0 ? {} : { stakeholder: "At least one stakeholder is required" }),
+            ...(props.newDocument.scale && props.newDocument.scale !== "none" ? {} : { scale: "Scale is required" }),
+            ...(props.newDocument.scale === "plan" && !props.newDocument.planNumber 
+                ? { planNumber: "Plan Number is required for scale 'plan'" } 
+                : {}),
+            ...(props.newDocument.date ? {} : { date: "Date is required" }),
+            ...(props.newDocument.type && props.newDocument.type !== "none" ? {} : { type: "Type is required" }),
+            ...(props.newDocument.description ? {} : { description: "Description is required" })
+        };
+    
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const clearErrors = () => {
+        setErrors({});
+    };
+
+    // --- Submit Form ---
+    const handleConfirm = async () => {
+        // Refresh the list of the documents
+        setRefreshList(prev => prev + 1)
+        //CAMPI OPZIONALI: PAGE + LANGUAGE + GIORNO DELLA DATA(?) + COORDINATES
+        //CAMPI OBBLIGATORI: TITLE + STAKEHOLDER + SCALE(PLANE NUMBER IN CASE) + DATE + DESCRIPTION + TYPE 
+
+
+        const documentData = {
+            title: props.newDocument.title,
+            stakeholder: props.newDocument.stakeholders.map((e) => {
+                return e.value;
+            }),
+            scale: props.newDocument.scale,
+            planNumber: props.newDocument.planNumber, // Optional
+            date: props.newDocument.date, //day is optional
+            type: props.newDocument.type,
+            language: props.newDocument.language || null, // Set to null if not provided
+            pageNumber: props.newDocument.pages || null, // Set to null if not provided
+            description: props.newDocument.description, // Mandatory
+            areaId: props.newAreaId,
+            links: props.connections.length > 0 ? props.connections : null
+        };
+
+        console.log(documentData);
+
+        if (!validateFields()) {
+            setAlertMessage(['Please fill all the mandatory fields.', 'error']);
+            return;
+        }
+
+        try {
+            await API.addDocument(documentData);
+            setAlertMessage(['Document added successfully!', 'success']);
+            props.setnewAreaId(null)
+            props.setConnections([])
+            resetForm();
+            toggleModal();
+        } catch (error) {
+            console.log(error);
+            setAlertMessage([error.message, 'error']);
+        }
+    }
+
+    // --- others ---
+    const [alertMessage, setAlertMessage] = useState(['', '']);
+    
     useEffect(() => {
         props.setNavShow(true);
     }, []);
 
-    //className={`w-full px-3 text-xl py-2 text-white bg-input_color rounded-[40px] ${errors.scale ? 'border-red-500 border-1' : ''}`}>
 
+    const toggleModal = () => {
+        props.setIsModalOpen(!props.isModalOpen);
+        clearErrors();
+        resetForm();
+    };
+
+    const resetForm = () => {
+        props.setNewDocument(new DocumentClass())
+    };
+
+    // --- Styles ---
     const customDropdownStyles = {
         control: (provided, state) => ({
             ...provided,
@@ -111,7 +210,7 @@ function Document(props) {
         }),
     };
 
-
+    // --- Data ---
     const stakeholderOptions = [
         {value: "lkab", label: "LKAB"},
         {value: "municipality", label: "Municipality"},
@@ -136,197 +235,6 @@ function Document(props) {
         {code: "ar", name: "Arabic"},
         {code: "it", name: "Italian"},
     ];
-
-    const [alertMessage, setAlertMessage] = useState(['', '']);
-
-    const [errors, setErrors] = useState({});
-
-    const validateFields = () => {
-        const newErrors = {};
-        if (!props.newDocument.title) newErrors.title = "Title is required";
-        if (props.newDocument.stakeholders.length === 0) newErrors.stakeholder = "At least one stakeholder is required";
-        if (props.newDocument.scale === "none") newErrors.scale = "Scale is required";
-        if (props.newDocument.scale === "plan" && !props.newDocument.planNumber) newErrors.planNumber = "Plan Number is required for scale 'plan'";
-        if (!props.newDocument.date) newErrors.date = "Date is required";
-        if (props.newDocument.type === "none") newErrors.type = "Type is required";
-        if (!props.newDocument.description) newErrors.description = "Description is required";
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
-    const toggleModal = () => {
-        props.setIsModalOpen(!props.isModalOpen);
-        clearErrors();
-        resetForm();
-    };
-
-    const handleTitle = (event) => {
-        props.setNewDocument(prevDoc => ({
-            ...prevDoc,
-            title: event.target.value
-        }));
-
-        if (event.target.value) {
-            setErrors((prevErrors) => {
-                const {title, ...remainingErrors} = prevErrors;
-                return remainingErrors;
-            });
-        }
-    };
-
-    const handleStakeholder = (selectedOptions) => {
-        props.setNewDocument(prevDoc => ({
-            ...prevDoc,
-            stakeholders: selectedOptions || []
-        }));
-
-        if (selectedOptions.length > 0) {
-            setErrors((prevErrors) => {
-                const {stakeholder, ...remainingErrors} = prevErrors;
-                return remainingErrors;
-            });
-        }
-    };
-
-    const handleScale = (event) => {
-        props.setNewDocument(prevDoc => ({
-            ...prevDoc,
-            scale: event.target.value
-        }));
-
-        if (event.target.value !== "none") {
-            setErrors((prevErrors) => {
-                const {scale, ...remainingErrors} = prevErrors;
-                return remainingErrors;
-            });
-        }
-    };
-
-    const handlePlanNumber = (event) => {
-        props.setNewDocument(prevDoc => ({
-            ...prevDoc,
-            planNumber: event.target.value
-        }));
-
-        if (event.target.value) {
-            setErrors((prevErrors) => {
-                const {planNumber, ...remainingErrors} = prevErrors;
-                return remainingErrors;
-            });
-        }
-    };
-
-    const handleDate = (event) => {
-        const selectedDate = dayjs(event.target.value).format("YYYY-MM-DD");
-        props.setNewDocument(prevDoc => ({
-            ...prevDoc,
-            date: selectedDate
-        }));
-
-        if (selectedDate) {
-            setErrors((prevErrors) => {
-                const {date, ...remainingErrors} = prevErrors;
-                return remainingErrors;
-            });
-        }
-    };
-
-    const handleType = (event) => {
-        props.setNewDocument(prevDoc => ({
-            ...prevDoc,
-            type: event.target.value
-        }));
-
-        if (event.target.value !== "none") {
-            setErrors((prevErrors) => {
-                const {type, ...remainingErrors} = prevErrors;
-                return remainingErrors;
-            });
-        }
-    };
-
-    const handleLanguage = (event) => {
-        const selectedLanguage = event.target.value;
-        props.setNewDocument(prevDoc => ({
-            ...prevDoc,
-            language: selectedLanguage
-        }));
-    };
-
-    const handleNumber = (event) => {
-        props.setNewDocument(prevDoc => ({
-            ...prevDoc,
-            pages: event.target.value
-        }));
-    };
-
-    const handleDescription = (event) => {
-        props.setNewDocument(prevDoc => ({
-            ...prevDoc,
-            description: event.target.value
-        }));
-
-        if (event.target.value) {
-            setErrors((prevErrors) => {
-                const {description, ...remainingErrors} = prevErrors;
-                return remainingErrors;
-            });
-        }
-    };
-
-    const clearErrors = () => {
-        setErrors({});
-    };
-
-    const handleConfirm = async () => {
-        // Refresh the list of the documents
-        setRefreshList(prev => prev + 1)
-        //CAMPI OPZIONALI: PAGE + LANGUAGE + GIORNO DELLA DATA(?) + COORDINATES
-        //CAMPI OBBLIGATORI: TITLE + STAKEHOLDER + SCALE(PLANE NUMBER IN CASE) + DATE + DESCRIPTION + TYPE 
-
-
-        const documentData = {
-            title: props.newDocument.title,
-            stakeholder: props.newDocument.stakeholders.map((e) => {
-                return e.value;
-            }),
-            scale: props.newDocument.scale,
-            planNumber: props.newDocument.planNumber, // Optional
-            date: props.newDocument.date, //day is optional
-            type: props.newDocument.type,
-            language: props.newDocument.language || null, // Set to null if not provided
-            pageNumber: props.newDocument.pages || null, // Set to null if not provided
-            description: props.newDocument.description, // Mandatory
-            areaId: props.newAreaId,
-            links: props.connections.length > 0 ? props.connections : null
-        };
-
-        console.log(documentData);
-
-        if (!validateFields()) {
-            setAlertMessage(['Please fill all the mandatory fields.', 'error']);
-            return;
-        }
-
-        try {
-            await API.addDocument(documentData);
-            setAlertMessage(['Document added successfully!', 'success']);
-            props.setnewAreaId(null)
-            props.setConnections([])
-            resetForm();
-            toggleModal();
-        } catch (error) {
-            console.log(error);
-            setAlertMessage([error.message, 'error']);
-        }
-    }
-
-    const resetForm = () => {
-
-        props.setNewDocument(new DocumentClass())
-    };
-    const navigate = useNavigate();
 
     return (
         <div className={isDarkMode ? 'dark' : 'light'}>
@@ -404,11 +312,12 @@ function Document(props) {
                             onClick={(e) => e.stopPropagation()}
                         >
                             <h2 className="text-black_text mb-4 dark:text-white_text text-2xl  ">Add New Document</h2>
+                            {/* Close Button */}
                             <button onClick={toggleModal}
                                     className="absolute top-5 text-black_text dark:text-white_text right-4 hover:text-gray-600">
                                 <i className="bi bi-x-lg text-2xl"></i>
                             </button>
-
+                            {/* Title */}
                             <div className="input-title mb-4 w-full">
                                 <label
                                     className="text-black_text dark:text-white_text w-full ml-2 mb-1 text-base text-left">Title<span
@@ -421,7 +330,7 @@ function Document(props) {
                                     className={`w-full px-3 text-base py-2 text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md ${errors.title ? 'border-red-500 border-1' : 'focus:border-blue-400 border-1 border-transparent'} focus:outline-none`}
                                 />
                             </div>
-
+                            {/* Stakeholders */}
                             <div className="input-stakeholder mb-4 w-full">
                                 <label
                                     className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Stakeholders<span
@@ -438,7 +347,7 @@ function Document(props) {
                                     className="select text-black_text"
                                 />
                             </div>
-
+                            {/* Scale */}
                             <div className="input-scale mb-4 w-full">
                                 <label
                                     className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Scale<span
@@ -471,7 +380,7 @@ function Document(props) {
                                         className={`w-full text-base px-3 py-2 text-text-black_text dark:text-white_text bg-input_color_light dark:bg-input_color_dark rounded-md ${errors.title ? 'border-red-500 border-1' : 'focus:border-blue-400 border-1 border-transparent'} focus:outline-none`}>
                                     </input>
                                 </div>}
-
+                            {/* Date */}
                             <div className="input-date mb-4 w-full">
                                 <label
                                     className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Issuance
@@ -484,7 +393,7 @@ function Document(props) {
                                     className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md ${isDarkMode ? 'dark-mode' : 'light-mode'} ${errors.title ? 'border-red-500 border-1' : 'focus:border-blue-400 border-1 border-transparent'} focus:outline-none`}
                                 />
                             </div>
-
+                            {/* Type */}
                             <div className="input-type mb-4 w-full">
                                 <label
                                     className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Type<span
@@ -505,7 +414,7 @@ function Document(props) {
                                     <option value="material effects">Material effects</option>
                                 </select>
                             </div>
-
+                            {/* Language */}
                             <div className="input-language mb-4 w-full">
                                 <label
                                     className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Language</label>
@@ -522,8 +431,7 @@ function Document(props) {
                                     ))}
                                 </select>
                             </div>
-
-
+                            {/* Pages */}
                             <div className="input-number mb-4 w-full">
                                 <label
                                     className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Pages</label>
@@ -536,7 +444,7 @@ function Document(props) {
                                     className="w-full text-base px-3 py-2 text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md focus:border-blue-400 border-1 border-transparent :outline-none">
                                 </input>
                             </div>
-
+                            {/* Description */}
                             <div className="input-description mb-4 w-full">
                                 <label
                                     className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Description<span
@@ -549,7 +457,7 @@ function Document(props) {
                                     rows="4"
                                 ></textarea>
                             </div>
-
+                            {/* Georeference */}
                             <div className="input-map mb-4 w-full">
                                 <label
                                     className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Georeference</label>
@@ -567,8 +475,8 @@ function Document(props) {
                                     className="w-full p-2 text-white_text dark:text-black_text text-base border-gray-300 focus:outline-none bg-customGray1 dark:bg-[#D9D9D9] hover:bg-[#000000] dark:hover:bg-customGray1 :transition rounded-md">
                                     <i className="bi bi-globe-europe-africa"></i> Open the Map
                                 </button>
-                            </div>
-
+                            </div >
+                            {/* Linking */}
                             <div className="input-link mb-4 w-full">
                                 <label
                                     className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">Linking</label>
@@ -586,16 +494,14 @@ function Document(props) {
                                     Documents to Link
                                 </button>
                             </div>
-
-                            {/* Save button */}
+                            {/* Save Button */}
                             <button
                                 className="bg-primary_color_light dark:bg-primary_color_dark w-full hover:bg-[#2E6A8E66] transition  text-lg dark:text-white_text text-black_text py-2 px-4 rounded-lg mt-4"
                                 onClick={handleConfirm}>
                                 Confirm
                             </button>
-
-                        </div>
-                    </div>
+                        </div >
+                    </div >
                 )
             }
         </div>

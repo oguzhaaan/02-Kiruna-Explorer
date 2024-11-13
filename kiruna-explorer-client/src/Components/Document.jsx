@@ -11,7 +11,7 @@ import { useTheme } from "../contexts/ThemeContext.jsx";
 import { getStakeholderColor } from "./Utilities/StakeholdersColors";
 import { getIcon } from "./Utilities/DocumentIcons";
 
-function formatString(input) {
+export function formatString(input) {
     return input
         .replace(/_/g, " ") // Replace underscores with spaces
         .split(" ") // Split the string into an array of words

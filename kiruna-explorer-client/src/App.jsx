@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import LoginPage from "./components/LoginPage";
+import LoginPage from "./Components/LoginPage.jsx";
 import { Container } from "react-bootstrap";
 import { Route, Routes, Outlet, Navigate } from "react-router-dom";
 import { useUserContext } from "./contexts/UserContext.jsx";

@@ -10,14 +10,7 @@ import DocumentClass from "../classes/Document.mjs";
 import {useTheme} from "../contexts/ThemeContext.jsx";
 import {getStakeholderColor} from "./Utilities/StakeholdersColors";
 import {getIcon} from "./Utilities/DocumentIcons";
-
-function formatString(input) {
-    return input
-        .replace(/_/g, " ") // Replace underscores with spaces
-        .split(" ") // Split the string into an array of words
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
-        .join(" "); // Join the words back into a single string
-}
+import { formatString } from "./Utilities/StringUtils.js";
 
 
 function Document(props) {
@@ -63,7 +56,7 @@ function Document(props) {
     const handleScale = (event) => handleFieldChange("scale", event.target.value);
     const handlePlanNumber = (event) => handleFieldChange("planNumber", event.target.value);
     const handleDate = (event) => {
-        const selectedDate = dayjs(event.target.value).format("YYYY-MM-DD");
+        const selectedDate = dayjs(event.target.value).format("YYYY/MM/DD");
         handleFieldChange("date", selectedDate);
     };
     const handleType = (event) => handleFieldChange("type", event.target.value);

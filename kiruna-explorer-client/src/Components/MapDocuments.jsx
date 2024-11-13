@@ -209,8 +209,9 @@ function Markers({ area, handleClick, clickedArea }) {
   const map = useMap()
   const [areaDoc, setAreaDoc] = useState([])
   const geometry = area.geoJson.geometry;
+  const [tooltipVisible, setTooltipVisible] = useState(true); // Stato per visibilità del Tooltip
+  const [isZoomLevelLow, setIsZoomLevelLow] = useState(false); // Stato per controllare il livello di zoom
   const { isDarkMode } = useTheme();
-
 
   console.log(geometry.coordinates[0])
   const GenericPoints = L.icon({
@@ -239,21 +240,36 @@ function Markers({ area, handleClick, clickedArea }) {
       try {
         const docs = await API.getDocumentsFromArea(area.id)
         setAreaDoc(docs)
-        console.log(docs);
-      }
-      catch (err) {
-        setAreaDoc("")
+      } catch (err) {
+        setAreaDoc([])
       }
     }
     takeDocumentsArea()
-
   }, [])
 
-  return (
+  useEffect(() => {
+    // Funzione per monitorare il livello di zoom
+    const handleZoom = () => {
+      if (map.getZoom() <= 13) {
+        setIsZoomLevelLow(true); // Livello di zoom basso, mostra solo il numero di documenti
+      } else {
+        setIsZoomLevelLow(false); // Livello di zoom alto, mostra anche le icone
+      }
+    };
 
-    geometry.type === 'Polygon' ?
-      // Rendi un poligono
-      (areaDoc &&
+    map.on('zoomend', handleZoom);
+    // Controllo iniziale del livello di zoom
+    handleZoom();
+
+    // Pulizia del listener quando il componente viene smontato
+    return () => {
+      map.off('zoomend', handleZoom);
+    };
+  }, [map]);
+
+  return (
+    geometry.type === 'Polygon' ? (
+      areaDoc && (
         <>
           <Marker
             position={calculateCentroid(geometry.coordinates[0])} // Inverti lat/lng per Leaflet
@@ -265,37 +281,41 @@ function Markers({ area, handleClick, clickedArea }) {
               }
             }}
           >
-            <Tooltip permanent>
-              {/* Contenitore principale con flexbox per disporre gli elementi in riga */}
-              <div className="flex flex-row items-center space-x-2 flex-wrap max-w-full">
-                {areaDoc.map((doc, index) => (
-                  <React.Fragment key={index}>
-                    <img
-                      src={getIcon({ type: doc.type }, { isDarkMode })} // Usa l'icona corrispondente o una di default
-                      alt={doc.type}
-                      className="w-[30px] h-[30px]"
-                    />
-                    <span className="counter-documents text-lg">1</span>
-                  </React.Fragment>
-                ))}
-              </div>
-            </Tooltip>
-
+            {tooltipVisible && (
+              <Tooltip permanent>
+                {/* Se il livello di zoom è basso, mostra solo il numero di documenti */}
+                {isZoomLevelLow ? (
+                  <span className="w-full counter-documents text-lg">{areaDoc.length}</span>
+                ) : (
+                  <div className=" flex flex-row ">
+                  {
+                    areaDoc.map((doc, index) => (
+                      <div key={index} style={{ display: 'flex', minWidth: '4em', minHeight: '1.5em', margin: '5px', flexDirection: 'row' }}>
+                        <img
+                          src={getIcon({ type: doc.type }, { isDarkMode })}
+                          alt={doc.type}
+                          style={{ width: '30px', height: '30px', marginRight: '5px' }}
+                        />
+                        <span className="counter-documents text-lg">1</span>
+                      </div>
+                    ))
+                  }
+                  </div>
+                )}
+              </Tooltip>
+            )}
           </Marker>
-          {
-            clickedArea === area.id &&
+
+          {clickedArea === area.id && (
             <Polygon
-              positions={
-                geometry.coordinates[0].map(coord => [coord[1], coord[0]]) // Inverti le coordinate per Leaflet
-              }
+              positions={geometry.coordinates[0].map(coord => [coord[1], coord[0]])} // Inverti le coordinate per Leaflet
               pathOptions={{ color: 'blue' }}
             />
-          }
+          )}
         </>
       )
-      :
-      // Rendi un punto
-      (areaDoc &&
+    ) : (
+      areaDoc && (
         <>
           <Marker
             key={area.id}
@@ -308,24 +328,34 @@ function Markers({ area, handleClick, clickedArea }) {
               }
             }}
           >
-            <Tooltip permanent>
-              {/* Mappa i documenti per mostrare le icone con i numeri */}
-              {areaDoc.map((doc, index) => (
-                <div key={index} style={{ display: 'flex', minWidth: '4em', minHeight: '1.5em', alignItems: 'col', marginBottom: '5px' }}>
-                  <img
-                    src={getIcon({ type: doc.type }, { isDarkMode })} // Usa l'icona corrispondente o una di default
-                    alt={doc.type}
-                    style={{ width: '30px', height: '30px', marginRight: '5px' }}
-                  />
-                  <span className="counter-documents text-lg ">1</span>
-                </div>
-              ))}
-            </Tooltip>
+             {tooltipVisible && (
+              <Tooltip permanent>
+                {/* Se il livello di zoom è basso, mostra solo il numero di documenti */}
+                {isZoomLevelLow ? (
+                  <span className="w-full counter-documents text-lg">{areaDoc.length}</span>
+                ) : (
+                  <div className=" flex flex-row ">
+                  {
+                    areaDoc.map((doc, index) => (
+                      <div key={index} style={{ display: 'flex', minWidth: '4em', minHeight: '1.5em', margin: '5px', flexDirection: 'row' }}>
+                        <img
+                          src={getIcon({ type: doc.type }, { isDarkMode })}
+                          alt={doc.type}
+                          style={{ width: '30px', height: '30px', marginRight: '5px' }}
+                        />
+                        <span className="counter-documents text-lg">1</span>
+                      </div>
+                    ))
+                  }
+                  </div>
+                )}
+              </Tooltip>
+            )}
           </Marker>
         </>
       )
+    )
   );
-
 }
 
 export { GeoreferenceMapDoc }

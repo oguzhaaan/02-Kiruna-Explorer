@@ -26,6 +26,7 @@ Here's the Table of Contents with all the APIs listed:
       - [Add Attachments](#add-attachments)
       - [Delete Attachments](#delete-attachments)
     - [5. Users Credentials](#5-users-credentials)
+    - [6. Dockerization](#6-dockerization)
     - [LICENSE](#license)
 
 
@@ -497,6 +498,17 @@ Response body: None
 | -------- | -------- | ------------- |
 | Romeo    | 1111     | urban planner |
 | Juliet   | 2222     | resident      |
+
+### 6. Dockerization
+
+The application is dockerized and can be run using the following command inside the root folder of the project `02-kiruna-explorer/`:
+
+```bash
+$docker compose build
+$docker compose up
+```
+
+**note**: You need to have Docker Desktop installed 
 
 ## LICENSE
 

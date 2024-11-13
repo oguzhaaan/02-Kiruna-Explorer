@@ -19,6 +19,14 @@ function Document(props) {
 
     const { isDarkMode, toggleTheme } = useTheme();
 
+
+    // --- Filters ---
+    const [isFiltersMenuOpen, setIsFiltersMenuOpen] = useState(false);
+    const toggleFiltersMenu = () => {
+        setIsFiltersMenuOpen(prevState => !prevState);
+    };
+
+
     // --- Update Documents List ---
     const [documents, setDocuments] = useState([]);
     const [refreshList, setRefreshList] = useState(0);
@@ -256,8 +264,8 @@ function Document(props) {
                                 className="outline outline-1 outline-customGray1 dark:outline-none bg-search_dark_color w-60 py-2 pl-10 pr-4 text-black_text rounded-[50px] placeholder-black_text"
                             />
                         </div>
-
-                        <button className="text-black_text dark:text-white_text text-2xl">
+                        {/* Filters Button */}
+                        <button className="text-black_text dark:text-white_text text-2xl" onClick={toggleFiltersMenu}>
                             <i className="bi bi-sort-down-alt"></i>
                         </button>
                     </div>
@@ -299,6 +307,86 @@ function Document(props) {
                     ))}
                 </div>
             </div>
+            {/* Filters Menu */}
+            {
+                isFiltersMenuOpen && (
+                    <div
+                        className={`${isDarkMode ? "dark-select" : "light-select"} 
+                            py-4 fixed inset-0 flex items-center justify-center `}
+                        onClick={toggleFiltersMenu}
+                    >
+                        <div
+                            className="bg-box_white_color dark:bg-box_color backdrop-blur-2xl drop-shadow-xl w-1/3 px-14 py-10 h-1/2 overflow-y-auto rounded-lg flex flex-col relative scrollbar-thin scrollbar-webkit"
+                        >
+                            {/* Stakeholders */}
+                            <div className="input-stakeholder mb-4 w-full">
+                                <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">
+                                    Stakeholders:
+                                </label>
+                                <Select
+                                    isMulti
+                                    options={stakeholderOptions}
+                                    value={props.newDocument.stakeholders}
+                                    onChange={handleStakeholder}
+                                    styles={customDropdownStyles}
+                                    placeholder="None"
+                                    isClearable={false}
+                                    isSearchable={false}
+                                    className="select text-black_text"
+                                />
+                            </div>
+                            {/* Type */}
+                            <div className="input-type mb-4 w-full">
+                                <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">
+                                    Type:
+                                </label>
+                                <select
+                                    id="document-type"
+                                    value={"none"}
+                                    onChange={()=>console.log("type")}
+                                    className={`w-full px-3 text-base py-2 text-black_text dark:text-white_text bg-input_color_light dark:bg-input_color_dark rounded-md ${errors.title ? 'border-red-500 border-1' : 'focus:border-blue-400 border-1 border-transparent'} focus:outline-none`}>
+                                    <option value="none">None</option>
+                                    <option value="design">Design document</option>
+                                    <option value="informative">Informative document</option>
+                                    <option value="prescriptive">Prescriptive document</option>
+                                    <option value="technical">Technical document</option>
+                                    <option value="agreement">Agreement</option>
+                                    <option value="conflict">Conflict</option>
+                                    <option value="consultation">Consultation</option>
+                                    <option value="material effects">Material effects</option>
+                                </select>
+                            </div>
+                            {/* Issuance Date Range */}
+                            <div className="input-date mb-4 w-full">
+                                <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">
+                                    Issuance Date Range:
+                                </label>
+                                <input
+                                    id="document-date"
+                                    type="date"
+                                    value={"date"}
+                                    onChange={()=>console.log("date")}
+                                    className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md ${isDarkMode ? 'dark-mode' : 'light-mode'} ${errors.title ? 'border-red-500 border-1' : 'focus:border-blue-400 border-1 border-transparent'} focus:outline-none`}
+                                />
+                            </div>
+                            {/* Fileter Menu Buttons */}
+                            <div className="flex justify-center mb-4 w-full space-x-3">
+                                <button
+                                    className="bg-[#FFFFFFcc] dark:bg-customGray hover:bg-[#FFFFFFff] dark:hover:bg-[#938888] transition text-black w-40 h-16 opacity-60 px-4 py-2 rounded-xl text-xl"
+                                >
+                                    Clear
+                                </button>
+                                <button
+                                    className="bg-primary_color_light dark:bg-customBlue hover:bg-blue-300 dark:hover:bg-[#317199] transition text-black_text dark:text-white_text w-40 h-16 px-4 py-2 rounded-xl text-xl"
+                                >
+                                    Apply
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                )
+            }
             {/* Add Document Form */}
             {
                 props.isModalOpen && (

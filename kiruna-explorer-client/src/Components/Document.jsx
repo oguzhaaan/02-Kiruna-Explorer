@@ -1,7 +1,7 @@
 import {useState, useEffect} from "react";
 import dayjs from "dayjs";
 import "./document.css";
-//import Alert from "./Alert.jsx";
+import Alert from "./Alert.jsx";
 import API from "../API/API.mjs";
 import {SingleDocument} from "./SingleDocument.jsx";
 import {useNavigate} from "react-router-dom";
@@ -56,7 +56,7 @@ function Document(props) {
     const handleScale = (event) => handleFieldChange("scale", event.target.value);
     const handlePlanNumber = (event) => handleFieldChange("planNumber", event.target.value);
     const handleDate = (event) => {
-        const selectedDate = dayjs(event.target.value).format("YYYY/MM/DD");
+        const selectedDate = dayjs(event.target.value).format("YYYY-MM-DD");
         handleFieldChange("date", selectedDate);
     };
     const handleType = (event) => handleFieldChange("type", event.target.value);

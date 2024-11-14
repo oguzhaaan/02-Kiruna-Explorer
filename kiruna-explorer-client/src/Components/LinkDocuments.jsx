@@ -137,7 +137,7 @@ const LinkDocuments = ({originalDocId, mode, setConnectionsInForm, setOriginalDo
     // Filter documents based on the search query and connection status
     const filteredDocuments = documents.filter(doc => {
         return (
-            doc.title.toLowerCase().includes(searchQuery.toLowerCase() || doc.type.toLowerCase().includes(query.toLowerCase()))
+            doc.title.toLowerCase().includes(searchQuery.toLowerCase())
         );
     });
 
@@ -345,13 +345,13 @@ const DocumentItem = ({
             </div>
 
             {/* Document Title and Type */}
-            <div className="w-5/12 flex flex-row">
+            <div className="w-5/12 flex flex-row gap-3">
 
                 {/* Vertical Line */}
-                <div className="w-0.5 mr-3 bg-white opacity-10"></div>
+                <div className="w-0.5 bg-white opacity-10"></div>
 
-                <div>
-                    <div className="text-base mb-3 font-normal">{formatString(title)}</div>
+                <div className="w-[90%]">
+                    <div className="text-base mb-3 font-normal line-clamp-2">{formatString(title)}</div>
                     <div className="text-sm font-light flex items-center">
                         <img src={getIcon({type: type}, {darkMode: isDarkMode})} className="w-8 mr-2" alt="type_icon"/>
                         {formatString(type)}
@@ -359,12 +359,12 @@ const DocumentItem = ({
                 </div>
             </div>
 
-            <div className="flex flex-col w-4/12 justify-content-between align-items-end">
+            <div className="flex flex-col w-4/12 gap-2 justify-content-between align-items-end">
                 {/* Date */}
                 <div className="text-sm top-3 right-5 text-gray-400">{date}</div>
 
                 {/* Stakeholders */}
-                <div className="flex flex-wrap gap-2 bottom-4 right-5">
+                <div className="flex flex-wrap justify-content-end gap-2 bottom-4 right-5">
                     {stakeholders && stakeholders.map((stakeholder, idx) => (
                         <span
                             key={idx}
@@ -453,7 +453,7 @@ const SelectedDocument = ({
             </div>
             <div className="w-0.5 bg-white opacity-10"></div>
             <div className="mx-4 flex-col">
-                <div className="text-base mb-3 font-normal">{formatString(title)}</div>
+                <div className="text-base mb-3 font-normal line-clamp-2">{formatString(title)}</div>
                 <div className="text-sm font-light flex items-center">
                     <img src={getIcon({type: type}, {darkMode: isDarkMode})} className="w-8 mr-2" alt="type_icon"/>
                     {formatString(type)}

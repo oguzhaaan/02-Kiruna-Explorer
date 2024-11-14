@@ -11,7 +11,7 @@ import polygonpin from "../assets/polygon-pin.svg";
 import municipalarea from "../assets/municipal-area.svg"
 import { useTheme } from "../contexts/ThemeContext.jsx";
 import { getIcon } from "./Utilities/DocumentIcons.jsx";
-import { formatString } from "./Document.jsx";
+import { formatString } from "./Utilities/StringUtils.js";
 import { SingleDocumentMap } from "./SingleDocumentMap.jsx";
 
 function GeoreferenceMapDoc(props) {

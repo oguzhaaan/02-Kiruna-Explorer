@@ -1,7 +1,7 @@
 import {useState, useEffect} from "react";
 import dayjs from "dayjs";
 import "./document.css";
-import Alert from "./Alert";
+//import Alert from "./Alert.jsx";
 import API from "../API/API.mjs";
 import {SingleDocument} from "./SingleDocument.jsx";
 import {useNavigate} from "react-router-dom";

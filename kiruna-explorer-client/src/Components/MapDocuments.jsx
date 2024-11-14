@@ -85,21 +85,20 @@ function GeoreferenceMapDoc(props) {
       <div className={isDarkMode ? "dark" : "light"}>
         {ShowSingleDocument && <SingleDocumentMap setDocumentId={setDocumentId} id={documentId} setShowSingleDocument={setShowSingleDocument}></SingleDocumentMap>}
         <MapContainer
-
           center={[latitude, longitude]}
           zoom={13} ref={mapRef}
           zoomControl={false}
           style={{
             height: "100vh",
-            width: "100vw",
-            filter: isDarkMode ? "invert(100%) hue-rotate(180deg) brightness(200%) contrast(90%)" : ""
+            width: "100vw"
           }}
           maxBounds={cityBounds}
           minZoom={12}
         >
           <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
+              className={isDarkMode ? "custom-tile-layer" : ""}
           />
           <ZoomControl position="topright" />
 
@@ -247,7 +246,7 @@ function Markers({ area, handleClick, clickedArea, setDocumentId, setShowSingleD
           >
             {OpenTooltipDocs !== area.id ? (
               <div style={{zIndex:-100}}>
-              <Tooltip permanent className=" cursor-pointer">
+              <Tooltip permanent className="cursor-pointer border-none text-black_text dark:text-white_text bg-box_white_color dark:bg-box_color backdrop-blur-2xl outline outline-1 outline-[#00000055] dark:outline-[#FFFFFF55]">
                 <div onClick={() => { setOpenTooltipDocs(area.id) }} style={{ cursor: 'pointer', pointerEvents: 'auto' }}>
                   {/* Se il livello di zoom è basso, mostra solo il numero di documenti */}
                   {isZoomLevelLow ? (
@@ -258,7 +257,7 @@ function Markers({ area, handleClick, clickedArea, setDocumentId, setShowSingleD
                         groupedDocs.map(([type, num]) => (
                           <div key={type} style={{ display: 'flex', minWidth: '4em', minHeight: '1.5em', margin: '5px', flexDirection: 'row' }}>
                             <img
-                              src={getIcon({ type: type }, { isDarkMode })}
+                              src={getIcon({ type: type }, { darkMode: isDarkMode })}
                               alt={type}
                               style={{ width: '30px', height: '30px', marginRight: '5px' }}
                             />
@@ -274,7 +273,7 @@ function Markers({ area, handleClick, clickedArea, setDocumentId, setShowSingleD
             ) :
 
               (
-                <Tooltip permanent className=" cursor-pointer">
+                <Tooltip permanent className="cursor-pointer border-none text-black_text dark:text-white_text bg-white_text dark:bg-black_text outline outline-1 outline-[#00000055] dark:outline-[#FFFFFF55]">
                   <div style={{ cursor: 'pointer', pointerEvents: 'auto' }}>
                     <ListDocuments setDocumentId={setDocumentId} setShowSingleDocument={setShowSingleDocument} docs={areaDoc} setOpenTooltipDocs={setOpenTooltipDocs}></ListDocuments>
                   </div>
@@ -307,7 +306,7 @@ function Markers({ area, handleClick, clickedArea, setDocumentId, setShowSingleD
           >
             {OpenTooltipDocs !== area.id ? (
               <div style={{zIndex:-100}}>
-              <Tooltip permanent className=" cursor-pointer" >
+              <Tooltip permanent className="cursor-pointer border-none text-black_text dark:text-white_text bg-box_white_color dark:bg-box_color backdrop-blur-2xl outline outline-1 outline-[#00000055] dark:outline-[#FFFFFF55]" >
                 <div onClick={() => { setOpenTooltipDocs(area.id); }} style={{ cursor: 'pointer', pointerEvents: 'auto' }}>
                   {/* Se il livello di zoom è basso, mostra solo il numero di documenti */}
                   {isZoomLevelLow ? (
@@ -318,7 +317,7 @@ function Markers({ area, handleClick, clickedArea, setDocumentId, setShowSingleD
                         groupedDocs.map(([type, num]) => (
                           <div key={type} style={{ display: 'flex', minWidth: '4em', minHeight: '1.5em', margin: '5px', flexDirection: 'row' }}>
                             <img
-                              src={getIcon({ type: type }, { isDarkMode })}
+                                src={getIcon({ type: type }, { darkMode: isDarkMode })}
                               alt={type}
                               style={{ width: '30px', height: '30px', marginRight: '5px' }}
                             />
@@ -334,7 +333,7 @@ function Markers({ area, handleClick, clickedArea, setDocumentId, setShowSingleD
             ) :
 
               (
-                <Tooltip permanent className=" cursor-pointer">
+                <Tooltip permanent className="cursor-pointer border-none text-black_text dark:text-white_text bg-white_text dark:bg-black_text outline outline-1 outline-[#00000055] dark:outline-[#FFFFFF55]">
                   <div style={{ cursor: 'pointer', pointerEvents: 'auto' }}>
                     <ListDocuments setDocumentId={setDocumentId} setShowSingleDocument={setShowSingleDocument} docs={areaDoc} setOpenTooltipDocs={setOpenTooltipDocs}></ListDocuments>
                   </div>
@@ -360,14 +359,14 @@ function ListDocuments({ docs, setOpenTooltipDocs, setDocumentId, setShowSingleD
       className={`${isDarkMode ? "dark" : "light"} inset-0 flex items-center justify-center scrollbar-thin scrollbar-webkit`}
     >
       <div
-        className="flex flex-col backdrop-blur-2xl drop-shadow-xl rounded-xl text-black_text font-sans p-2 max-h-[300px] overflow-y-auto overflow-x-hidden w-[250px]"
+        className="flex flex-col drop-shadow-xl rounded-xl text-black_text dark:text-white_text font-sans p-2 max-h-[300px] overflow-y-auto overflow-x-hidden w-[250px]"
       >
         {/* Header con il pulsante per chiudere */}
         <div className="w-full flex justify-between text-center text-xl mb-2">
           Documents
           <button
             onClick={() => setOpenTooltipDocs(null)}
-            className="text-black_text dark : text_white text-base hover:text-gray-600"
+            className="text-black_text dark:text-white_text text-base hover:text-gray-600"
           >
             <i className="bi bi-x-lg text-2xl"></i>
           </button>
@@ -405,7 +404,7 @@ const DocumentItem = ({ documentId, title, type, setShowSingleDocument, setDocum
 
   return (
     <div
-      className="flex flex-row items-center rounded-lg m-1 bg-[#7878782e] p-3 text-black cursor-pointer w-full"
+      className="flex flex-row items-center rounded-lg m-1 bg-[#7878782e] p-3 text-black_text dark:text-white_text cursor-pointer w-full"
       onClick={() => {
         setDocumentId(documentId);
         setShowSingleDocument(true);
@@ -414,7 +413,7 @@ const DocumentItem = ({ documentId, title, type, setShowSingleDocument, setDocum
       }
     >
       {/* Icona del documento */}
-      <img src={getIcon({ type }, { isDarkMode })} className="w-9 h-9 mr-2" alt="type_icon" />
+      <img src={getIcon({ type: type }, { darkMode: isDarkMode })} className="w-9 h-9 mr-2" alt="type_icon" />
 
       {/* Titolo del documento con ellissi per il testo lungo */}
       <div

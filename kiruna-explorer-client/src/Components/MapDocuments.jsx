@@ -362,7 +362,7 @@ function ListDocuments({ docs, setOpenTooltipDocs, setDocumentId, setShowSingleD
           Documents
           <button
             onClick={() => setOpenTooltipDocs(null)}
-            className="text-black_text dark:text-white_text text-base hover:text-gray-600"
+            className="text-black_text dark : text_white text-base hover:text-gray-600"
           >
             <i className="bi bi-x-lg text-2xl"></i>
           </button>

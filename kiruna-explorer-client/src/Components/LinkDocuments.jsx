@@ -137,7 +137,7 @@ const LinkDocuments = ({originalDocId, mode, setConnectionsInForm, setOriginalDo
     // Filter documents based on the search query and connection status
     const filteredDocuments = documents.filter(doc => {
         return (
-            doc.title.toLowerCase().includes(searchQuery.toLowerCase())
+            doc.title.toLowerCase().includes(searchQuery.toLowerCase() || doc.type.toLowerCase().includes(query.toLowerCase()))
         );
     });
 

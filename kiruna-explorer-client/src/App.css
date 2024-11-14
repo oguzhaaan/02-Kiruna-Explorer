@@ -134,7 +134,7 @@ body {
   
   /* Stile individuale per ciascun elemento */
   .offcanvas-content {
-    font-size: 1rem;             /* Dimensione del testo */
+    font-size: 1.5rem;             /* Dimensione del testo */
     font-weight: 400;            /* Peso del testo */
   }
 
@@ -151,8 +151,8 @@ body {
   }
 
   .offcanvas-content-small {
-    font-size: 0.8rem;             /* Dimensione del testo */
-    font-weight: 200;            /* Peso del testo */
+    font-size: 1rem;             /* Dimensione del testo */
+    font-weight: 300;            /* Peso del testo */
   }
 
   .separator {

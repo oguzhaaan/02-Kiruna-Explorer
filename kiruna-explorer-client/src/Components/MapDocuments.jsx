@@ -83,7 +83,7 @@ function GeoreferenceMapDoc(props) {
   return (
     <>
       <div className={isDarkMode ? "dark" : "light"}>
-        {ShowSingleDocument && <SingleDocumentMap id={documentId} setShowSingleDocument={setShowSingleDocument}></SingleDocumentMap>}
+        {ShowSingleDocument && <SingleDocumentMap setDocumentId={setDocumentId} id={documentId} setShowSingleDocument={setShowSingleDocument}></SingleDocumentMap>}
         <MapContainer
 
           center={[latitude, longitude]}
@@ -349,6 +349,11 @@ function Markers({ area, handleClick, clickedArea, setDocumentId, setShowSingleD
 }
 function ListDocuments({ docs, setOpenTooltipDocs, setDocumentId, setShowSingleDocument }) {
   const { isDarkMode } = useTheme();
+  const [query, setQuery] = useState("");
+
+  const filteredDocs = docs.filter((e)=>{
+    return (e.title.toLowerCase().includes(query.toLowerCase()) || e.type.toLowerCase().includes(query.toLowerCase()));
+  })
 
   return (
     <div
@@ -374,11 +379,13 @@ function ListDocuments({ docs, setOpenTooltipDocs, setDocumentId, setShowSingleD
             <input
                 type="text"
                 placeholder="Search"
+                input={query}
+                onChange={(e) => setQuery(e.target.value)}
                 className="outline outline-1 outline-customGray1 dark:outline-none bg-search_dark_color w-auto py-2 pl-10 pr-4 text-black_text rounded-[50px] placeholder-black_text"
             />
         </div>
         {/* Lista di documenti */}
-        {docs.map((doc) => (
+        {filteredDocs.map((doc) => (
           <DocumentItem
             setDocumentId={setDocumentId}
             setShowSingleDocument={setShowSingleDocument}

@@ -7,7 +7,7 @@ import { getLanguageName } from "./Utilities/Languages.jsx";
 import API from "../API/API.mjs";
 import {useTheme} from "../contexts/ThemeContext.jsx";
 
-function SingleDocumentMap({id, setShowSingleDocument}) {
+function SingleDocumentMap({setDocumentId, id, setShowSingleDocument}) {
 
     const {isDarkMode} = useTheme();
 
@@ -31,11 +31,11 @@ function SingleDocumentMap({id, setShowSingleDocument}) {
 
                 }
                 else {
-                    navigate("/documents")
+                    navigate("/mapDocuments")
                 }
             }
             catch (err) {
-                navigate("/documents")
+                navigate("/mapDocuments")
                 console.log(err)
             }
         }
@@ -201,7 +201,8 @@ function SingleDocumentMap({id, setShowSingleDocument}) {
                                     >
                                         <div
                                             onClick={() => {
-                                                navigate(`/documents/${connection.id}`);
+                                                setDocumentId(connection.id)
+                                                //navigate(`/mapDocuments`);
                                             }}
                                             className="flex flex-row align-items-center gap-2 bg-[#FFFFFF77] dark:bg-box_high_opacity px-3 py-3 rounded-lg hover:bg-[#D9D9D950] transition cursor-pointer">
                                             <img src={getIcon({type : connection.type}, {darkMode: isDarkMode})} className="w-7" alt={"type_icon"}></img>

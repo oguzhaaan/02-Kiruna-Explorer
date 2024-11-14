@@ -315,14 +315,12 @@ function GeoreferenceMap(props) {
     return (
         <div className={isDarkMode ? "dark" : "light"}>
             <MapContainer
-
                 center={[latitude, longitude]}
                 zoom={13} ref={mapRef}
                 zoomControl={false}
                 style={{
                     height: "100vh",
-                    width: "100vw",
-                    filter: isDarkMode ? "invert(100%) hue-rotate(180deg) brightness(200%) contrast(90%)" : ""
+                    width: "100vw"
                 }}
                 maxBounds={cityBounds}
                 minZoom={12}
@@ -331,6 +329,7 @@ function GeoreferenceMap(props) {
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
+                    className={isDarkMode ? "custom-tile-layer" : ""}
                 />
                 <ZoomControl position="topright" />
                 <FeatureGroup>

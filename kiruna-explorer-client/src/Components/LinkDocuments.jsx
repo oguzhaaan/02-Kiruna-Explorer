@@ -7,11 +7,30 @@ import API from "../API/API.mjs";
 import PropTypes from 'prop-types';
 import {useTheme} from "../contexts/ThemeContext.jsx";
 import { formatString } from "./Utilities/StringUtils.js";
+import FilterMenu from "./FilterMenu.jsx";
 
 const LinkDocuments = ({originalDocId, mode, setConnectionsInForm, setOriginalDocId}) => {
     const navigate = useNavigate();
 
     const { isDarkMode } = useTheme();
+
+    // --- Filter ---
+    const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
+    const [appliedFilters, setAppliedFilters] = useState(null);
+
+    const toggleFilterMenu = () => {
+        setIsFilterMenuOpen((prevState) => !prevState);
+    };
+
+    const handleApply = (filters) => {
+        setAppliedFilters(filters);
+        setIsFilterMenuOpen(false);
+        console.log('Applied Filters:', filters);
+    };
+
+    const handleClear = () => {
+        setAppliedFilters(null);
+    };
 
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [documents, setDocuments] = useState([]);
@@ -219,8 +238,8 @@ const LinkDocuments = ({originalDocId, mode, setConnectionsInForm, setOriginalDo
                         />
                     </div>
 
-                    {/* Sort Button */}
-                    <button className="text-black_text dark:text-white_text text-2xl">
+                    {/* Filter Button */}
+                    <button className="text-black_text dark:text-white_text text-2xl" onClick={toggleFilterMenu}>
                         <i className="bi bi-sort-down-alt"></i>
                     </button>
                 </div>
@@ -235,7 +254,7 @@ const LinkDocuments = ({originalDocId, mode, setConnectionsInForm, setOriginalDo
           </span>
                 </button>
             </div>
-
+            
             <div className="flex flex-row gap-3">
                 {/* Document List */}
                 <div className="space-y-3 w-7/12">
@@ -274,7 +293,8 @@ const LinkDocuments = ({originalDocId, mode, setConnectionsInForm, setOriginalDo
                 </div>
 
             </div>
-
+            {/* Filter Menu */}
+            {isFilterMenuOpen  && <FilterMenu onApply={handleApply} onClear={handleClear} toggleFilterMenu={toggleFilterMenu}/>}
             {/* Confirmation Modal */}
             {isModalVisible && (
                 <ConfirmationModal onConfirm={handleConfirm} onCancel={handleCancel}/>

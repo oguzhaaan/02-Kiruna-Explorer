@@ -246,6 +246,7 @@ function Markers({ area, handleClick, clickedArea, setDocumentId, setShowSingleD
             }}
           >
             {OpenTooltipDocs !== area.id ? (
+              <div style={{zIndex:-100}}>
               <Tooltip permanent className=" cursor-pointer">
                 <div onClick={() => { setOpenTooltipDocs(area.id) }} style={{ cursor: 'pointer', pointerEvents: 'auto' }}>
                   {/* Se il livello di zoom è basso, mostra solo il numero di documenti */}
@@ -269,6 +270,7 @@ function Markers({ area, handleClick, clickedArea, setDocumentId, setShowSingleD
                   )}
                 </div>
               </Tooltip>
+              </div>
             ) :
 
               (
@@ -304,7 +306,8 @@ function Markers({ area, handleClick, clickedArea, setDocumentId, setShowSingleD
             }}
           >
             {OpenTooltipDocs !== area.id ? (
-              <Tooltip permanent className=" cursor-pointer">
+              <div style={{zIndex:-100}}>
+              <Tooltip permanent className=" cursor-pointer" >
                 <div onClick={() => { setOpenTooltipDocs(area.id); }} style={{ cursor: 'pointer', pointerEvents: 'auto' }}>
                   {/* Se il livello di zoom è basso, mostra solo il numero di documenti */}
                   {isZoomLevelLow ? (
@@ -327,6 +330,7 @@ function Markers({ area, handleClick, clickedArea, setDocumentId, setShowSingleD
                   )}
                 </div>
               </Tooltip>
+              </div>
             ) :
 
               (
@@ -348,7 +352,7 @@ function ListDocuments({ docs, setOpenTooltipDocs, setDocumentId, setShowSingleD
 
   return (
     <div
-      className={`${isDarkMode ? "dark" : "light"} inset-0 z-[200000] flex items-center justify-center scrollbar-thin scrollbar-webkit`}
+      className={`${isDarkMode ? "dark" : "light"} inset-0 flex items-center justify-center scrollbar-thin scrollbar-webkit`}
     >
       <div
         className="flex flex-col backdrop-blur-2xl drop-shadow-xl rounded-xl text-black_text font-sans p-2 max-h-[300px] overflow-y-auto overflow-x-hidden w-[250px]"
@@ -363,7 +367,16 @@ function ListDocuments({ docs, setOpenTooltipDocs, setDocumentId, setShowSingleD
             <i className="bi bi-x-lg text-2xl"></i>
           </button>
         </div>
-
+        <div className="z-[0] relative mb-1">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-black_text">
+                <i className="bi bi-search"></i>
+            </span>
+            <input
+                type="text"
+                placeholder="Search"
+                className="outline outline-1 outline-customGray1 dark:outline-none bg-search_dark_color w-auto py-2 pl-10 pr-4 text-black_text rounded-[50px] placeholder-black_text"
+            />
+        </div>
         {/* Lista di documenti */}
         {docs.map((doc) => (
           <DocumentItem

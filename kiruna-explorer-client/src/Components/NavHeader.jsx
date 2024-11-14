@@ -41,7 +41,7 @@ function NavHeader(props) {
                         <Navbar.Offcanvas
                             id="basic-navbar-nav"
                             className={`drop-shadow-xl backdrop-blur-2xl ${isDarkMode ? 'bg-navbar text-white_text' : 'bg-navbar_light text-black_text'} overflow-hidden`}
-                            backdrop={false}
+                            backdrop={true}
                         >
                             <Offcanvas.Body className="flex flex-col justify-between">
                                 <div className="offcanvas-content">
@@ -76,7 +76,7 @@ function NavHeader(props) {
                                     </Row>
                                     <Row
                                         className={`offcanvas-item w-100 p-1 ${currentRoute.includes("map") ? (isDarkMode ? 'bg-customBlue' : 'bg-blue-200') : ''}`}
-                                        onClick={() => { }}
+                                        onClick={() => { navigate("/mapDocuments")}}
                                     >
                                         <Col xs="auto">
                                             <i className={`bi bi-globe-americas fs-3 align-middle ${isDarkMode ? 'text-white_text' : 'text-black_text'}`}></i>

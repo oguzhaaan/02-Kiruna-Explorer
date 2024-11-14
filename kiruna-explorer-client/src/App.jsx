@@ -10,6 +10,7 @@ import { Document } from "./Components/Document.jsx";
 import LinkDocuments from "./Components/LinkDocuments.jsx";
 import { GeoreferenceMap } from "./Components/Map.jsx";
 import DocumentClass from "./classes/Document.mjs";
+import { GeoreferenceMapDoc } from "./Components/MapDocuments.jsx";
 import { ThemeProvider } from "./contexts/ThemeContext.jsx";
 
 function App() {
@@ -55,6 +56,8 @@ function App() {
           <Route path="/documents/:id" element={isLoggedIn ? <Document setoriginalDocId={setoriginalDocId} setMode={setMode} connections={connections} setConnections={setConnections} setNavShow={setNavShow} setIsModalOpen={setIsModalOpen} isModalOpen={isModalOpen} newAreaId={newAreaId} setnewAreaId={setnewAreaId} setNewDocument={setNewDocument} newDocument={newDocument} /> : <Navigate replace to="/" />} />
 
           <Route path="/map" element={isLoggedIn ? <GeoreferenceMap setNavShow={setNavShow} setnewAreaId={setnewAreaId} /> : <Navigate replace to="/" />} />
+
+          <Route path="/mapDocuments" element={isLoggedIn && <GeoreferenceMapDoc setNavShow={setNavShow} /> } />
 
           <Route path="/linkDocuments" element={ isLoggedIn ? <LinkDocuments setOriginalDocId = { setoriginalDocId } originalDocId = { docId } mode = { mode } setConnectionsInForm = { setConnections }/> : <Navigate replace to = "/" />} />
 

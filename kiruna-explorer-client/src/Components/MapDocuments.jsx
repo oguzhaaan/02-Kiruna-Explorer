@@ -17,8 +17,9 @@ import { SingleDocumentMap } from "./SingleDocumentMap.jsx";
 function GeoreferenceMapDoc(props) {
   const { isDarkMode } = useTheme();
   const navigate = useNavigate()
-
-  const latitude = 67.8558;
+  
+  //define default  position to "center of Kiruna"
+  const latitude = 67.8558; 
   const longitude = 20.2253;
 
   const [presentAreas, setPresentAreas] = useState(null);
@@ -166,7 +167,7 @@ function Markers({ area, handleClick, clickedArea, setDocumentId, setShowSingleD
   const [groupedDocs, setGroupedDocs] = useState([]);
 
 
-  console.log(geometry.coordinates[0])
+ // console.log(geometry.coordinates[0])
   const GenericPoints = L.icon({
     iconUrl: markerpin,
     iconSize: [35, 45],
@@ -201,7 +202,7 @@ function Markers({ area, handleClick, clickedArea, setDocumentId, setShowSingleD
           acc[item.type]++;
           return acc;
         }, {})
-        console.log(groupedByType)
+        //console.log(groupedByType)
         setGroupedDocs(Object.entries(groupedByType))
       } catch (err) {
         setAreaDoc([])

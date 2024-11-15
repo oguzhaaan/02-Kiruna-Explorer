@@ -7,21 +7,37 @@ import { getIcon } from "./Utilities/DocumentIcons.jsx";
 import { getStakeholderColor } from "./Utilities/StakeholdersColors.jsx";
 import { getLanguageName } from "./Utilities/Languages.jsx";
 import API from "../API/API.mjs";
-import {useTheme} from "../contexts/ThemeContext.jsx";
+import { useTheme } from "../contexts/ThemeContext.jsx";
 
 function SingleDocument(props) {
 
-    const {isDarkMode} = useTheme();
+    const { isDarkMode } = useTheme();
 
     const [collapsedSections, setCollapsedSections] = useState({});
     const [document, setDocument] = useState({});
-    const [documenLinks, setDocumentLinks] = useState([]);
+    const [documentLinks, setDocumentLinks] = useState([]);
     const [isCharging, setIsCharging] = useState(false);
+
+    //files management
+    const [activeTab, setActiveTab] = useState("connections"); // Stato per gestire le schede
+    const [files, setFiles] = useState([
+        {
+            'name': 'name',
+            'trype': 'map',
+            'path': 'path/to/file'
+        },
+        {
+            'name': 'name2',
+            'trype': 'text',
+            'path': 'path/to/file2'
+        }
+    ]); // Stato per i file
+
 
     const { id } = useParams();
     const navigate = useNavigate();
 
-    useEffect( () => {
+    useEffect(() => {
         const getDoc = async () => {
             try {
                 setIsCharging(true)
@@ -46,6 +62,19 @@ function SingleDocument(props) {
         if (id) getDoc()
     }, [id])
 
+    /*  useEffect(() => {
+          const getFiles = async () => {
+              try {
+                  const fileData = await API.getDocumentFiles(id); // Aggiungi un'API per i file
+                  setFiles(fileData);
+              } catch (error) {
+                  console.error(error);
+              }
+          };
+          if (id) getFiles();
+      }, [id]);
+      */
+
     function capitalizeWords(str) {
         return str.replace(/\b\w/g, char => char.toUpperCase());
     }
@@ -54,7 +83,7 @@ function SingleDocument(props) {
     useEffect(() => {
         const getLinks = async () => {
             try {
-                const links  = await API.getDocuemntLinks(id) // [{link1}, {link2}]
+                const links = await API.getDocuemntLinks(id) // [{link1}, {link2}]
                 console.log(links)
                 setDocumentLinks(links)
             } catch (error) {
@@ -62,9 +91,8 @@ function SingleDocument(props) {
             }
         }
         if (id) getLinks()
-        
+
     }, [id])
-   
 
     function formatString(input) {
         return input
@@ -107,7 +135,7 @@ function SingleDocument(props) {
                             {/* Type */}
                             <div className="font-light">
                                 <div className="text-black_text dark:text-white_text text-base flex flex-row align-items-center gap-2">
-                                    <img src={document.type ? getIcon({ type: document.type}, {darkMode: isDarkMode }) : getIcon("informative", {darkMode: isDarkMode})}
+                                    <img src={document.type ? getIcon({ type: document.type }, { darkMode: isDarkMode }) : getIcon("informative", { darkMode: isDarkMode })}
                                         className="w-9" alt={"type_icon"}></img>
                                     <p className="m-0 p-0">{document.type ? document.type.charAt(0).toUpperCase() + document.type.slice(1) : ''}</p>
                                 </div>
@@ -164,13 +192,9 @@ function SingleDocument(props) {
                         {/* Other Buttons */}
                         <div className="flex flex-row gap-3 font-normal pt-3">
                             <button
-                                className="flex flex-row gap-2 align-items-center text-black_text dark:text-white_text text-sm bg-[#76767655] dark:bg-[#D9D9D90E] hover:bg-[#FFFFFF55] dark:hover:bg-[#D9D9D933] transition rounded-2xl px-3 py-2 drop-shadow-lg">
+                                className="flex flex-row gap-2 align-items-center text-black_text dark:text-white_text text-sm bg-[#76767655] dark:bg-[#a0a0a058] hover:bg-[#FFFFFF55] dark:hover:bg-[#d9d9d974] transition rounded-2xl px-3 py-2 drop-shadow-lg">
                                 <i className="bi bi-globe-europe-africa text-base"></i>
                                 <p className="m-0 p-0">See on the map</p>
-                            </button>
-                            <button
-                                className="flex flex-row gap-2 align-items-center text-black_text dark:text-white_text text-sm bg-[#76767655] dark:bg-[#D9D9D90E] hover:bg-[#FFFFFF55] dark:hover:bg-[#D9D9D933] transition rounded-2xl px-3 py-2 drop-shadow-lg">
-                                <p className="m-0 p-0">Original Document</p>
                             </button>
                         </div>
                     </div>
@@ -178,72 +202,144 @@ function SingleDocument(props) {
                     {/* Links */}
                     <div
                         className="flex flex-col gap-3 w-2/6 h-100 bg-[#FFFFFF22] dark:bg-box_high_opacity rounded-xl py-3 px-4 overflow-y-auto">
-                        {/* NavBar */}
-                        <div className="flex flex-row justify-content-between align-items-center">
-                            <p className="m-0 p-0 text-xl font-medium">Connections</p>
+                        {/* Tab Header */}
+                        <div className="flex">
+                            {/* Connections Tab */}
+                            <button
+                                className={`flex-1 py-2 text-center ${activeTab === "connections"
+                                    ? `text-white-500 text-xl border-b-2 ${isDarkMode ? "border-white" : "border-black"}`
+                                    : "text-[#5d5d5db4] dark:text-[#5D5D5D] border-b-2 border-transparent"
+                                    }`}
+                                onClick={() => setActiveTab("connections")}
+                            >
+                                Connections
+                            </button>
 
-                            <button onClick={() => {
-                                props.setMode("save");
-                                props.setNavShow(false);
-                                props.setoriginalDocId(id);
-                                navigate("/linkDocuments")
-                            }} className="text-black_text dark:text-white_text text-base right-4 hover:text-gray-400">
-                                <i className="bi bi-pencil-square text-2xl"></i>
+                            {/* Files Tab */}
+                            <button
+                                className={`flex-1 py-2 text-center ${activeTab === "files"
+                                    ? `text-white-500 text-xl border-b-2 ${isDarkMode ? "border-white" : "border-black"}`
+                                    : "text-[#5d5d5db4] dark:text-[#5D5D5D] border-b-2 border-transparent"
+                                    }`}
+                                onClick={() => setActiveTab("files")}
+                            >
+                                Files
                             </button>
                         </div>
 
-                        <div className="w-full h-[2px] bg-[#C3C3C3CC] dark:bg-[#79797980]">
 
-                        </div>
                         {/* Connections */}
-                        {Object.entries(documenLinks.reduce((acc, connection) => {
-                            if (!acc[connection.connection]) {
-                                acc[connection.connection] = [];
-                            }
-                            acc[connection.connection].push(connection);
-                            return acc;
-                        }, {})).map(([connectionType, connections], index) => (
-                            <div key={index} className="flex flex-col gap-3 bg-[#FFFFFF33] dark:bg-[#D9D9D90E] p-3 rounded-xl">
-                                <div className="flex flex-row justify-content-between align-items-center cursor-pointer"
-                                    onClick={() => setCollapsedSections(prevState => ({
-                                        ...prevState,
-                                        [connectionType]: !prevState[connectionType]
-                                    }))}
-                                >
-                                    <h3 className="p-0 m-0 text-black_text dark:text-white_text text-sm">{connectionType ? formatString(connectionType) : ''}</h3>
-                                    <div
-                                        className="text-black_text dark:text-white_text text-base right-4 hover:text-gray-400">
-                                        <i className={`bi ${collapsedSections[connectionType] ? 'bi-caret-down' : 'bi-caret-up'} text-2xl`}></i>
-                                    </div>
-                                </div>
-                                {!collapsedSections[connectionType] && connections.map((connection, idx) => (
-                                    <div key={idx} className={"flex flex-col gap-1"}
-                                        onClick={() => {
-                                            //add click event to navigate to the document
-                                        }}
-                                    >
-                                        <div
-                                            onClick={() => {
-                                                navigate(`/documents/${connection.id}`);
-                                            }}
-                                            className="flex flex-row align-items-center gap-2 bg-[#FFFFFF77] dark:bg-box_high_opacity px-3 py-3 rounded-lg hover:bg-[#D9D9D950] transition cursor-pointer">
-                                            <img src={getIcon({type : connection.type}, {darkMode: isDarkMode})} className="w-7" alt={"type_icon"}></img>
-                                            <p className="m-0 p-0 text-black_text dark:text-white_text text-base font-normal line-clamp-1">{connection.title}</p>
+                        {activeTab === "connections" ? (
+                            Object.entries(documentLinks.reduce((acc, connection) => {
+                                if (!acc[connection.connection]) {
+                                    acc[connection.connection] = [];
+                                }
+                                acc[connection.connection].push(connection);
+                                return acc;
+                            }, {})).map(([connectionType, connections], index) => (
+                                <div key={index} className="flex flex-col gap-3 bg-[#76767655] dark:bg-[#D9D9D90E] p-3 rounded-xl">
+                                    <div className="flex flex-row justify-content-between align-items-center cursor-pointer"
+                                        onClick={() => setCollapsedSections(prevState => ({
+                                            ...prevState,
+                                            [connectionType]: !prevState[connectionType]
+                                        }))}>
+                                        <h3 className="p-0 m-0 text-black_text dark:text-white_text text-sm">{connectionType ? formatString(connectionType) : ''}</h3>
+                                        <div className="text-black_text dark:text-white_text text-base right-4 hover:text-gray-400">
+                                            <i className={`bi ${collapsedSections[connectionType] ? 'bi-caret-down' : 'bi-caret-up'} text-2xl`}></i>
                                         </div>
                                     </div>
-                                ))}
-                            </div>
-                        ))}
-                        <div>
+                                    {!collapsedSections[connectionType] && connections.map((connection, idx) => (
+                                        <div key={idx} className="flex flex-col gap-1" onClick={() => {
+                                            //add click event to navigate to the document
+                                        }}>
+                                            <div
+                                                onClick={() => {
+                                                    navigate(`/documents/${connection.id}`);
+                                                }}
+                                                className="flex flex-row align-items-center gap-2 bg-[#FFFFFF77] dark:bg-[#d9d9d947] px-3 py-3 rounded-lg hover:bg-[#d9d9d934] transition cursor-pointer">
+                                                <img src={getIcon({ type: connection.type }, { darkMode: isDarkMode })} className="w-7" alt={"type_icon"} />
+                                                <p className="m-0 p-0 text-black_text dark:text-white_text text-base font-normal line-clamp-1">{connection.title}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ))
+                        ) : (
+                            <>
+                            {Object.entries(files.reduce((acc, connection) => {
+                                if (!acc[connection.connection]) {
+                                    acc[connection.connection] = [];
+                                }
+                                acc[connection.connection].push(connection);
+                                return acc;
+                            }, {})).map(([connectionType, connections], index) => (
+                                <div key={index} className="flex flex-col gap-3 bg-[#76767655] dark:bg-[#D9D9D90E] p-3 rounded-xl">
+                                    <div className="flex flex-row justify-content-between align-items-center cursor-pointer"
+                                        onClick={() => setCollapsedSections(prevState => ({
+                                            ...prevState,
+                                            [connectionType]: !prevState[connectionType]
+                                        }))}>
+                                        <h3 className="p-0 m-0 text-black_text dark:text-white_text text-sm">{connectionType ? formatString(connectionType) : ''}</h3>
+                                        <div className="text-black_text dark:text-white_text text-base right-4 hover:text-gray-400">
+                                            <i className={`bi ${collapsedSections[connectionType] ? 'bi-caret-down' : 'bi-caret-up'} text-2xl`}></i>
+                                        </div>
+                                    </div>
+                                    {!collapsedSections[connectionType] && connections.map((connection, idx) => (
+                                        <div key={idx} className="flex flex-col gap-1" onClick={() => {
+                                            //add click event to navigate to the document
+                                        }}>
+                                            <div
+                                                onClick={() => {
+                                                    navigate(`/documents/${connection.id}`);
+                                                }}
+                                                className="flex flex-row align-items-center gap-2 bg-[#FFFFFF77] dark:bg-[#d9d9d947] px-3 py-3 rounded-lg hover:bg-[#d9d9d934] transition cursor-pointer">
+                                                <img src={getIcon({ type: connection.type }, { darkMode: isDarkMode })} className="w-7" alt={"type_icon"} />
+                                                <p className="m-0 p-0 text-black_text dark:text-white_text text-base font-normal line-clamp-1">{connection.title}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ))
+                        }
+                        </>
+                            )}
 
-                        </div>
+
+                        {/* Bottone in basso a destra */}
+                        {activeTab === "connections" ? (
+                            <button
+                                onClick={() => {
+                                    props.setMode("save");
+                                    props.setNavShow(false);
+                                    props.setoriginalDocId(id);
+                                    navigate("/linkDocuments");
+                                }}
+                                className={`fixed bottom-6 right-6 sm:right-9 bg-[#76767655] dark:bg-[#d9d9d951] ${isDarkMode ? "text-white" : "text-black"} rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:bg-[#d9d9d934] transition-all`}
+                            >
+                                <i className="bi bi-pencil-square text-xl"></i>
+                            </button>
+                        ) :
+                            (
+                                <button
+                                    onClick={() => {
+                                        props.setMode("save");
+                                        props.setNavShow(false);
+                                        props.setoriginalDocId(id);
+                                        navigate("/linkDocuments");
+                                    }}
+                                    className={`fixed bottom-6 right-6 sm:right-9 bg-[#76767655] dark:bg-[#d9d9d951] ${isDarkMode ? "text-white" : "text-black"} rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:bg-[#d9d9d934] transition-all`}
+                                >
+                                    <i class="bi bi-plus-lg text-xl"></i>
+                                </button>
+                            )
+                        }
 
                     </div>
 
                 </div>
 
             </div>
-        </div>
+        </div >
     );
 }
 

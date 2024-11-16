@@ -16,6 +16,9 @@ import { stakeholderOptions, popularLanguages } from "./Utilities/Data.js";
 import FilterMenu from "./FilterMenu.jsx";
 
 
+import FilterLabels from "./FilterLabels.jsx";
+
+
 
 function Document(props) {
 
@@ -25,25 +28,19 @@ function Document(props) {
 
     // --- Search ---
     const [searchQuery, setSearchQuery] = useState("");
-
     // --- Filter ---
     const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
-    const [appliedFilters, setAppliedFilters] = useState(null);
-
     const toggleFilterMenu = () => {
         setIsFilterMenuOpen((prevState) => !prevState);
     };
-
-    const handleApply = (filters) => {
-        setAppliedFilters(filters);
-        setIsFilterMenuOpen(false);
-        console.log('Applied Filters:', filters);
-    };
-
-    const handleClear = () => {
-        setAppliedFilters(null);
-    };
-
+    const [filterValues, setFilterValues] = useState({
+        type: "",
+        stakeholders: [],
+        date: "",
+        startDate: "",
+        endDate: "",
+    });
+    const [isFilterDateRange, setIsFilterDateRange] = useState(false);
     // --- Update Documents List ---
     const [documents, setDocuments] = useState([]);
     const [refreshList, setRefreshList] = useState(0);
@@ -171,6 +168,7 @@ function Document(props) {
                 <div className="flex flex-row justify-content-between align-items-center w-full h-16 px-3">
 
                     <div className="flex flex-row items-center ml-14 gap-3">
+                        {/* Search Bar */}
                         <div className="z-[0] relative">
                             <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-black_text">
                                 <i className="bi bi-search"></i>
@@ -183,13 +181,33 @@ function Document(props) {
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
-                        {/* Filter Button */}
-                        <button className="text-black_text dark:text-white_text text-2xl" onClick={toggleFilterMenu}>
-                            <i className="bi bi-sort-down-alt"></i>
-                        </button>
+                        <div className="relative">
+                            {/* Filter Button */}
+                            <button
+                                className="text-black_text dark:text-white_text text-2xl"
+                                onClick={toggleFilterMenu}
+                            >
+                                <i className="bi bi-sort-down-alt"></i>
+                            </button>
+
+                            {/* Conditional Filter Menu */}
+                            {isFilterMenuOpen && (
+                                <div className="absolute top-full left-0 mt-2 z-50">
+                                    <FilterMenu
+                                        filterValues={filterValues}
+                                        setFilterValues={setFilterValues}
+                                        isFilterDateRange={isFilterDateRange}
+                                        setIsFilterDateRange={setIsFilterDateRange}
+                                        toggleFilterMenu={toggleFilterMenu}
+                                    />
+                                </div>
+                            )}
+                        </div>
+
                     </div>
 
                     <div className="flex flex-row justify-content-end gap-3 align-items-center">
+                        {/* Add document Button */}
                         <button onClick={toggleModal}
                             className="bg-primary_color_light dark:bg-primary_color_dark hover:bg-[#2E6A8E66] transition text-black_text dark:text-white_text grid justify-items-end py-2 px-4 rounded-md">
                             <span className="text-base"><i className="bi bi-file-earmark-plus"></i> Add document</span>
@@ -210,7 +228,8 @@ function Document(props) {
                         </button>
                     </div>
                 </div>
-
+                {/* Filter Labels */}
+                <FilterLabels filterValues={filterValues} setFilterValues={setFilterValues} />
                 {/* Documents List */}
                 <div className="flex flex-col gap-3 p-3 w-100">
                     {documents.map((doc) => (
@@ -226,8 +245,6 @@ function Document(props) {
                     ))}
                 </div>
             </div>
-            {/* Filter Menu */}
-            {isFilterMenuOpen  && <FilterMenu onApply={handleApply} onClear={handleClear} toggleFilterMenu={toggleFilterMenu}/>}
             {/* Add Document Form */}
             {
                 props.isModalOpen && (

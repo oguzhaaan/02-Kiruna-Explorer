@@ -1,36 +1,34 @@
-import {useEffect, useState} from "react";
-import {useNavigate} from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
-import {getStakeholderColor} from "./Utilities/StakeholdersColors";
-import {getIcon} from "./Utilities/DocumentIcons";
+import { getStakeholderColor } from "./Utilities/StakeholdersColors";
+import { getIcon } from "./Utilities/DocumentIcons";
 import API from "../API/API.mjs";
 import PropTypes from 'prop-types';
-import {useTheme} from "../contexts/ThemeContext.jsx";
+import { useTheme } from "../contexts/ThemeContext.jsx";
 import { formatString } from "./Utilities/StringUtils.js";
 import FilterMenu from "./FilterMenu.jsx";
+import FilterLabels from "./FilterLabels.jsx";
 
-const LinkDocuments = ({originalDocId, mode, setConnectionsInForm, setOriginalDocId}) => {
+const LinkDocuments = ({ originalDocId, mode, setConnectionsInForm, setOriginalDocId }) => {
     const navigate = useNavigate();
 
     const { isDarkMode } = useTheme();
 
     // --- Filter ---
     const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
-    const [appliedFilters, setAppliedFilters] = useState(null);
-
     const toggleFilterMenu = () => {
         setIsFilterMenuOpen((prevState) => !prevState);
     };
-
-    const handleApply = (filters) => {
-        setAppliedFilters(filters);
-        setIsFilterMenuOpen(false);
-        console.log('Applied Filters:', filters);
-    };
-
-    const handleClear = () => {
-        setAppliedFilters(null);
-    };
+    const [filterValues, setFilterValues] = useState({
+        type: "",
+        stakeholders: [],
+        date: "",
+        startDate: "",
+        endDate: "",
+    });
+    const [isFilterDateRange, setIsFilterDateRange] = useState(false);
+    //-------
 
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [documents, setDocuments] = useState([]);
@@ -66,27 +64,27 @@ const LinkDocuments = ({originalDocId, mode, setConnectionsInForm, setOriginalDo
 
                     setLinks(() => {
 
-                            if (linkedDocument) {
-                                mergedDocuments.forEach((doc) => {
-                                    tempLinks[doc.id] = [];
-                                });
-                                linkedDocument.reduce((acc, link) => {
-                                    const docId = link.id;
-                                    const connectionType = link.connection;
-                                    if (!tempLinks[docId]) {
-                                        tempLinks[docId] = [];
-                                    }
-                                    tempLinks[docId].push(connectionType);
-                                    return tempLinks;
-                                }, {})
-                                return tempLinks
-                            } else {
-                                mergedDocuments.forEach((doc) => {
-                                    tempLinks[doc.id] = [];
-                                });
-                                return tempLinks
-                            }
+                        if (linkedDocument) {
+                            mergedDocuments.forEach((doc) => {
+                                tempLinks[doc.id] = [];
+                            });
+                            linkedDocument.reduce((acc, link) => {
+                                const docId = link.id;
+                                const connectionType = link.connection;
+                                if (!tempLinks[docId]) {
+                                    tempLinks[docId] = [];
+                                }
+                                tempLinks[docId].push(connectionType);
+                                return tempLinks;
+                            }, {})
+                            return tempLinks
+                        } else {
+                            mergedDocuments.forEach((doc) => {
+                                tempLinks[doc.id] = [];
+                            });
+                            return tempLinks
                         }
+                    }
                     )
                 } else {
                     mergedDocuments.forEach((doc) => {
@@ -226,9 +224,9 @@ const LinkDocuments = ({originalDocId, mode, setConnectionsInForm, setOriginalDo
 
                     {/* Search Input */}
                     <div className="relative">
-                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-black_text">
-                                <i className="bi bi-search"></i>
-                            </span>
+                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-black_text">
+                            <i className="bi bi-search"></i>
+                        </span>
                         <input
                             type="text"
                             placeholder="Search"
@@ -238,10 +236,28 @@ const LinkDocuments = ({originalDocId, mode, setConnectionsInForm, setOriginalDo
                         />
                     </div>
 
-                    {/* Filter Button */}
-                    <button className="text-black_text dark:text-white_text text-2xl" onClick={toggleFilterMenu}>
-                        <i className="bi bi-sort-down-alt"></i>
-                    </button>
+                    <div className="relative">
+                        {/* Filter Button */}
+                        <button
+                            className="text-black_text dark:text-white_text text-2xl"
+                            onClick={toggleFilterMenu}
+                        >
+                            <i className="bi bi-sort-down-alt"></i>
+                        </button>
+
+                        {/* Conditional Filter Menu */}
+                        {isFilterMenuOpen && (
+                            <div className="absolute top-full left-0 mt-2 z-50">
+                                <FilterMenu
+                                    filterValues={filterValues}
+                                    setFilterValues={setFilterValues}
+                                    isFilterDateRange={isFilterDateRange}
+                                    setIsFilterDateRange={setIsFilterDateRange}
+                                    toggleFilterMenu={toggleFilterMenu}
+                                />
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* Done Button */}
@@ -249,12 +265,14 @@ const LinkDocuments = ({originalDocId, mode, setConnectionsInForm, setOriginalDo
                     onClick={handleDoneClick}
                     className="bg-primary_color_light dark:bg-primary_color_dark hover:bg-[#2E6A8E66] transition text-black_text dark:text-white_text py-2 px-4 rounded-md"
                 >
-          <span>
-            <i className="bi bi-file-earmark-plus"></i> Done
-          </span>
+                    <span>
+                        <i className="bi bi-file-earmark-plus"></i> Done
+                    </span>
                 </button>
             </div>
-            
+            {/* Filter Labels */}
+            <FilterLabels filterValues={filterValues} setFilterValues={setFilterValues} />
+
             <div className="flex flex-row gap-3">
                 {/* Document List */}
                 <div className="space-y-3 w-7/12">
@@ -287,32 +305,30 @@ const LinkDocuments = ({originalDocId, mode, setConnectionsInForm, setOriginalDo
                             selectedOption={Array.isArray(links[doc.id]) ? links[doc.id] : []}
                             onConnectionChange={(value) => handleConnectionChange(doc.id, value)}
                             getFilteredOptions={getFilteredOptions}
-                            isDarkMode = {isDarkMode}
+                            isDarkMode={isDarkMode}
                         />
                     ))}
                 </div>
 
             </div>
-            {/* Filter Menu */}
-            {isFilterMenuOpen  && <FilterMenu onApply={handleApply} onClear={handleClear} toggleFilterMenu={toggleFilterMenu}/>}
             {/* Confirmation Modal */}
             {isModalVisible && (
-                <ConfirmationModal onConfirm={handleConfirm} onCancel={handleCancel}/>
+                <ConfirmationModal onConfirm={handleConfirm} onCancel={handleCancel} />
             )}
         </div>
     );
 };
 
 const DocumentItem = ({
-                          title,
-                          type,
-                          date,
-                          stakeholders = [],
-                          connectionOptions = [],
-                          selectedOption = [],
-                          onConnectionChange,
-                          isDarkMode
-                      }) => {
+    title,
+    type,
+    date,
+    stakeholders = [],
+    connectionOptions = [],
+    selectedOption = [],
+    onConnectionChange,
+    isDarkMode
+}) => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
 
     return (
@@ -324,15 +340,15 @@ const DocumentItem = ({
                 <label>Connections:</label>
                 {selectedOption.length > 0 ? selectedOption.map((option, idx) => (
                     <div key={idx} className="flex items-center">
-                <span className="flex flex-row gap-2 rounded-lg px-3 py-1 bg-primary_color_light dark:bg-customPill text-black_text dark:text-white_text mr-2 mt-1">
-              {formatString(option)}
-                    <button
-                        className="text-my_red"
-                        onClick={() => onConnectionChange(option)}
-                    >
-                <i className="bi bi-x-circle"></i>
-              </button>
-                </span>
+                        <span className="flex flex-row gap-2 rounded-lg px-3 py-1 bg-primary_color_light dark:bg-customPill text-black_text dark:text-white_text mr-2 mt-1">
+                            {formatString(option)}
+                            <button
+                                className="text-my_red"
+                                onClick={() => onConnectionChange(option)}
+                            >
+                                <i className="bi bi-x-circle"></i>
+                            </button>
+                        </span>
                     </div>
                 )) : null}
                 {connectionOptions &&
@@ -373,7 +389,7 @@ const DocumentItem = ({
                 <div className="w-[90%]">
                     <div className="text-base mb-3 font-normal line-clamp-2">{formatString(title)}</div>
                     <div className="text-sm font-light flex items-center">
-                        <img src={getIcon({type: type}, {darkMode: isDarkMode})} className="w-8 mr-2" alt="type_icon"/>
+                        <img src={getIcon({ type: type }, { darkMode: isDarkMode })} className="w-8 mr-2" alt="type_icon" />
                         {formatString(type)}
                     </div>
                 </div>
@@ -389,11 +405,11 @@ const DocumentItem = ({
                         <span
                             key={idx}
                             className={`rounded-2xl px-3 py-1 text-sm text-white_text ${getStakeholderColor(
-                                {stakeholder}
+                                { stakeholder }
                             )}`}
                         >
-            {formatString(stakeholder)}
-          </span>
+                            {formatString(stakeholder)}
+                        </span>
                     ))}
                 </div>
             </div>
@@ -402,17 +418,17 @@ const DocumentItem = ({
 };
 
 const SelectedDocument = ({
-                              docId,
-                              title,
-                              type,
-                              date,
-                              stakeholders,
-                              connectionOptions = [],
-                              selectedOption = [], // Default to an empty array if not provided
-                              onConnectionChange,
-                              getFilteredOptions,
-                              isDarkMode
-                          }) => {
+    docId,
+    title,
+    type,
+    date,
+    stakeholders,
+    connectionOptions = [],
+    selectedOption = [], // Default to an empty array if not provided
+    onConnectionChange,
+    getFilteredOptions,
+    isDarkMode
+}) => {
     const filteredOptions = getFilteredOptions(docId);
 
     const [actualOption, setActualOption] = useState("None");
@@ -431,16 +447,16 @@ const SelectedDocument = ({
                 <label>Connections:</label>
                 {selectedOption.map((option, idx) => (
                     <div key={idx} className="flex items-center">
-            <span
-                className="flex flex-row align-items-center gap-2 rounded-md px-3 py-1 bg-customPill_light dark:bg-customPill text-black_text dark:text-white_text mr-2 mt-1">
-              {formatString(option)}
-                <button
-                    className="text-my_red text-xl"
-                    onClick={() => onConnectionChange(option)}
-                >
-                <i className="bi bi-x-circle"></i>
-              </button>
-            </span>
+                        <span
+                            className="flex flex-row align-items-center gap-2 rounded-md px-3 py-1 bg-customPill_light dark:bg-customPill text-black_text dark:text-white_text mr-2 mt-1">
+                            {formatString(option)}
+                            <button
+                                className="text-my_red text-xl"
+                                onClick={() => onConnectionChange(option)}
+                            >
+                                <i className="bi bi-x-circle"></i>
+                            </button>
+                        </span>
                     </div>
                 ))}
                 {filteredOptions && filteredOptions.length > 0 &&
@@ -475,7 +491,7 @@ const SelectedDocument = ({
             <div className="mx-4 flex-col">
                 <div className="text-base mb-3 font-normal line-clamp-2">{formatString(title)}</div>
                 <div className="text-sm font-light flex items-center">
-                    <img src={getIcon({type: type}, {darkMode: isDarkMode})} className="w-8 mr-2" alt="type_icon"/>
+                    <img src={getIcon({ type: type }, { darkMode: isDarkMode })} className="w-8 mr-2" alt="type_icon" />
                     {formatString(type)}
                 </div>
             </div>
@@ -496,7 +512,7 @@ SelectedDocument.propTypes = {
 };
 
 // Modal component for confirmation
-const ConfirmationModal = ({onConfirm, onCancel}) => {
+const ConfirmationModal = ({ onConfirm, onCancel }) => {
     return (
         <div className="fixed inset-0 flex items-center justify-center">
             <div

@@ -6,7 +6,6 @@ import { AreaNotFound } from "../models/Area.mjs";
 import { InvalidArea } from "../models/Area.mjs";
 
 const areaDAO = new AreaDAO();
-const documentDAO = new DocumentDAO();
 export default function DocumentDAO() {
     this.getAllDocuments = () => {
         const query = "SELECT * FROM document";

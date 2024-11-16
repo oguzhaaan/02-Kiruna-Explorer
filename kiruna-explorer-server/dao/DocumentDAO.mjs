@@ -39,6 +39,50 @@ export default function DocumentDAO() {
         });
     };
 
+    this.getDocumentsByFilter = ({ type, title, stakeholders, startDate, endDate }) => {
+        return new Promise((resolve, reject) => {
+            let query = "SELECT * FROM document WHERE 1=1";
+            const params = [];
+    
+            if (type) {
+                query += " AND type = ?";
+                params.push(type);
+            }
+    
+            if (title) {
+                query += " AND title LIKE ?";
+                params.push(`%${title}%`);
+            }
+    
+            if (stakeholders) {
+                query += " AND (";
+                const stakeholderConditions = [];
+                stakeholders.forEach(stakeholder => {
+                    stakeholderConditions.push(`${stakeholder} = TRUE`);
+                });
+                query += stakeholderConditions.join(" OR ");
+                query += ")";
+            }
+    
+            if (startDate) {
+                query += " AND date >= ?";
+                params.push(startDate);
+            }
+    
+            if (endDate) {
+                query += " AND date <= ?";
+                params.push(endDate);
+            }
+    
+            db.all(query, params, (err, rows) => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve(rows);
+            });
+        });
+    };
+
     this.getDocumentsByAreaId = (areaId) => {
         const areaDAO = new AreaDAO();
         const query = "SELECT * FROM document WHERE areaId = ?";

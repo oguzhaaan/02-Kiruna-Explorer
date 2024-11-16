@@ -9,6 +9,7 @@ import { isLoggedIn } from "../auth/authMiddleware.mjs";
 import { InvalidArea, AreaNotFound } from "../models/Area.mjs";
 import { DocumentNotFound } from "../models/Document.mjs";
 import { authorizeRoles } from "../auth/authMiddleware.mjs";
+import { query } from "express-validator";
 
 
 const router = express.Router();
@@ -16,6 +17,50 @@ const DocumentDao = new DocumentDAO();
 const AreaDao = new AreaDAO();
 const DocumentLinksDao = new DocumentLinksDAO();
 
+
+/* GET /api/documents/filter */
+/*
+some examples of queries:
+/api/documents/filter?type=technical&title=Document%201&stakeholders=lkab,municipality&startDate=2023-01-01&endDate=2023-12-31
+/api/documents/filter?type=technical&title=Document%201&stakeholders=lkab,municipality
+/api/documents/filter?type=technical&title=Document%201
+/api/documents/filter?type=technical
+/api/documents/filter?title=Document%201
+/api/documents/filter?stakeholders=lkab,municipality
+/api/documents/filter
+*/
+router.get("/filter", isLoggedIn,
+    [
+        query("type").optional().isString().withMessage("Type must be a string"),
+        query("title").optional().isString().withMessage("title must be a string"),
+        query("stakeholders").optional().isString().withMessage("Stakeholders must be a comma-separated string"),
+        query("startDate").optional().isISO8601().withMessage("Start date must be a valid date"),
+        query("endDate").optional().isISO8601().withMessage("End date must be a valid date")
+    ],
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        try {
+            const { type, title, stakeholders, startDate, endDate } = req.query;
+            const stakeholdersArray = stakeholders ? stakeholders.split(',') : null;
+
+            const documents = await DocumentDao.getDocumentsByFilter({
+                type,
+                title,
+                stakeholders: stakeholdersArray,
+                startDate,
+                endDate
+            });
+
+            res.status(200).json(documents);
+        } catch (err) {
+            console.error("Error fetching documents:", err);
+            res.status(500).json({ error: "Internal server error", details: err.message });
+        }
+    });
 
 router.get("/",
     async (req, res) => {
@@ -30,6 +75,8 @@ router.get("/",
         }
     }
 );
+
+
 
 /* GET /api/documents/:DocId */
 router.get("/:DocId", isLoggedIn,
@@ -56,6 +103,8 @@ router.get("/:DocId", isLoggedIn,
             res.status(err.status).json({ error: err });
         }
     })
+    
+    
 
 /* GET /api/documents/area/:areaId */
 router.get("/area/:areaId", isLoggedIn,

@@ -523,11 +523,14 @@ router.post(
     }
 );
 
-router.delete('/:DocId/uploads',
+router.delete('/:DocId/files/:FilePath',
     [
         param("DocId")
             .isNumeric()
-            .withMessage("Document ID must be a valid number")
+            .withMessage("Document ID must be a valid number"),
+        param("FilePath")
+            .isString()
+            .withMessage("File path must be a string")
     ],
     async (req, res) => {
         const errors = validationResult(req);
@@ -536,13 +539,20 @@ router.delete('/:DocId/uploads',
         }
         try {
             const params = req.params;
-            const documentId = params.DocId;
-            const deleteResult = await FileDao.deleteAll(documentId);
+            const path = params.FilePath;
+            console.log(path);
+            const deleteResult = await FileDao.deleteFile(path);
+
+            if (deleteResult.deletedCount === 0) {
+                return res.status(404).json({ error: "File not found" });
+            }
+            res.status(200).json({ message: "File deleted successfully" });
         }
         catch (error) {
             console.error("Error in deleteAll function:", error.message);
             res.status(500).json({ error: error.message });
         }
+    }
 
 )
 

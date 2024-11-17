@@ -113,6 +113,31 @@ const getDocumentsFromArea = async (areaId) => {
   }
 };
 
+const updateDocumentArea = async (docId,areaId) => {
+  try {
+    const response = await fetch(`${SERVER_URL}/api/documents/${docId}/area`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        areaId:areaId
+      }),
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const errMessage = await response.json();
+      throw new Error(`${errMessage.message || 'Error while creating the document.'}`);
+    }
+
+    const result = await response.json();
+    return result; 
+    
+  } catch (error) {
+    console.error("Error in addDocument function:", error.message);
+    throw new Error(`${error.message || 'Error while creating the document.'}`);
+  }
+};
+
 const getAllAreas = async () => {
   try {
     const response = await fetch(`${SERVER_URL}/api/areas`, {
@@ -150,7 +175,7 @@ const getAreaById = async (areaId) => {
     }
     
     const result = await response.json();
-    
+    console.log(result)
     const geoJsonresult = JSON.parse(result.geoJson)
     return geoJsonresult
     
@@ -314,6 +339,7 @@ const API = {
   addDocument,
   getDocumentById,
   getDocumentsFromArea,
+  updateDocumentArea,
   getAllAreas,
   getAreaById,
   addArea,

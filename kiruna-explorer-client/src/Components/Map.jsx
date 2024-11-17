@@ -21,6 +21,12 @@ function CenterMap({ lat, lng }) {
     return null;
 }
 
+function CenterMapPolygon({ bounds }) {
+    const map = useMap();
+    map.fitBounds(bounds);
+    return null;
+}
+
 const HomeButton = ({ handleMunicipalAreas }) => {
     return (
         <div title="Municipal Area" className="custom-home-button" onClick={() => {
@@ -53,7 +59,7 @@ function GeoreferenceMap(props) {
     const [coordinatesErr, setCoordinatesErr] = useState(false)
 
     const mapRef = useRef(null);
-
+    const featureGroupRef = useRef(null);
     {/* Clear Alert message after 5 sec*/
     }
     useEffect(() => {
@@ -125,7 +131,6 @@ function GeoreferenceMap(props) {
     const onCreated = (e) => {
 
         const { layer } = e;
-        console.log(layer)
         if (layer instanceof L.Polygon) {
             setShowManually(false)
             setAlertMessage("You selected a new custom area");
@@ -145,8 +150,6 @@ function GeoreferenceMap(props) {
     };
 
     const onEdited = (e) => {
-        console.log("onEdited", e);
-
         const layers = e.layers;
         layers.eachLayer((layer) => {
             const geoJson = layer.toGeoJSON();
@@ -154,12 +157,10 @@ function GeoreferenceMap(props) {
             if (layer instanceof L.Polygon) {
                 setShowManually(false)
                 setAlertMessage("You edited the custom area");
-                console.log("Modificato un poligono:", geoJson);
             } else if (layer instanceof L.Marker) {
                 setShowManually(true)
                 const markerPosition = layer.getLatLng();
                 setAlertMessage("You edited the point position");
-                console.log("Modificato un marker:", geoJson);
                 setMarkerLayer(layer);
                 setMarkerCoordinates({ lat: markerPosition.lat, lng: markerPosition.lng });
             } else {
@@ -205,61 +206,56 @@ function GeoreferenceMap(props) {
         setShowSave(false);
     };
 
-    useEffect(() => {
-        const createLayerToUpdate = async (areaId) => {
-            try {
-                const updateArea = await API.getAreaById(areaId)
-                console.log(updateArea)
-                let newLayer;
+    const createLayerToUpdate = async (areaId) => {
+        try {
+            const updateArea = await API.getAreaById(areaId)
+            let newLayer;
 
-                if (updateArea.geometry.type === "marker") {
-                    // Crea un nuovo marker
-                    const [lat, lng] = updateArea.geometry.coordinates;
-                    newLayer = L.marker([lat, lng], {
-                        icon: L.icon({
-                            iconUrl: "src/assets/digging.svg", // Percorso verso l'icona personalizzata
-                            iconSize: [32, 32],
-                            iconAnchor: [16, 32],
-                        }),
-                    });
-                    setAlertMessage("You can update the marker coordinates")
-                } else if (updateArea.geometry.type === "polygon") {
-                    // Crea un nuovo poligono
-                    newLayer = L.polygon(updateArea.geometry.coordinates, {
-                        color: "blue",
-                        weight: 2,
-                        fillColor: "#3388ff",
-                        fillOpacity: 0.5,
-                    });
-                    setAlertMessage("You can update polygon coordinates")
-                }
-                else{
-                    return
-                }
-
-                // Aggiungi il layer alla mappa
-                if (mapRef.current) {
-                    const map = mapRef.current;
-                    newLayer.addTo(map);
-                    setCoordinatesErr(false);
-
-                    // Centra la mappa sul nuovo layer
-                    if (updateArea.geometry.type === "marker") {
-                        map.setView(updateArea.geometry.coordinates, map.getZoom());
-                    } else if (updateArea.geometry.type === "polygon") {
-                        const bounds = newLayer.getBounds();
-                        map.fitBounds(bounds);
-                    }
-
-                    // Salva il GeoJSON del layer creato
-                    setDrawnObject(newLayer.toGeoJSON());
-                }
-            } catch (err) {
-                setAlertMessage("No area provided for this document, create new one or exit");
+            if (updateArea.geometry.type === "Point") {
+                // Crea un nuovo marker
+                const [lng, lat] = updateArea.geometry.coordinates;
+                newLayer = L.marker([lat, lng], {
+                    icon: L.icon({
+                        iconUrl: markerpin, // Percorso verso l'icona personalizzata
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 32],
+                    }),
+                });
+                setAlertMessage("You can update the marker coordinates")
+            } else if (updateArea.geometry.type === "Polygon") {
+                // Crea un nuovo poligono
+                newLayer = L.polygon(updateArea.geometry.coordinates[0].map(coord => [coord[1], coord[0]]), {
+                    color: "blue",
+                    weight: 2,
+                    fillColor: "#3388ff",
+                    fillOpacity: 0.5,
+                });
+                setAlertMessage("You can update polygon coordinates")
             }
-        };
-        if (props.updateAreaId.docId) createLayerToUpdate(props.updateAreaId.areaId);
-    }, [mapRef.current, props.updateAreaId?.docId])
+            else {
+                return
+            }
+
+            // Aggiungi il layer alla mappa
+            if (featureGroupRef.current && mapRef.current && !drawnObject) {
+                const map = mapRef.current
+                featureGroupRef.current.addLayer(newLayer);
+                setCoordinatesErr(false);
+
+                // Centra la mappa sul nuovo layer
+                if (updateArea.geometry.type === "Point") {
+                    map.panTo(updateArea.geometry.coordinates);
+                } else if (updateArea.geometry.type === "Polygon") {
+                    const bounds = newLayer.getBounds();
+                    map.fitBounds(bounds);
+                }
+                // Salva il GeoJSON del layer creato
+                setDrawnObject(newLayer.toGeoJSON());
+            }
+        } catch (err) {
+            setAlertMessage("No area provided for this document, create new one or exit");
+        }
+    };
 
     const updateMarkerPosition = (lat, lng) => {
         if (markerLayer) {
@@ -288,13 +284,12 @@ function GeoreferenceMap(props) {
         }
     };
 
-    {/* Get all areas to diplay them, the first (presentAreas[0]) should be the municipality one */
+    {/* Get all areas to display them, the first (presentAreas[0]) should be the municipality one */
     }
     const handleMunicipalAreas = async () => {
         try {
             if (!presentAreas) {
                 const allAreas = await API.getAllAreas()
-                //console.log(allAreas)
                 setPresentAreas(allAreas)
                 setAlertMessage("Select existing area")
                 setShowManually(false)
@@ -304,7 +299,6 @@ function GeoreferenceMap(props) {
                 setAlertMessage(null)
                 setClickedArea(null)
                 setShowSave(false)
-                //setShowManually(true)
             }
 
         } catch (err) {
@@ -316,17 +310,15 @@ function GeoreferenceMap(props) {
     }
     const handleSave = async () => {
         try {
+            let area_id
             //If he drows a new area
             if (drawnObject) {
-                console.log(drawnObject)
-                const area_id = await API.addArea(drawnObject)
-                props.setnewAreaId(area_id)
+                area_id = await API.addArea(drawnObject)
                 setDrawnObject(null)
             }
             //if he clicked an existing one
             else if (clickedArea) {
-                const area_id = clickedArea
-                props.setnewAreaId(area_id)
+                area_id = clickedArea
             } else {
                 const geoJson = {
                     type: "Feature",
@@ -336,9 +328,12 @@ function GeoreferenceMap(props) {
                         coordinates: [lng, lat]
                     }
                 }
-                const area_id = await API.addArea(geoJson)
-                props.setnewAreaId(area_id)
+                area_id = await API.addArea(geoJson)
             }
+
+            // if update area is not null then update, else set new area id for the form
+            props.updateAreaId.docId ? await API.updateDocumentArea(props.updateAreaId.docId, area_id) : props.setnewAreaId(area_id)
+            props.setUpdateAreaId({ areaId: null, docId: null })
             navigate(-1);
         } catch (err) {
             console.log(err)
@@ -358,6 +353,7 @@ function GeoreferenceMap(props) {
                 }}
                 maxBounds={cityBounds}
                 minZoom={12}
+                whenReady={() => { if (props.updateAreaId.docId && !drawnObject) createLayerToUpdate(props.updateAreaId.areaId) }}
             >
                 {mapRef.current && !drawnObject && showMuniAreas && <HomeButton handleMunicipalAreas={handleMunicipalAreas} />}
                 <TileLayer
@@ -366,7 +362,7 @@ function GeoreferenceMap(props) {
                     className={isDarkMode ? "custom-tile-layer" : ""}
                 />
                 <ZoomControl position="topright" />
-                <FeatureGroup>
+                <FeatureGroup ref={featureGroupRef}>
                     <EditControl
                         key={drawnObject}
                         position="topright"
@@ -388,10 +384,14 @@ function GeoreferenceMap(props) {
                         minZoom={12} />
                 </FeatureGroup>
 
+                {/* Center Map in drown object*/}
                 {
                     drawnObject && drawnObject.geometry.type === "Point" &&
-                    <CenterMap lat={drawnObject.geometry.coordinates[1]}
-                        lng={drawnObject.geometry.coordinates[0]}></CenterMap>
+                    <CenterMap lat={drawnObject.geometry.coordinates[1]} lng={drawnObject.geometry.coordinates[0]}></CenterMap>
+                }
+                {
+                    drawnObject && drawnObject.geometry.type === "Polygon" &&
+                    <CenterMap lat={calculateCentroid(drawnObject.geometry.coordinates[0])[0]} lng={calculateCentroid(drawnObject.geometry.coordinates[0])[1]}></CenterMap>
                 }
 
                 {/* Visualize All present Areas*/}
@@ -418,7 +418,9 @@ function GeoreferenceMap(props) {
                             </button>
                             <button
                                 onClick={() => {
-                                    navigate(-1), setDrawnObject(null)
+                                    setDrawnObject(null),
+                                        props.setUpdateAreaId({ areaId: null, docId: null }),
+                                        navigate(-1)
                                 }}
                                 className="bg-primary_color_light dark:bg-customBlue hover:bg-blue-300 dark:hover:bg-[#317199] transition text-black_text dark:text-white_text w-40 h-16 px-4 py-2 rounded-xl text-xl"
                             >
@@ -541,19 +543,18 @@ function calculateCentroid(coordinates) {
     const centroidX = xSum / (6 * area);
     const centroidY = ySum / (6 * area);
 
-    return [centroidY, centroidX]; // Restituisci in formato [latitudine, longitudine]
+    return [centroidY, centroidX]; // return centroid of a polygon to center the map
 }
 
 function Markers({ area, handleClick, clickedArea }) {
     const map = useMap()
     const [areaDoc, setAreaDoc] = useState([])
     const geometry = area.geoJson.geometry;
-    const [tooltipVisible, setTooltipVisible] = useState(true); // Stato per visibilità del Tooltip
-    const [isZoomLevelLow, setIsZoomLevelLow] = useState(false); // Stato per controllare il livello di zoom
+    const [tooltipVisible, setTooltipVisible] = useState(true);
+    const [isZoomLevelLow, setIsZoomLevelLow] = useState(false);
     const { isDarkMode } = useTheme();
     const [groupedDocs, setGroupedDocs] = useState([])
 
-    console.log(geometry.coordinates[0])
     const GenericPoints = L.icon({
         iconUrl: markerpin,
         iconSize: [35, 45],
@@ -584,11 +585,10 @@ function Markers({ area, handleClick, clickedArea }) {
                     if (!acc[item.type]) {
                         acc[item.type] = 0;
                     }
-                    // Incrementa il conteggio per il tipo corrente
+                    // Counts number of document for each type
                     acc[item.type]++;
                     return acc;
                 }, {})
-                console.log(groupedByType)
                 setGroupedDocs(Object.entries(groupedByType))
             } catch (err) {
                 setAreaDoc([])
@@ -598,20 +598,17 @@ function Markers({ area, handleClick, clickedArea }) {
     }, [])
 
     useEffect(() => {
-        // Funzione per monitorare il livello di zoom
         const handleZoom = () => {
             if (map.getZoom() <= 13) {
-                setIsZoomLevelLow(true); // Livello di zoom basso, mostra solo il numero di documenti
+                setIsZoomLevelLow(true); // low zoom level
             } else {
-                setIsZoomLevelLow(false); // Livello di zoom alto, mostra anche le icone
+                setIsZoomLevelLow(false); // high zoom level
             }
         };
 
         map.on('zoomend', handleZoom);
-        // Controllo iniziale del livello di zoom
         handleZoom();
 
-        // Pulizia del listener quando il componente viene smontato
         return () => {
             map.off('zoomend', handleZoom);
         };
@@ -622,8 +619,8 @@ function Markers({ area, handleClick, clickedArea }) {
             areaDoc && (
                 <>
                     <Marker
-                        position={calculateCentroid(geometry.coordinates[0])} // Inverti lat/lng per Leaflet
-                        icon={area.id === 1 ? MunicipalArea : GenericPolygon} // Puoi scegliere di usare un'icona personalizzata per i punti
+                        position={calculateCentroid(geometry.coordinates[0])} 
+                        icon={area.id === 1 ? MunicipalArea : GenericPolygon} 
                         eventHandlers={{
                             click: (e) => {
                                 handleClick(e, area.id),
@@ -631,34 +628,32 @@ function Markers({ area, handleClick, clickedArea }) {
                             }
                         }}
                     >
-                        {tooltipVisible && (
-                            <Tooltip permanent>
-                                {/* Se il livello di zoom è basso, mostra solo il numero di documenti */}
-                                {isZoomLevelLow ? (
-                                    <span className="w-full counter-documents text-lg">{areaDoc.length}</span>
-                                ) : (
-                                    <div className=" flex flex-row ">
-                                        {
-                                            groupedDocs.map(([type, num]) => (
-                                                <div key={type} style={{ display: 'flex', minWidth: '4em', minHeight: '1.5em', margin: '5px', flexDirection: 'row' }}>
-                                                    <img
-                                                        src={getIcon({ type: type }, { isDarkMode })}
-                                                        alt={type}
-                                                        style={{ width: '30px', height: '30px', marginRight: '5px' }}
-                                                    />
-                                                    <span className="counter-documents text-lg">{num}</span>
-                                                </div>
-                                            ))
-                                        }
-                                    </div>
-                                )}
-                            </Tooltip>
-                        )}
-                    </Marker>
+                        <Tooltip permanent>
+                            {/* if the zoom level is low shows only the number of documents */}
+                            {isZoomLevelLow ? (
+                                <span className="w-full counter-documents text-lg">{areaDoc.length}</span>
+                            ) : (
+                                <div className=" flex flex-row ">
+                                    {
+                                        groupedDocs.map(([type, num]) => (
+                                            <div key={type} style={{ display: 'flex', minWidth: '4em', minHeight: '1.5em', margin: '5px', flexDirection: 'row' }}>
+                                                <img
+                                                    src={getIcon({ type: type }, { isDarkMode })}
+                                                    alt={type}
+                                                    style={{ width: '30px', height: '30px', marginRight: '5px' }}
+                                                />
+                                                <span className="counter-documents text-lg">{num}</span>
+                                            </div>
+                                        ))
+                                    }
+                                </div>
+                            )}
+                        </Tooltip>
 
+                    </Marker>
                     {clickedArea === area.id && (
                         <Polygon
-                            positions={geometry.coordinates[0].map(coord => [coord[1], coord[0]])} // Inverti le coordinate per Leaflet
+                            positions={geometry.coordinates[0].map(coord => [coord[1], coord[0]])}
                             pathOptions={{ color: 'blue' }}
                         />
                     )}
@@ -669,8 +664,8 @@ function Markers({ area, handleClick, clickedArea }) {
                 <>
                     <Marker
                         key={area.id}
-                        position={[geometry.coordinates[1], geometry.coordinates[0]]} // Inverti lat/lng per Leaflet
-                        icon={GenericPoints} // Puoi scegliere di usare un'icona personalizzata per i punti
+                        position={[geometry.coordinates[1], geometry.coordinates[0]]} 
+                        icon={GenericPoints} 
                         eventHandlers={{
                             click: (e) => {
                                 handleClick(e, area.id),
@@ -678,29 +673,27 @@ function Markers({ area, handleClick, clickedArea }) {
                             }
                         }}
                     >
-                        {tooltipVisible && (
-                            <Tooltip permanent>
-                                {/* Se il livello di zoom è basso, mostra solo il numero di documenti */}
-                                {isZoomLevelLow ? (
-                                    <span className="w-full counter-documents text-lg">{areaDoc.length}</span>
-                                ) : (
-                                    <div className=" flex flex-row ">
-                                        {
-                                            groupedDocs.map(([type, num]) => (
-                                                <div key={type} style={{ display: 'flex', minWidth: '4em', minHeight: '1.5em', margin: '5px', flexDirection: 'row' }}>
-                                                    <img
-                                                        src={getIcon({ type: type }, { isDarkMode })}
-                                                        alt={type}
-                                                        style={{ width: '30px', height: '30px', marginRight: '5px' }}
-                                                    />
-                                                    <span className="counter-documents text-lg">{num}</span>
-                                                </div>
-                                            ))
-                                        }
-                                    </div>
-                                )}
-                            </Tooltip>
-                        )}
+                        <Tooltip permanent>
+                            {/* if the zoom level is low shows only the number of documents */}
+                            {isZoomLevelLow ? (
+                                <span className="w-full counter-documents text-lg">{areaDoc.length}</span>
+                            ) : (
+                                <div className=" flex flex-row ">
+                                    {
+                                        groupedDocs.map(([type, num]) => (
+                                            <div key={type} style={{ display: 'flex', minWidth: '4em', minHeight: '1.5em', margin: '5px', flexDirection: 'row' }}>
+                                                <img
+                                                    src={getIcon({ type: type }, { isDarkMode })}
+                                                    alt={type}
+                                                    style={{ width: '30px', height: '30px', marginRight: '5px' }}
+                                                />
+                                                <span className="counter-documents text-lg">{num}</span>
+                                            </div>
+                                        ))
+                                    }
+                                </div>
+                            )}
+                        </Tooltip>
                     </Marker>
                 </>
             )

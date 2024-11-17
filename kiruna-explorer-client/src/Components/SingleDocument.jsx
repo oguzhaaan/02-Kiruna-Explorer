@@ -163,7 +163,7 @@ function SingleDocument(props) {
                         </div>
                         {/* Other Buttons */}
                         <div className="flex flex-row gap-3 font-normal pt-3">
-                            <button onClick={()=>{props.setUpdateAreaId({areaId:document.id,docId:document.areaId}),navigate("/map")}}
+                            <button onClick={()=>{props.setUpdateAreaId({areaId:document.areaId,docId:document.id}),navigate("/map")}}
                                 className="flex flex-row gap-2 align-items-center text-black_text dark:text-white_text text-sm bg-[#76767655] dark:bg-[#D9D9D90E] hover:bg-[#FFFFFF55] dark:hover:bg-[#D9D9D933] transition rounded-2xl px-3 py-2 drop-shadow-lg">
                                 <i className="bi bi-globe-europe-africa text-base"></i>
                                 <p className="m-0 p-0">See on the map</p>

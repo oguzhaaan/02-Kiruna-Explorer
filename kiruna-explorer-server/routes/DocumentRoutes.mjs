@@ -87,7 +87,7 @@ router.get("/area/:areaId", isLoggedIn,
     });
 
 
-const validStakeholders = ["lkab", "municipality", "regional authority", "architecture firms", "citizens", "others" ];
+const validStakeholders = ["lkab", "municipality", "regional authority", "architecture firms", "citizens", "others"];
 
 router.post("/",
     isLoggedIn,
@@ -317,13 +317,13 @@ router.post("/link",
         //check if documents exist
         try {
             const doc1Exists = await DocumentDao.getDocumentById(req.body.doc1Id);
-            
+
             const doc2Exists = await DocumentDao.getDocumentById(req.body.doc2Id);
-            
+
         } catch (error) {
             console.error("Error in isLink function:", error.message);
             return res.status(404).json({ error: "Document 1 or 2 not found" });
-          //  throw new Error("Unable to check if documents exist. Please check your connection and try again.");
+            //  throw new Error("Unable to check if documents exist. Please check your connection and try again.");
         }
 
         try {
@@ -374,7 +374,7 @@ router.post("/links",
         try {
             // Controlliamo che ogni documento esista
             for (const link of links) {
-                
+
                 const doc1Exists = await DocumentDao.getDocumentById(link.originalDocId);
                 if (!doc1Exists) {
                     return res.status(404).json({ error: `Document with ID ${link.originalDocId} not found` });
@@ -420,7 +420,15 @@ router.post("/links",
     }
 );
 
+router.post("/:DocId/attachments",
+    isLoggedIn,
+    [
+        param("DocId")
+            .isNumeric()
+            .withMessage("Document ID must be a valid number"),
+
+    ],
+    async (req, res) => {
 
 
-
-export default router;
+        export default router;

@@ -42,8 +42,10 @@ function SingleDocument(props) {
         formData.append('file', selectedFile);
         formData.append('fileType', fileType);
 
-        console.log(formData);
-        
+
+
+        console.log(formData.get('file'));
+
         try {
             const response = await fetch('/api/upload', {
                 method: 'POST',

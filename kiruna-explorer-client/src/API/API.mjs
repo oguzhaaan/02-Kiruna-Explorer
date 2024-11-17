@@ -317,7 +317,8 @@ const API = {
   getDocuemntLinks,
   getAllDocuments,
   addLinks,
-  deleteAll
+  deleteAll,
+  uploadFile
 };
 
 export default API;

@@ -19,6 +19,17 @@ function SingleDocument(props) {
     const [documentLinks, setDocumentLinks] = useState([]);
     const [isCharging, setIsCharging] = useState(false);
     const [modalPlusVisible, setModalPlusVisible] = useState(false);
+    const [openDropdown, setOpenDropdown] = useState(null); // Tieni traccia dell'indice del dropdown aperto
+
+    const handleToggleDropdown = (index) => {
+        // Se il dropdown è già aperto, lo chiudi (toggle)
+        if (openDropdown == index) {
+            setOpenDropdown(null); // Chiudi il dropdown se già aperto
+        } else {
+            setOpenDropdown(index); // Altrimenti, apri il dropdown corrispondente
+        }
+    };
+
 
     //upload a new file
     const [fileType, setFileType] = useState(''); // Tipo di file (documento originale o allegato)
@@ -47,11 +58,7 @@ function SingleDocument(props) {
         console.log(formData.get('file'));
 
         try {
-            const response = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData,
-            });
-
+            const response = API.uploadFile(id, formData);
             if (response.ok) {
                 alert('File uploaded successfully!');
                 handleCloseModal(); // Chiudi il modal dopo l'upload
@@ -391,11 +398,13 @@ function SingleDocument(props) {
                                         </div>
                                         {!collapsedFileSections[fileType] && fileGroup.map((file, idx) => (
                                             <FileItem
-                                                key={idx}
+                                                key={file.id}
                                                 file={file}
                                                 isDarkMode={isDarkMode}
                                                 handleDownload={handleDownload}
                                                 handleDelete={handleDelete}
+                                                isDropdownOpen={openDropdown == idx} // Passa lo stato per determinare se il dropdown è aperto
+                                                onDropdownToggle={() => handleToggleDropdown(idx)} // Passa la funzione per togglare il dropdown
                                             />
                                         ))}
                                     </div>
@@ -500,14 +509,23 @@ function SingleDocument(props) {
     );
 }
 
-const FileItem = ({ file, isDarkMode, handleDownload, handleDelete }) => {
-    const [dropdownVisible, setDropdownVisible] = useState(false);
 
-    // Handle dropdown toggle
-    const toggleDropdown = (e) => {
-        e.stopPropagation();
-        setDropdownVisible(!dropdownVisible);
-    };
+const FileItem = ({ file, isDarkMode, handleDownload, handleDelete, isDropdownOpen, onDropdownToggle }) => {
+
+    // Chiudi il dropdown quando si clicca fuori
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (isDropdownOpen && !e.target.closest('.dropdown') && !e.target.closest('.bi-three-dots-vertical')) {
+                onDropdownToggle(); // Chiude il dropdown se clicchi fuori
+            }
+        };
+
+        document.addEventListener('click', handleClickOutside);
+
+        return () => {
+            document.removeEventListener('click', handleClickOutside);
+        };
+    }, [isDropdownOpen, onDropdownToggle]);
 
     return (
         <div className="relative flex flex-col gap-1">
@@ -524,34 +542,33 @@ const FileItem = ({ file, isDarkMode, handleDownload, handleDelete }) => {
                 </p>
                 <i
                     className="bi bi-three-dots-vertical cursor-pointer ml-auto"
-                    onClick={toggleDropdown}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onDropdownToggle(); // Toggle dropdown when clicked
+                    }}
                 ></i>
             </div>
 
-            {dropdownVisible && (
+            {isDropdownOpen && (
                 <div
-                    className={`absolute right-3 top-full mt-1 z-10 ${isDarkMode ? "dark:bg-[#4F4F4F]" : "bg-[#76767655]"
-                        } rounded-lg shadow-lg w-40 transition-all`}
+                    className={`absolute right-2 top-8 mt-1 z-10 ${isDarkMode ? "dark:bg-[#4F4F4F]" : "bg-[#76767655]"} rounded-lg shadow-lg w-40 transition-all dropdown`}
                     onClick={(e) => e.stopPropagation()} // Prevents modal close on click
                 >
                     <div className="flex flex-col w-full">
                         <button
-                            className={`py-1 px-2 text-sm border-b-[0.0001rem] ${isDarkMode ? "border-white" : "border-black"
-                                } ${isDarkMode ? "dark:bg-[#4F4F4F]" : "bg-[#76767655]"
-                                } ${isDarkMode ? "text-white" : "text-black"} cursor-pointer flex items-center text-left`}
+                            className={`py-1 px-2 text-sm border-b-[0.0001rem] ${isDarkMode ? "border-white" : "border-black"} ${isDarkMode ? "dark:bg-[#4F4F4F]" : "bg-[#76767655]"} ${isDarkMode ? "text-white" : "text-black"} cursor-pointer flex items-center text-left`}
                             onClick={() => {
                                 handleDownload(file);
-                                setDropdownVisible(false);
+                                onDropdownToggle(); // Chiude il dropdown dopo l'azione
                             }}
                         >
                             <i className="bi bi-download mr-2"></i> Download
                         </button>
                         <button
-                            className={`py-1 px-2 text-sm ${isDarkMode ? "dark:bg-[#4F4F4F]" : "bg-[#76767655]"
-                                } text-[#E63232] flex items-center text-left cursor-pointer`}
+                            className={`py-1 px-2 text-sm ${isDarkMode ? "dark:bg-[#4F4F4F]" : "bg-[#76767655]"} text-[#E63232] flex items-center text-left cursor-pointer`}
                             onClick={() => {
                                 handleDelete(file);
-                                setDropdownVisible(false);
+                                onDropdownToggle(); // Chiude il dropdown dopo l'azione
                             }}
                         >
                             <i className="bi bi-trash3 mr-2 text-[#E63232]"></i> Delete
@@ -563,5 +580,4 @@ const FileItem = ({ file, isDarkMode, handleDownload, handleDelete }) => {
     );
 };
 
-export default FileItem;
 export { SingleDocument };

@@ -1,5 +1,6 @@
 import express from "express";
 import multer from 'multer'; // Package: multer
+import { fileURLToPath } from 'url';
 import path from 'path';
 import { promises as fs } from 'fs';
 import DocumentDAO from "../dao/DocumentDAO.mjs";
@@ -16,6 +17,8 @@ const DocumentDao = new DocumentDAO();
 const AreaDao = new AreaDAO();
 const DocumentLinksDao = new DocumentLinksDAO();
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname("../");
 
 router.get("/",
     async (req, res) => {
@@ -427,30 +430,32 @@ router.post("/links",
 
 // Configure Multer for file storage
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
+    destination: async (req, file, cb) => {
         const uploadPath = path.join(__dirname, 'uploads');
-        if (!fs.existsSync(uploadPath)) {
-            fs.mkdirSync(uploadPath, { recursive: true });
+        try {
+            await fs.mkdir(uploadPath, { recursive: true });
+        } catch (error) {
+            return cb(error);
         }
-        cb(null, uploadPath); // Save files to 'uploads' folder
+        cb(null, uploadPath);
     },
     filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + '-' + file.originalname); // Ensure unique file names
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        cb(null, `${uniqueSuffix}-${file.originalname}`);
     },
 });
 
 const upload = multer({
     storage: storage,
     fileFilter: (req, file, cb) => {
-        const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+        const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf', 'image/jpg', 'image/svg+xml', 'text/plain']; //add jpeg, jpg, svg, txt
         if (!allowedTypes.includes(file.mimetype)) {
             return cb(new Error('Invalid file type'));
         }
         cb(null, true);
     },
     limits: {
-        fileSize: 2 * 1024 * 1024, // Limit files to 2MB
+        fileSize: 20 * 1024 * 1024, // Limit files to 20MB
     },
 });
 
@@ -472,7 +477,10 @@ router.post(
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
-
+        //check if file is not empty
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
         // Check if file exists
         if (!req.file) {
             return res.status(400).json({ error: 'File upload failed. No file provided.' });

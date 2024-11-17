@@ -66,14 +66,13 @@ function SingleDocument(props) {
                 const response = await API.uploadFile(id, formData);
 
 
-                if (response.ok) {
-                    setAlertMessage(['File uploaded successfully!', 'success']);
-                    handleCloseModal(); // Chiudi il modal dopo l'upload
+                if (response) {
+                    setAlertMessage([response.message, 'success']);
+                    setModalPlusVisible(false); // Chiudi il modal dopo l'upload
                 } else {
-                    setAlertMessage(['Error uploading file...', 'error']);
+                    setAlertMessage([response.message, 'error']);
                 }
             } catch (error) {
-                console.error('Upload failed', error);
                 setAlertMessage([error.message, 'error']);
 
             } finally {
@@ -109,10 +108,10 @@ function SingleDocument(props) {
         try {
             const response = await API.deleteFile(id, path);
 
-            if (response.ok) {
-                console.log("File eliminato")
+            if (response) {
+                setAlertMessage([response.message, 'success']);
             } else {
-                setAlertMessage(['Error uploading file...', 'error']);
+                setAlertMessage([response.error, 'error']);
             }
         } catch (error) {
             console.error('Upload failed', error);
@@ -164,7 +163,7 @@ function SingleDocument(props) {
             }
         };
         if (id) getFiles();
-    }, [id]);
+    }, [id, alertMessage]);
 
     function capitalizeWords(str) {
         return str.replace(/\b\w/g, char => char.toUpperCase());

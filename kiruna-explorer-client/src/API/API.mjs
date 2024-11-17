@@ -293,13 +293,15 @@ const deleteAll = async (id) => {
       credentials: 'include'
     });
 
+    const result = await response.json();
+
     if (response.ok) {
-      return await response.json();
+      return result;
     } else {
-      throw new Error('File upload failed');
+      console.log(result);
+      throw new Error(result.error + "");
     }
   } catch (error) {
-    console.error('Error during file upload:', error);
     throw error;
   }
 };
@@ -322,23 +324,25 @@ const getDocumentFiles = async (DocId) => {
 };
 
 const deleteFile = async (DocId, FilePath) => {
+
+  const encodedFilePath = encodeURIComponent(FilePath);
+
   try {
-    const response = await fetch(`${DocId}/files/${FilePath}`, {
+    const response = await fetch(`${SERVER_URL}/api/documents/${DocId}/files/${encodedFilePath}`, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       credentials: 'include'
     });
 
+    const result = await response.json();
+
     if (!response.ok) {
-      throw new Error(`Failed to delete file ${FilePath}: ${response.statusText}`);
+      throw new Error(result.error);
+    }
+    else {
+      return result
     }
 
-    return await response.json();
-
   } catch (error) {
-    console.error('Error deleting file:', error);
     throw error;
   }
 };

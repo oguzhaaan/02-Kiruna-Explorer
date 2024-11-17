@@ -13,6 +13,7 @@ import { isLoggedIn } from "../auth/authMiddleware.mjs";
 import { InvalidArea, AreaNotFound } from "../models/Area.mjs";
 import { DocumentNotFound } from "../models/Document.mjs";
 import FileDAO from "../dao/FileDAO.mjs";
+import { query } from "express";
 
 const router = express.Router();
 
@@ -528,9 +529,6 @@ router.delete('/:DocId/files/:FilePath',
         param("DocId")
             .isNumeric()
             .withMessage("Document ID must be a valid number"),
-        param("FilePath")
-            .isString()
-            .withMessage("File path must be a string")
     ],
     async (req, res) => {
         const errors = validationResult(req);
@@ -538,13 +536,12 @@ router.delete('/:DocId/files/:FilePath',
             return res.status(400).json({ errors: errors.array() });
         }
         try {
-            const params = req.params;
-            const path = params.FilePath;
-            console.log(path);
-            const deleteResult = await FileDao.deleteFile(path);
+            const { DocId, FilePath } = req.params;
+            console.log(FilePath);
+            const deleteResult = await FileDao.deleteFile(FilePath);
 
             if (deleteResult.deletedCount === 0) {
-                return res.status(404).json({ error: "File not found" });
+                return res.status(405).json({ error: "File not found" });
             }
             res.status(200).json({ message: "File deleted successfully" });
         }
@@ -565,7 +562,7 @@ router.get('/:DocId/files',
     ],
     async (req, res) => {
 
-        
+
         const docId = req.params.DocId;
         console.log(docId);
 

@@ -12,22 +12,22 @@ Here's the Table of Contents with all the APIs listed:
     - [2. Technologies Used](#2-technologies-used)
     - [3. Database Structure](#3-database-structure)
     - [4. API Documentation](#4-api-documentation)
-      - [Add Document](#add-document)
-      - [Get All Documents](#get-all-documents)
-      - [Get Document by Id](#get-document-by-id)
-      - [Get Documents by Area Id](#get-documents-by-area-id)
-      - [Link Document](#link-document)
-      - [Add Links to a Document](#add-links-to-a-document)
-      - [Get Linked Documents](#get-linked-documents)
-      - [Delete Links](#delete-links)
-      - [Get All Areas](#get-all-areas)
-      - [Add Area](#add-area)
-      - [Edit Area Id](#edit-area-id)
-      - [Add Attachments](#add-attachments)
-      - [Delete Attachments](#delete-attachments)
+      - [**Add Document**](#add-document)
+      - [**Get All Documents**](#get-all-documents)
+      - [**Get Document by Id:**](#get-document-by-id)
+      - [**Get Documents by Id area :**](#get-documents-by-id-area-)
+      - [**Link Document**:](#link-document)
+      - [**Add links to a document**](#add-links-to-a-document)
+      - [**Get Linked Documents**](#get-linked-documents)
+      - [Delete links](#delete-links)
+      - [**Get all areas**](#get-all-areas)
+      - [**Add Area**:](#add-area)
+      - [**Edit area id**:](#edit-area-id)
+      - [**Add Attachments**:](#add-attachments)
+      - [**Delete Attachments**](#delete-attachments)
     - [5. Users Credentials](#5-users-credentials)
     - [6. Dockerization](#6-dockerization)
-    - [LICENSE](#license)
+  - [LICENSE](#license)
 
 
 
@@ -457,12 +457,12 @@ Request Body:
 [
   {
     "name" : "name",
-    "trype" : "map",
+    "type" : "original",
     "path" : "path/to/file"
   },
   {
     "name" : "name2",
-    "trype" : "text",
+    "type" : "Attachment",
     "path" : "path/to/file2"
   }
 ]

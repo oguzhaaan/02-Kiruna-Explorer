@@ -12,10 +12,15 @@ import Link from "../models/Link.mjs";
 import { isLoggedIn } from "../auth/authMiddleware.mjs";
 import { InvalidArea, AreaNotFound } from "../models/Area.mjs";
 import { DocumentNotFound } from "../models/Document.mjs";
+import FileDAO from "../dao/FileDAO.mjs";
+
 const router = express.Router();
+
 const DocumentDao = new DocumentDAO();
 const AreaDao = new AreaDAO();
 const DocumentLinksDao = new DocumentLinksDAO();
+const FileDao = new FileDAO();
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname("../");
@@ -454,45 +459,91 @@ const upload = multer({
         }
         cb(null, true);
     },
-    limits: {
-        fileSize: 20 * 1024 * 1024, // Limit files to 20MB
-    },
+    // limits: {
+    //     fileSize: 2 * 1024 * 1024, // Limit files to 20MB
+    // },
 });
+
+const MAX_SIZE = 2 * 1024 * 1024;
 
 // API route to handle file upload
 router.post(
     '/:DocId/upload',
+    isLoggedIn,
     upload.single('file'), // Use multer middleware
     [
-        // Validate 'fileType' field
-        body('fileType')
-            .notEmpty()
-            .withMessage('File type is required')
-            .isIn(['image', 'document', 'other']) // Adjust as needed
-            .withMessage('Invalid file type'),
+        param("DocId")
+            .isNumeric()
+            .withMessage("Document ID must be a valid number")
+
     ],
-    (req, res) => {
+    async (req, res) => {
         // Handle validation errors
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
-        //check if file is not empty
-        if (!req.file) {
-            return res.status(400).json({ error: 'No file uploaded' });
-        }
-        // Check if file exists
+        //check if file was uploaded
         if (!req.file) {
             return res.status(400).json({ error: 'File upload failed. No file provided.' });
         }
+        // Check file size
+        if (req.file.size > MAX_SIZE) {
+            return res.status(400).json({ error: 'File size exceeds the maximum limit of 20MB.' });
+        }
+        //check if file type is allowed
+        const allowedTypes = ['attachment', 'original'];
+        if (!allowedTypes.includes(req.body.fileType)) {
+            return res.status(400).json({ error: 'Invalid file type. Allowed types: attachment, original' });
+        }
+        // console.log(req.file);
 
-        // File successfully uploaded
-        res.status(200).json({
-            message: 'File uploaded successfully',
-            fileName: req.file.filename,
-            filePath: `/uploads/${req.file.filename}`,
-        });
+        const docId = req.params.DocId;
+        const file = {
+            name: req.file.originalname,
+            type: req.body.fileType,
+            path: `/uploads/${req.file.filename}`,
+        }
+        try {
+            const attachmentID = await FileDao.storeFile(docId, file);
+            // File successfully uploaded
+            if (!attachmentID) {
+                return res.status(500).json({ error: "Unable to store file. Please try again later." });
+            }
+            res.status(200).json({
+                message: 'File uploaded successfully',
+                fileName: req.file.filename,
+                filePath: `/uploads/${req.file.filename}`,
+            });
+        }
+        catch (error) {
+            console.error("Error in storeFile function:", error.message);
+            return res.status(500).json({ error: error.message });
+        }
     }
 );
+
+router.delete('/:DocId/uploads',
+    [
+        param("DocId")
+            .isNumeric()
+            .withMessage("Document ID must be a valid number")
+    ],
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+        try {
+            const params = req.params;
+            const documentId = params.DocId;
+            const deleteResult = await FileDao.deleteAll(documentId);
+        }
+        catch (error) {
+            console.error("Error in deleteAll function:", error.message);
+            res.status(500).json({ error: error.message });
+        }
+
+)
 
 export default router;

@@ -285,6 +285,25 @@ const deleteAll = async (id) => {
   }
 };
 
+export const uploadFile = async (id, formData) => {
+  try {
+    const response = await fetch(`${SERVER_URL}/api/documents/${id}/upload`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (response.ok) {
+      return await response.json();
+    } else {
+      throw new Error('File upload failed');
+    }
+  } catch (error) {
+    console.error('Error during file upload:', error);
+    throw error;
+  }
+};
+
+
 const API = {
   logIn,
   getUserInfo,

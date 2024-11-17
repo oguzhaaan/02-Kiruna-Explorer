@@ -445,7 +445,7 @@ Response body: None
 
 #### **Add Attachments**:
 
-**POST** `api/documents/:DocId/attachments`
+**POST** `api/documents/:DocId/uploads`
 
 Description : Add resources to a certain docuemnt identified by its <DocId>
 
@@ -478,7 +478,7 @@ Response body: None
 
 #### **Delete Attachments**
 
-**DELETE** `api/documents/:DocId/attachments`
+**DELETE** `api/documents/:DocId/uploads`
 
 Description : Delete all attachments associated to a document with its <DocId>
 

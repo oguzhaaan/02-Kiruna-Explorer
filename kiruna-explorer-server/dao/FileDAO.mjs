@@ -1,6 +1,7 @@
 import db from "../db.mjs";
 
 export default function FileDAO() {
+
     this.storeFile = (docId, file) => {
         return new Promise((resolve, reject) => {
 
@@ -24,4 +25,24 @@ export default function FileDAO() {
             });
         });
     }
+
+    this.getFilesByDocumentId = (docId) => {
+        return new Promise((resolve, reject) => {
+            const query = `
+                SELECT file.name, file.type, file.path
+                FROM file
+                INNER JOIN attachment ON file.id = attachment.fileId
+                WHERE attachment.docId = ?`;
+            
+            db.all(query, [docId], (err, rows) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(rows);
+                }
+            });
+        });
+    };
+
+
 }

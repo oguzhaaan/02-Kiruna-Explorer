@@ -103,11 +103,22 @@ function SingleDocument(props) {
         }
     };
 
-    const handleDelete = (file) => {
-        if (file) {
-            console.log('Deleting:', file.name);
-            // Delete logic goes here
-        }
+    const handleDelete = async (path) => {
+        console.log(path);
+
+        try {
+            const response = await API.deleteFile(id, path);
+
+            if (response.ok) {
+                console.log("File eliminato")
+            } else {
+                setAlertMessage(['Error uploading file...', 'error']);
+            }
+        } catch (error) {
+            console.error('Upload failed', error);
+            setAlertMessage([error.message, 'error']);
+
+        } 
     };
 
     //files management
@@ -142,18 +153,18 @@ function SingleDocument(props) {
         if (id) getDoc()
     }, [id])
 
-      useEffect(() => {
-          const getFiles = async () => {
-              try {
-                  const fileData = await API.getDocumentFiles(id); // Aggiungi un'API per i file
-                  console.log(fileData);
-                  setFiles(fileData);
-              } catch (error) {
-                  console.error(error);
-              }
-          };
-          if (id) getFiles();
-      }, [id]);
+    useEffect(() => {
+        const getFiles = async () => {
+            try {
+                const fileData = await API.getDocumentFiles(id); // Aggiungi un'API per i file
+                console.log(fileData);
+                setFiles(fileData);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+        if (id) getFiles();
+    }, [id]);
 
     function capitalizeWords(str) {
         return str.replace(/\b\w/g, char => char.toUpperCase());
@@ -561,7 +572,7 @@ const FileItem = ({ file, isDarkMode, handleDownload, handleDelete, isDropdownOp
                         <button
                             className={`py-1 px-2 text-sm ${isDarkMode ? "dark:bg-[#4F4F4F]" : "bg-[#76767655]"} text-[#E63232] flex items-center text-left cursor-pointer`}
                             onClick={() => {
-                                handleDelete(file);
+                                handleDelete(file.path);
                                 onDropdownToggle(); // Chiude il dropdown dopo l'azione
                             }}
                         >

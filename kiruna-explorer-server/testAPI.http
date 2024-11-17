@@ -37,3 +37,6 @@ Content-Type: application/json
     "planNumber": 2
   }
 ###
+
+
+GET http://localhost:3000/api/documents/1/files HTTP/1.1

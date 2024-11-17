@@ -290,6 +290,7 @@ const deleteAll = async (id) => {
     const response = await fetch(`${SERVER_URL}/api/documents/${id}/upload`, {
       method: 'POST',
       body: formData,
+      credentials: 'include'
     });
 
     if (response.ok) {
@@ -303,9 +304,11 @@ const deleteAll = async (id) => {
   }
 };
 
-const getDocumentFiles = async (id) => {
+const getDocumentFiles = async (DocId) => {
   try {
-      const response = await fetch(`${SERVER_URL}/api/documents/${id}/files`);
+      const response = await fetch(`${SERVER_URL}/api/documents/${DocId}/files`,{
+        credentials: 'include'
+      });
       
       if (response.ok) {
         return await response.json();
@@ -315,6 +318,28 @@ const getDocumentFiles = async (id) => {
   } catch (error) {
       console.error("Error fetching document files:", error);
       throw error;
+  }
+};
+
+const deleteFile = async (DocId, FilePath) => {
+  try {
+    const response = await fetch(`${DocId}/files/${FilePath}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to delete file ${FilePath}: ${response.statusText}`);
+    }
+
+    return await response.json();
+
+  } catch (error) {
+    console.error('Error deleting file:', error);
+    throw error;
   }
 };
 
@@ -334,7 +359,9 @@ const API = {
   getAllDocuments,
   addLinks,
   deleteAll,
-  uploadFile
+  uploadFile,
+  getDocumentFiles,
+  deleteFile
 };
 
 export default API;

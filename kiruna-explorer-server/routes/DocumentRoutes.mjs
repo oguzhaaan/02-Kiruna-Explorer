@@ -543,7 +543,33 @@ router.delete('/:DocId/uploads',
             console.error("Error in deleteAll function:", error.message);
             res.status(500).json({ error: error.message });
         }
-
+    }
 )
+
+router.get('/:DocId/files',
+    isLoggedIn,
+    [
+        param("DocId")
+            .isNumeric()
+            .withMessage("Document ID must be a valid number")
+    ],
+    async (req, res) => {
+
+        
+        const docId = req.params.DocId;
+        console.log(docId);
+
+        try {
+            // Use the DAO function to get files
+            const files = await FileDao.getFilesByDocumentId(docId);
+
+            // Return the files as a JSON response
+            res.status(200).json(files);
+        } catch (error) {
+            // Handle errors and return a response
+            console.error("Error fetching files:", error);
+            res.status(500).json({ error: 'An error occurred while fetching files.' });
+        }
+    });
 
 export default router;

@@ -138,6 +138,28 @@ const getAllAreas = async () => {
   }
 };
 
+const getAreaById = async (areaId) => {
+  try {
+    const response = await fetch(`${SERVER_URL}/api/areas/${areaId}`, {
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const errMessage = await response.json();
+      throw new Error(`${errMessage.message || 'Error while getting areas.'}`);
+    }
+    
+    const result = await response.json();
+    
+    const geoJsonresult = JSON.parse(result.geoJson)
+    return geoJsonresult
+    
+  } catch (error) {
+    console.error("Error in get all areas function:", error.message);
+    throw new Error(`${error.message || 'Error while getting areas.'}`);
+  }
+};
+
 const addArea = async (geoJson) => {
   console.log("Sending GeoJSON:", JSON.stringify(geoJson, null, 2));  // Controllo per verificare cosa viene inviato
 
@@ -293,6 +315,7 @@ const API = {
   getDocumentById,
   getDocumentsFromArea,
   getAllAreas,
+  getAreaById,
   addArea,
   addLink,
   getDocuemntLinks,

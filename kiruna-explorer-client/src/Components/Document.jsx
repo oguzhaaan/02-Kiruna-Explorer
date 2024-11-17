@@ -164,7 +164,7 @@ function Document(props) {
     return (
         <div className={isDarkMode ? 'dark' : 'light'}>
             <div className="bg-background_color_white dark:bg-background_color min-h-screen flex flex-col items-center">
-                <SingleDocument setNavShow={props.setNavShow} setMode={props.setMode}
+                <SingleDocument setUpdateAreaId={props.setUpdateAreaId} setNavShow={props.setNavShow} setMode={props.setMode}
                     setoriginalDocId={props.setoriginalDocId}></SingleDocument>
                 <Alert message={alertMessage[0]} type={alertMessage[1]}
                     clearMessage={() => setAlertMessage(['', ''])}></Alert>

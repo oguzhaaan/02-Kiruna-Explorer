@@ -77,15 +77,6 @@ function GeoreferenceMap(props) {
         //refresh
     }, [showExit, showSave, presentAreas, coordinatesErr])
 
-    const GenericPoints = L.icon({
-        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
-    });
-
     const cityBounds = [
         [67.92532085836797, 20.245374612817344],
         [67.85139867724654, 20.65936775042602],
@@ -111,28 +102,28 @@ function GeoreferenceMap(props) {
     {/* Click on area */
     }
     const handleClick = (e, content) => {
-        if (content===clickedArea){
+        if (content === clickedArea) {
             setClickedArea(null)
             setAlertMessage(``)
             setShowSave(false)
         }
-        else{
-            if (content===1){
+        else {
+            if (content === 1) {
                 setAlertMessage(`You selected Municipality Area`)
             }
-            else{
+            else {
                 setAlertMessage(`You selected Area N.${content}`)
             }
             setClickedArea(content)
             setShowSave(true)
         }
-        
+
     };
 
     {/* Handle creation/edit/delete of a area/point */
     }
     const onCreated = (e) => {
-        
+
         const { layer } = e;
         console.log(layer)
         if (layer instanceof L.Polygon) {
@@ -143,7 +134,7 @@ function GeoreferenceMap(props) {
             const markerPosition = layer.getLatLng();
             setAlertMessage("You selected a new custom point");
             setMarkerLayer(layer);
-            setMarkerCoordinates({lat: markerPosition.lat,lng: markerPosition.lng }); 
+            setMarkerCoordinates({ lat: markerPosition.lat, lng: markerPosition.lng });
         }
 
         const geoJson = layer.toGeoJSON();
@@ -170,7 +161,7 @@ function GeoreferenceMap(props) {
                 setAlertMessage("You edited the point position");
                 console.log("Modificato un marker:", geoJson);
                 setMarkerLayer(layer);
-                setMarkerCoordinates({lat: markerPosition.lat,lng: markerPosition.lng });     
+                setMarkerCoordinates({ lat: markerPosition.lat, lng: markerPosition.lng });
             } else {
                 console.warn("Tipo di layer non supportato.");
             }
@@ -187,7 +178,7 @@ function GeoreferenceMap(props) {
         setShowMuniAreas(true);
         setAlertMessage("");
         setMarkerLayer(null)
-        setMarkerCoordinates({lat:"",lng:""})
+        setMarkerCoordinates({ lat: "", lng: "" })
     };
 
     const onDrawStart = () => {
@@ -201,12 +192,12 @@ function GeoreferenceMap(props) {
 
     const onDrawStop = () => {
         setCoordinatesErr(false)
-        if (markerLayer===null){
+        if (markerLayer === null) {
             setShowMuniAreas(true)
             setShowExit(true)
             setAlertMessage("")
         }
-      };
+    };
 
     const onEditStart = () => {
         setAlertMessage("Edit your area or move the point as needed.");
@@ -214,32 +205,88 @@ function GeoreferenceMap(props) {
         setShowSave(false);
     };
 
+    useEffect(() => {
+        const createLayerToUpdate = async (areaId) => {
+            try {
+                const updateArea = await API.getAreaById(areaId)
+                console.log(updateArea)
+                let newLayer;
+
+                if (updateArea.geometry.type === "marker") {
+                    // Crea un nuovo marker
+                    const [lat, lng] = updateArea.geometry.coordinates;
+                    newLayer = L.marker([lat, lng], {
+                        icon: L.icon({
+                            iconUrl: "src/assets/digging.svg", // Percorso verso l'icona personalizzata
+                            iconSize: [32, 32],
+                            iconAnchor: [16, 32],
+                        }),
+                    });
+                    setAlertMessage("You can update the marker coordinates")
+                } else if (updateArea.geometry.type === "polygon") {
+                    // Crea un nuovo poligono
+                    newLayer = L.polygon(updateArea.geometry.coordinates, {
+                        color: "blue",
+                        weight: 2,
+                        fillColor: "#3388ff",
+                        fillOpacity: 0.5,
+                    });
+                    setAlertMessage("You can update polygon coordinates")
+                }
+                else{
+                    return
+                }
+
+                // Aggiungi il layer alla mappa
+                if (mapRef.current) {
+                    const map = mapRef.current;
+                    newLayer.addTo(map);
+                    setCoordinatesErr(false);
+
+                    // Centra la mappa sul nuovo layer
+                    if (updateArea.geometry.type === "marker") {
+                        map.setView(updateArea.geometry.coordinates, map.getZoom());
+                    } else if (updateArea.geometry.type === "polygon") {
+                        const bounds = newLayer.getBounds();
+                        map.fitBounds(bounds);
+                    }
+
+                    // Salva il GeoJSON del layer creato
+                    setDrawnObject(newLayer.toGeoJSON());
+                }
+            } catch (err) {
+                setAlertMessage("No area provided for this document, create new one or exit");
+            }
+        };
+        if (props.updateAreaId.docId) createLayerToUpdate(props.updateAreaId.areaId);
+    }, [mapRef.current, props.updateAreaId?.docId])
+
     const updateMarkerPosition = (lat, lng) => {
         if (markerLayer) {
-          // Aggiorna lo stato per riflettere le nuove coordinate
-          setMarkerCoordinates({ lat, lng });
+            // Aggiorna lo stato per riflettere le nuove coordinate
+            setMarkerCoordinates({ lat, lng });
 
-          if (isPointInCityBounds(lat,lng)){
-            // Aggiorna la posizione del marker esistente
-            markerLayer.setLatLng([lat, lng]);
-            setShowSave(true)
-            setAlertMessage("You modified your custom point")
-            setCoordinatesErr(false)
-            const geoJson = markerLayer.toGeoJSON()
-            setDrawnObject(geoJson)
-            // Centra la mappa sul nuovo marker
-            if (mapRef.current) {
-                mapRef.current.setView([lat, lng], mapRef.current.getZoom());
+            if (isPointInCityBounds(lat, lng)) {
+                // Aggiorna la posizione del marker esistente
+                markerLayer.setLatLng([lat, lng]);
+                setShowSave(true)
+                setAlertMessage("You modified your custom point")
+                setCoordinatesErr(false)
+                const geoJson = markerLayer.toGeoJSON()
+                setDrawnObject(geoJson)
+                // Centra la mappa sul nuovo marker
+                if (mapRef.current) {
+                    mapRef.current.setView([lat, lng], mapRef.current.getZoom());
+                }
             }
-          }
-          else{
-            setShowSave(false)
-            setAlertMessage("Coordinates out of city bound")
-            setCoordinatesErr(true)
-          }
-          
+            else {
+                setShowSave(false)
+                setAlertMessage("Coordinates out of city bound")
+                setCoordinatesErr(true)
+            }
+
         }
-      };
+    };
 
     {/* Get all areas to diplay them, the first (presentAreas[0]) should be the municipality one */
     }
@@ -301,6 +348,7 @@ function GeoreferenceMap(props) {
     return (
         <div className={isDarkMode ? "dark" : "light"}>
             <MapContainer
+                whenCreated={(map) => (mapRef.current = map)}
                 center={[latitude, longitude]}
                 zoom={13} ref={mapRef}
                 zoomControl={false}
@@ -403,42 +451,42 @@ function GeoreferenceMap(props) {
             )}
 
             <div
-                className={`absolute flex flex-row bottom-5 w-100 ${showManually?"justify-between":"justify-end"} z-[1000] max-md:flex-col max-md:block`}>
+                className={`absolute flex flex-row bottom-5 w-100 ${showManually ? "justify-between" : "justify-end"} z-[1000] max-md:flex-col max-md:block`}>
 
                 {/* Editable coordinates */}
                 {showManually &&
-                <div
-                    style={{
-                        gap: "10px",
-                        display: "flex",
-                        marginLeft: "10px",
-                    }}
-                    className="max-md:mb-4 max-md:w-1/2 max-md:flex-col"
-                >
-                    <div className="flex flex-col">
-                        <label
-                            className="text-black_text dark:text-white_text mb-1 text-lg text-left max-md:text-sm">Longitude</label>
-                        <input
-                            id="lon"
-                            type="number"
-                            step="0.00001"
-                            value={markerCoordinates.lng}
-                            onChange={(e) => updateMarkerPosition(markerCoordinates.lat, e.target.value) }
-                            className={`px-2 text-l py-1 text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-[40px] ${coordinatesErr && showManually ? "border-red-500 border-2" : ""} max-md:w-full max-md:h-5`}
-                        />
+                    <div
+                        style={{
+                            gap: "10px",
+                            display: "flex",
+                            marginLeft: "10px",
+                        }}
+                        className="max-md:mb-4 max-md:w-1/2 max-md:flex-col"
+                    >
+                        <div className="flex flex-col">
+                            <label
+                                className="text-black_text dark:text-white_text mb-1 text-lg text-left max-md:text-sm">Longitude</label>
+                            <input
+                                id="lon"
+                                type="number"
+                                step="0.00001"
+                                value={markerCoordinates.lng}
+                                onChange={(e) => updateMarkerPosition(markerCoordinates.lat, e.target.value)}
+                                className={`px-2 text-l py-1 text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-[40px] ${coordinatesErr && showManually ? "border-red-500 border-2" : ""} max-md:w-full max-md:h-5`}
+                            />
+                        </div>
+                        <div className="flex flex-col">
+                            <label className="text-black_text dark:text-white_text mb-1 text-lg text-left max-md:text-sm">Latitude</label>
+                            <input
+                                id="lat"
+                                type="number"
+                                step="0.00001"
+                                value={markerCoordinates.lat}
+                                onChange={(e) => updateMarkerPosition(e.target.value, markerCoordinates.lng)}
+                                className={`px-2 text-l py-1 text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-[40px] ${coordinatesErr && showManually ? "border-red-500 border-2" : ""} max-md:w-full max-md:h-5`}
+                            />
+                        </div>
                     </div>
-                    <div className="flex flex-col">
-                        <label className="text-black_text dark:text-white_text mb-1 text-lg text-left max-md:text-sm">Latitude</label>
-                        <input
-                            id="lat"
-                            type="number"
-                            step="0.00001"
-                            value={markerCoordinates.lat}
-                            onChange={(e) => updateMarkerPosition(e.target.value, markerCoordinates.lng)}
-                            className={`px-2 text-l py-1 text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-[40px] ${coordinatesErr && showManually ? "border-red-500 border-2" : ""} max-md:w-full max-md:h-5`}
-                        />
-                    </div>
-                </div>
                 }
                 {/* Exit and Save buttons */}
                 <div
@@ -532,14 +580,14 @@ function Markers({ area, handleClick, clickedArea }) {
             try {
                 const docs = await API.getDocumentsFromArea(area.id)
                 setAreaDoc(docs)
-                const groupedByType = docs.reduce((acc,item)=>{
+                const groupedByType = docs.reduce((acc, item) => {
                     if (!acc[item.type]) {
                         acc[item.type] = 0;
                     }
                     // Incrementa il conteggio per il tipo corrente
                     acc[item.type]++;
                     return acc;
-                },{})
+                }, {})
                 console.log(groupedByType)
                 setGroupedDocs(Object.entries(groupedByType))
             } catch (err) {
@@ -591,7 +639,7 @@ function Markers({ area, handleClick, clickedArea }) {
                                 ) : (
                                     <div className=" flex flex-row ">
                                         {
-                                            groupedDocs.map(([type,num]) => (
+                                            groupedDocs.map(([type, num]) => (
                                                 <div key={type} style={{ display: 'flex', minWidth: '4em', minHeight: '1.5em', margin: '5px', flexDirection: 'row' }}>
                                                     <img
                                                         src={getIcon({ type: type }, { isDarkMode })}
@@ -638,7 +686,7 @@ function Markers({ area, handleClick, clickedArea }) {
                                 ) : (
                                     <div className=" flex flex-row ">
                                         {
-                                            groupedDocs.map(([type,num]) => (
+                                            groupedDocs.map(([type, num]) => (
                                                 <div key={type} style={{ display: 'flex', minWidth: '4em', minHeight: '1.5em', margin: '5px', flexDirection: 'row' }}>
                                                     <img
                                                         src={getIcon({ type: type }, { isDarkMode })}

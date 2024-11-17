@@ -317,10 +317,10 @@ const DocumentItem = ({
 
     return (
         <div
-            className={`flex flex-wrap rounded-xl bg-document_item_radient_grey_light dark:bg-document_item_radient_grey p-3`}
+            className={`flex flex-wrap lg:gap-0 md:gap-3 sm:gap-3 rounded-xl bg-document_item_radient_grey_light dark:bg-document_item_radient_grey p-3`}
         >
             {/* Connection Section */}
-            <div className="flex flex-col w-3/12">
+            <div className="flex flex-col lg:w-3/12 md:w-[45%] sm:w-[45%]">
                 <label>Connections:</label>
                 {selectedOption.length > 0 ? selectedOption.map((option, idx) => (
                     <div key={idx} className="flex items-center">
@@ -342,7 +342,7 @@ const DocumentItem = ({
                             onClick={() => setDropdownOpen(!dropdownOpen)}
                         >
                             <i className="bi bi-plus-circle text-base"></i>
-                            Add Connection
+                            <p className="m-0 p-0 lg:inline-block md:hidden sm:hidden">Add Connection</p>
                         </button>
                         {dropdownOpen && (
                             <div
@@ -365,7 +365,7 @@ const DocumentItem = ({
             </div>
 
             {/* Document Title and Type */}
-            <div className="w-5/12 flex flex-row gap-3">
+            <div className="lg:w-5/12 md:w-1/2 sm:w-1/2 flex flex-row gap-3">
 
                 {/* Vertical Line */}
                 <div className="w-0.5 bg-white opacity-10"></div>
@@ -379,7 +379,7 @@ const DocumentItem = ({
                 </div>
             </div>
 
-            <div className="flex flex-col w-4/12 gap-2 justify-content-between align-items-end">
+            <div className="flex flex-col lg:w-4/12 md:w-full sm:w-full gap-2 justify-content-between align-items-end">
                 {/* Date */}
                 <div className="text-sm top-3 right-5 text-gray-400">{date}</div>
 
@@ -426,12 +426,12 @@ const SelectedDocument = ({
     }, [filteredOptions]);
 
     return (
-        <div className={`flex flex-row rounded-xl bg-document_item_radient_blue_light dark:bg-document_item_radient_blue p-3 gap-3`}>
-            <div className="flex flex-col w-1/2 self-center">
+        <div className={`flex flex-wrap rounded-xl bg-document_item_radient_blue_light dark:bg-document_item_radient_blue p-3 gap-3`}>
+            <div className="flex flex-col lg:w-[43%] md:w-[43%] sm:w-full self-center">
                 <label>Connections:</label>
                 {selectedOption.map((option, idx) => (
                     <div key={idx} className="flex items-center">
-            <span
+                <span
                 className="flex flex-row align-items-center gap-2 rounded-md px-3 py-1 bg-customPill_light dark:bg-customPill text-black_text dark:text-white_text mr-2 mt-1">
               {formatString(option)}
                 <button
@@ -440,7 +440,7 @@ const SelectedDocument = ({
                 >
                 <i className="bi bi-x-circle"></i>
               </button>
-            </span>
+                </span>
                     </div>
                 ))}
                 {filteredOptions && filteredOptions.length > 0 &&
@@ -450,7 +450,7 @@ const SelectedDocument = ({
                             onClick={() => setDropdownOpen(!dropdownOpen)}
                         >
                             <i className="bi bi-plus-circle text-base"></i>
-                            Add Connection
+                            <p className="m-0 p-0 lg:inline-block md:hidden sm:hidden">Add Connection</p>
                         </button>
                         {dropdownOpen && (
                             <div
@@ -471,8 +471,8 @@ const SelectedDocument = ({
                         )}
                     </div>}
             </div>
-            <div className="w-0.5 bg-white opacity-10"></div>
-            <div className="mx-4 flex-col">
+            <div className="w-0.5 bg-white opacity-10 lg:inline-block md:hidden sm:hidden"></div>
+            <div className="flex flex-col lg:w-[45%] md:w-full sm:w-full">
                 <div className="text-base mb-3 font-normal line-clamp-2">{formatString(title)}</div>
                 <div className="text-sm font-light flex items-center">
                     <img src={getIcon({type: type}, {darkMode: isDarkMode})} className="w-8 mr-2" alt="type_icon"/>

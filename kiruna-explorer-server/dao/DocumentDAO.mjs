@@ -75,7 +75,7 @@ export default function DocumentDAO() {
                 }
     
                 // Check if oldAreaId and newAreaId exists in areaIdsInDoc
-                if (!areaIdsInDoc.includes(oldAreaId) && !areaIdsInDoc.includes(newAreaId)) {
+                if (!areaIdsInDoc.includes(oldAreaId) || !areaIdsInDoc.includes(newAreaId) || !allAreaIds.includes(newAreaId)) {
                     return reject(new AreaNotFound());
                 }
     

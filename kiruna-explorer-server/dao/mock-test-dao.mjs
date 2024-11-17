@@ -2,7 +2,7 @@ import DocumentDAO from "./DocumentDAO.mjs";
 
 const documentDao = new DocumentDAO();
 
-//documentDao.updateDocumentAreaId(1,3);
+documentDao.updateDocumentAreaId(1,40);
 /*
 async function testGetDocumentsByFilter() {
     try {

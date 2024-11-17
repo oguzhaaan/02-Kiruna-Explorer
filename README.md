@@ -491,6 +491,22 @@ Response :
 
 Response body: None
 
+#### **Delete Attachments**
+
+**DELETE** `api/documents/:DocId/uploads/:FilePath`
+
+Description : Delete a specific file stored in a certain path, associated to a document with its <DocId>
+
+Requqest parameters: Document Id, File Path
+
+Response :
+- `200 OK`
+- `404 Not Found`
+- `500 Internal Server Error`
+
+Response body: None
+
+
 
 ### 5. Users Credentials
 

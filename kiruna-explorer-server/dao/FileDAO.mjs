@@ -45,4 +45,17 @@ export default function FileDAO() {
     };
 
 
+    this.deleteFile = (FilePath) => {
+        return new Promise((resolve, reject) => {
+            console.log(FilePath);
+            const query = `DELETE FROM file WHERE path = ?`;
+            db.run(query, [FilePath], function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(this.changes);
+                }
+            });
+        });
+    }
 }

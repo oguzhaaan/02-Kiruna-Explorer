@@ -1,4 +1,7 @@
 import express from "express";
+import multer from 'multer'; // Package: multer
+import path from 'path';
+import { promises as fs } from 'fs';
 import DocumentDAO from "../dao/DocumentDAO.mjs";
 import { body, param, validationResult } from "express-validator";
 import AreaDAO from "../dao/AreaDAO.mjs";
@@ -420,15 +423,68 @@ router.post("/links",
     }
 );
 
-router.post("/:DocId/attachments",
-    isLoggedIn,
+
+
+// Configure Multer for file storage
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const uploadPath = path.join(__dirname, 'uploads');
+        if (!fs.existsSync(uploadPath)) {
+            fs.mkdirSync(uploadPath, { recursive: true });
+        }
+        cb(null, uploadPath); // Save files to 'uploads' folder
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + '-' + file.originalname); // Ensure unique file names
+    },
+});
+
+const upload = multer({
+    storage: storage,
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+        if (!allowedTypes.includes(file.mimetype)) {
+            return cb(new Error('Invalid file type'));
+        }
+        cb(null, true);
+    },
+    limits: {
+        fileSize: 2 * 1024 * 1024, // Limit files to 2MB
+    },
+});
+
+// API route to handle file upload
+router.post(
+    '/:DocId/upload',
+    upload.single('file'), // Use multer middleware
     [
-        param("DocId")
-            .isNumeric()
-            .withMessage("Document ID must be a valid number"),
-
+        // Validate 'fileType' field
+        body('fileType')
+            .notEmpty()
+            .withMessage('File type is required')
+            .isIn(['image', 'document', 'other']) // Adjust as needed
+            .withMessage('Invalid file type'),
     ],
-    async (req, res) => {
+    (req, res) => {
+        // Handle validation errors
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
 
+        // Check if file exists
+        if (!req.file) {
+            return res.status(400).json({ error: 'File upload failed. No file provided.' });
+        }
 
-        export default router;
+        // File successfully uploaded
+        res.status(200).json({
+            message: 'File uploaded successfully',
+            fileName: req.file.filename,
+            filePath: `/uploads/${req.file.filename}`,
+        });
+    }
+);
+
+export default router;

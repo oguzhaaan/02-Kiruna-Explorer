@@ -491,6 +491,34 @@ Response :
 
 Response body: None
 
+#### **Get Attachments**
+
+**GET** `api/documents/:DocId/attachments`
+
+Description : Get all attachments associated to a document with its <DocId>
+
+Requqest parameters: Document Id
+
+Response :
+- `200 OK`
+- `404 Not Found`
+- `500 Internal Server Error`
+
+Response body: 
+```
+[
+  {
+    'name' : 'name',
+    'trype' : 'map',
+    'path' : 'path/to/file'
+  },
+  {
+    'name' : 'name2',
+    'trype' : 'text',
+    'path' : 'path/to/file2'
+  }
+]
+```
 
 ### 5. Users Credentials
 

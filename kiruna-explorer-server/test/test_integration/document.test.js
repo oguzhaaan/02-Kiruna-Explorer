@@ -277,7 +277,7 @@ describe("Integration Test PUT /api/documents/:DocId/area", () => {
             .set("Cookie", urbanplanner_cookie) // Authorized role
             .send({ newAreaId: 99999 })
             .expect(404);
-        expect(res.body.error).toEqual("Area Not Found");
+        expect(res.body.error).toEqual("Area not found");
     });
 
     test("Should return 400 if areaId is not a valid integer", async () => {

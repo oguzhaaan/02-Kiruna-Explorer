@@ -70,7 +70,7 @@ export default function DocumentDAO() {
                 this.getAllDocuments().then(documents => documents.map(doc => doc.areaId)),
                 areaDAO.getAllAreas().then(areas => areas.map(area => area.id)) // Get all valid area IDs
             ]).then(([oldAreaId, areaIdsInDoc, allAreaIds]) => {
-                if (!Number.isInteger(newAreaId)) {
+                if (!Number.isInteger(newAreaId) || (Number.isInteger(newAreaId) && newAreaId < 0) || (Number.isInteger(newAreaId) && newAreaId === 0) || newAreaId === null) {
                     return reject(new InvalidArea());
                 }
     

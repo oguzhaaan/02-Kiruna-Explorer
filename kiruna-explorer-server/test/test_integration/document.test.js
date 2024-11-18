@@ -284,8 +284,22 @@ describe.only("Integration Test PUT /api/documents/:DocId/area", () => {
 
     test("Should return 400 if areaId is not a valid integer", async () => {
         const invalidAreaId = "abc"; // Non-integer ID
+        //create new area
+        const resArea = await request(app)
+            .post(areaPath)
+            .set("Cookie", urbanplanner_cookie) // Authorized role
+            .send( geoJson )
+            .expect(201);
+        const firstAreaId = resArea.body
+        //create document in that area
+        const resDocument = await request(app)
+            .post(`${basePath}`)
+            .set("Cookie", urbanplanner_cookie) // Authorized role
+            .send({ ...mockDocumentbody, areaId: firstAreaId })
+            .expect(201);
+        const documentId = resDocument.body.lastId;
         const res = await request(app)
-            .put(`${basePath}/1/area`)
+            .put(`${basePath}/${documentId}/area`)
             .set("Cookie", urbanplanner_cookie) // Authorized role
             .send({ newAreaId: invalidAreaId })
             .expect(400);
@@ -293,15 +307,41 @@ describe.only("Integration Test PUT /api/documents/:DocId/area", () => {
     });
 
     test("Should return 400 if areaId is not provided", async () => {
+        const resArea = await request(app)
+            .post(areaPath)
+            .set("Cookie", urbanplanner_cookie) // Authorized role
+            .send( geoJson )
+            .expect(201);
+        const firstAreaId = resArea.body
+        //create document in that area
+        const resDocument = await request(app)
+            .post(`${basePath}`)
+            .set("Cookie", urbanplanner_cookie) // Authorized role
+            .send({ ...mockDocumentbody, areaId: firstAreaId })
+            .expect(201);
+        const documentId = resDocument.body.lastId;
         const res = await request(app)
-            .put(`${basePath}/1/area`)
+            .put(`${basePath}/${documentId}/area`)
             .set("Cookie", urbanplanner_cookie) // Authorized role
             .expect(400);
     });
 
     test("Should return 400 if areaId is null", async () => {
+        const resArea = await request(app)
+            .post(areaPath)
+            .set("Cookie", urbanplanner_cookie) // Authorized role
+            .send( geoJson )
+            .expect(201);
+        const firstAreaId = resArea.body
+        //create document in that area
+        const resDocument = await request(app)
+            .post(`${basePath}`)
+            .set("Cookie", urbanplanner_cookie) // Authorized role
+            .send({ ...mockDocumentbody, areaId: firstAreaId })
+            .expect(201);
+        const documentId = resDocument.body.lastId;
         const res = await request(app)
-            .put(`${basePath}/1/area`)
+            .put(`${basePath}/${documentId}/area`)
             .set("Cookie", urbanplanner_cookie) // Authorized role
             .send({ newAreaId: null })
             .expect(400);
@@ -309,8 +349,21 @@ describe.only("Integration Test PUT /api/documents/:DocId/area", () => {
     });
 
     test("Should return 400 if areaId is 0", async () => {
+        const resArea = await request(app)
+            .post(areaPath)
+            .set("Cookie", urbanplanner_cookie) // Authorized role
+            .send( geoJson )
+            .expect(201);
+        const firstAreaId = resArea.body
+        //create document in that area
+        const resDocument = await request(app)
+            .post(`${basePath}`)
+            .set("Cookie", urbanplanner_cookie) // Authorized role
+            .send({ ...mockDocumentbody, areaId: firstAreaId })
+            .expect(201);
+        const documentId = resDocument.body.lastId;
         const res = await request(app)
-            .put(`${basePath}/1/area`)
+            .put(`${basePath}/${documentId}/area`)
             .set("Cookie", urbanplanner_cookie) // Authorized role
             .send({ newAreaId: 0 })
             .expect(400);
@@ -318,8 +371,21 @@ describe.only("Integration Test PUT /api/documents/:DocId/area", () => {
     });
 
     test("Should return 400 if areaId is negative", async () => {
+        const resArea = await request(app)
+            .post(areaPath)
+            .set("Cookie", urbanplanner_cookie) // Authorized role
+            .send( geoJson )
+            .expect(201);
+        const firstAreaId = resArea.body
+        //create document in that area
+        const resDocument = await request(app)
+            .post(`${basePath}`)
+            .set("Cookie", urbanplanner_cookie) // Authorized role
+            .send({ ...mockDocumentbody, areaId: firstAreaId })
+            .expect(201);
+        const documentId = resDocument.body.lastId;
         const res = await request(app)
-            .put(`${basePath}/1/area`)
+            .put(`${basePath}/${documentId}/area`)
             .set("Cookie", urbanplanner_cookie) // Authorized role
             .send({ newAreaId: -1 })
             .expect(400);
@@ -327,8 +393,21 @@ describe.only("Integration Test PUT /api/documents/:DocId/area", () => {
     });
 
     test("Should return 400 if areaId is a float", async () => {
+        const resArea = await request(app)
+            .post(areaPath)
+            .set("Cookie", urbanplanner_cookie) // Authorized role
+            .send( geoJson )
+            .expect(201);
+        const firstAreaId = resArea.body
+        //create document in that area
+        const resDocument = await request(app)
+            .post(`${basePath}`)
+            .set("Cookie", urbanplanner_cookie) // Authorized role
+            .send({ ...mockDocumentbody, areaId: firstAreaId })
+            .expect(201);
+        const documentId = resDocument.body.lastId;
         const res = await request(app)
-            .put(`${basePath}/1/area`)
+            .put(`${basePath}/${documentId}/area`)
             .set("Cookie", urbanplanner_cookie) // Authorized role
             .send({ newAreaId: 1.5 })
             .expect(400);

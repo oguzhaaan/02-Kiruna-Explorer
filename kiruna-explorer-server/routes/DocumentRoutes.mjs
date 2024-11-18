@@ -436,6 +436,8 @@ router.put('/:DocId/area', isLoggedIn, authorizeRoles('admin', 'urban_planner'),
                 res.status(400).json({ error: 'Invalid area ID' });
             } else if (error instanceof AreaNotFound) {
                 res.status(404).json({ error: 'Area not found' });
+            } else if (error instanceof DocumentNotFound) {
+                res.status(404).json({ error: 'Document not found' });
             } else {
                 res.status(500).json({ error: 'Internal server error' });
             }

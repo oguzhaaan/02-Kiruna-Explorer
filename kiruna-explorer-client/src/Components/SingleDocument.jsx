@@ -98,9 +98,17 @@ function SingleDocument(props) {
     const handleDownload = (file) => {
         if (file) {
             console.log('Downloading:', file.name);
-            // Download logic goes here
+            // Chiama la funzione downloadFile dal tuo API
+            API.downloadFile(id, file.path)
+                .then(() => {
+                    console.log('File downloaded successfully');
+                })
+                .catch(error => {
+                    setAlertMessage([error.message, 'error']);
+                });
         }
     };
+
 
     const handleDelete = async (path) => {
         console.log(path);
@@ -117,7 +125,7 @@ function SingleDocument(props) {
             console.error('Upload failed', error);
             setAlertMessage([error.message, 'error']);
 
-        } 
+        }
     };
 
     //files management

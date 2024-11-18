@@ -524,12 +524,48 @@ router.post(
     }
 );
 
+router.get('/:DocId/files/download/:FilePath',
+    [
+        param("DocId")
+            .isNumeric()
+            .withMessage("Document ID must be a valid number"),
+    ],
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+        try {
+            const { DocId, FilePath } = req.params;
+
+
+            // Costruisci il percorso assoluto del file
+            const filePathToDownload = "./" + FilePath;
+
+            try {
+                await fs.access(filePathToDownload);  // Verifica se il file esiste
+                res.download(filePathToDownload, (err) => {
+                    if (err) {
+                        res.status(500).json({ error: "Failed to download the file" });
+                    }
+                });
+            } catch (error) {
+                // Se il file non esiste, invia un errore senza far crashare l'app
+                res.status(404).json({ error: "File not found" });
+            }
+        } catch (error) {
+            console.error('Error in file download:', error.message);
+            res.status(500).json({ error: error.message });
+        }
+    });
+
 router.delete('/:DocId/files/:FilePath',
     [
         param("DocId")
             .isNumeric()
             .withMessage("Document ID must be a valid number"),
     ],
+    isLoggedIn,
     async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {

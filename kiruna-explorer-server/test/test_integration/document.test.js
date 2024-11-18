@@ -191,7 +191,7 @@ describe("Integration Test POST / - Add Document", () => {
 });
 
 /* PUT /api/documents/:DocId/area */
-describe.only("Integration Test PUT /api/documents/:DocId/area", () => {
+describe("Integration Test PUT /api/documents/:DocId/area", () => {
     const areaPath = "/api/areas";
 
     const geoJson = {

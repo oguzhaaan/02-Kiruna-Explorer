@@ -240,7 +240,7 @@ describe("Unit Test addDocument", () => {
     });
 });
 
-describe("Unit Test updateDocumentAreaId", () => {
+describe.only("Unit Test updateDocumentAreaId", () => {
     let documentDAO;
 
     beforeEach(() => {
@@ -264,11 +264,13 @@ describe("Unit Test updateDocumentAreaId", () => {
         ]);
     
         vitest.spyOn(areaDAO, "getAllAreas").mockResolvedValueOnce([
-            oldAreaId,
-            newAreaId  
+            { id: oldAreaId },
+            { id: newAreaId }
         ]);
     
-        vitest.spyOn(db, "run").mockImplementation((query, params, callback) => {
+        vi.spyOn(db, "run").mockImplementation((query, params, callback) => {
+            console.log("db.run called with query:", query);
+            console.log("db.run called with params:", params);
             callback(null);
         });
     

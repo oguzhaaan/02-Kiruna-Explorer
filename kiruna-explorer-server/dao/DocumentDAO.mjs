@@ -77,15 +77,16 @@ export default function DocumentDAO() {
                 // Check if oldAreaId and newAreaId exists in areaIdsInDoc
                 if (!areaIdsInDoc.includes(oldAreaId) || !allAreaIds.includes(newAreaId)) {
                     return reject(new AreaNotFound());
-                }             
-
-              
+                }              
     
                 // Proceed to update the document's areaId to newAreaId
                 const updateQuery = "UPDATE document SET areaId = ? WHERE id = ?";
                 db.run(updateQuery, [newAreaId, documentId], (err) => {
+                    console.log("db.run called with query:", updateQuery);
+                    console.log("db.run called with params:", [newAreaId, documentId]);
                     if (err) {
                         return reject(err);
+                        
                     }
     
                     // Re-fetch documents to check if oldAreaId is still in use

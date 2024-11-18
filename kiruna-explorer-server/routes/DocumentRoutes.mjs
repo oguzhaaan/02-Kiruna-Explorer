@@ -592,8 +592,7 @@ router.delete('/:DocId/files/:FilePath',
             res.status(200).json({ message: "File deleted successfully" });
         }
         catch (error) {
-            console.error("Error in deleteAll function:", error.message);
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ error: "Error in the delete function" });
         }
     }
 

@@ -22,6 +22,7 @@ function SingleDocument(props) {
     const [isCharging, setIsCharging] = useState(false);
     const [modalPlusVisible, setModalPlusVisible] = useState(false);
     const [openDropdown, setOpenDropdown] = useState(null); // Tieni traccia dell'indice del dropdown aperto
+    const [showModalDeleteConfirm, setShowModalDeleteConfirm] = useState(false);
 
     const handleToggleDropdown = (index) => {
         // Se il dropdown è già aperto, lo chiudi (toggle)
@@ -83,7 +84,7 @@ function SingleDocument(props) {
         uploadFile(); // Esegui l'upload quando le dipendenze cambiano
         setModalPlusVisible(false);
 
-    }, [selectedFile, fileType]); // Dipendenze: l'effetto si attiva quando questi due stati cambiano
+    }, [fileType]); // Dipendenze: l'effetto si attiva quando questi due stati cambiano
 
     const toggleDropdown = () => {
         setModalPlusVisible(!modalPlusVisible);
@@ -216,6 +217,33 @@ function SingleDocument(props) {
                 clearMessage={() => setAlertMessage(['', ''])}></Alert>
             <div className={`${isDarkMode ? 'dark' : 'light'} fixed inset-0 z-[200] flex items-center justify-center scrollbar-thin scrollbar-webkit`}>
 
+                {/* Modal delete confirm */}  
+                {showModalDeleteConfirm &&
+                    <div className="fixed z-[2000] inset-0 flex items-center justify-center">
+                        <div
+                        className="flex flex-col justify-items-center align-items-center bg-box_white_color dark:bg-box_color backdrop-blur-2xl drop-shadow-xl rounded-xl text-black_text dark:text-white_text font-sans p-6">
+                            <div className="text-xl text-center w-[26rem] mb-2">Are you really sure to delete the file "{selectedFile.name}"?</div>
+                            <div className="flex justify-center space-x-5 mt-10">
+                                <button
+                                    onClick={() => setShowModalDeleteConfirm(false)}
+                                    className="bg-[#FFFFFFcc] dark:bg-customGray hover:bg-[#FFFFFFff] dark:hover:bg-[#938888] transition text-black w-40 h-16 opacity-60  rounded-xl text-xl"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setShowModalDeleteConfirm(false);
+                                        console.log(selectedFile);
+                                        handleDelete(selectedFile.path);
+                                    }}
+                                    className="bg-my_red dark:bg-my_red hover:bg-red-500 dark:hover:bg-red-500 transition text-white_text w-40 h-16 rounded-xl text-xl"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
                 <div
                     className="bg-box_white_color dark:bg-box_color backdrop-blur-2xl drop-shadow-xl w-11/12 py-3 px-4 h-5/6 overflow-none rounded-2xl flex flex-col gap-3 items-center relative scrollbar-thin scrollbar-webkit">
 
@@ -426,9 +454,10 @@ function SingleDocument(props) {
                                                 <FileItem
                                                     key={idx}
                                                     file={file}
+                                                    setSelectedFile={setSelectedFile}
                                                     isDarkMode={isDarkMode}
+                                                    setShowModalDeleteConfirm={setShowModalDeleteConfirm}
                                                     handleDownload={handleDownload}
-                                                    handleDelete={handleDelete}
                                                     isDropdownOpen={openDropdown == idx} // Passa lo stato per determinare se il dropdown è aperto
                                                     onDropdownToggle={() => handleToggleDropdown(idx)} // Passa la funzione per togglare il dropdown
                                                 />
@@ -497,7 +526,7 @@ function SingleDocument(props) {
                                                                         ${isDarkMode ? 'dark:bg-[#4F4F4F]' : 'bg-[#76767655]'} 
                                                                         ${isDarkMode ? 'text-white' : 'text-black'} 
                                                                         flex items-center text-left cursor-pointer`}
-                                                                onClick={handleDelete}
+                                                                onClick={() => {console.log("TODO")}}
                                                             >
                                                                 <i className="bi bi-paperclip mr-2"></i> Attachments
                                                             </button>
@@ -522,7 +551,7 @@ function SingleDocument(props) {
 }
 
 
-const FileItem = ({ file, isDarkMode, handleDownload, handleDelete, isDropdownOpen, onDropdownToggle }) => {
+const FileItem = ({ file, isDarkMode, handleDownload, setShowModalDeleteConfirm, setSelectedFile, isDropdownOpen, onDropdownToggle }) => {
 
     // Chiudi il dropdown quando si clicca fuori
     useEffect(() => {
@@ -579,7 +608,9 @@ const FileItem = ({ file, isDarkMode, handleDownload, handleDelete, isDropdownOp
                         <button
                             className={`py-1 px-2 text-sm ${isDarkMode ? "dark:bg-[#4F4F4F]" : "bg-[#76767655]"} text-[#E63232] flex items-center text-left cursor-pointer`}
                             onClick={() => {
-                                handleDelete(file.path);
+                                console.log(file);
+                                setSelectedFile(file);
+                                setShowModalDeleteConfirm(true);
                                 onDropdownToggle(); // Chiude il dropdown dopo l'azione
                             }}
                         >

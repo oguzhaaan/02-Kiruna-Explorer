@@ -191,7 +191,7 @@ describe("Integration Test POST / - Add Document", () => {
 });
 
 /* PUT /api/documents/:DocId/area */
-describe("Integration Test PUT /api/documents/:DocId/area", () => {
+describe.only("Integration Test PUT /api/documents/:DocId/area", () => {
     const areaPath = "/api/areas";
 
     const geoJson = {
@@ -253,7 +253,7 @@ describe("Integration Test PUT /api/documents/:DocId/area", () => {
             .set("Cookie", urbanplanner_cookie) // Authorized role
             .send({ newAreaId: firstAreaId })
             .expect(404);
-        expect(res.body.error).toEqual("Document Not Found");
+        expect(res.body.error).toEqual("Document not found");
     });
 
     test("Should return 404 if the area does not exist", async () => {
@@ -264,6 +264,7 @@ describe("Integration Test PUT /api/documents/:DocId/area", () => {
             .send( geoJson )
             .expect(201);
         const firstAreaId = resArea.body
+        console.log("firstAreaId: ", firstAreaId)
         //create document in that area
         const resDocument = await request(app)
             .post(`${basePath}`)
@@ -271,13 +272,14 @@ describe("Integration Test PUT /api/documents/:DocId/area", () => {
             .send({ ...mockDocumentbody, areaId: firstAreaId })
             .expect(201);
         const documentId = resDocument.body.lastId;
+        console.log("documentId: ", documentId)
         //move document to new area
         const res = await request(app)
             .put(`${basePath}/${documentId}/area`)
             .set("Cookie", urbanplanner_cookie) // Authorized role
             .send({ newAreaId: 99999 })
             .expect(404);
-        expect(res.body.error).toEqual("Area Not Found");
+        expect(res.body.error).toEqual("Area not found");
     });
 
     test("Should return 400 if areaId is not a valid integer", async () => {

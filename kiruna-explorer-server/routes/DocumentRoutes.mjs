@@ -538,11 +538,21 @@ router.delete('/:DocId/files/:FilePath',
         try {
             const { DocId, FilePath } = req.params;
             console.log(FilePath);
+
+            await fs.unlink("./" + FilePath, async (err) => {
+                if (err) {
+                    console.log('Error deleting file:', err);
+                    return res.status(500).json({ error: "Failed to delete the physical file" });
+                }
+            });
+
+            // Ora rimuovi la riga nel database
             const deleteResult = await FileDao.deleteFile(FilePath);
 
             if (deleteResult.deletedCount === 0) {
-                return res.status(405).json({ error: "File not found" });
+                return res.status(405).json({ error: "File not found in database" });
             }
+
             res.status(200).json({ message: "File deleted successfully" });
         }
         catch (error) {

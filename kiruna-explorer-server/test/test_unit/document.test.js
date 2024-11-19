@@ -4,9 +4,14 @@ import db from '../../db.mjs';
 import DocumentDAO from '../../dao/DocumentDAO.mjs';
 import Document from '../../models/Document.mjs';
 import { DocumentNotFound } from '../../models/Document.mjs';
+import AreaDAO from '../../dao/AreaDAO.mjs';
+import { InvalidArea } from '../../models/Area.mjs';
+import { AreaNotFound } from '../../models/Area.mjs';
+import Area from '../../models/Area.mjs';
+const areaDAO = new AreaDAO();
 
 const mockRowDB = {
-    id: 1,
+    id: 1,  
     title: 'Test Document',
     lkab: true, // Mocking boolean fields
     municipality: false,
@@ -234,3 +239,259 @@ describe("Unit Test addDocument", () => {
         expect(res).toBeInstanceOf(Error)
     });
 });
+
+describe("Unit Test getDocumentsByFilter", () => {
+    let documentDAO;
+
+    beforeEach(() => {
+        documentDAO = new DocumentDAO();
+    });
+
+    afterEach(() => {
+        // Clear all created function mocks after each test
+        vitest.clearAllMocks();
+    });
+
+    test("should return all documents when no filter parameters are provided", async () => {
+        const mockRowsDB = [
+            { id: 1, title: "Document 1", stakeholders: [], date: "2023-10-01", type: "type1", language: "en", description: "Description 1", areaId: 1, scale: "1:1000", pages: 10, planNumber: 101 },
+            { id: 2, title: "Document 2", stakeholders: [], date: "2023-10-02", type: "type2", language: "en", description: "Description 2", areaId: 2, scale: "1:2000", pages: 20, planNumber: 102 }
+            // Add more mock documents as needed
+        ];
+
+        const mockDocuments = mockRowsDB.map(row => new Document(
+            row.id,
+            row.title,
+            row.stakeholders,
+            row.date,
+            row.type,
+            row.language,
+            row.description,
+            row.areaId,
+            row.scale,
+            row.pages,
+            row.planNumber
+        ));
+
+        vitest.spyOn(db, "all").mockImplementation((_sql, _params, callback) => {
+            callback(null, mockRowsDB);
+        });
+
+        vitest.spyOn(documentDAO, "convertDBRowToDocument").mockImplementation(row => {
+            return new Document(
+                row.id,
+                row.title,
+                row.stakeholders,
+                row.date,
+                row.type,
+                row.language,
+                row.description,
+                row.areaId,
+                row.scale,
+                row.pages,
+                row.planNumber
+            );
+        });
+
+        const documents = await documentDAO.getDocumentsByFilter({});
+
+        expect(documents).toEqual(mockDocuments);
+        expect(db.all).toBeCalledTimes(1);
+        expect(db.all).toBeCalledWith(expect.stringContaining("SELECT * FROM document WHERE 1=1"), [], expect.any(Function));
+    });
+
+    test("should return documents that match the title filter", async () => {
+        const titleFilter = "Document 1";
+        const mockRowsDB = [
+            { id: 1, title: "Document 1", stakeholders: [], date: "2023-10-01", type: "type1", language: "en", description: "Description 1", areaId: 1, scale: "1:1000", pages: 10, planNumber: 101 }
+            // Add more mock documents if needed
+        ];
+
+        const mockDocuments = mockRowsDB.map(row => new Document(
+            row.id,
+            row.title,
+            row.stakeholders,
+            row.date,
+            row.type,
+            row.language,
+            row.description,
+            row.areaId,
+            row.scale,
+            row.pages,
+            row.planNumber
+        ));
+
+        vitest.spyOn(db, "all").mockImplementation((_sql, _params, callback) => {
+            callback(null, mockRowsDB);
+        });
+
+        vitest.spyOn(documentDAO, "convertDBRowToDocument").mockImplementation(row => {
+            return new Document(
+                row.id,
+                row.title,
+                row.stakeholders,
+                row.date,
+                row.type,
+                row.language,
+                row.description,
+                row.areaId,
+                row.scale,
+                row.pages,
+                row.planNumber
+            );
+        });
+
+        const documents = await documentDAO.getDocumentsByFilter({ title: titleFilter });
+
+        expect(documents).toEqual(mockDocuments);
+        expect(db.all).toBeCalledTimes(1);
+        expect(db.all).toBeCalledWith(expect.stringContaining("SELECT * FROM document WHERE 1=1 AND title LIKE ?"), [`%${titleFilter}%`], expect.any(Function));
+    });
+    test("should return documents that match the stakeholders filter", async () => {
+        const stakeholdersFilter = ["lkab", "municipality"];
+        const mockRowsDB = [
+            { id: 1, title: "Document 1", stakeholders: ["lkab", "municipality"], date: "2023-10-01", type: "type1", language: "en", description: "Description 1", areaId: 1, scale: "1:1000", pages: 10, planNumber: 101 }
+            // Add more mock documents if needed
+        ];
+
+        const mockDocuments = mockRowsDB.map(row => new Document(
+            row.id,
+            row.title,
+            row.stakeholders,
+            row.date,
+            row.type,
+            row.language,
+            row.description,
+            row.areaId,
+            row.scale,
+            row.pages,
+            row.planNumber
+        ));
+
+        vitest.spyOn(db, "all").mockImplementation((_sql, _params, callback) => {
+            callback(null, mockRowsDB);
+        });
+
+        vitest.spyOn(documentDAO, "convertDBRowToDocument").mockImplementation(row => {
+            return new Document(
+                row.id,
+                row.title,
+                row.stakeholders,
+                row.date,
+                row.type,
+                row.language,
+                row.description,
+                row.areaId,
+                row.scale,
+                row.pages,
+                row.planNumber
+            );
+        });
+
+        const documents = await documentDAO.getDocumentsByFilter({ stakeholders: stakeholdersFilter });
+
+        expect(documents).toEqual(mockDocuments);
+        expect(db.all).toBeCalledTimes(1);
+
+        // Construct the expected SQL condition for stakeholders
+        const expectedStakeholderConditions = stakeholdersFilter.map(stakeholder => `${stakeholder} = TRUE`).join(" AND ");
+        expect(db.all).toBeCalledWith(expect.stringContaining(`SELECT * FROM document WHERE 1=1 AND (${expectedStakeholderConditions})`), [], expect.any(Function));
+    });
+    test("should return documents that match the startDate filter", async () => {
+        const startDateFilter = "2023-10-01";
+        const mockRowsDB = [
+            { id: 1, title: "Document 1", stakeholders: [], date: "2023-10-01", type: "type1", language: "en", description: "Description 1", areaId: 1, scale: "1:1000", pages: 10, planNumber: 101 }
+            // Add more mock documents if needed
+        ];
+    
+        const mockDocuments = mockRowsDB.map(row => new Document(
+            row.id,
+            row.title,
+            row.stakeholders,
+            row.date,
+            row.type,
+            row.language,
+            row.description,
+            row.areaId,
+            row.scale,
+            row.pages,
+            row.planNumber
+        ));
+    
+        vitest.spyOn(db, "all").mockImplementation((_sql, _params, callback) => {
+            callback(null, mockRowsDB);
+        });
+    
+        vitest.spyOn(documentDAO, "convertDBRowToDocument").mockImplementation(row => {
+            return new Document(
+                row.id,
+                row.title,
+                row.stakeholders,
+                row.date,
+                row.type,
+                row.language,
+                row.description,
+                row.areaId,
+                row.scale,
+                row.pages,
+                row.planNumber
+            );
+        });
+    
+        const documents = await documentDAO.getDocumentsByFilter({ startDate: startDateFilter });
+    
+        expect(documents).toEqual(mockDocuments);
+        expect(db.all).toBeCalledTimes(1);
+        expect(db.all).toBeCalledWith(expect.stringContaining("SELECT * FROM document WHERE 1=1 AND date >= ?"), [startDateFilter], expect.any(Function));
+    });
+
+    test("should return documents that match the endDate filter", async () => {
+        const endDateFilter = "2023-10-01";
+        const mockRowsDB = [
+            { id: 1, title: "Document 1", stakeholders: [], date: "2023-10-01", type: "type1", language: "en", description: "Description 1", areaId: 1, scale: "1:1000", pages: 10, planNumber: 101 }
+            // Add more mock documents if needed
+        ];
+    
+        const mockDocuments = mockRowsDB.map(row => new Document(
+            row.id,
+            row.title,
+            row.stakeholders,
+            row.date,
+            row.type,
+            row.language,
+            row.description,
+            row.areaId,
+            row.scale,
+            row.pages,
+            row.planNumber
+        ));
+    
+        vitest.spyOn(db, "all").mockImplementation((_sql, _params, callback) => {
+            callback(null, mockRowsDB);
+        });
+    
+        vitest.spyOn(documentDAO, "convertDBRowToDocument").mockImplementation(row => {
+            return new Document(
+                row.id,
+                row.title,
+                row.stakeholders,
+                row.date,
+                row.type,
+                row.language,
+                row.description,
+                row.areaId,
+                row.scale,
+                row.pages,
+                row.planNumber
+            );
+        });
+    
+        const documents = await documentDAO.getDocumentsByFilter({ endDate: endDateFilter });
+    
+        expect(documents).toEqual(mockDocuments);
+        expect(db.all).toBeCalledTimes(1);
+        expect(db.all).toBeCalledWith(expect.stringContaining("SELECT * FROM document WHERE 1=1 AND date <= ?"), [endDateFilter], expect.any(Function));
+    });
+
+});
+

@@ -188,5 +188,168 @@ describe("Integration Test POST / - Add Document", () => {
         expect(result.body).toHaveProperty('lastId');
         expect(result.body.message).toBe("Document added successfully");
     });
+
+    describe("Integration Test GET /filter - Get Documents by Filter", () => {
+        beforeEach(async () => {
+            await cleanup();
+            urbanplanner_cookie = await login(urbanplannerUser);
+            // Create a document to ensure there is data to filter
+            mockDocId = await createDocument(urbanplanner_cookie);
+        });
+    
+        test("should return all documents when no filter parameters are provided", async () => {
+            const result = await request(app)
+                .get(`${basePath}/filter`)
+                .set("Cookie", urbanplanner_cookie)
+                .expect('Content-Type', /json/)
+                .expect(200);
+    
+            expect(result.body).toEqual([
+                { id: mockDocId, areaId: null, ...mockDocumentbody }
+                // Add more expected documents if needed
+            ]);
+        });
+    });
+    describe("Integration Test GET /filter - Get Documents by Title", () => {
+        beforeEach(async () => {
+            await cleanup();
+            urbanplanner_cookie = await login(urbanplannerUser);
+    
+            // Create documents with different titles
+            await createDocument(urbanplanner_cookie); // Uses mockDocumentbody with title 'Test Document'
+            await request(app)
+                .post(`${basePath}`)
+                .send({ ...mockDocumentbody, title: 'Another Document' })
+                .set("Cookie", urbanplanner_cookie)
+                .expect(201);
+        });
+    
+        test("should return documents that match the title filter", async () => {
+            const titleFilter = 'Test Document';
+            const result = await request(app)
+                .get(`${basePath}/filter`)
+                .query({ title: titleFilter })
+                .set("Cookie", urbanplanner_cookie)
+                .expect('Content-Type', /json/)
+                .expect(200);
+    
+            expect(result.body).toEqual([
+                { id: expect.any(Number), areaId: null, ...mockDocumentbody }
+            ]);
+        });
+    });
+    describe("Integration Test GET /filter - Get Documents by Type", () => {
+        beforeEach(async () => {
+            await cleanup();
+            urbanplanner_cookie = await login(urbanplannerUser);
+    
+            // Create documents with different types
+            await createDocument(urbanplanner_cookie); // Uses mockDocumentbody with type 'design'
+            await request(app)
+                .post(`${basePath}`)
+                .send({ ...mockDocumentbody, type: 'informative' })
+                .set("Cookie", urbanplanner_cookie)
+                .expect(201);
+        });
+    
+        test("should return documents that match the type filter", async () => {
+            const typeFilter = 'design';
+            const result = await request(app)
+                .get(`${basePath}/filter`)
+                .query({ type: typeFilter })
+                .set("Cookie", urbanplanner_cookie)
+                .expect('Content-Type', /json/)
+                .expect(200);
+    
+            expect(result.body).toEqual([
+                { id: expect.any(Number), areaId: null, ...mockDocumentbody }
+            ]);
+        });
+    });
+    describe("Integration Test GET /filter - Get Documents by Stakeholders", () => {
+        beforeEach(async () => {
+            await cleanup();
+            urbanplanner_cookie = await login(urbanplannerUser);
+    
+            // Create documents with different stakeholders
+            await createDocument(urbanplanner_cookie); // Uses mockDocumentbody with stakeholders ['lkab', 'municipality']
+            await request(app)
+                .post(`${basePath}`)
+                .send({ ...mockDocumentbody, stakeholders: ['citizens'] })
+                .set("Cookie", urbanplanner_cookie)
+                .expect(201);
+        });
+    
+        test("should return documents that match the stakeholders filter", async () => {
+            const stakeholdersFilter = 'lkab,municipality';
+            const result = await request(app)
+                .get(`${basePath}/filter`)
+                .query({ stakeholders: stakeholdersFilter })
+                .set("Cookie", urbanplanner_cookie)
+                .expect('Content-Type', /json/)
+                .expect(200);
+    
+            expect(result.body).toEqual([
+                { id: expect.any(Number), areaId: null, ...mockDocumentbody }
+            ]);
+        });
+    });
+    describe("Integration Test GET /filter - Get Documents by Start Date", () => {
+        beforeEach(async () => {
+            await cleanup();
+            urbanplanner_cookie = await login(urbanplannerUser);
+    
+            // Create documents with different dates
+            await createDocument(urbanplanner_cookie); // Uses mockDocumentbody with date '2023-01-01'
+            await request(app)
+                .post(`${basePath}`)
+                .send({ ...mockDocumentbody, date: '2022-12-01' })
+                .set("Cookie", urbanplanner_cookie)
+                .expect(201);
+        });
+    
+        test("should return documents that match the startDate filter", async () => {
+            const startDateFilter = '2023-01-01';
+            const result = await request(app)
+                .get(`${basePath}/filter`)
+                .query({ startDate: startDateFilter })
+                .set("Cookie", urbanplanner_cookie)
+                .expect('Content-Type', /json/)
+                .expect(200);
+    
+            expect(result.body).toEqual([
+                { id: expect.any(Number), areaId: null, ...mockDocumentbody }
+            ]);
+        });
+    });
+    
+    describe("Integration Test GET /filter - Get Documents by End Date", () => {
+        beforeEach(async () => {
+            await cleanup();
+            urbanplanner_cookie = await login(urbanplannerUser);
+    
+            // Create documents with different dates
+            await createDocument(urbanplanner_cookie); // Uses mockDocumentbody with date '2023-01-01'
+            await request(app)
+                .post(`${basePath}`)
+                .send({ ...mockDocumentbody, date: '2023-02-01' })
+                .set("Cookie", urbanplanner_cookie)
+                .expect(201);
+        });
+    
+        test("should return documents that match the endDate filter", async () => {
+            const endDateFilter = '2023-01-01';
+            const result = await request(app)
+                .get(`${basePath}/filter`)
+                .query({ endDate: endDateFilter })
+                .set("Cookie", urbanplanner_cookie)
+                .expect('Content-Type', /json/)
+                .expect(200);
+    
+            expect(result.body).toEqual([
+                { id: expect.any(Number), areaId: null, ...mockDocumentbody }
+            ]);
+        });
+    });
 });
 

@@ -80,7 +80,7 @@ describe("Unit Test getDocumentById", () => {
     let documentDAO;
 
     beforeEach(() => {
-        documentDAO = new DocumentDAO();
+        documentDAO = new DocumentDAO(areaDAO);
     });
 
     afterEach(() => {
@@ -143,7 +143,7 @@ describe("Unit Test addDocument", () => {
     let documentDAO;
 
     beforeEach(() => {
-        documentDAO = new DocumentDAO();
+        documentDAO = new DocumentDAO(areaDAO);
     });
 
     afterEach(() => {
@@ -240,11 +240,11 @@ describe("Unit Test addDocument", () => {
     });
 });
 
-describe.only("Unit Test updateDocumentAreaId", () => {
+describe("Unit Test updateDocumentAreaId", () => {
     let documentDAO;
 
     beforeEach(() => {
-        documentDAO = new DocumentDAO();
+        documentDAO = new DocumentDAO(areaDAO);
     });
 
     afterEach(() => {

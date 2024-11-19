@@ -6,10 +6,22 @@ import { useTheme } from "../contexts/ThemeContext";
 
 function FilterMenu({ filterValues, setFilterValues, toggleFilterMenu }) {
   const { isDarkMode } = useTheme();
-  const [isFilterDateRange, setIsFilterDateRange] = useState();
-
+  const [isFilterDateRange, setIsFilterDateRange] = useState(
+    filterValues.startDate !== "" &&
+      filterValues.endDate !== "" &&
+      filterValues.startDate !== filterValues.endDate
+  );
   // Temporary state for inputs
   const [tempFilterValues, setTempFilterValues] = useState({ ...filterValues });
+
+  const toggleFilterDateRange = () => {
+    if (isFilterDateRange) {
+      handleTempChange("endDate", tempFilterValues.startDate);
+    }
+
+    // Toggle the state
+    setIsFilterDateRange(!isFilterDateRange);
+  };
 
   const handleTempChange = (key, value) => {
     setTempFilterValues((prevValues) => ({
@@ -135,7 +147,7 @@ function FilterMenu({ filterValues, setFilterValues, toggleFilterMenu }) {
           <input
             type="checkbox"
             checked={isFilterDateRange}
-            onChange={() => setIsFilterDateRange(!isFilterDateRange)}
+            onChange={toggleFilterDateRange}
             className="mr-2"
           />
           Select Range

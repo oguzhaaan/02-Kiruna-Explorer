@@ -39,7 +39,7 @@ function FilterLabels({ filterValues, setFilterValues }) {
 
       {filterValues.stakeholders.length > 0 && (
         <div
-          className={`flex flex-row items-center p-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-400 rounded-md cursor-pointer`}
+          className={`flex flex-row items-center p-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 rounded-md cursor-pointer`}
         >
           Stakeholders
           {filterValues.stakeholders.map((stakeholder, idx) => (
@@ -60,7 +60,7 @@ function FilterLabels({ filterValues, setFilterValues }) {
       )}
       { filterValues.startDate && filterValues.endDate && filterValues.startDate === filterValues.endDate && (
         <div
-          className={`flex flex-row items-center p-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-400 rounded-md cursor-pointer`}
+          className={`flex flex-row items-center p-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 rounded-md cursor-pointer`}
         >
           Issuance Date:
           <div className="mx-1 px-1 border-2 border-blue-400 dark:border-opacity-30 rounded-lg">
@@ -76,7 +76,7 @@ function FilterLabels({ filterValues, setFilterValues }) {
       )}
       {filterValues.startDate && filterValues.endDate && filterValues.startDate !== filterValues.endDate &&(
         <div
-          className={`flex flex-row items-center p-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-400 rounded-md cursor-pointer`}
+          className={`flex flex-row items-center p-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 rounded-md cursor-pointer`}
         >
           Issuance Date:
           <div className="mx-1 px-1 border-2 border-blue-400 dark:border-opacity-30 rounded-lg">

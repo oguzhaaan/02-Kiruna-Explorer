@@ -445,12 +445,8 @@ describe("Unit Test getDocumentsByFilter", () => {
         expect(documents).toEqual(mockDocuments);
         expect(db.all).toBeCalledTimes(1);
 
-        // Construct the expected SQL condition for stakeholders
-        const expectedStakeholderConditions = stakeholdersFilter.map(stakeholder => `${stakeholder} = TRUE`).join(" AND ");
-        expect(db.all).toBeCalledWith(expect.stringContaining(`SELECT *
-                                                               FROM document
-                                                               WHERE 1 = 1
-                                                                 AND (${expectedStakeholderConditions})`), [], expect.any(Function));
+        const expectedSQL = `SELECT * FROM document WHERE 1=1 AND (lkab = TRUE AND municipality = TRUE)`;
+        expect(db.all).toBeCalledWith(expect.stringContaining(expectedSQL), [], expect.any(Function));
     });
     test("should return documents that match the startDate filter", async () => {
         const startDateFilter = "2023-10-01";
@@ -589,28 +585,36 @@ describe("Unit Test updateDocumentAreaId", () => {
         const oldAreaId = 2;
         const newAreaId = 5;
         const documentId = 1;
-
-        vitest.spyOn(documentDAO, "getDocumentById").mockResolvedValueOnce({areaId: oldAreaId});
-
+    
+        // Simula `getDocumentById` per restituire un oggetto documento con `areaId`
+        vitest.spyOn(documentDAO, "getDocumentById").mockResolvedValueOnce({ areaId: oldAreaId });
+    
+        // Simula `getAllDocuments` per restituire una lista di documenti
         vitest.spyOn(documentDAO, "getAllDocuments").mockResolvedValueOnce([
-            {id: 1, areaId: oldAreaId},
-            {id: 2, areaId: newAreaId}
+            { id: 1, areaId: oldAreaId },
+            { id: 2, areaId: newAreaId }
         ]);
-
+    
+        // Simula `getAllAreas` per restituire una lista di aree
         vitest.spyOn(areaDAO, "getAllAreas").mockResolvedValueOnce([
-            {id: oldAreaId},
-            {id: newAreaId}
+            { id: oldAreaId },
+            { id: newAreaId }
         ]);
-
+    
+        // Simula `db.run` per gestire correttamente il callback
         vitest.spyOn(db, "run").mockImplementation((query, params, callback) => {
-            console.log("db.run called with query:", query);
-            console.log("db.run called with params:", params);
-            callback(null);
+            if (typeof callback === "function") {
+                callback(null); // Simula una chiamata di successo
+            }
         });
-
+    
+        // Esegui la funzione da testare
         const result = await documentDAO.updateDocumentAreaId(documentId, newAreaId);
-
+    
+        // Controlla che il risultato sia `true`
         expect(result).toBe(true);
+    
+        // Verifica che `db.run` sia stato chiamato con i parametri corretti
         expect(db.run).toBeCalledWith(
             expect.stringContaining("UPDATE document SET areaId"),
             [newAreaId, documentId],

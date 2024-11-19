@@ -130,7 +130,7 @@ export default function DocumentDAO(areaDAO) {
     
                 // Proceed to update the document's areaId to newAreaId
                 const updateQuery = "UPDATE document SET areaId = ? WHERE id = ?";
-                db.run(updateQuery, [newAreaId, documentId], (err) => {
+                db.run(updateQuery, [newAreaId, documentId], function (err) {
                     console.log("db.run called with query:", updateQuery);
                     console.log("db.run called with params:", [newAreaId, documentId]);
                     if (err) {

@@ -490,6 +490,7 @@ router.put('/:DocId/area', isLoggedIn, authorizeRoles('admin', 'urban_planner'),
     const { DocId } = req.params;
     const { newAreaId } = req.body;
 
+    console.log("AAA: " + DocId, newAreaId);
     DocumentDao.updateDocumentAreaId(Number(DocId), Number(newAreaId))
         .then(() => {
             res.status(200).json({ message: 'Document areaId updated successfully' });

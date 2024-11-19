@@ -376,7 +376,7 @@ describe("Integration Test PUT /api/documents/:DocId/area", () => {
     test("Should move a document to a new area successfully", async () => {
         //create new area
         const resArea = await request(app)
-            .post(areaPath)
+            .post(`${areaPath}`)
             .set("Cookie", urbanplanner_cookie) // Authorized role
             .send( geoJson )
             .expect(201);

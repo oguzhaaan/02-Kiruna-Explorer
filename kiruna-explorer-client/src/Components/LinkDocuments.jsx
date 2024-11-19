@@ -21,6 +21,9 @@ const LinkDocuments = ({
 
   const { isDarkMode } = useTheme();
 
+  // --- Search ---
+  const [searchQuery, setSearchQuery] = useState(""); // User's input
+  const [debouncedQuery, setDebouncedQuery] = useState(""); // Debounced query
   // --- Filter ---
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   const toggleFilterMenu = () => {
@@ -40,14 +43,27 @@ const LinkDocuments = ({
     fetchAllDocuments,
     fetchFilteredDocuments,
   } = useDocuments();
-
+  // Fetch all documents on mount
   useEffect(() => {
-    fetchAllDocuments(); // Fetch all documents on mount
+    fetchAllDocuments();
   }, []);
+  // Add delay
   useEffect(() => {
-    fetchFilteredDocuments(filterValues); // Fetch filtered documents
-  }, [filterValues]);
+    const handler = setTimeout(() => {
+      setDebouncedQuery(searchQuery); // Update debounced query after delay
+    }, 500); // Wait 500ms
+
+    return () => {
+      clearTimeout(handler); // Clear timeout if searchQuery changes before 500ms
+    };
+  }, [searchQuery]);
+  useEffect(() => {
+    // Merge searchQuery into filterValues
+    fetchFilteredDocuments({ ...filterValues, title: debouncedQuery });
+  }, [filterValues, debouncedQuery]);
   //-------
+
+  const [availableDocuments, setAvailableDocuments] = useState([]);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -66,47 +82,48 @@ const LinkDocuments = ({
     const fetchDocuments = async () => {
       try {
         const linkedDocument = await API.getDocuemntLinks(originalDocId);
+        const allDocuments = await API.getAllDocuments();
+
+        // Filter out the document with the same ID as originalDocId
+        const availableDocuments = allDocuments.filter(
+          (doc) => doc.id !== originalDocId
+        );
+
         let tempLinks = {};
 
-        const allDocuments = await API.getAllDocuments();
-        // Filter out the document with the same ID as originalDocId
-        const mergedDocuments = allDocuments.filter((doc) => {
-          console.log("doc id: " + doc.id + ", original: " + originalDocId);
-          // Verifica se il documento NON è presente in linkedDocument
-          return doc.id != originalDocId;
-        });
-        console.log(mergedDocuments);
-
         if (mode === "save") {
-          setLinks(() => {
-            if (linkedDocument) {
-              mergedDocuments.forEach((doc) => {
-                tempLinks[doc.id] = [];
-              });
-              linkedDocument.reduce((acc, link) => {
-                const docId = link.id;
-                const connectionType = link.connection;
-                if (!tempLinks[docId]) {
-                  tempLinks[docId] = [];
-                }
-                tempLinks[docId].push(connectionType);
-                return tempLinks;
-              }, {});
-              return tempLinks;
-            } else {
-              mergedDocuments.forEach((doc) => {
-                tempLinks[doc.id] = [];
-              });
-              return tempLinks;
-            }
-          });
+          // Set the links only if linkedDocument exists
+          if (linkedDocument) {
+            // Initialize tempLinks with empty arrays
+            availableDocuments.forEach((doc) => {
+              tempLinks[doc.id] = [];
+            });
+
+            // Populate tempLinks with connection types
+            linkedDocument.forEach((link) => {
+              const { id, connection } = link;
+              if (!tempLinks[id]) {
+                tempLinks[id] = [];
+              }
+              tempLinks[id].push(connection);
+            });
+          } else {
+            // If linkedDocument doesn't exist, initialize tempLinks with empty arrays
+            availableDocuments.forEach((doc) => {
+              tempLinks[doc.id] = [];
+            });
+          }
+
+          // Update the links state here
+          setLinks(tempLinks);
         } else {
-          mergedDocuments.forEach((doc) => {
+          // If not in "save" mode, initialize tempLinks with empty arrays
+          availableDocuments.forEach((doc) => {
             tempLinks[doc.id] = [];
           });
           setLinks(tempLinks);
         }
-        setDocuments(mergedDocuments);
+
       } catch (error) {
         console.error("Error in getAllDocuments function:", error.message);
         throw new Error(
@@ -116,27 +133,40 @@ const LinkDocuments = ({
     };
 
     fetchDocuments();
-  }, [mode]);
+  }, [mode]); // Only run effect when mode changes
 
-  // State to hold the search query
-  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedDocuments, setSelectedDocuments] = useState([]);
+  // Syncing `selectedDocuments` with `links`
+  useEffect(() => {
+    // Check if links are available and update `selectedDocuments`
+    const updatedSelectedDocuments = documents
+      .filter((doc) => doc.id !== originalDocId)
+      .filter((doc) => links[doc.id] && links[doc.id].length > 0);
+    setSelectedDocuments(updatedSelectedDocuments);
+  }, [links]);
 
   const handleConnectionChange = (docId, value) => {
     setLinks((prevLinks) => {
       const currentConnections = prevLinks[docId] || [];
-      if (currentConnections.includes(value)) {
-        // Remove the connection if it already exists
-        return {
-          ...prevLinks,
-          [docId]: currentConnections.filter((conn) => conn !== value),
-        };
+      const newLinks = currentConnections.includes(value)
+        ? currentConnections.filter((conn) => conn !== value)
+        : [...currentConnections, value];
+
+      if (newLinks.length > 0) {
+        // Add document to selectedDocuments if not already there
+        if (!selectedDocuments.some((doc) => doc.id === docId)) {
+          const selectedDoc = documents.find((doc) => doc.id === docId);
+          setSelectedDocuments((prev) => [...prev, selectedDoc]);
+        }
       } else {
-        // Add the new connection
-        return {
-          ...prevLinks,
-          [docId]: [...currentConnections, value],
-        };
+        // Remove from selectedDocuments if no connections are left
+        setSelectedDocuments((prev) => prev.filter((doc) => doc.id !== docId));
       }
+
+      return {
+        ...prevLinks,
+        [docId]: newLinks,
+      };
     });
   };
 
@@ -164,11 +194,6 @@ const LinkDocuments = ({
       return acc;
     }, []);
   };
-
-  // Filter documents based on the search query and connection status
-  const filteredDocuments = documents.filter((doc) => {
-    return doc.title.toLowerCase().includes(searchQuery.toLowerCase());
-  });
 
   // Show modal when "Done" is clicked
   const handleDoneClick = () => {
@@ -294,54 +319,58 @@ const LinkDocuments = ({
       <div className="flex flex-row gap-3">
         {/* Document List */}
         <div className="space-y-3 w-7/12">
-          {documents &&
-            filteredDocuments
-              .filter((doc) => links[doc.id] && links[doc.id].length === 0)
-              .map((doc) => (
-                <DocumentItem
-                  key={doc.id}
-                  title={doc.title}
-                  type={doc.type}
-                  date={doc.date}
-                  stakeholders={doc.stakeholders}
-                  connectionOptions={defaultConnectionOptions}
-                  selectedOption={
-                    Array.isArray(links[doc.id]) ? links[doc.id] : []
-                  }
-                  onConnectionChange={(value) =>
-                    handleConnectionChange(doc.id, value)
-                  }
-                  isDarkMode={isDarkMode}
-                />
-              ))}
+          {documents
+            .filter(
+              (doc) =>
+                !selectedDocuments.some(
+                  (selectedDoc) => selectedDoc.id === doc.id
+                )
+            )
+            .filter((doc) => links[doc.id] && links[doc.id].length === 0)
+            .map((doc) => (
+              <DocumentItem
+                key={doc.id}
+                title={doc.title}
+                type={doc.type}
+                date={doc.date}
+                stakeholders={doc.stakeholders}
+                connectionOptions={defaultConnectionOptions}
+                selectedOption={
+                  Array.isArray(links[doc.id]) ? links[doc.id] : []
+                }
+                onConnectionChange={(value) =>
+                  handleConnectionChange(doc.id, value)
+                }
+                isDarkMode={isDarkMode}
+              />
+            ))}
         </div>
 
         <div className="px-3 py-3 space-y-3 w-5/12 rounded-md bg-gray-100 dark:bg-[#0e2430]">
           <p className="m-0 p-0 text-black_text dark:text-white_text text-xl font-normal">
             Connected Documents
           </p>
-          {documents &&
-            filteredDocuments
-              .filter((doc) => links[doc.id] && links[doc.id].length > 0)
-              .map((doc) => (
-                <SelectedDocument
-                  docId={doc.id}
-                  key={doc.id}
-                  title={doc.title}
-                  type={doc.type}
-                  date={doc.date}
-                  stakeholders={doc.stakeholders}
-                  connectionOptions={defaultConnectionOptions}
-                  selectedOption={
-                    Array.isArray(links[doc.id]) ? links[doc.id] : []
-                  }
-                  onConnectionChange={(value) =>
-                    handleConnectionChange(doc.id, value)
-                  }
-                  getFilteredOptions={getFilteredOptions}
-                  isDarkMode={isDarkMode}
-                />
-              ))}
+          {selectedDocuments
+            .filter((doc) => links[doc.id] && links[doc.id].length > 0)
+            .map((doc) => (
+              <SelectedDocument
+                docId={doc.id}
+                key={doc.id}
+                title={doc.title}
+                type={doc.type}
+                date={doc.date}
+                stakeholders={doc.stakeholders}
+                connectionOptions={defaultConnectionOptions}
+                selectedOption={
+                  Array.isArray(links[doc.id]) ? links[doc.id] : []
+                }
+                onConnectionChange={(value) =>
+                  handleConnectionChange(doc.id, value)
+                }
+                getFilteredOptions={getFilteredOptions}
+                isDarkMode={isDarkMode}
+              />
+            ))}
         </div>
       </div>
       {/* Confirmation Modal */}

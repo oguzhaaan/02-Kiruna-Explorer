@@ -23,7 +23,8 @@ function Document(props) {
   const { isDarkMode, toggleTheme } = useTheme();
 
   // --- Search ---
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(""); // User's input
+  const [debouncedQuery, setDebouncedQuery] = useState(""); // Debounced query
   // --- Filter ---
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   const toggleFilterMenu = () => {
@@ -43,13 +44,23 @@ function Document(props) {
     fetchAllDocuments,
     fetchFilteredDocuments,
   } = useDocuments();
-
+  // Fetch all documents on mount
   useEffect(() => {
-    fetchAllDocuments(); // Fetch all documents on mount
+    fetchAllDocuments();
   }, []);
   useEffect(() => {
-    fetchFilteredDocuments(filterValues); // Fetch filtered documents
-  }, [filterValues]);
+    const handler = setTimeout(() => {
+      setDebouncedQuery(searchQuery); // Update debounced query after delay
+    }, 500); // Wait 500ms
+  
+    return () => {
+      clearTimeout(handler); // Clear timeout if searchQuery changes before 500ms
+    };
+  }, [searchQuery]);
+  useEffect(() => {
+    // Merge searchQuery into filterValues
+    fetchFilteredDocuments({ ...filterValues, title: debouncedQuery });
+  }, [filterValues, debouncedQuery]);
 
   // --- Handle Fields Changes ---
   const handleFieldChange = (field, value) => {

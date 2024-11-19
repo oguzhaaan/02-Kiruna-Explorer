@@ -121,6 +121,7 @@ describe("Integration Test GET / - Get All documents", () => {
 
         const result = await request(app)
             .get(`${basePath}/`)
+            .set("Cookie",urbanplanner_cookie)
             .expect('Content-Type', /json/)
             .expect(200);
 
@@ -131,6 +132,7 @@ describe("Integration Test GET / - Get All documents", () => {
     
         const result = await request(app)
             .get(`${basePath}/`)
+            .set("Cookie",urbanplanner_cookie)
             .expect('Content-Type', /json/)
             .expect(200)
     
@@ -192,7 +194,7 @@ describe("Integration Test POST / - Add Document", () => {
     describe("Integration Test GET /filter - Get Documents by Filter", () => {
         beforeEach(async () => {
             await cleanup();
-            urbanplanner_cookie = await login(urbanplannerUser);
+            urbanplanner_cookie = await login(urbanPlannerUser);
             // Create a document to ensure there is data to filter
             mockDocId = await createDocument(urbanplanner_cookie);
         });
@@ -213,7 +215,7 @@ describe("Integration Test POST / - Add Document", () => {
     describe("Integration Test GET /filter - Get Documents by Title", () => {
         beforeEach(async () => {
             await cleanup();
-            urbanplanner_cookie = await login(urbanplannerUser);
+            urbanplanner_cookie = await login(urbanPlannerUser);
     
             // Create documents with different titles
             await createDocument(urbanplanner_cookie); // Uses mockDocumentbody with title 'Test Document'
@@ -241,7 +243,7 @@ describe("Integration Test POST / - Add Document", () => {
     describe("Integration Test GET /filter - Get Documents by Type", () => {
         beforeEach(async () => {
             await cleanup();
-            urbanplanner_cookie = await login(urbanplannerUser);
+            urbanplanner_cookie = await login(urbanPlannerUser);
     
             // Create documents with different types
             await createDocument(urbanplanner_cookie); // Uses mockDocumentbody with type 'design'
@@ -269,7 +271,7 @@ describe("Integration Test POST / - Add Document", () => {
     describe("Integration Test GET /filter - Get Documents by Stakeholders", () => {
         beforeEach(async () => {
             await cleanup();
-            urbanplanner_cookie = await login(urbanplannerUser);
+            urbanplanner_cookie = await login(urbanPlannerUser);
     
             // Create documents with different stakeholders
             await createDocument(urbanplanner_cookie); // Uses mockDocumentbody with stakeholders ['lkab', 'municipality']
@@ -297,7 +299,7 @@ describe("Integration Test POST / - Add Document", () => {
     describe("Integration Test GET /filter - Get Documents by Start Date", () => {
         beforeEach(async () => {
             await cleanup();
-            urbanplanner_cookie = await login(urbanplannerUser);
+            urbanplanner_cookie = await login(urbanPlannerUser);
     
             // Create documents with different dates
             await createDocument(urbanplanner_cookie); // Uses mockDocumentbody with date '2023-01-01'
@@ -326,7 +328,7 @@ describe("Integration Test POST / - Add Document", () => {
     describe("Integration Test GET /filter - Get Documents by End Date", () => {
         beforeEach(async () => {
             await cleanup();
-            urbanplanner_cookie = await login(urbanplannerUser);
+            urbanplanner_cookie = await login(urbanPlannerUser);
     
             // Create documents with different dates
             await createDocument(urbanplanner_cookie); // Uses mockDocumentbody with date '2023-01-01'
@@ -447,26 +449,26 @@ describe("Integration Test PUT /api/documents/:DocId/area", () => {
 
     test("Should return 400 if areaId is not a valid integer", async () => {
         const invalidAreaId = "abc"; // Non-integer ID
-        //create new area
-        const resArea = await request(app)
-            .post(areaPath)
-            .set("Cookie", urbanplanner_cookie) // Authorized role
-            .send( geoJson )
-            .expect(201);
-        const firstAreaId = resArea.body
-        //create document in that area
-        const resDocument = await request(app)
-            .post(`${basePath}`)
-            .set("Cookie", urbanplanner_cookie) // Authorized role
-            .send({ ...mockDocumentbody, areaId: firstAreaId })
-            .expect(201);
-        const documentId = resDocument.body.lastId;
-        const res = await request(app)
-            .put(`${basePath}/${documentId}/area`)
-            .set("Cookie", urbanplanner_cookie) // Authorized role
-            .send({ newAreaId: invalidAreaId })
-            .expect(400);
-        expect(res.body.error).toEqual("Invalid area ID");
+            //create new area
+            const resArea = await request(app)
+                .post(areaPath)
+                .set("Cookie", urbanplanner_cookie) // Authorized role
+                .send( geoJson )
+                .expect(201);
+            const firstAreaId = resArea.body
+            //create document in that area
+            const resDocument = await request(app)
+                .post(`${basePath}`)
+                .set("Cookie", urbanplanner_cookie) // Authorized role
+                .send({ ...mockDocumentbody, areaId: firstAreaId })
+                .expect(201);
+            const documentId = resDocument.body.lastId;
+            const res = await request(app)
+                .put(`${basePath}/${documentId}/area`)
+                .set("Cookie", urbanplanner_cookie) // Authorized role
+                .send({ newAreaId: invalidAreaId })
+                .expect(400);
+            expect(res.body.error).toEqual("Invalid area ID");
     });
 
     test("Should return 400 if areaId is not provided", async () => {

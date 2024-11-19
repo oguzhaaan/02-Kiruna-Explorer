@@ -119,22 +119,22 @@ const updateDocumentArea = async (docId,areaId) => {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        areaId:areaId
+        newAreaId:areaId
       }),
       credentials: 'include'
     });
 
     if (!response.ok) {
       const errMessage = await response.json();
-      throw new Error(`${errMessage.message || 'Error while creating the document.'}`);
+      throw new Error(`${errMessage.message || 'Error while updating area.'}`);
     }
 
     const result = await response.json();
     return result; 
     
   } catch (error) {
-    console.error("Error in addDocument function:", error.message);
-    throw new Error(`${error.message || 'Error while creating the document.'}`);
+    console.error("Error in update area function:", error.message);
+    throw new Error(`${error.message || 'Error while updating area.'}`);
   }
 };
 
@@ -198,15 +198,15 @@ const addArea = async (geoJson) => {
 
     if (!response.ok) {
       const errMessage = await response.json();
-      throw new Error(`${errMessage.message || 'Error while creating the document.'}`);
+      throw new Error(`${errMessage.message || 'Error while adding Area.'}`);
     }
 
     const result = await response.json();
     return result; 
 
   } catch (error) {
-    console.error("Error in addDocument function:", error.message);
-    throw new Error(`${error.message || 'Error while creating the document.'}`);
+    console.error("Error in addArea:", error.message);
+    throw new Error(`${error.message || 'Error while adding Document.'}`);
   }
 };
 

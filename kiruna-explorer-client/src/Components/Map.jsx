@@ -319,16 +319,6 @@ function GeoreferenceMap(props) {
             //if he clicked an existing one
             else if (clickedArea) {
                 area_id = clickedArea
-            } else {
-                const geoJson = {
-                    type: "Feature",
-                    properties: {},
-                    geometry: {
-                        type: "Point",
-                        coordinates: [lng, lat]
-                    }
-                }
-                area_id = await API.addArea(geoJson)
             }
 
             // if update area is not null then update, else set new area id for the form

@@ -50,6 +50,7 @@ export default function DocumentDAO() {
                     return reject(new InvalidArea());
                 }
                 else if (rows.length === 0) {
+                    if (areaId == 1) return resolve([])
                     return reject(new DocumentNotFound());
                 } else if (areaId === null && !areaDAO.getAllAreas().includes(areaId)) {
                     return reject(new AreaNotFound());

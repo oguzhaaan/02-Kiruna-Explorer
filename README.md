@@ -26,6 +26,7 @@ Here's the Table of Contents with all the APIs listed:
       - [**Add Files**:](#add-files)
       - [**Delete File**](#delete-file)
       - [**Get Files**:](#get-files)
+      - [**Download File**:](#download-a-file)
     - [5. Users Credentials](#5-users-credentials)
     - [6. Dockerization](#6-dockerization)
   - [LICENSE](#license)
@@ -524,6 +525,23 @@ Response body:
   }
 ]
 ```
+
+#### **Download a File**
+
+**GET** `api/documents/:DocId/files/download/:FileId`
+
+Description : Download a specific file stored in the server with a certain <FileId>, associated to a document with its <DocId>
+
+Requqest parameters: Document Id, File Id
+
+Response :
+- `200 OK`
+- `404 Not Found`
+- `500 Internal Server Error`
+
+Response body: None
+
+
 
 
 

@@ -12,8 +12,8 @@ import { authorizeRoles } from "../auth/authMiddleware.mjs";
 
 
 const router = express.Router();
-const DocumentDao = new DocumentDAO();
 const AreaDao = new AreaDAO();
+const DocumentDao = new DocumentDAO(AreaDao);
 const DocumentLinksDao = new DocumentLinksDAO();
 
 

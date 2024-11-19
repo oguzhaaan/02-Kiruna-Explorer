@@ -5,8 +5,8 @@ import AreaDAO from "./AreaDAO.mjs";
 import { AreaNotFound } from "../models/Area.mjs";
 import { InvalidArea } from "../models/Area.mjs";
 
-const areaDAO = new AreaDAO();
-export default function DocumentDAO() {
+export default function DocumentDAO(areaDAO) {
+
     this.getAllDocuments = () => {
         const query = "SELECT * FROM document";
         return new Promise((resolve, reject) => {
@@ -96,6 +96,7 @@ export default function DocumentDAO() {
                     return reject(new InvalidArea());
                 }
                 else if (rows.length === 0) {
+                    if (areaId == 1) return resolve([])
                     return reject(new DocumentNotFound());
                 } else if (areaId === null && !areaDAO.getAllAreas().includes(areaId)) {
                     return reject(new AreaNotFound());
@@ -112,26 +113,29 @@ export default function DocumentDAO() {
         return new Promise((resolve, reject) => {
             // Fetch oldAreaId, areaIdsInDoc, and allAreas at the same time
             Promise.all([
-                this.getDocumentById(documentId).then(document => document.areaId),
+                this.getDocumentById(documentId).then(document => document.areaId).catch(err => reject(err)),
                 this.getAllDocuments().then(documents => documents.map(doc => doc.areaId)),
                 areaDAO.getAllAreas().then(areas => areas.map(area => area.id)) // Get all valid area IDs
             ]).then(([oldAreaId, areaIdsInDoc, allAreaIds]) => {
-                if (!Number.isInteger(newAreaId)) {
+                if (!Number.isInteger(newAreaId) || (Number.isInteger(newAreaId) && newAreaId < 0) || (Number.isInteger(newAreaId) && newAreaId === 0) || newAreaId === null) {
                     return reject(new InvalidArea());
                 }
 
                 
     
                 // Check if oldAreaId and newAreaId exists in areaIdsInDoc
-                if (!areaIdsInDoc.includes(oldAreaId) || !areaIdsInDoc.includes(newAreaId) || !allAreaIds.includes(newAreaId)) {
+                if (!areaIdsInDoc.includes(oldAreaId) || !allAreaIds.includes(newAreaId)) {
                     return reject(new AreaNotFound());
-                }
+                }              
     
                 // Proceed to update the document's areaId to newAreaId
                 const updateQuery = "UPDATE document SET areaId = ? WHERE id = ?";
                 db.run(updateQuery, [newAreaId, documentId], (err) => {
+                    console.log("db.run called with query:", updateQuery);
+                    console.log("db.run called with params:", [newAreaId, documentId]);
                     if (err) {
                         return reject(err);
+                        
                     }
     
                     // Re-fetch documents to check if oldAreaId is still in use

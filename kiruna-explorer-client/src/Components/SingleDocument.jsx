@@ -168,6 +168,13 @@ function SingleDocument(props) {
     }, [id])
 
     useEffect(() => {
+        if(props.updateAreaId.areaId === "done") {
+            props.setUpdateAreaId({areaId:null,docId:null})
+            props.setAlertMessage(["Document moved successfully", "success"])
+        }
+    }, [props.updateAreaId])
+
+    useEffect(() => {
         const getFiles = async () => {
             try {
                 const fileData = await API.getDocumentFiles(id); // Aggiungi un'API per i file

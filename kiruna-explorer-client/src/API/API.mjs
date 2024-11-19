@@ -113,6 +113,31 @@ const getDocumentsFromArea = async (areaId) => {
   }
 };
 
+const updateDocumentArea = async (docId,areaId) => {
+  try {
+    const response = await fetch(`${SERVER_URL}/api/documents/${docId}/area`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        newAreaId:areaId
+      }),
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const errMessage = await response.json();
+      throw new Error(`${errMessage.message || 'Error while updating area.'}`);
+    }
+
+    const result = await response.json();
+    return result; 
+    
+  } catch (error) {
+    console.error("Error in update area function:", error.message);
+    throw new Error(`${error.message || 'Error while updating area.'}`);
+  }
+};
+
 const getAllAreas = async () => {
   try {
     const response = await fetch(`${SERVER_URL}/api/areas`, {
@@ -138,6 +163,28 @@ const getAllAreas = async () => {
   }
 };
 
+const getAreaById = async (areaId) => {
+  try {
+    const response = await fetch(`${SERVER_URL}/api/areas/${areaId}`, {
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const errMessage = await response.json();
+      throw new Error(`${errMessage.message || 'Error while getting areas.'}`);
+    }
+    
+    const result = await response.json();
+    console.log(result)
+    const geoJsonresult = JSON.parse(result.geoJson)
+    return geoJsonresult
+    
+  } catch (error) {
+    console.error("Error in get all areas function:", error.message);
+    throw new Error(`${error.message || 'Error while getting areas.'}`);
+  }
+};
+
 const addArea = async (geoJson) => {
   console.log("Sending GeoJSON:", JSON.stringify(geoJson, null, 2));  // Controllo per verificare cosa viene inviato
 
@@ -151,15 +198,15 @@ const addArea = async (geoJson) => {
 
     if (!response.ok) {
       const errMessage = await response.json();
-      throw new Error(`${errMessage.message || 'Error while creating the document.'}`);
+      throw new Error(`${errMessage.message || 'Error while adding Area.'}`);
     }
 
     const result = await response.json();
     return result;
 
   } catch (error) {
-    console.error("Error in addDocument function:", error.message);
-    throw new Error(`${error.message || 'Error while creating the document.'}`);
+    console.error("Error in addArea:", error.message);
+    throw new Error(`${error.message || 'Error while adding Document.'}`);
   }
 };
 
@@ -441,7 +488,9 @@ const API = {
   addDocument,
   getDocumentById,
   getDocumentsFromArea,
+  updateDocumentArea,
   getAllAreas,
+  getAreaById,
   addArea,
   addLink,
   getDocuemntLinks,

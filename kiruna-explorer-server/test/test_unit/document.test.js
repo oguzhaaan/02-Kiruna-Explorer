@@ -80,7 +80,7 @@ describe("Unit Test getDocumentById", () => {
     let documentDAO;
 
     beforeEach(() => {
-        documentDAO = new DocumentDAO();
+        documentDAO = new DocumentDAO(areaDAO);
     });
 
     afterEach(() => {
@@ -143,7 +143,7 @@ describe("Unit Test addDocument", () => {
     let documentDAO;
 
     beforeEach(() => {
-        documentDAO = new DocumentDAO();
+        documentDAO = new DocumentDAO(areaDAO);
     });
 
     afterEach(() => {
@@ -244,7 +244,7 @@ describe("Unit Test getDocumentsByFilter", () => {
     let documentDAO;
 
     beforeEach(() => {
-        documentDAO = new DocumentDAO();
+        documentDAO = new DocumentDAO(areaDAO);
     });
 
     afterEach(() => {
@@ -492,6 +492,125 @@ describe("Unit Test getDocumentsByFilter", () => {
         expect(db.all).toBeCalledTimes(1);
         expect(db.all).toBeCalledWith(expect.stringContaining("SELECT * FROM document WHERE 1=1 AND date <= ?"), [endDateFilter], expect.any(Function));
     });
+
+    });   
+
+    describe("Unit Test updateDocumentAreaId", () => {
+    let documentDAO;
+
+    beforeEach(() => {
+        documentDAO = new DocumentDAO(areaDAO);
+    });
+
+    afterEach(() => {
+        vitest.clearAllMocks();
+    });
+
+    test("should update the document's areaId and delete old area if unused", async () => {
+        const oldAreaId = 2;
+        const newAreaId = 5;
+        const documentId = 1;
+    
+        vitest.spyOn(documentDAO, "getDocumentById").mockResolvedValueOnce({ areaId: oldAreaId });
+    
+        vitest.spyOn(documentDAO, "getAllDocuments").mockResolvedValueOnce([
+            { id: 1, areaId: oldAreaId },
+            { id: 2, areaId: newAreaId }
+        ]);
+    
+        vitest.spyOn(areaDAO, "getAllAreas").mockResolvedValueOnce([
+            { id: oldAreaId },
+            { id: newAreaId }
+        ]);
+    
+        vi.spyOn(db, "run").mockImplementation((query, params, callback) => {
+            console.log("db.run called with query:", query);
+            console.log("db.run called with params:", params);
+            callback(null);
+        });
+    
+        const result = await documentDAO.updateDocumentAreaId(documentId, newAreaId);
+    
+        expect(result).toBe(true);
+        expect(db.run).toBeCalledWith(
+            expect.stringContaining("UPDATE document SET areaId"),
+            [newAreaId, documentId],
+            expect.any(Function)
+        );
+        expect(db.run).toBeCalledWith(
+            expect.stringContaining("DELETE FROM area WHERE id"),
+            [oldAreaId],
+            expect.any(Function)
+        );
+    });
+
+    test("should reject with AreaNotFound if newAreaId is not exists in area table", async () => {
+        const documentId = 1;
+        const newAreaId = 999; // Assume this ID does not exist
+
+        vitest.spyOn(documentDAO, 'getDocumentById').mockResolvedValue({ areaId: 1 });
+
+        vitest.spyOn(areaDAO, 'getAllAreas').mockResolvedValue([
+            { id: 1 },
+            { id: 2 }
+        ]);
+
+        const result = await documentDAO.updateDocumentAreaId(documentId, newAreaId).catch(err => err);
+
+        expect(result).toBeInstanceOf(AreaNotFound);
+    });
+
+    test("should reject with InvalidArea if newAreaId is not an integer", async () => {
+        const documentId = 1;
+        const newAreaId = "invalid"; 
+
+        vitest.spyOn(documentDAO, 'getDocumentById').mockResolvedValue({ areaId: 1 });
+
+        vitest.spyOn(areaDAO, 'getAllAreas').mockResolvedValue([
+            { id: 1 },
+            { id: 2 }
+        ]);
+
+        const result = await documentDAO.updateDocumentAreaId(documentId, newAreaId).catch(err => err);
+
+        expect(result).toBeInstanceOf(InvalidArea);
+    });
+
+    test("should not delete the area after modifying if oldAreaId still exists in document table after updating it to newAreaId", async () => {
+        const oldAreaId = 2;
+        const newAreaId = 5;
+        const documentId = 1;
+    
+        // Mock getDocumentById to return document with oldAreaId
+        vitest.spyOn(documentDAO, "getDocumentById").mockResolvedValueOnce({ areaId: oldAreaId });
+    
+        // Mock getAllDocuments to return documents with oldAreaId still in use by other documents
+        vitest.spyOn(documentDAO, "getAllDocuments").mockResolvedValueOnce([
+            { id: 1, areaId: oldAreaId }, // document being updated
+            { id: 2, areaId: newAreaId }, // document with newAreaId
+            { id: 3, areaId: oldAreaId }  // another document still using oldAreaId
+        ]);
+    
+        vitest.spyOn(areaDAO, "getAllAreas").mockResolvedValueOnce([
+            { id: oldAreaId },
+            { id: newAreaId }
+        ]);
+    
+        vitest.spyOn(db, "run").mockImplementation((query, params, callback) => {
+            callback(null);
+        });
+    
+        const result = await documentDAO.updateDocumentAreaId(documentId, newAreaId);
+    
+        expect(result).toBe(true);
+    
+        expect(db.run).toBeCalledWith(
+            expect.stringContaining("UPDATE document SET areaId"),
+            [newAreaId, documentId],
+            expect.any(Function)
+        );
+    
+    });   
 
 });
 

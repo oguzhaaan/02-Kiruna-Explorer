@@ -5,6 +5,7 @@ import AreaDAO from "./AreaDAO.mjs";
 import { AreaNotFound } from "../models/Area.mjs";
 import { InvalidArea } from "../models/Area.mjs";
 
+const areaDAO = new AreaDAO();
 export default function DocumentDAO() {
     this.getAllDocuments = () => {
         const query = "SELECT * FROM document";
@@ -38,6 +39,50 @@ export default function DocumentDAO() {
         });
     };
 
+    this.getDocumentsByFilter = ({ type, title, stakeholders, startDate, endDate }) => {
+        return new Promise((resolve, reject) => {
+            let query = "SELECT * FROM document WHERE 1=1";
+            const params = [];
+    
+            if (type) {
+                query += " AND type = ?";
+                params.push(type);
+            }
+    
+            if (title) {
+                query += " AND title LIKE ?";
+                params.push(`%${title}%`);
+            }
+    
+            if (stakeholders) {
+                query += " AND (";
+                const stakeholderConditions = [];
+                stakeholders.forEach(stakeholder => {
+                    stakeholderConditions.push(`${stakeholder} = TRUE`);
+                });
+                query += stakeholderConditions.join(" OR ");
+                query += ")";
+            }
+    
+            if (startDate) {
+                query += " AND date >= ?";
+                params.push(startDate);
+            }
+    
+            if (endDate) {
+                query += " AND date <= ?";
+                params.push(endDate);
+            }
+    
+            db.all(query, params, (err, rows) => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve(rows);
+            });
+        });
+    };
+
     this.getDocumentsByAreaId = (areaId) => {
         const areaDAO = new AreaDAO();
         const query = "SELECT * FROM document WHERE areaId = ?";
@@ -60,6 +105,52 @@ export default function DocumentDAO() {
             });
         });
     }
+
+    this.updateDocumentAreaId = (documentId, newAreaId) => {
+        return new Promise((resolve, reject) => {
+            // Fetch oldAreaId, areaIdsInDoc, and allAreas at the same time
+            Promise.all([
+                this.getDocumentById(documentId).then(document => document.areaId),
+                this.getAllDocuments().then(documents => documents.map(doc => doc.areaId)),
+                areaDAO.getAllAreas().then(areas => areas.map(area => area.id)) // Get all valid area IDs
+            ]).then(([oldAreaId, areaIdsInDoc, allAreaIds]) => {
+                if (!Number.isInteger(newAreaId)) {
+                    return reject(new InvalidArea());
+                }
+
+                
+    
+                // Check if oldAreaId and newAreaId exists in areaIdsInDoc
+                if (!areaIdsInDoc.includes(oldAreaId) || !areaIdsInDoc.includes(newAreaId) || !allAreaIds.includes(newAreaId)) {
+                    return reject(new AreaNotFound());
+                }
+    
+                // Proceed to update the document's areaId to newAreaId
+                const updateQuery = "UPDATE document SET areaId = ? WHERE id = ?";
+                db.run(updateQuery, [newAreaId, documentId], (err) => {
+                    if (err) {
+                        return reject(err);
+                    }
+    
+                    // Re-fetch documents to check if oldAreaId is still in use
+                    this.getAllDocuments().then(updatedDocuments => {
+                        const updatedAreaIdsInDoc = updatedDocuments.map(doc => doc.areaId);
+    
+                        if (!updatedAreaIdsInDoc.includes(oldAreaId)) {
+                            // If oldAreaId is no longer in use, delete it from the area table
+                            Promise.resolve([
+                                areaDAO.deleteAreaById(oldAreaId),
+                                resolve(true)
+                            ]);
+                        } else {
+                            console.log("Area ID is still in use; not deleted.");
+                            resolve(true); // Resolve without deleting if still in use
+                        }
+                    }).catch(reject); // Catch errors from re-fetching documents
+                });
+            }).catch(reject); // Catch errors from initial promises
+        });
+    };
 
     this.addDocument = (documentData) => {
         // Converti il documento per l'inserimento nel database

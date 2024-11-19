@@ -52,9 +52,9 @@ function App() {
 
           <Route path="/login" element={isLoggedIn ? <Navigate replace to="/documents" /> : <LoginPage setNavShow={setNavShow} />} />
 
-          <Route path="/documents" element={isLoggedIn ? <Document setUpdateAreaId={setUpdateAreaId} setoriginalDocId={setoriginalDocId} setMode={setMode} connections={connections} setConnections={setConnections} setNavShow={setNavShow} setIsModalOpen={setIsModalOpen} isModalOpen={isModalOpen} newAreaId={newAreaId} setnewAreaId={setnewAreaId} setNewDocument={setNewDocument} newDocument={newDocument} /> : <Navigate replace to="/" />} />
+          <Route path="/documents" element={isLoggedIn ? <Document updateAreaId={updateAreaId} setUpdateAreaId={setUpdateAreaId} setoriginalDocId={setoriginalDocId} setMode={setMode} connections={connections} setConnections={setConnections} setNavShow={setNavShow} setIsModalOpen={setIsModalOpen} isModalOpen={isModalOpen} newAreaId={newAreaId} setnewAreaId={setnewAreaId} setNewDocument={setNewDocument} newDocument={newDocument} /> : <Navigate replace to="/" />} />
 
-          <Route path="/documents/:id" element={isLoggedIn ? <Document setUpdateAreaId={setUpdateAreaId} setoriginalDocId={setoriginalDocId} setMode={setMode} connections={connections} setConnections={setConnections} setNavShow={setNavShow} setIsModalOpen={setIsModalOpen} isModalOpen={isModalOpen} newAreaId={newAreaId} setnewAreaId={setnewAreaId} setNewDocument={setNewDocument} newDocument={newDocument} /> : <Navigate replace to="/" />} />
+          <Route path="/documents/:id" element={isLoggedIn ? <Document updateAreaId={updateAreaId} setUpdateAreaId={setUpdateAreaId} setoriginalDocId={setoriginalDocId} setMode={setMode} connections={connections} setConnections={setConnections} setNavShow={setNavShow} setIsModalOpen={setIsModalOpen} isModalOpen={isModalOpen} newAreaId={newAreaId} setnewAreaId={setnewAreaId} setNewDocument={setNewDocument} newDocument={newDocument} /> : <Navigate replace to="/" />} />
 
           <Route path="/map" element={isLoggedIn ? <GeoreferenceMap setUpdateAreaId={setUpdateAreaId} updateAreaId={updateAreaId} setNavShow={setNavShow} setnewAreaId={setnewAreaId} /> : <Navigate replace to="/" />} />
 

@@ -14,6 +14,7 @@ import markerpin from "../assets/marker-pin.svg"
 import polygonpin from "../assets/polygon-pin.svg"
 import municipalarea from "../assets/municipal-area.svg"
 import { getIcon } from "./Utilities/DocumentIcons.jsx";
+import Alert from "./Alert.jsx";
 
 function CenterMap({ lat, lng }) {
     const map = useMap();
@@ -53,6 +54,7 @@ function GeoreferenceMap(props) {
     const [presentAreas, setPresentAreas] = useState(null);
     const [clickedArea, setClickedArea] = useState(null);
     const [alertMessage, setAlertMessage] = useState("");
+    const [alertCustomMessage, setAlertCustomMessage] = useState(['', '']);
     const [showManually, setShowManually] = useState(false)
     const [markerLayer, setMarkerLayer] = useState(null);
     const [markerCoordinates, setMarkerCoordinates] = useState({ lat: "", lng: "" });
@@ -302,6 +304,7 @@ function GeoreferenceMap(props) {
             }
 
         } catch (err) {
+            setAlertCustomMessage([err.message, 'error'])
             console.log(err)
         }
     }
@@ -323,15 +326,18 @@ function GeoreferenceMap(props) {
 
             // if update area is not null then update, else set new area id for the form
             props.updateAreaId.docId ? await API.updateDocumentArea(props.updateAreaId.docId, area_id) : props.setnewAreaId(area_id)
-            props.setUpdateAreaId({ areaId: null, docId: null })
+            props.setUpdateAreaId({ areaId: "done", docId: "done" })
             navigate(-1);
         } catch (err) {
+            setAlertCustomMessage(["We encountered some errors, check your connection and retry", 'error'])
             console.log(err)
         }
     }
 
     return (
         <div className={isDarkMode ? "dark" : "light"}>
+            <Alert message={alertCustomMessage[0]} type={alertCustomMessage[1]}
+                   clearMessage={() => setAlertCustomMessage(['', ''])}></Alert>
             <MapContainer
                 whenCreated={(map) => (mapRef.current = map)}
                 center={[latitude, longitude]}

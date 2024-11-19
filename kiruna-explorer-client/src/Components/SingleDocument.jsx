@@ -46,6 +46,13 @@ function SingleDocument(props) {
         if (id) getDoc()
     }, [id])
 
+    useEffect(() => {
+        if(props.updateAreaId.areaId === "done") {
+            props.setUpdateAreaId({areaId:null,docId:null})
+            props.setAlertMessage(["Document moved successfully", "success"])
+        }
+    }, [props.updateAreaId])
+
     function capitalizeWords(str) {
         return str.replace(/\b\w/g, char => char.toUpperCase());
     }

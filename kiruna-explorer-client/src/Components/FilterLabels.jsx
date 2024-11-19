@@ -12,7 +12,7 @@ function FilterLabels({ filterValues, setFilterValues }) {
           stakeholders: prevFilters.stakeholders.filter((s) => s !== value),
         };
       }
-      if (key === "rangeDate") {
+      if (key === "date") {
         return { ...prevFilters, startDate: "", endDate: "" };
       }
       return { ...prevFilters, [key]: "" };
@@ -58,13 +58,13 @@ function FilterLabels({ filterValues, setFilterValues }) {
           ))}
         </div>
       )}
-      {filterValues.date && (
+      { filterValues.startDate && filterValues.endDate && filterValues.startDate === filterValues.endDate && (
         <div
           className={`flex flex-row items-center p-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-400 rounded-md cursor-pointer`}
         >
           Issuance Date:
           <div className="mx-1 px-1 border-2 border-blue-400 dark:border-opacity-30 rounded-lg">
-            {filterValues.date}
+            {filterValues.startDate}
           </div>
           <img
             src={isDarkMode ? whiteCloseIcon : blackCloseIcon}
@@ -74,7 +74,7 @@ function FilterLabels({ filterValues, setFilterValues }) {
           />
         </div>
       )}
-      {filterValues.startDate && filterValues.endDate && (
+      {filterValues.startDate && filterValues.endDate && filterValues.startDate !== filterValues.endDate &&(
         <div
           className={`flex flex-row items-center p-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-400 rounded-md cursor-pointer`}
         >
@@ -85,7 +85,7 @@ function FilterLabels({ filterValues, setFilterValues }) {
           <img
             src={isDarkMode ? whiteCloseIcon : blackCloseIcon}
             className="w-4"
-            onClick={() => handleRemoveFilter("rangeDate")}
+            onClick={() => handleRemoveFilter("date")}
             alt="remove"
           />
         </div>

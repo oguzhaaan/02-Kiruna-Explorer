@@ -14,8 +14,8 @@ import { formatString } from "./Utilities/StringUtils.js";
 import customDropdownStyles from "./Utilities/CustomDropdownStyles.js";
 import { stakeholderOptions, popularLanguages } from "./Utilities/Data.js";
 import FilterMenu from "./FilterMenu.jsx";
-
 import FilterLabels from "./FilterLabels.jsx";
+import { useDocuments } from "../hooks/useDocuments.mjs";
 
 function Document(props) {
   const navigate = useNavigate();
@@ -32,26 +32,24 @@ function Document(props) {
   const [filterValues, setFilterValues] = useState({
     type: "",
     stakeholders: [],
-    date: "",
     startDate: "",
     endDate: "",
   });
-  const [isFilterDateRange, setIsFilterDateRange] = useState(false);
   // --- Update Documents List ---
-  const [documents, setDocuments] = useState([]);
-  const [refreshList, setRefreshList] = useState(0);
+  const {
+    documents,
+    loading,
+    error,
+    fetchAllDocuments,
+    fetchFilteredDocuments,
+  } = useDocuments();
+
   useEffect(() => {
-    const fetchDocuments = async () => {
-      try {
-        const allDocuments = await API.getAllDocuments();
-        setDocuments(allDocuments);
-      } catch (error) {
-        console.error("Error in getAllDocuments function:", error.message);
-        throw new Error("Unable to get the documents.");
-      }
-    };
-    fetchDocuments();
-  }, [refreshList]);
+    fetchAllDocuments(); // Fetch all documents on mount
+  }, []);
+  useEffect(() => {
+    fetchFilteredDocuments(filterValues); // Fetch filtered documents
+  }, [filterValues]);
 
   // --- Handle Fields Changes ---
   const handleFieldChange = (field, value) => {
@@ -101,7 +99,7 @@ function Document(props) {
   // --- Submit Form ---
   const handleConfirm = async () => {
     // Refresh the list of the documents
-    setRefreshList((prev) => prev + 1);
+
     //CAMPI OPZIONALI: PAGE + LANGUAGE + GIORNO DELLA DATA(?) + COORDINATES
     //CAMPI OBBLIGATORI: TITLE + STAKEHOLDER + SCALE(PLANE NUMBER IN CASE) + DATE + DESCRIPTION + TYPE
 
@@ -201,8 +199,6 @@ function Document(props) {
                   <FilterMenu
                     filterValues={filterValues}
                     setFilterValues={setFilterValues}
-                    isFilterDateRange={isFilterDateRange}
-                    setIsFilterDateRange={setIsFilterDateRange}
                     toggleFilterMenu={toggleFilterMenu}
                   />
                 </div>

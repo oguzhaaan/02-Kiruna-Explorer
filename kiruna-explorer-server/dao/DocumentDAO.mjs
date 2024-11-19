@@ -60,7 +60,7 @@ export default function DocumentDAO() {
                 stakeholders.forEach(stakeholder => {
                     stakeholderConditions.push(`${stakeholder} = TRUE`);
                 });
-                query += stakeholderConditions.join(" OR ");
+                query += stakeholderConditions.join(" AND ");
                 query += ")";
             }
     
@@ -78,7 +78,9 @@ export default function DocumentDAO() {
                 if (err) {
                     return reject(err);
                 }
-                resolve(rows);
+                else {
+                    resolve(rows.map(row => this.convertDBRowToDocument(row)));
+                }
             });
         });
     };

@@ -4,14 +4,9 @@ import customDropdownStyles from "./Utilities/CustomDropdownStyles";
 import { stakeholderOptions } from "./Utilities/Data";
 import { useTheme } from "../contexts/ThemeContext";
 
-function FilterMenu({
-  filterValues,
-  setFilterValues,
-  isFilterDateRange,
-  setIsFilterDateRange,
-  toggleFilterMenu,
-}) {
+function FilterMenu({ filterValues, setFilterValues, toggleFilterMenu }) {
   const { isDarkMode } = useTheme();
+  const [isFilterDateRange, setIsFilterDateRange] = useState();
 
   // Temporary state for inputs
   const [tempFilterValues, setTempFilterValues] = useState({ ...filterValues });
@@ -27,7 +22,6 @@ function FilterMenu({
     const clearedValues = {
       type: "",
       stakeholders: [],
-      date: "",
       startDate: "",
       endDate: "",
     };
@@ -36,17 +30,7 @@ function FilterMenu({
   };
 
   const handleApply = () => {
-    const updatedFilterValues = { ...tempFilterValues };
-
-    if (isFilterDateRange) {
-      // If date range is selected, clear start and end date
-      updatedFilterValues.date = "";
-    } else {
-      // If date range is not selected, clear start and end date
-      updatedFilterValues.startDate = "";
-      updatedFilterValues.endDate = "";
-    }
-    setFilterValues(updatedFilterValues);
+    setFilterValues(tempFilterValues);
     toggleFilterMenu();
   };
 
@@ -108,8 +92,11 @@ function FilterMenu({
             <input
               id="filter-date"
               type="date"
-              value={tempFilterValues.date}
-              onChange={(e) => handleTempChange("date", e.target.value)}
+              value={tempFilterValues.startDate}
+              onChange={(e) => {
+                handleTempChange("startDate", e.target.value);
+                handleTempChange("endDate", e.target.value);
+              }}
               className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md  focus:outline-none`}
             />
           </div>

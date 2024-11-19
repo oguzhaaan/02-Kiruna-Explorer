@@ -9,6 +9,7 @@ import { useTheme } from "../contexts/ThemeContext.jsx";
 import { formatString } from "./Utilities/StringUtils.js";
 import FilterMenu from "./FilterMenu.jsx";
 import FilterLabels from "./FilterLabels.jsx";
+import { useDocuments } from "../hooks/useDocuments.mjs";
 
 const LinkDocuments = ({
   originalDocId,
@@ -28,15 +29,27 @@ const LinkDocuments = ({
   const [filterValues, setFilterValues] = useState({
     type: "",
     stakeholders: [],
-    date: "",
     startDate: "",
     endDate: "",
   });
-  const [isFilterDateRange, setIsFilterDateRange] = useState(false);
+  // --- Update Documents List ---
+  const {
+    documents,
+    loading,
+    error,
+    fetchAllDocuments,
+    fetchFilteredDocuments,
+  } = useDocuments();
+
+  useEffect(() => {
+    fetchAllDocuments(); // Fetch all documents on mount
+  }, []);
+  useEffect(() => {
+    fetchFilteredDocuments(filterValues); // Fetch filtered documents
+  }, [filterValues]);
   //-------
 
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [documents, setDocuments] = useState([]);
 
   // Default connection options for all documents
   const defaultConnectionOptions = [
@@ -255,8 +268,6 @@ const LinkDocuments = ({
                 <FilterMenu
                   filterValues={filterValues}
                   setFilterValues={setFilterValues}
-                  isFilterDateRange={isFilterDateRange}
-                  setIsFilterDateRange={setIsFilterDateRange}
                   toggleFilterMenu={toggleFilterMenu}
                 />
               </div>

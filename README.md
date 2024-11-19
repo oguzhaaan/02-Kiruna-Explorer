@@ -23,9 +23,9 @@ Here's the Table of Contents with all the APIs listed:
       - [**Get all areas**](#get-all-areas)
       - [**Add Area**:](#add-area)
       - [**Edit area id**:](#edit-area-id)
-      - [**Add Attachments**:](#add-attachments)
-      - [**Delete Attachments**](#delete-attachment)
-      - [**Get Attachments**:](#get-attachments)
+      - [**Add Files**:](#add-files)
+      - [**Delete File**](#delete-file)
+      - [**Get Files**:](#get-files)
     - [5. Users Credentials](#5-users-credentials)
     - [6. Dockerization](#6-dockerization)
   - [LICENSE](#license)
@@ -444,7 +444,7 @@ Response :
 
 Response body: None
 
-#### **Add Attachments**:
+#### **Add Files**:
 
 **POST** `api/documents/:DocId/uploads`
 
@@ -478,7 +478,7 @@ Response :
 Response body: None
 
 
-#### **Delete Attachment**
+#### **Delete File**
 
 **DELETE** `api/documents/:DocId/files/:FileId`
 
@@ -494,7 +494,7 @@ Response :
 Response body: None
 
 
-#### **Get Attachments**
+#### **Get Files**
 
 **GET** `api/documents/:DocId/files`
 
@@ -512,15 +512,15 @@ Response body:
 [
   {
     "id": 1,
-    "name": "string",
+    "name": "file_name",
     "type": "original",
-    "path": "/files/hashed_string"
+    "path": "/files/hashed_file_name"
   },
   {
     "id": 2,
-    "name": "string",
+    "name": "file_name2",
     "type": "original",
-    "path": "/files/hashed_string"
+    "path": "/files/hashed_file_name2"
   }
 ]
 ```

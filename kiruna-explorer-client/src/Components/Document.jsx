@@ -171,6 +171,7 @@ function Document(props) {
     <div className={isDarkMode ? "dark" : "light"}>
       <div className="bg-background_color_white dark:bg-background_color min-h-screen flex flex-col items-center">
         <SingleDocument
+            setUpdateAreaId = {props.setUpdateAreaId}
           setNavShow={props.setNavShow}
           setMode={props.setMode}
           setoriginalDocId={props.setoriginalDocId}
@@ -180,8 +181,9 @@ function Document(props) {
           type={alertMessage[1]}
           clearMessage={() => setAlertMessage(["", ""])}
         ></Alert>
-        <div className="flex flex-row justify-content-between align-items-center w-full h-16 px-3">
-          <div className="flex flex-row items-center ml-14 gap-3">
+        <div className="sticky-top w-2/3">
+        <div className="flex flex-row justify-content-between align-items-center h-16 px-3 w-full">
+          <div className="flex flex-row items-center gap-3">
             {/* Search Bar */}
             <div className="z-[0] relative">
               <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-black_text">
@@ -248,13 +250,14 @@ function Document(props) {
             </button>
           </div>
         </div>
+        </div>
         {/* Filter Labels */}
         <FilterLabels
           filterValues={filterValues}
           setFilterValues={setFilterValues}
         />
         {/* Documents List */}
-        <div className="flex flex-col gap-3 p-3 w-100">
+        <div className="flex flex-col gap-3 p-3 w-2/3 overflow-y-scroll">
           {documents.map((doc) => (
             <DocumentItem
               key={doc.id}

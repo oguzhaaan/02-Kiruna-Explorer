@@ -1,16 +1,13 @@
 // 02-Kiruna-Explorer/kiruna-explorer-server/test/document.test.js
-import {describe, beforeEach, afterEach, test, expect, vitest} from 'vitest';
+import { describe, beforeEach, afterEach, test, expect, vitest } from 'vitest';
 import db from '../../db.mjs';
 import DocumentDAO from '../../dao/DocumentDAO.mjs';
 import Document from '../../models/Document.mjs';
-import {DocumentNotFound} from '../../models/Document.mjs';
+import { DocumentNotFound } from '../../models/Document.mjs';
 import AreaDAO from '../../dao/AreaDAO.mjs';
-import {InvalidArea} from '../../models/Area.mjs';
-import {AreaNotFound} from '../../models/Area.mjs';
+import { InvalidArea } from '../../models/Area.mjs';
+import { AreaNotFound } from '../../models/Area.mjs';
 import Area from '../../models/Area.mjs';
-import request from "supertest";
-import {app} from "../../server.mjs";
-import {Role} from "../../models/User.mjs";
 
 const areaDAO = new AreaDAO();
 
@@ -445,8 +442,12 @@ describe("Unit Test getDocumentsByFilter", () => {
         expect(documents).toEqual(mockDocuments);
         expect(db.all).toBeCalledTimes(1);
 
-        const expectedSQL = `SELECT * FROM document WHERE 1=1 AND (lkab = TRUE AND municipality = TRUE)`;
-        expect(db.all).toBeCalledWith(expect.stringContaining(expectedSQL), [], expect.any(Function));
+        // Construct the expected SQL condition for stakeholders
+        const expectedStakeholderConditions = stakeholdersFilter.map(stakeholder => `${stakeholder} = TRUE`).join(" AND ");
+        expect(db.all).toBeCalledWith(expect.stringContaining(`SELECT *
+                                                               FROM document
+                                                               WHERE 1 = 1
+                                                                 AND (${expectedStakeholderConditions})`), [], expect.any(Function));
     });
     test("should return documents that match the startDate filter", async () => {
         const startDateFilter = "2023-10-01";
@@ -585,11 +586,9 @@ describe("Unit Test updateDocumentAreaId", () => {
         const oldAreaId = 2;
         const newAreaId = 5;
         const documentId = 1;
-    
-        // Simula `getDocumentById` per restituire un oggetto documento con `areaId`
-        vitest.spyOn(documentDAO, "getDocumentById").mockResolvedValueOnce({ areaId: oldAreaId });
-    
-        // Simula `getAllDocuments` per restituire una lista di documenti
+
+        vitest.spyOn(documentDAO, "getDocumentById").mockResolvedValueOnce({areaId: oldAreaId});
+
         vitest.spyOn(documentDAO, "getAllDocuments").mockResolvedValueOnce([
             { id: 1, areaId: oldAreaId },
             { id: 2, areaId: newAreaId }
@@ -600,12 +599,11 @@ describe("Unit Test updateDocumentAreaId", () => {
             { id: oldAreaId },
             { id: newAreaId }
         ]);
-    
-        // Simula `db.run` per gestire correttamente il callback
+
         vitest.spyOn(db, "run").mockImplementation((query, params, callback) => {
-            if (typeof callback === "function") {
-                callback(null); // Simula una chiamata di successo
-            }
+            console.log("db.run called with query:", query);
+            console.log("db.run called with params:", params);
+            callback(null);
         });
     
         // Esegui la funzione da testare
@@ -631,11 +629,11 @@ describe("Unit Test updateDocumentAreaId", () => {
         const documentId = 1;
         const newAreaId = 999; // Assume this ID does not exist
 
-        vitest.spyOn(documentDAO, 'getDocumentById').mockResolvedValue({areaId: 1});
+        vitest.spyOn(documentDAO, 'getDocumentById').mockResolvedValue({ areaId: 1 });
 
         vitest.spyOn(areaDAO, 'getAllAreas').mockResolvedValue([
-            {id: 1},
-            {id: 2}
+            { id: 1 },
+            { id: 2 }
         ]);
 
         const result = await documentDAO.updateDocumentAreaId(documentId, newAreaId).catch(err => err);
@@ -647,11 +645,11 @@ describe("Unit Test updateDocumentAreaId", () => {
         const documentId = 1;
         const newAreaId = "invalid";
 
-        vitest.spyOn(documentDAO, 'getDocumentById').mockResolvedValue({areaId: 1});
+        vitest.spyOn(documentDAO, 'getDocumentById').mockResolvedValue({ areaId: 1 });
 
         vitest.spyOn(areaDAO, 'getAllAreas').mockResolvedValue([
-            {id: 1},
-            {id: 2}
+            { id: 1 },
+            { id: 2 }
         ]);
 
         const result = await documentDAO.updateDocumentAreaId(documentId, newAreaId).catch(err => err);
@@ -665,18 +663,18 @@ describe("Unit Test updateDocumentAreaId", () => {
         const documentId = 1;
 
         // Mock getDocumentById to return document with oldAreaId
-        vitest.spyOn(documentDAO, "getDocumentById").mockResolvedValueOnce({areaId: oldAreaId});
+        vitest.spyOn(documentDAO, "getDocumentById").mockResolvedValueOnce({ areaId: oldAreaId });
 
         // Mock getAllDocuments to return documents with oldAreaId still in use by other documents
         vitest.spyOn(documentDAO, "getAllDocuments").mockResolvedValueOnce([
-            {id: 1, areaId: oldAreaId}, // document being updated
-            {id: 2, areaId: newAreaId}, // document with newAreaId
-            {id: 3, areaId: oldAreaId}  // another document still using oldAreaId
+            { id: 1, areaId: oldAreaId }, // document being updated
+            { id: 2, areaId: newAreaId }, // document with newAreaId
+            { id: 3, areaId: oldAreaId }  // another document still using oldAreaId
         ]);
 
         vitest.spyOn(areaDAO, "getAllAreas").mockResolvedValueOnce([
-            {id: oldAreaId},
-            {id: newAreaId}
+            { id: oldAreaId },
+            { id: newAreaId }
         ]);
 
         vitest.spyOn(db, "run").mockImplementation((query, params, callback) => {

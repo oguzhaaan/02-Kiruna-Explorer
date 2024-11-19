@@ -66,6 +66,7 @@ export default function FileDAO() {
                 if (err) {
                     reject(err);
                 } else {
+                    console.log(row);
                     resolve(row.path);
                 }
             });

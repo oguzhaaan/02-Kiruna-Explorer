@@ -83,6 +83,8 @@ function SingleDocument(props) {
 
         uploadFile(); // Esegui l'upload quando le dipendenze cambiano
         setModalPlusVisible(false);
+        setSelectedFile(null);
+        setFileType("");
 
     }, [fileType]); // Dipendenze: l'effetto si attiva quando questi due stati cambiano
 
@@ -100,7 +102,7 @@ function SingleDocument(props) {
         if (file) {
             console.log('Downloading:', file.name);
             // Chiama la funzione downloadFile dal tuo API
-            API.downloadFile(id, file.path)
+            API.downloadFile(id, file.id, file.path)
                 .then(() => {
                     console.log('File downloaded successfully');
                 })
@@ -108,6 +110,8 @@ function SingleDocument(props) {
                     setAlertMessage([error.message, 'error']);
                 });
         }
+        setModalPlusVisible(false);
+        setSelectedFile(null);
     };
 
 
@@ -127,6 +131,8 @@ function SingleDocument(props) {
             setAlertMessage([error.message, 'error']);
 
         }
+        setModalPlusVisible(false);
+        setSelectedFile(null);
     };
 
     //files management
@@ -217,11 +223,11 @@ function SingleDocument(props) {
                 clearMessage={() => setAlertMessage(['', ''])}></Alert>
             <div className={`${isDarkMode ? 'dark' : 'light'} fixed inset-0 z-[200] flex items-center justify-center scrollbar-thin scrollbar-webkit`}>
 
-                {/* Modal delete confirm */}  
+                {/* Modal delete confirm */}
                 {showModalDeleteConfirm &&
                     <div className="fixed z-[2000] inset-0 flex items-center justify-center">
                         <div
-                        className="flex flex-col justify-items-center align-items-center bg-box_white_color dark:bg-box_color backdrop-blur-2xl drop-shadow-xl rounded-xl text-black_text dark:text-white_text font-sans p-6">
+                            className="flex flex-col justify-items-center align-items-center bg-box_white_color dark:bg-box_color backdrop-blur-2xl drop-shadow-xl rounded-xl text-black_text dark:text-white_text font-sans p-6">
                             <div className="text-xl text-center w-[26rem] mb-2">Are you really sure to delete the file "{selectedFile.name}"?</div>
                             <div className="flex justify-center space-x-5 mt-10">
                                 <button
@@ -518,6 +524,7 @@ function SingleDocument(props) {
                                                                 id="fileInput"  // Deve corrispondere al valore di `htmlFor` nel label
                                                                 type="file"
                                                                 className="hidden"  // Nasconde l'input per farlo apparire solo come un'area cliccabile
+                                                                accept=".jpeg, .jpg, .png, .pdf, .svg, .txt"
                                                                 onChange={handleFileChangeOriginal} // Gestisci il cambiamento del file
                                                             />
 
@@ -526,7 +533,7 @@ function SingleDocument(props) {
                                                                         ${isDarkMode ? 'dark:bg-[#4F4F4F]' : 'bg-[#76767655]'} 
                                                                         ${isDarkMode ? 'text-white' : 'text-black'} 
                                                                         flex items-center text-left cursor-pointer`}
-                                                                onClick={() => {console.log("TODO")}}
+                                                                onClick={() => { console.log("TODO") }}
                                                             >
                                                                 <i className="bi bi-paperclip mr-2"></i> Attachments
                                                             </button>

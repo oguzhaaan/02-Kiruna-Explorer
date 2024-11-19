@@ -27,6 +27,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname("../");
 
 router.get("/",
+    isLoggedIn,
     async (req, res) => {
         try {
             const documents = await DocumentDao.getAllDocuments();
@@ -201,6 +202,7 @@ router.post("/",
 /* GET /api/documents/:DocId/links */
 
 router.get("/:DocId/links",
+    isLoggedIn,
     [
         param("DocId")
             .isNumeric()
@@ -253,6 +255,7 @@ router.get("/:DocId/links",
 );
 
 router.delete("/:DocId/links",
+    isLoggedIn,
     [
         param("DocId")
             .isNumeric()
@@ -286,6 +289,7 @@ router.delete("/:DocId/links",
 /* POST /api/documents/link */
 
 router.post("/link",
+    isLoggedIn,
     [
         body("doc1Id")
             .isNumeric()
@@ -351,6 +355,7 @@ router.post("/link",
 );
 
 router.post("/links",
+    isLoggedIn,
     [
         body("links")
             .isArray({ min: 0 })
@@ -451,25 +456,43 @@ const storage = multer.diskStorage({
     },
 });
 
+const multerErrorHandler = (err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        // Errori specifici di Multer (es: dimensione file)
+        return res.status(400).json({ error: `Multer error: ${err.message}` });
+    } else if (err.code === 'INVALID_FILE_TYPE') {
+        // Errore personalizzato per tipo di file non valido
+        return res.status(400).json({ error: err.message });
+    }
+    // Errori generici
+    next(err);
+};
+
 const upload = multer({
     storage: storage,
     fileFilter: (req, file, cb) => {
-        const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf', 'image/jpg', 'image/svg+xml', 'text/plain']; //add jpeg, jpg, svg, txt
+        const allowedTypes = [
+            'image/jpeg',
+            'image/png',
+            'application/pdf',
+            'image/jpg',
+            'image/svg+xml',
+            'text/plain'
+        ];
         if (!allowedTypes.includes(file.mimetype)) {
-            return cb(new Error('Invalid file type'));
+            const error = new Error('Invalid file type. Only JPEG, PNG, PDF, JPG, SVG, and TXT are allowed.');
+            error.code = 'INVALID_FILE_TYPE'; // Custom error code
+            return cb(error);
         }
         cb(null, true);
-    },
-    // limits: {
-    //     fileSize: 2 * 1024 * 1024, // Limit files to 20MB
-    // },
+    }
 });
 
 const MAX_SIZE = 2 * 1024 * 1024;
 
 // API route to handle file upload
 router.post(
-    '/:DocId/upload',
+    '/:DocId/files',
     isLoggedIn,
     upload.single('file'), // Use multer middleware
     [
@@ -519,28 +542,41 @@ router.post(
         }
         catch (error) {
             console.error("Error in storeFile function:", error.message);
-            return res.status(500).json({ error: error.message });
+            return res.status(500).json({ error: "Unable to store file. Please try again later." });
         }
-    }
+    }, multerErrorHandler
 );
 
-router.get('/:DocId/files/download/:FilePath',
+router.get('/:DocId/files/download/:FileId',
+    isLoggedIn,
     [
         param("DocId")
             .isNumeric()
             .withMessage("Document ID must be a valid number"),
+        param("FileId")
+            .isNumeric()
+            .withMessage("File ID must be a valid number")
     ],
+
     async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
         try {
-            const { DocId, FilePath } = req.params;
+            const { DocId, FileId } = req.params;
 
+
+            //add function to get file path from id
+            const FilePath = await FileDao.getFilePathById(FileId);
+
+            if (!FilePath) {
+                return res.status(404).json({ error: "File not found" });
+            }
+            console.log(FilePath);
 
             // Costruisci il percorso assoluto del file
-            const filePathToDownload = "./" + FilePath;
+            const filePathToDownload = "." + FilePath;
 
             try {
                 await fs.access(filePathToDownload);  // Verifica se il file esiste
@@ -559,7 +595,7 @@ router.get('/:DocId/files/download/:FilePath',
         }
     });
 
-router.delete('/:DocId/files/:FileId',
+router.delete('/:DocId/files/:FileId', isLoggedIn,
     [
         param("DocId")
             .isNumeric()
@@ -568,7 +604,6 @@ router.delete('/:DocId/files/:FileId',
             .isNumeric()
             .withMessage("File ID must be a valid number")
     ],
-    isLoggedIn,
     async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {

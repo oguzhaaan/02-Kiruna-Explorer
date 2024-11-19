@@ -287,7 +287,7 @@ const deleteAll = async (id) => {
 
 const uploadFile = async (id, formData) => {
   try {
-    const response = await fetch(`${SERVER_URL}/api/documents/${id}/upload`, {
+    const response = await fetch(`${SERVER_URL}/api/documents/${id}/files`, {
       method: 'POST',
       body: formData,
       credentials: 'include'
@@ -347,11 +347,11 @@ const deleteFile = async (DocId, FileId) => {
   }
 };
 
-const downloadFile = async (DocId, FilePath) => {
-  const encodedFilePath = encodeURIComponent(FilePath);
+const downloadFile = async (DocId, FileId, FilePath) => {
+  //const encodedFilePath = encodeURIComponent(FileId);
 
   try {
-    const fileDownloadUrl = `${SERVER_URL}/api/documents/${DocId}/files/download/${encodedFilePath}`;  // Sostituisci con il percorso corretto dell'endpoint
+    const fileDownloadUrl = `${SERVER_URL}/api/documents/${DocId}/files/download/${FileId}`;  // Sostituisci con il percorso corretto dell'endpoint
     const response = await fetch(fileDownloadUrl, {
       method: 'GET', // Metodo GET per scaricare il file
       headers: {

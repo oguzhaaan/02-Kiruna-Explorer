@@ -86,7 +86,6 @@ export default function DocumentDAO(areaDAO) {
     };
 
     this.getDocumentsByAreaId = (areaId) => {
-        const areaDAO = new AreaDAO();
         const query = "SELECT * FROM document WHERE areaId = ?";
         return new Promise((resolve, reject) => {
             db.all(query, [areaId], (err, rows) => {
@@ -121,13 +120,11 @@ export default function DocumentDAO(areaDAO) {
                     return reject(new InvalidArea());
                 }
 
-                
-    
                 // Check if oldAreaId and newAreaId exists in areaIdsInDoc
                 if (!areaIdsInDoc.includes(oldAreaId) || !allAreaIds.includes(newAreaId)) {
                     return reject(new AreaNotFound());
-                }              
-    
+                }
+
                 // Proceed to update the document's areaId to newAreaId
                 const updateQuery = "UPDATE document SET areaId = ? WHERE id = ?";
                 db.run(updateQuery, [newAreaId, documentId], (err) => {
@@ -135,13 +132,13 @@ export default function DocumentDAO(areaDAO) {
                     console.log("db.run called with params:", [newAreaId, documentId]);
                     if (err) {
                         return reject(err);
-                        
+
                     }
-    
+
                     // Re-fetch documents to check if oldAreaId is still in use
                     this.getAllDocuments().then(updatedDocuments => {
                         const updatedAreaIdsInDoc = updatedDocuments.map(doc => doc.areaId);
-    
+
                         if (!updatedAreaIdsInDoc.includes(oldAreaId)) {
                             // If oldAreaId is no longer in use, delete it from the area table
                             Promise.resolve([

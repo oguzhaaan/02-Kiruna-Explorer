@@ -24,4 +24,6 @@ const db = new sqlite3.Database(dbPath, (err) => {
   }
 });
 
+db.run("PRAGMA foreign_keys = ON");
+
 export default db;

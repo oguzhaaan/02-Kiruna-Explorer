@@ -47,13 +47,10 @@ function GeoreferenceMap(props) {
     const [presentAreas, setPresentAreas] = useState(null);
     const [clickedArea, setClickedArea] = useState(null);
     const [alertMessage, setAlertMessage] = useState("");
-    const [showManually, setShowManually] = useState(true)
-    const [lat, setLat] = useState(latitude);
-    const [lng, setLng] = useState(longitude);
-    const [tmplat, settmpLat] = useState(latitude);
-    const [tmplng, settmpLng] = useState(longitude);
-    const [laterr, setLaterr] = useState(false)
-    const [lngerr, setLngerr] = useState(false)
+    const [showManually, setShowManually] = useState(false)
+    const [markerLayer, setMarkerLayer] = useState(null);
+    const [markerCoordinates, setMarkerCoordinates] = useState({ lat: "", lng: "" });
+    const [coordinatesErr, setCoordinatesErr] = useState(false)
 
     const mapRef = useRef(null);
 
@@ -78,7 +75,7 @@ function GeoreferenceMap(props) {
     }
     useEffect(() => {
         //refresh
-    }, [showExit, showSave, presentAreas, laterr, lngerr, lng, lat])
+    }, [showExit, showSave, presentAreas, coordinatesErr])
 
     const GenericPoints = L.icon({
         iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
@@ -135,26 +132,28 @@ function GeoreferenceMap(props) {
     {/* Handle creation/edit/delete of a area/point */
     }
     const onCreated = (e) => {
-        setShowManually(false)
+        
         const { layer } = e;
         console.log(layer)
         if (layer instanceof L.Polygon) {
+            setShowManually(false)
             setAlertMessage("You selected a new custom area");
         } else if (layer instanceof L.Marker) {
+            setShowManually(true)
             const markerPosition = layer.getLatLng();
-            settmpLat(markerPosition.lat);
-            settmpLng(markerPosition.lng);
             setAlertMessage("You selected a new custom point");
+            setMarkerLayer(layer);
+            setMarkerCoordinates({lat: markerPosition.lat,lng: markerPosition.lng }); 
         }
 
         const geoJson = layer.toGeoJSON();
         setDrawnObject(geoJson);
+        setShowMuniAreas(false)
         setShowExit(true);
         setShowSave(true);
     };
 
     const onEdited = (e) => {
-        setShowManually(false)
         console.log("onEdited", e);
 
         const layers = e.layers;
@@ -162,14 +161,16 @@ function GeoreferenceMap(props) {
             const geoJson = layer.toGeoJSON();
             setDrawnObject(geoJson);
             if (layer instanceof L.Polygon) {
+                setShowManually(false)
                 setAlertMessage("You edited the custom area");
                 console.log("Modificato un poligono:", geoJson);
             } else if (layer instanceof L.Marker) {
+                setShowManually(true)
                 const markerPosition = layer.getLatLng();
-                settmpLat(markerPosition.lat);
-                settmpLng(markerPosition.lng);
                 setAlertMessage("You edited the point position");
                 console.log("Modificato un marker:", geoJson);
+                setMarkerLayer(layer);
+                setMarkerCoordinates({lat: markerPosition.lat,lng: markerPosition.lng });     
             } else {
                 console.warn("Tipo di layer non supportato.");
             }
@@ -179,21 +180,18 @@ function GeoreferenceMap(props) {
     };
 
     const onDeleted = (e) => {
-        setShowManually(true)
+        setShowManually(false)
         setDrawnObject(null);
         setShowExit(true);
         setShowSave(false);
         setShowMuniAreas(true);
         setAlertMessage("");
-        settmpLat(latitude)
-        settmpLng(longitude)
+        setMarkerLayer(null)
+        setMarkerCoordinates({lat:"",lng:""})
     };
 
     const onDrawStart = () => {
-        settmpLat("")
-        settmpLng("")
-        setLaterr("")
-        setLngerr("")
+        setCoordinatesErr(false)
         setShowSave(false)
         setShowExit(false);
         setPresentAreas(null);
@@ -201,54 +199,47 @@ function GeoreferenceMap(props) {
         setAlertMessage("Click the map to set area points or set your point");
     };
 
+    const onDrawStop = () => {
+        setCoordinatesErr(false)
+        if (markerLayer===null){
+            setShowMuniAreas(true)
+            setShowExit(true)
+            setAlertMessage("")
+        }
+      };
+
     const onEditStart = () => {
         setAlertMessage("Edit your area or move the point as needed.");
         setShowExit(false);
         setShowSave(false);
     };
 
-    {/* Handle latitude and longitude input field modification */
-    }
-    const handleLng = (event) => {
-        try {
-            const newLng = event.target.value;
-            if (isPointInCityBounds(lat, newLng)) {
-                setShowSave(true)
-                setLngerr(false)
-                setLng(newLng);
-                settmpLng(newLng)
-                setAlertMessage("You selected custom point")
-            } else {
-                setLngerr(true)
-                setShowSave(false)
-                settmpLng(newLng || "")
-                setAlertMessage("Point out of city bounds")
-            }
-        } catch (err) {
-            setAlertMessage(err.message)
-        }
-    };
+    const updateMarkerPosition = (lat, lng) => {
+        if (markerLayer) {
+          // Aggiorna lo stato per riflettere le nuove coordinate
+          setMarkerCoordinates({ lat, lng });
 
-    const handleLat = (event) => {
-        try {
-            const newLat = event.target.value;
-            if (isPointInCityBounds(newLat, lng)) {
-                setShowSave(true)
-                setLaterr(false)
-                setLat(newLat);
-                settmpLat(newLat)
-
-                setAlertMessage("You selected custom point")
-            } else {
-                setLaterr(true)
-                setShowSave(false)
-                settmpLat(newLat || "")
-                setAlertMessage("Point out of city bounds")
+          if (isPointInCityBounds(lat,lng)){
+            // Aggiorna la posizione del marker esistente
+            markerLayer.setLatLng([lat, lng]);
+            setShowSave(true)
+            setAlertMessage("You modified your custom point")
+            setCoordinatesErr(false)
+            const geoJson = markerLayer.toGeoJSON()
+            setDrawnObject(geoJson)
+            // Centra la mappa sul nuovo marker
+            if (mapRef.current) {
+                mapRef.current.setView([lat, lng], mapRef.current.getZoom());
             }
-        } catch (err) {
-            setAlertMessage(err.message)
+          }
+          else{
+            setShowSave(false)
+            setAlertMessage("Coordinates out of city bound")
+            setCoordinatesErr(true)
+          }
+          
         }
-    };
+      };
 
     {/* Get all areas to diplay them, the first (presentAreas[0]) should be the municipality one */
     }
@@ -260,18 +251,13 @@ function GeoreferenceMap(props) {
                 setPresentAreas(allAreas)
                 setAlertMessage("Select existing area")
                 setShowManually(false)
-                settmpLat("")
-                settmpLng("")
-                setLaterr("")
-                setLngerr("")
+                setCoordinatesErr(false)
             } else {
                 setPresentAreas(null)
                 setAlertMessage(null)
                 setClickedArea(null)
                 setShowSave(false)
-                setShowManually(true)
-                settmpLat(latitude)
-                settmpLng(longitude)
+                //setShowManually(true)
             }
 
         } catch (err) {
@@ -325,7 +311,7 @@ function GeoreferenceMap(props) {
                 maxBounds={cityBounds}
                 minZoom={12}
             >
-                {mapRef.current && showMuniAreas && <HomeButton handleMunicipalAreas={handleMunicipalAreas} />}
+                {mapRef.current && !drawnObject && showMuniAreas && <HomeButton handleMunicipalAreas={handleMunicipalAreas} />}
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
@@ -341,6 +327,7 @@ function GeoreferenceMap(props) {
                         onDeleted={onDeleted}
                         onDrawStart={onDrawStart}
                         onEditStart={onEditStart}
+                        onDrawStop={onDrawStop}
                         draw={{
                             rectangle: false,
                             circle: false,
@@ -353,13 +340,6 @@ function GeoreferenceMap(props) {
                         minZoom={12} />
                 </FeatureGroup>
 
-                {tmplat && tmplng && showManually &&
-                    <Marker
-                        position={[lat, lng]}
-                        icon={GenericPoints}
-                    >
-                        <CenterMap lat={lat} lng={lng}></CenterMap>
-                    </Marker>}
                 {
                     drawnObject && drawnObject.geometry.type === "Point" &&
                     <CenterMap lat={drawnObject.geometry.coordinates[1]}
@@ -416,16 +396,17 @@ function GeoreferenceMap(props) {
                     zIndex: 1000,
                     textAlign: "center"
                 }}
-                    className={`${(lngerr || laterr) && showManually && 'border-red-500 border-1'} max-md:text-xs`}
+                    className={`${(coordinatesErr) && showManually && 'border-red-500 border-1'} max-md:text-xs`}
                 >
                     {alertMessage}
                 </div>
             )}
 
             <div
-                className="absolute flex flex-row bottom-5 w-100 justify-between z-[1000] max-md:flex-col max-md:block">
+                className={`absolute flex flex-row bottom-5 w-100 ${showManually?"justify-between":"justify-end"} z-[1000] max-md:flex-col max-md:block`}>
 
                 {/* Editable coordinates */}
+                {showManually &&
                 <div
                     style={{
                         gap: "10px",
@@ -438,25 +419,27 @@ function GeoreferenceMap(props) {
                         <label
                             className="text-black_text dark:text-white_text mb-1 text-lg text-left max-md:text-sm">Longitude</label>
                         <input
-                            disabled={!showManually}
                             id="lon"
-                            value={tmplng}
-                            onChange={(e) => handleLng(e)}
-                            className={`px-2 text-l py-1 text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-[40px] ${lngerr && showManually ? "border-red-500 border-2" : ""} max-md:w-full max-md:h-5`}
+                            type="number"
+                            step="0.00001"
+                            value={markerCoordinates.lng}
+                            onChange={(e) => updateMarkerPosition(markerCoordinates.lat, e.target.value) }
+                            className={`px-2 text-l py-1 text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-[40px] ${coordinatesErr && showManually ? "border-red-500 border-2" : ""} max-md:w-full max-md:h-5`}
                         />
                     </div>
                     <div className="flex flex-col">
                         <label className="text-black_text dark:text-white_text mb-1 text-lg text-left max-md:text-sm">Latitude</label>
                         <input
-                            disabled={!showManually}
                             id="lat"
-                            value={tmplat}
-                            onChange={(e) => handleLat(e)}
-                            className={`px-2 text-l py-1 text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-[40px] ${laterr && showManually ? "border-red-500 border-2" : ""} max-md:w-full max-md:h-5`}
+                            type="number"
+                            step="0.00001"
+                            value={markerCoordinates.lat}
+                            onChange={(e) => updateMarkerPosition(e.target.value, markerCoordinates.lng)}
+                            className={`px-2 text-l py-1 text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-[40px] ${coordinatesErr && showManually ? "border-red-500 border-2" : ""} max-md:w-full max-md:h-5`}
                         />
                     </div>
                 </div>
-
+                }
                 {/* Exit and Save buttons */}
                 <div
                     style={{

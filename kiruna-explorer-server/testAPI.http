@@ -37,3 +37,9 @@ Content-Type: application/json
     "planNumber": 2
   }
 ###
+
+
+GET http://localhost:3000/api/documents/1/files HTTP/1.1
+
+###
+DELETE http://localhost:3000/api/documents/1/files/\/uploads\/1731860563551-753580087-dbscan_report HTTP/1.1

@@ -1,5 +1,6 @@
 import db from "../db.mjs";
 import Area from "../models/Area.mjs";
+import { AreaNotFound } from "../models/Area.mjs";
 
 export default function AreaDAO() {
 
@@ -52,5 +53,18 @@ export default function AreaDAO() {
             });
         });
     }
+
+    this.deleteAreaById = (id) => {
+        const query = "DELETE FROM area WHERE id = ?";
+    
+        return new Promise((resolve, reject) => {
+            db.run(query, [id], function (err) {
+                if (err) {
+                    return reject(err);
+                }
+                resolve("Area deleted successfully.");
+            });
+        });
+    };
     
 }

@@ -111,11 +111,11 @@ function SingleDocument(props) {
     };
 
 
-    const handleDelete = async (path) => {
-        console.log(path);
+    const handleDelete = async (FileId) => {
+        console.log(FileId);
 
         try {
-            const response = await API.deleteFile(id, path);
+            const response = await API.deleteFile(id, FileId);
 
             if (response) {
                 setAlertMessage([response.message, 'success']);
@@ -234,7 +234,7 @@ function SingleDocument(props) {
                                     onClick={() => {
                                         setShowModalDeleteConfirm(false);
                                         console.log(selectedFile);
-                                        handleDelete(selectedFile.path);
+                                        handleDelete(selectedFile.id);
                                     }}
                                     className="bg-my_red dark:bg-my_red hover:bg-red-500 dark:hover:bg-red-500 transition text-white_text w-40 h-16 rounded-xl text-xl"
                                 >

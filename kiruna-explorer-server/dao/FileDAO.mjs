@@ -29,7 +29,7 @@ export default function FileDAO() {
     this.getFilesByDocumentId = (docId) => {
         return new Promise((resolve, reject) => {
             const query = `
-                SELECT file.name, file.type, file.path
+                SELECT *
                 FROM file
                 INNER JOIN attachment ON file.id = attachment.fileId
                 WHERE attachment.docId = ?`;
@@ -45,14 +45,28 @@ export default function FileDAO() {
     };
 
 
-    this.deleteFile = (FilePath) => {
+    this.deleteFile = (FileId) => {
         return new Promise((resolve, reject) => {
-            const query = `DELETE FROM file WHERE path = ?`;
-            db.run(query, [FilePath], function (err) {
+            const query = `DELETE FROM file WHERE id = ?`;
+            db.run(query, [FileId], function (err) {
                 if (err) {
                     reject(err);
                 } else {
+                    console.log(this.changes);
                     resolve(this.changes);
+                }
+            });
+        });
+    }
+
+    this.getFilePathById = (id) => {
+        return new Promise((resolve, reject) => {
+            const query = "SELECT * FROM file WHERE id = ?";
+            db.get(query, [id], (err, row) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(row.path);
                 }
             });
         });

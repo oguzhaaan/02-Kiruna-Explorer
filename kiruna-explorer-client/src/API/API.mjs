@@ -323,12 +323,12 @@ const getDocumentFiles = async (DocId) => {
   }
 };
 
-const deleteFile = async (DocId, FilePath) => {
+const deleteFile = async (DocId, FileId) => {
 
-  const encodedFilePath = encodeURIComponent(FilePath);
-
+  //const encodedFilePath = encodeURIComponent(FilePath);
+  console.log(DocId, FileId);
   try {
-    const response = await fetch(`${SERVER_URL}/api/documents/${DocId}/files/${encodedFilePath}`, {
+    const response = await fetch(`${SERVER_URL}/api/documents/${DocId}/files/${FileId}`, {
       method: 'DELETE',
       credentials: 'include'
     });

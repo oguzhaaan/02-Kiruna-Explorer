@@ -559,11 +559,14 @@ router.get('/:DocId/files/download/:FilePath',
         }
     });
 
-router.delete('/:DocId/files/:FilePath',
+router.delete('/:DocId/files/:FileId',
     [
         param("DocId")
             .isNumeric()
             .withMessage("Document ID must be a valid number"),
+        param("FileId")
+            .isNumeric()
+            .withMessage("File ID must be a valid number")
     ],
     isLoggedIn,
     async (req, res) => {
@@ -572,18 +575,26 @@ router.delete('/:DocId/files/:FilePath',
             return res.status(400).json({ errors: errors.array() });
         }
         try {
-            const { DocId, FilePath } = req.params;
+            const { DocId, FileId } = req.params;
+
+            //add function to get file path from id
+            const FilePath = await FileDao.getFilePathById(FileId);
+
+            if (!FilePath) {
+                return res.status(404).json({ error: "File not found" });
+            }
             console.log(FilePath);
 
-            await fs.unlink("./" + FilePath, async (err) => {
+            await fs.unlink("." + FilePath, async (err) => {
                 if (err) {
                     console.log('Error deleting file:', err);
                     return res.status(500).json({ error: "Failed to delete the physical file" });
                 }
             });
-
+            console.log("File deleted successfully");
+            console.log("Deleting file with ID:", FileId);
             // Ora rimuovi la riga nel database
-            const deleteResult = await FileDao.deleteFile(FilePath);
+            const deleteResult = await FileDao.deleteFile(FileId);
 
             if (deleteResult.deletedCount === 0) {
                 return res.status(405).json({ error: "File not found in database" });

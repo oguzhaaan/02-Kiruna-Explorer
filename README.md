@@ -24,7 +24,8 @@ Here's the Table of Contents with all the APIs listed:
       - [**Add Area**:](#add-area)
       - [**Edit area id**:](#edit-area-id)
       - [**Add Attachments**:](#add-attachments)
-      - [**Delete Attachments**](#delete-attachments)
+      - [**Delete Attachments**](#delete-attachment)
+      - [**Get Attachments**:](#get-attachments)
     - [5. Users Credentials](#5-users-credentials)
     - [6. Dockerization](#6-dockerization)
   - [LICENSE](#license)
@@ -476,11 +477,28 @@ Response :
 
 Response body: None
 
-#### **Delete Attachments**
 
-**DELETE** `api/documents/:DocId/uploads`
+#### **Delete Attachment**
 
-Description : Delete all attachments associated to a document with its <DocId>
+**DELETE** `api/documents/:DocId/files/:FileId`
+
+Description : Delete a specific file stored in the server with a certain <FileId>, associated to a document with its <DocId>
+
+Requqest parameters: Document Id, File Id
+
+Response :
+- `200 OK`
+- `404 Not Found`
+- `500 Internal Server Error`
+
+Response body: None
+
+
+#### **Get Attachments**
+
+**GET** `api/documents/:DocId/files`
+
+Description : Get all attachments associated to a document with its <DocId>
 
 Requqest parameters: Document Id
 
@@ -489,22 +507,23 @@ Response :
 - `404 Not Found`
 - `500 Internal Server Error`
 
-Response body: None
-
-#### **Delete Attachments**
-
-**DELETE** `api/documents/:DocId/uploads/:FilePath`
-
-Description : Delete a specific file stored in a certain path, associated to a document with its <DocId>
-
-Requqest parameters: Document Id, File Path
-
-Response :
-- `200 OK`
-- `404 Not Found`
-- `500 Internal Server Error`
-
-Response body: None
+Response body: 
+```
+[
+  {
+    "id": 1,
+    "name": "string",
+    "type": "original",
+    "path": "/files/hashed_string"
+  },
+  {
+    "id": 2,
+    "name": "string",
+    "type": "original",
+    "path": "/files/hashed_string"
+  }
+]
+```
 
 
 

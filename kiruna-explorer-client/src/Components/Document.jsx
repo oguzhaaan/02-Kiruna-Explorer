@@ -323,7 +323,7 @@ function Document(props) {
                 value={props.newDocument.scale}
                 onChange={(e) => handleFieldChange("scale", e.target.value)}
                 className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text bg-input_color_light dark:bg-input_color_dark rounded-md ${
-                  errors.title
+                  errors.scale
                     ? "border-red-500 border-1"
                     : "focus:border-blue-400 border-1 border-transparent"
                 } focus:outline-none`}
@@ -370,7 +370,7 @@ function Document(props) {
                 className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md ${
                   isDarkMode ? "dark-mode" : "light-mode"
                 } ${
-                  errors.title
+                  errors.date
                     ? "border-red-500 border-1"
                     : "focus:border-blue-400 border-1 border-transparent"
                 } focus:outline-none`}
@@ -386,7 +386,7 @@ function Document(props) {
                 value={props.newDocument.type}
                 onChange={(e) => handleFieldChange("type", e.target.value)}
                 className={`w-full px-3 text-base py-2 text-black_text dark:text-white_text bg-input_color_light dark:bg-input_color_dark rounded-md ${
-                  errors.title
+                  errors.type
                     ? "border-red-500 border-1"
                     : "focus:border-blue-400 border-1 border-transparent"
                 } focus:outline-none`}
@@ -447,7 +447,7 @@ function Document(props) {
                   handleFieldChange("description", e.target.value)
                 }
                 className={`w-full p-2 px-3 py-2 text-base text-text-black_text dark:text-white_text border-gray-300 placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark  ${
-                  errors.title
+                  errors.description
                     ? "border-red-500 border-1"
                     : "focus:border-blue-400 border-1 border-transparent"
                 } focus:outline-none`}

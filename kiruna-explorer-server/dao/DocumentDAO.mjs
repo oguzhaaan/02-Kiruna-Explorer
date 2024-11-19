@@ -1,7 +1,6 @@
 import db from "../db.mjs";
 import Document from "../models/Document.mjs";
 import { DocumentNotFound } from "../models/Document.mjs";
-import AreaDAO from "./AreaDAO.mjs";
 import { AreaNotFound } from "../models/Area.mjs";
 import { InvalidArea } from "../models/Area.mjs";
 
@@ -116,7 +115,9 @@ export default function DocumentDAO(areaDAO) {
                 this.getAllDocuments().then(documents => documents.map(doc => doc.areaId)),
                 areaDAO.getAllAreas().then(areas => areas.map(area => area.id)) // Get all valid area IDs
             ]).then(([oldAreaId, areaIdsInDoc, allAreaIds]) => {
-                if (!Number.isInteger(newAreaId) || (Number.isInteger(newAreaId) && newAreaId < 0) || (Number.isInteger(newAreaId) && newAreaId === 0) || newAreaId === null) {
+                const this_self = this
+
+                if (!Number.isInteger(newAreaId) || newAreaId <= 0) {
                     return reject(new InvalidArea());
                 }
 
@@ -128,25 +129,20 @@ export default function DocumentDAO(areaDAO) {
                 // Proceed to update the document's areaId to newAreaId
                 const updateQuery = "UPDATE document SET areaId = ? WHERE id = ?";
                 db.run(updateQuery, [newAreaId, documentId], function (err) {
-                    console.log("db.run called with query:", updateQuery);
-                    console.log("db.run called with params:", [newAreaId, documentId]);
                     if (err) {
                         return reject(err);
-
                     }
 
                     // Re-fetch documents to check if oldAreaId is still in use
-                    this.getAllDocuments().then(updatedDocuments => {
+                    this_self.getAllDocuments().then(updatedDocuments => {
                         const updatedAreaIdsInDoc = updatedDocuments.map(doc => doc.areaId);
 
                         if (!updatedAreaIdsInDoc.includes(oldAreaId)) {
                             // If oldAreaId is no longer in use, delete it from the area table
-                            Promise.resolve([
-                                areaDAO.deleteAreaById(oldAreaId),
-                                resolve(true)
-                            ]);
+                            Promise.all([
+                                areaDAO.deleteAreaById(oldAreaId)
+                            ]).then(() => resolve(true)).catch(reject);
                         } else {
-                            console.log("Area ID is still in use; not deleted.");
                             resolve(true); // Resolve without deleting if still in use
                         }
                     }).catch(reject); // Catch errors from re-fetching documents

@@ -107,7 +107,7 @@ describe("Integration Test POST /api/areas - Create a new area", () => {
 });
 
 // GET /api/areas - Get all areas
-describe("Integration Test GET /api/areas - Get all areas", () => {
+describe.only("Integration Test GET /api/areas - Get all areas", () => {
   beforeEach(async () => {
     // Clean up the database or reset mock data
     await cleanup();

@@ -65,8 +65,8 @@ const addDocument = async (documentData) => {
     }
 
     const result = await response.json();
-    return result; 
-    
+    return result;
+
   } catch (error) {
     console.error("Error in addDocument function:", error.message);
     throw new Error(`${error.message || 'Error while creating the document.'}`);
@@ -85,8 +85,8 @@ const getDocumentById = async (docid) => {
     }
 
     const result = await response.json();
-    return result; 
-    
+    return result;
+
   } catch (error) {
     console.error("Error in getDocumentById function:", error.message);
     throw new Error(`${error.message || 'Error while creating the document.'}`);
@@ -105,8 +105,8 @@ const getDocumentsFromArea = async (areaId) => {
     }
 
     const result = await response.json();
-    return result; 
-    
+    return result;
+
   } catch (error) {
     console.error("Error in get document from area function:", error.message);
     throw new Error(`${error.message || 'Error while getting document from area.'}`);
@@ -123,15 +123,15 @@ const getAllAreas = async () => {
       const errMessage = await response.json();
       throw new Error(`${errMessage.message || 'Error while getting areas.'}`);
     }
-    
+
     const result = await response.json();
-    
-    const geoJsonresult = result.map((r)=>{
+
+    const geoJsonresult = result.map((r) => {
       r.geoJson = JSON.parse(r.geoJson)
       return r
-    }); 
+    });
     return geoJsonresult
-    
+
   } catch (error) {
     console.error("Error in get all areas function:", error.message);
     throw new Error(`${error.message || 'Error while getting areas.'}`);
@@ -155,7 +155,7 @@ const addArea = async (geoJson) => {
     }
 
     const result = await response.json();
-    return result; 
+    return result;
 
   } catch (error) {
     console.error("Error in addDocument function:", error.message);
@@ -177,7 +177,7 @@ const getAllDocuments = async () => {
 
     const result = await response.json();
     return result;
-    
+
   } catch (error) {
     console.error("Error in getAllDocuments function:", error.message);
     throw new Error("Unable to get the documents. Please check your connection and try again.");
@@ -204,8 +204,8 @@ const addLink = async (link) => {
     }
 
     const result = await response.json();
-    return result; 
-    
+    return result;
+
   } catch (error) {
     console.error("Error in addConnection function:", error.message);
     throw new Error("Unable to add the connection. Please check your connection and try again.");
@@ -230,8 +230,8 @@ const addLinks = async (links) => {
     }
 
     const result = await response.json();
-    return result; 
-    
+    return result;
+
   } catch (error) {
     console.error("Error in addConnection function:", error.message);
     throw new Error("Unable to add the connection. Please check your connection and try again.");
@@ -250,8 +250,8 @@ const getDocuemntLinks = async (docid) => {
     }
 
     const result = await response.json();
-    return result; 
-    
+    return result;
+
   } catch (error) {
     console.error("Error in getDocumentById function:", error.message);
     throw new Error("Unable to get the document. Please check your connection and try again.");
@@ -277,11 +277,115 @@ const deleteAll = async (id) => {
     }
 
     const result = await response.json();
-    return result; 
-    
+    return result;
+
   } catch (error) {
     console.error("Error in delete function:", error.message);
     throw new Error("Unable to delete the connections. Please check your connection and try again.");
+  }
+};
+
+const uploadFile = async (id, formData) => {
+  try {
+    const response = await fetch(`${SERVER_URL}/api/documents/${id}/files`, {
+      method: 'POST',
+      body: formData,
+      credentials: 'include'
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      return result;
+    } else {
+      console.log(result);
+      throw new Error(result.error + "");
+    }
+  } catch (error) {
+    throw error;
+  }
+};
+
+const getDocumentFiles = async (DocId) => {
+  try {
+    const response = await fetch(`${SERVER_URL}/api/documents/${DocId}/files`, {
+      credentials: 'include'
+    });
+
+    if (response.ok) {
+      return await response.json();
+    } else {
+      throw new Error('File upload failed');
+    }
+  } catch (error) {
+    console.error("Error fetching document files:", error);
+    throw error;
+  }
+};
+
+const deleteFile = async (DocId, FileId) => {
+
+  //const encodedFilePath = encodeURIComponent(FilePath);
+  console.log(DocId, FileId);
+  try {
+    const response = await fetch(`${SERVER_URL}/api/documents/${DocId}/files/${FileId}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error);
+    }
+    else {
+      return result
+    }
+
+  } catch (error) {
+    throw error;
+  }
+};
+
+const downloadFile = async (DocId, FileId, FilePath) => {
+  //const encodedFilePath = encodeURIComponent(FileId);
+
+  try {
+    const fileDownloadUrl = `${SERVER_URL}/api/documents/${DocId}/files/download/${FileId}`;  // Sostituisci con il percorso corretto dell'endpoint
+    const response = await fetch(fileDownloadUrl, {
+      method: 'GET', // Metodo GET per scaricare il file
+      headers: {
+        // Puoi aggiungere altre intestazioni se necessario, come un token di autorizzazione
+        'Content-Type': 'application/octet-stream',
+      },
+      credentials: 'include',
+    });
+
+
+
+    if (!response.ok) {
+      const result = await response.json();
+      throw new Error(result.error);
+    }
+
+    // Ottieni il file come blob
+    const blob = await response.blob();
+
+    // Crea un URL per il blob
+    const url = window.URL.createObjectURL(blob);
+
+    // Crea un elemento <a> per avviare il download
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = FilePath.split('/').pop();  // Estrai il nome del file dal percorso
+    document.body.appendChild(a);
+    a.click();  // Avvia il download
+    a.remove();  // Rimuovi il link temporaneo
+
+    window.URL.revokeObjectURL(url);  // Libera la memoria del blob
+
+  } catch (error) {
+    throw error;  // Puoi gestire l'errore come preferisci
   }
 };
 
@@ -298,7 +402,11 @@ const API = {
   getDocuemntLinks,
   getAllDocuments,
   addLinks,
-  deleteAll
+  deleteAll,
+  uploadFile,
+  getDocumentFiles,
+  deleteFile,
+  downloadFile
 };
 
 export default API;

@@ -12,22 +12,24 @@ Here's the Table of Contents with all the APIs listed:
     - [2. Technologies Used](#2-technologies-used)
     - [3. Database Structure](#3-database-structure)
     - [4. API Documentation](#4-api-documentation)
-      - [Add Document](#add-document)
-      - [Get All Documents](#get-all-documents)
-      - [Get Document by Id](#get-document-by-id)
-      - [Get Documents by Area Id](#get-documents-by-area-id)
-      - [Link Document](#link-document)
-      - [Add Links to a Document](#add-links-to-a-document)
-      - [Get Linked Documents](#get-linked-documents)
-      - [Delete Links](#delete-links)
-      - [Get All Areas](#get-all-areas)
-      - [Add Area](#add-area)
-      - [Edit Area Id](#edit-area-id)
-      - [Add Attachments](#add-attachments)
-      - [Delete Attachments](#delete-attachments)
+      - [**Add Document**](#add-document)
+      - [**Get All Documents**](#get-all-documents)
+      - [**Get Document by Id:**](#get-document-by-id)
+      - [**Get Documents by Id area :**](#get-documents-by-id-area-)
+      - [**Link Document**:](#link-document)
+      - [**Add links to a document**](#add-links-to-a-document)
+      - [**Get Linked Documents**](#get-linked-documents)
+      - [Delete links](#delete-links)
+      - [**Get all areas**](#get-all-areas)
+      - [**Add Area**:](#add-area)
+      - [**Edit area id**:](#edit-area-id)
+      - [**Add Files**:](#add-files)
+      - [**Delete File**](#delete-file)
+      - [**Get Files**:](#get-files)
+      - [**Download File**:](#download-a-file)
     - [5. Users Credentials](#5-users-credentials)
     - [6. Dockerization](#6-dockerization)
-    - [LICENSE](#license)
+  - [LICENSE](#license)
 
 
 
@@ -443,9 +445,9 @@ Response :
 
 Response body: None
 
-#### **Add Attachments**:
+#### **Add Files**:
 
-**POST** `api/documents/:DocId/attachments`
+**POST** `api/documents/:DocId/uploads`
 
 Description : Add resources to a certain docuemnt identified by its <DocId>
 
@@ -457,12 +459,12 @@ Request Body:
 [
   {
     "name" : "name",
-    "trype" : "map",
+    "type" : "original",
     "path" : "path/to/file"
   },
   {
     "name" : "name2",
-    "trype" : "text",
+    "type" : "Attachment",
     "path" : "path/to/file2"
   }
 ]
@@ -476,13 +478,61 @@ Response :
 
 Response body: None
 
-#### **Delete Attachments**
 
-**DELETE** `api/documents/:DocId/attachments`
+#### **Delete File**
 
-Description : Delete all attachments associated to a document with its <DocId>
+**DELETE** `api/documents/:DocId/files/:FileId`
+
+Description : Delete a specific file stored in the server with a certain <FileId>, associated to a document with its <DocId>
+
+Requqest parameters: Document Id, File Id
+
+Response :
+- `200 OK`
+- `404 Not Found`
+- `500 Internal Server Error`
+
+Response body: None
+
+
+#### **Get Files**
+
+**GET** `api/documents/:DocId/files`
+
+Description : Get all attachments associated to a document with its <DocId>
 
 Requqest parameters: Document Id
+
+Response :
+- `200 OK`
+- `404 Not Found`
+- `500 Internal Server Error`
+
+Response body: 
+```
+[
+  {
+    "id": 1,
+    "name": "file_name",
+    "type": "original",
+    "path": "/files/hashed_file_name"
+  },
+  {
+    "id": 2,
+    "name": "file_name2",
+    "type": "original",
+    "path": "/files/hashed_file_name2"
+  }
+]
+```
+
+#### **Download a File**
+
+**GET** `api/documents/:DocId/files/download/:FileId`
+
+Description : Download a specific file stored in the server with a certain <FileId>, associated to a document with its <DocId>
+
+Requqest parameters: Document Id, File Id
 
 Response :
 - `200 OK`
@@ -519,6 +569,9 @@ Response body:
   }
 ]
 ```
+
+
+
 
 ### 5. Users Credentials
 

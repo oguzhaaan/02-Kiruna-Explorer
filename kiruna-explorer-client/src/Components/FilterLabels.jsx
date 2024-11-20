@@ -19,10 +19,10 @@ function FilterLabels({ filterValues, setFilterValues }) {
     });
   };
   return (
-    <div className="flex flex-row ml-0 justify-start text-black_text dark:text-white_text rounded-lg gap-2 px-2 py-1">
+    <div className="flex flex-row ml-0 justify-start text-black_text dark:text-white_text rounded-lg gap-2 pt-3">
       {filterValues.type && (
         <div
-          className={`flex flex-row items-center p-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 rounded-md cursor-pointer`}
+          className={`flex flex-row gap-1 items-center p-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 rounded-md cursor-pointer`}
         >
           Type
           <div className="mx-1 px-1 border-2 border-blue-400 dark:border-opacity-30 rounded-lg">
@@ -32,14 +32,14 @@ function FilterLabels({ filterValues, setFilterValues }) {
             src={isDarkMode ? whiteCloseIcon : blackCloseIcon}
             className="w-4"
             onClick={() => handleRemoveFilter("type")}
-            alt=""
+            alt="remove"
           />
         </div>
       )}
 
       {filterValues.stakeholders.length > 0 && (
         <div
-          className={`flex flex-row items-center p-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 rounded-md cursor-pointer`}
+          className={`flex flex-row gap-1 items-center p-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 rounded-md cursor-pointer`}
         >
           Stakeholders
           {filterValues.stakeholders.map((stakeholder, idx) => (
@@ -60,7 +60,7 @@ function FilterLabels({ filterValues, setFilterValues }) {
       )}
       { filterValues.startDate && filterValues.endDate && filterValues.startDate === filterValues.endDate && (
         <div
-          className={`flex flex-row items-center p-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 rounded-md cursor-pointer`}
+          className={`flex flex-row gap-1 items-center p-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 rounded-md cursor-pointer`}
         >
           Issuance Date:
           <div className="mx-1 px-1 border-2 border-blue-400 dark:border-opacity-30 rounded-lg">
@@ -76,7 +76,7 @@ function FilterLabels({ filterValues, setFilterValues }) {
       )}
       {filterValues.startDate && filterValues.endDate && filterValues.startDate !== filterValues.endDate &&(
         <div
-          className={`flex flex-row items-center p-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 rounded-md cursor-pointer`}
+          className={`flex flex-row gap-1 items-center p-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 rounded-md cursor-pointer`}
         >
           Issuance Date:
           <div className="mx-1 px-1 border-2 border-blue-400 dark:border-opacity-30 rounded-lg">

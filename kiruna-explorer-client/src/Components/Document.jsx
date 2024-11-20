@@ -170,18 +170,14 @@ function Document(props) {
   return (
     <div className={isDarkMode ? "dark" : "light"}>
       <div className="bg-background_color_white dark:bg-background_color min-h-screen flex flex-col items-center">
-        <SingleDocument
-            setUpdateAreaId = {props.setUpdateAreaId}
-          setNavShow={props.setNavShow}
-          setMode={props.setMode}
-          setoriginalDocId={props.setoriginalDocId}
-        ></SingleDocument>
+        <SingleDocument updateAreaId={props.updateAreaId} setUpdateAreaId={props.setUpdateAreaId} setNavShow={props.setNavShow} setMode={props.setMode}
+                        setoriginalDocId={props.setoriginalDocId} setAlertMessage={setAlertMessage}></SingleDocument>
         <Alert
           message={alertMessage[0]}
           type={alertMessage[1]}
           clearMessage={() => setAlertMessage(["", ""])}
         ></Alert>
-        <div className="sticky-top w-2/3">
+        <div className="sticky-top w-full bg-[#f3f3f3ef] dark:bg-[#313131ef] rounded-b-md px-36">
         <div className="flex flex-row justify-content-between align-items-center h-16 px-3 w-full">
           <div className="flex flex-row items-center gap-3">
             {/* Search Bar */}
@@ -192,7 +188,7 @@ function Document(props) {
               <input
                 type="text"
                 placeholder="Search"
-                className="outline outline-1 outline-customGray1 dark:outline-none bg-search_dark_color w-60 py-2 pl-10 pr-4 text-black_text rounded-[50px] placeholder-black_text"
+                className="outline outline-1 outline-customGray1 dark:outline-none bg-search_dark_color lg:md:w-60 sm:w-36 py-2 pl-10 pr-4 text-black_text rounded-[50px] placeholder-black_text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -222,12 +218,11 @@ function Document(props) {
           <div className="flex flex-row justify-content-end gap-3 align-items-center">
             {/* Add document Button */}
             <button
-              onClick={toggleModal}
-              className="bg-primary_color_light dark:bg-primary_color_dark hover:bg-[#2E6A8E66] transition text-black_text dark:text-white_text grid justify-items-end py-2 px-4 rounded-md"
+                onClick={toggleModal}
+                className="bg-primary_color_light dark:bg-primary_color_dark hover:bg-[#2E6A8E66] transition text-black_text dark:text-white_text flex flex-row gap-2 justify-items-end py-2 px-3 rounded-md"
             >
-              <span className="text-base">
-                <i className="bi bi-file-earmark-plus"></i> Add document
-              </span>
+              <i className="bi bi-file-earmark-plus"></i>
+              <p className="text-base m-0 p-0 lg:inline-block md:inline-block sm:hidden">Add document</p>
             </button>
 
             {/* Change Theme Button */}
@@ -251,13 +246,15 @@ function Document(props) {
           </div>
         </div>
         </div>
-        {/* Filter Labels */}
-        <FilterLabels
-          filterValues={filterValues}
-          setFilterValues={setFilterValues}
-        />
         {/* Documents List */}
-        <div className="flex flex-col gap-3 p-3 w-2/3 overflow-y-scroll">
+        <div className="flex flex-col gap-3 w-2/3 overflow-y-scroll">
+          {/* Filter Labels */}
+          <div className="w-full">
+            <FilterLabels
+                filterValues={filterValues}
+                setFilterValues={setFilterValues}
+            />
+          </div>
           {documents.map((doc) => (
             <DocumentItem
               key={doc.id}
@@ -276,7 +273,7 @@ function Document(props) {
         <div
           className={`${
             isDarkMode ? "dark-select" : "light-select"
-          } py-4 fixed inset-0 flex items-center justify-center scrollbar-thin scrollbar-webkit`}
+          } py-4 fixed inset-0 flex items-center justify-center scrollbar-thin scrollbar-webkit z-[1040]`}
           onClick={toggleModal}
         >
           <div
@@ -476,10 +473,10 @@ function Document(props) {
               {props.newAreaId && (
                 <label className="text-black_text dark:text-white_text text-base w-full text-left py-1">
                   <i className="bi bi-check-lg align-middle text-green-400"></i>{" "}
-                  You selected{" "}
+                  You selected {" "}
                   {props.newAreaId === 1
                     ? "Municipality Area"
-                    : `Area N. ${props.newAreaId}`}
+                    : `a Georeference`}
                 </label>
               )}
               <button
@@ -539,10 +536,10 @@ const DocumentItem = ({
   return (
     <div className={isDarkMode ? "dark" : "light"}>
       <div
-        className={`flex flex-wrap drop-shadow-xl rounded-xl bg-document_item_radient_grey_light dark:bg-document_item_radient_grey p-3 cursor-pointer`}
-        onClick={() => {
-          navigate(/documents/ + documentId);
-        }}
+          className={`flex flex-wrap drop-shadow-xl rounded-xl bg-document_item_radient_grey_light dark:bg-document_item_radient_grey p-3 cursor-pointer`}
+          onClick={() => {
+            navigate(/documents/ + documentId);
+          }}
       >
         {/* Document Title and Type */}
         <div className="w-1/2 flex flex-row text-black_text dark:text-white_text">
@@ -552,32 +549,32 @@ const DocumentItem = ({
             </div>
             <div className="text-sm font-light flex items-center">
               <img
-                src={getIcon({ type: type }, { darkMode: isDarkMode })}
-                className="w-8 mr-2"
-                alt="type_icon"
+                  src={getIcon({type: type}, {darkMode: isDarkMode})}
+                  className="w-8 mr-2"
+                  alt="type_icon"
               />
               {formatString(type)}
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col w-1/2 justify-content-between align-items-end">
+        <div className="flex flex-col gap-2 w-1/2 justify-content-between align-items-end">
           {/* Date */}
           <div className="text-sm top-3 right-5 text-gray-400">{date}</div>
 
           {/* Stakeholders */}
-          <div className="flex flex-wrap gap-2 bottom-4 right-5">
+          <div className="flex flex-wrap justify-content-end gap-2 bottom-4 right-5">
             {stakeholders &&
-              stakeholders.map((stakeholder, idx) => (
-                <span
-                  key={idx}
-                  className={`rounded-2xl px-3 py-1 text-sm text-white_text ${getStakeholderColor(
-                    { stakeholder }
-                  )}`}
-                >
+                stakeholders.map((stakeholder, idx) => (
+                    <span
+                        key={idx}
+                        className={`rounded-2xl px-3 py-1 text-sm text-white_text ${getStakeholderColor(
+                            {stakeholder}
+                        )}`}
+                    >
                   {formatString(stakeholder)}
                 </span>
-              ))}
+                ))}
           </div>
         </div>
       </div>
@@ -585,4 +582,4 @@ const DocumentItem = ({
   );
 };
 
-export { Document };
+export {Document};

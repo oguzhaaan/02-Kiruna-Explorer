@@ -40,7 +40,7 @@ function NavHeader(props) {
                         </Navbar.Toggle>
                         <Navbar.Offcanvas
                             id="basic-navbar-nav"
-                            className={`drop-shadow-xl backdrop-blur-2xl ${isDarkMode ? 'bg-navbar text-white_text' : 'bg-navbar_light text-black_text'} overflow-hidden`}
+                            className={`drop-shadow-xl ${isDarkMode ? 'bg-background_color text-white_text' : 'bg-background_color_light text-black_text'} overflow-hidden`}
                             backdropClassName={`${isDarkMode ? 'bg-black_text' : 'bg-white_text'}`}
                         >
                             <Offcanvas.Body className="flex flex-col justify-between">

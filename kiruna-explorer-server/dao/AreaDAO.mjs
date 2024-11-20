@@ -83,8 +83,8 @@ export default function AreaDAO() {
                     return reject(err);
                 }
                 const equal = rows.filter((e)=>e.geoJson == geoJson)
-                if (equal) resolve(equal[0].id);
-                else resolve(null)
+                if (equal.length > 0) {resolve(equal[0].id)}
+                else {resolve(undefined)}
             });
         });
     }

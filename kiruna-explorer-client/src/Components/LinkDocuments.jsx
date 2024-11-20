@@ -476,14 +476,12 @@ const DocumentItem = ({
                                 {stakeholder}
                             )}`}
                         >
-            {formatString(stakeholder)}
-          </span>
+                          {formatString(stakeholder)}
+                        </span>
                     ))}
                 </div>
             </div>
-        </div>
       </div>
-    </div>
   );
 };
 

@@ -37,7 +37,7 @@ describe("Unit Test storeFile", () => {
 
         const result = await fileDAO.storeFile(docId, mockFile);
 
-        expect(result).toBe(expectedAttachmentId); // Expect the automatically generated attachment ID
+        expect(result).toEqual([expectedAttachmentId,fileId]); // Expect the automatically generated attachment ID
         expect(db.run).toHaveBeenNthCalledWith(
             1,
             expect.stringContaining("INSERT INTO file"),

@@ -599,13 +599,14 @@ router.post(
             path: `/uploads/${req.file.filename}`,
         }
         try {
-            const attachmentID = await FileDao.storeFile(docId, file);
+            const [attachmentID, fileId] = await FileDao.storeFile(docId, file);
             // File successfully uploaded
             if (!attachmentID) {
                 return res.status(500).json({ error: "Unable to store file. Please try again later." });
             }
             res.status(200).json({
                 message: 'File uploaded successfully',
+                fileId: fileId,
                 fileName: req.file.filename,
                 filePath: `/uploads/${req.file.filename}`,
             });

@@ -250,7 +250,7 @@ const LinkDocuments = ({
       } min-h-screen background_color_light dark:bg-background_color px-3 text-black_text dark:text-white_text`}
     >
       {/* Navigation Bar */}
-      <div className="flex items-center justify-between w-full h-16 mb-4">
+      <div className="flex items-center justify-between w-full h-16">
         <div className="flex items-center gap-3">
           {/* Back Button */}
           <button
@@ -311,10 +311,12 @@ const LinkDocuments = ({
         </button>
       </div>
       {/* Filter Labels */}
+      <div className="pb-3">
       <FilterLabels
         filterValues={filterValues}
         setFilterValues={setFilterValues}
       />
+      </div>
 
       <div className="flex flex-row gap-3">
         {/* Document List */}

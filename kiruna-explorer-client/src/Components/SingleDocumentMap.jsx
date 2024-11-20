@@ -247,6 +247,7 @@ function SingleDocumentMap({ id, setShowSingleDocument }) {
 
                         {/* Connections */}
                         {activeTab === "connections" ? (
+                            documentLinks.length > 0 ?
                             Object.entries(documentLinks.reduce((acc, connection) => {
                                 if (!acc[connection.connection]) {
                                     acc[connection.connection] = [];
@@ -283,10 +284,14 @@ function SingleDocumentMap({ id, setShowSingleDocument }) {
                                         </div>
                                     ))}
                                 </div>
-                            ))
+                            )) : <div className="flex flex-col justify-content-center align-content-center w-full h-full">
+                                    <p className="m-0 p-0 text-center text_black_text dark:text-white_text">No Connections</p>
+                                </div>
                         ) : (
                             <>
-                                {Object.entries(groupedFiles).map(([fileType, fileGroup], index) => (
+                                {
+                                    files.length > 0 ?
+                                    Object.entries(groupedFiles).map(([fileType, fileGroup], index) => (
                                     <div key={index} className="flex flex-col gap-3 bg-[#76767655] dark:bg-[#D9D9D90E] p-3 rounded-xl">
                                         <div
                                             className="flex flex-row justify-between items-center cursor-pointer"
@@ -313,7 +318,11 @@ function SingleDocumentMap({ id, setShowSingleDocument }) {
                                             />
                                         ))}
                                     </div>
-                                ))}
+                                ))
+                                        : <div className="flex flex-col justify-content-center align-content-center w-full h-full">
+                                            <p className="m-0 p-0 text-center text_black_text dark:text-white_text">No Files</p>
+                                        </div>
+                                }
 
                             </>
                         )}

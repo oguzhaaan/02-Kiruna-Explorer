@@ -120,7 +120,7 @@ function GeoreferenceMap(props) {
                 setAlertMessage(`You selected Municipality Area`)
             }
             else {
-                setAlertMessage(`You selected Area N.${content}`)
+                setAlertMessage(`You selected a Georeference`)
             }
             setClickedArea(content)
             setShowSave(true)
@@ -476,7 +476,7 @@ function GeoreferenceMap(props) {
                                 step="0.00001"
                                 value={markerCoordinates.lng}
                                 onChange={(e) => updateMarkerPosition(markerCoordinates.lat, e.target.value)}
-                                className={`px-2 text-l py-1 text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-[40px] ${coordinatesErr && showManually ? "border-red-500 border-2" : ""} max-md:w-full max-md:h-5`}
+                                className={`px-2 text-l py-1 text-black_text dark:text-white_text placeholder:text-placeholder_color bg-[#ffffffdd] dark:bg-[#1e1e1edd] rounded-[40px] ${coordinatesErr && showManually ? "border-red-500 border-2" : ""} max-md:w-full max-md:h-5`}
                             />
                         </div>
                         <div className="flex flex-col">
@@ -487,7 +487,7 @@ function GeoreferenceMap(props) {
                                 step="0.00001"
                                 value={markerCoordinates.lat}
                                 onChange={(e) => updateMarkerPosition(e.target.value, markerCoordinates.lng)}
-                                className={`px-2 text-l py-1 text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-[40px] ${coordinatesErr && showManually ? "border-red-500 border-2" : ""} max-md:w-full max-md:h-5`}
+                                className={`px-2 text-l py-1 text-black_text dark:text-white_text placeholder:text-placeholder_color bg-[#ffffffdd] dark:bg-[#1e1e1edd] rounded-[40px] ${coordinatesErr && showManually ? "border-red-500 border-2" : ""} max-md:w-full max-md:h-5`}
                             />
                         </div>
                     </div>
@@ -507,7 +507,7 @@ function GeoreferenceMap(props) {
                                 setShowModal(true);
                             }}
                             type="button"
-                            className="w-44 h-14 bg-[#D9D9D9] bg-opacity-60 shadow text-2xl font-normal text-black rounded-full hover:bg-[#938888] max-md:w-1/2 max-md:h-10"
+                            className="w-36 h-14 bg-[#D9D9D9] bg-opacity-80 shadow text-xl font-normal rounded-md text-black_text hover:bg-[#938888] max-md:w-1/2 max-md:h-10"
                         >
                             Exit
                         </button>
@@ -516,7 +516,7 @@ function GeoreferenceMap(props) {
                         <button
                             onClick={() => handleSave()}
                             type="button"
-                            className="w-44 h-14 bg-customBlue text-white_text bg-opacity-100 shadow text-2xl font-normal rounded-full hover:bg-[#317199] max-md:w-1/2 max-md:h-10"
+                            className="w-36 h-14 bg-customBlue text-white_text bg-opacity-100 shadow text-xl rounded-md font-normal hover:bg-[#317199] max-md:w-1/2 max-md:h-10"
                         >
                             Save
                         </button>

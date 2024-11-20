@@ -88,6 +88,13 @@ function SingleDocument(props) {
 
     }, [fileType]); // Dipendenze: l'effetto si attiva quando questi due stati cambiano
 
+    useEffect(() => {
+        if(props.updateAreaId.areaId === "done") {
+            props.setUpdateAreaId({areaId:null,docId:null})
+            props.setAlertMessage(["Document moved successfully", "success"])
+        }
+    }, [props.updateAreaId])
+
     const toggleDropdown = () => {
         setModalPlusVisible(!modalPlusVisible);
     };
@@ -228,7 +235,7 @@ function SingleDocument(props) {
         <>
             <Alert message={alertMessage[0]} type={alertMessage[1]}
                 clearMessage={() => setAlertMessage(['', ''])}></Alert>
-            <div className={`${isDarkMode ? 'dark' : 'light'} fixed inset-0 z-[200] flex items-center justify-center scrollbar-thin scrollbar-webkit`}>
+            <div className={`${isDarkMode ? 'dark' : 'light'} fixed inset-0 z-[1040] flex items-center justify-center scrollbar-thin scrollbar-webkit`}>
 
                 {/* Modal delete confirm */}
                 {showModalDeleteConfirm &&
@@ -372,14 +379,14 @@ function SingleDocument(props) {
                                 <button onClick={()=>{props.setUpdateAreaId({areaId:document.areaId,docId:document.id}); navigate("/map"); }}
                                     className="flex flex-row gap-2 align-items-center text-black_text dark:text-white_text text-sm bg-[#76767655] dark:bg-[#a0a0a058] hover:bg-[#FFFFFF55] dark:hover:bg-[#d9d9d974] transition rounded-2xl px-3 py-2 drop-shadow-lg">
                                     <i className="bi bi-globe-europe-africa text-base"></i>
-                                    <p className="m-0 p-0">See on the map</p>
+                                    <p className="m-0 p-0">{document.areaId == null ? "Add Georeference" : "Edit Georeference"}</p>
                                 </button>
                             </div>
                         </div>
 
                         {/* Links */}
                         <div
-                            className="flex flex-col gap-3 w-2/6 h-100 bg-[#FFFFFF22] dark:bg-box_high_opacity rounded-xl py-3 px-4 overflow-y-auto">
+                            className="flex flex-col gap-3 w-2/6 h-full bg-[#FFFFFF22] dark:bg-box_high_opacity rounded-xl py-3 px-4 overflow-y-auto">
                             {/* Tab Header */}
                             <div className="flex">
                                 {/* Connections Tab */}
@@ -405,9 +412,10 @@ function SingleDocument(props) {
                                 </button>
                             </div>
 
-
                             {/* Connections */}
+
                             {activeTab === "connections" ? (
+                                documentLinks.length > 0 ?
                                 Object.entries(documentLinks.reduce((acc, connection) => {
                                     if (!acc[connection.connection]) {
                                         acc[connection.connection] = [];
@@ -444,10 +452,14 @@ function SingleDocument(props) {
                                             </div>
                                         ))}
                                     </div>
-                                ))
+                                )) : <div className="flex flex-col justify-content-center align-content-center w-full h-full">
+                                    <p className="m-0 p-0 text-center text_black_text dark:text-white_text">No Connections</p>
+                                    </div>
                             ) : (
                                 <>
-                                    {Object.entries(groupedFiles).map(([fileType, fileGroup], index) => (
+                                    {
+                                        files.length > 0 ?
+                                        Object.entries(groupedFiles).map(([fileType, fileGroup], index) => (
                                         <div key={index} className="flex flex-col gap-3 bg-[#76767655] dark:bg-[#D9D9D90E] p-3 rounded-xl">
                                             <div
                                                 className="flex flex-row justify-between items-center cursor-pointer"
@@ -476,7 +488,10 @@ function SingleDocument(props) {
                                                 />
                                             ))}
                                         </div>
-                                    ))}
+                                    )) : <div className="flex flex-col justify-content-center align-content-center w-full h-full">
+                                                <p className="m-0 p-0 text-center text_black_text dark:text-white_text">No Files</p>
+                                            </div>
+                                    }
 
                                 </>
                             )}
@@ -512,20 +527,18 @@ function SingleDocument(props) {
                                                     onClick={handleCloseModal} // Chiudi il dropdown cliccando all'esterno
                                                 >
                                                     <div
-                                                        className={`absolute bottom-16 right-6 sm:right-9 ${isDarkMode ? 'dark:bg-[#4F4F4F]' : 'bg-[#76767655]'
-                                                            } rounded-lg shadow-lg w-44`}
+                                                        className={`absolute bottom-16 right-6 sm:right-9 dark:bg-[#4F4F4F] bg-[#cccccc] rounded-lg drop-shadow-lg w-44`}
                                                         onClick={(e) => e.stopPropagation()} // Impedisce che il click dentro il modal lo chiuda
                                                     >
                                                         <div className="flex flex-col w-full">
                                                             <label
-                                                                className={`py-1 px-2 text-sm border-b-[0.0001rem] 
-                                                                        ${isDarkMode ? 'border-white' : 'border-black'} 
-                                                                        ${isDarkMode ? 'dark:bg-[#4F4F4F]' : 'bg-[#76767655]'} 
+                                                                className={`py-2 px-2.5 text-sm
                                                                         ${isDarkMode ? 'text-white' : 'text-black'} 
-                                                                        cursor-pointer flex items-center text-left`}
+                                                                        cursor-pointer flex items-center text-left hover:opacity-70 transition`}
                                                                 htmlFor="fileInput"  // Associa il label al campo input
                                                             >
-                                                                <i className="bi bi-file-earmark-text mr-2"></i> Original Documents
+                                                                <i className="bi bi-file-earmark-text mr-2"></i> Original
+                                                                Documents
                                                             </label>
                                                             <input
                                                                 id="fileInput"  // Deve corrispondere al valore di `htmlFor` nel label
@@ -534,13 +547,15 @@ function SingleDocument(props) {
                                                                 accept=".jpeg, .jpg, .png, .pdf, .svg, .txt"
                                                                 onChange={handleFileChangeOriginal} // Gestisci il cambiamento del file
                                                             />
-
+                                                            <div
+                                                                className="w-full h-[1px] bg-[#4F4F4F22] dark:bg-[#99999922]"></div>
                                                             <button
-                                                                className={`py-1 px-2 text-sm 
-                                                                        ${isDarkMode ? 'dark:bg-[#4F4F4F]' : 'bg-[#76767655]'} 
+                                                                className={`py-2 px-2.5 text-sm                                                  
                                                                         ${isDarkMode ? 'text-white' : 'text-black'} 
-                                                                        flex items-center text-left cursor-pointer`}
-                                                                onClick={() => { console.log("TODO") }}
+                                                                        flex items-center text-left cursor-pointer hover:opacity-70 transition`}
+                                                                onClick={() => {
+                                                                    console.log("TODO")
+                                                                }}
                                                             >
                                                                 <i className="bi bi-paperclip mr-2"></i> Attachments
                                                             </button>
@@ -606,12 +621,12 @@ const FileItem = ({ file, isDarkMode, handleDownload, setShowModalDeleteConfirm,
 
             {isDropdownOpen && (
                 <div
-                    className={`absolute right-2 top-8 mt-1 z-10 ${isDarkMode ? "dark:bg-[#4F4F4F]" : "bg-[#76767655]"} rounded-lg shadow-lg w-40 transition-all dropdown`}
+                    className={`absolute right-2 top-8 mt-1 z-10 dark:bg-[#4F4F4F] bg-[#cccccc] rounded-md drop-shadow-lg w-40 transition-all dropdown`}
                     onClick={(e) => e.stopPropagation()} // Prevents modal close on click
                 >
-                    <div className="flex flex-col w-full">
+                    <div className="flex flex-col w-full rounded-md">
                         <button
-                            className={`py-1 px-2 text-sm border-b-[0.0001rem] ${isDarkMode ? "border-white" : "border-black"} ${isDarkMode ? "dark:bg-[#4F4F4F]" : "bg-[#76767655]"} ${isDarkMode ? "text-white" : "text-black"} cursor-pointer flex items-center text-left`}
+                            className={`py-2 px-2.5 text-sm ${isDarkMode ? "text-white" : "text-black"} hover:opacity-70 cursor-pointer flex items-center text-left rounded-t-md transition`}
                             onClick={() => {
                                 handleDownload(file);
                                 onDropdownToggle(); // Chiude il dropdown dopo l'azione
@@ -619,8 +634,9 @@ const FileItem = ({ file, isDarkMode, handleDownload, setShowModalDeleteConfirm,
                         >
                             <i className="bi bi-download mr-2"></i> Download
                         </button>
+                        <div className="w-full h-[1px] bg-[#4F4F4F22] dark:bg-[#99999922]"></div>
                         <button
-                            className={`py-1 px-2 text-sm ${isDarkMode ? "dark:bg-[#4F4F4F]" : "bg-[#76767655]"} text-[#E63232] flex items-center text-left cursor-pointer`}
+                            className={`py-2 px-2.5 text-sm text-my_red flex hover:opacity-70 items-center text-left cursor-pointer rounded-b-md transition`}
                             onClick={() => {
                                 console.log(file);
                                 setSelectedFile(file);
@@ -628,7 +644,7 @@ const FileItem = ({ file, isDarkMode, handleDownload, setShowModalDeleteConfirm,
                                 onDropdownToggle(); // Chiude il dropdown dopo l'azione
                             }}
                         >
-                            <i className="bi bi-trash3 mr-2 text-[#E63232]"></i> Delete
+                            <i className="bi bi-trash3 mr-2 text-my_red"></i> Delete
                         </button>
                     </div>
                 </div>

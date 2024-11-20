@@ -395,10 +395,10 @@ const DocumentItem = ({
 
   return (
     <div
-      className={`flex flex-wrap rounded-xl bg-document_item_radient_grey_light dark:bg-document_item_radient_grey p-3`}
+        className={`flex flex-wrap lg:gap-0 md:gap-3 sm:gap-3 rounded-xl bg-document_item_radient_grey_light dark:bg-document_item_radient_grey p-3`}
     >
       {/* Connection Section */}
-      <div className="flex flex-col w-3/12">
+      <div className="flex flex-col lg:w-3/12 md:w-[45%] sm:w-[45%]">
         <label>Connections:</label>
         {selectedOption.length > 0
           ? selectedOption.map((option, idx) => (
@@ -412,40 +412,39 @@ const DocumentItem = ({
                     <i className="bi bi-x-circle"></i>
                   </button>
                 </span>
-              </div>
-            ))
-          : null}
-        {connectionOptions && (
-          <div className="mt-3 gap-2 align-items-center relative">
-            <button
-              className="flex flex-row align-items-center drop-shadow-lg bg-[#FFFFFFaa] dark:bg-customGray3_30 text-black_text dark:text-white_text rounded-lg gap-2 px-2 py-1"
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-            >
-              <i className="bi bi-plus-circle text-base"></i>
-              Add Connection
-            </button>
-            {dropdownOpen && (
-              <div className="absolute top-full mt-2 bg-[#FFFFFF60] dark:bg-customGray3_30 backdrop-blur-xl text-text_white rounded-xl drop-shadow-2xl z-10">
-                {connectionOptions.map((option, idx) => (
-                  <div
-                    key={idx}
-                    className={`px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl cursor-pointer`}
-                    onClick={() => {
-                      onConnectionChange(option);
-                      setDropdownOpen(false);
-                    }}
-                  >
-                    {formatString(option)}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+                    </div>
+                )) : null}
+                {connectionOptions &&
+                    <div className="mt-3 gap-2 align-items-center relative">
+                        <button
+                            className="flex flex-row align-items-center drop-shadow-lg bg-[#FFFFFFaa] dark:bg-customGray3_30 text-black_text dark:text-white_text rounded-lg gap-2 px-2 py-1"
+                            onClick={() => setDropdownOpen(!dropdownOpen)}
+                        >
+                            <i className="bi bi-plus-circle text-base"></i>
+                            <p className="m-0 p-0 lg:inline-block md:hidden sm:hidden">Add Connection</p>
+                        </button>
+                        {dropdownOpen && (
+                            <div
+                                className="absolute top-full mt-2 bg-[#FFFFFF60] dark:bg-customGray3_30 backdrop-blur-xl text-text_white rounded-xl drop-shadow-2xl z-10">
+                                {connectionOptions.map((option, idx) => (
+                                    <div
+                                        key={idx}
+                                        className={`px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl cursor-pointer`}
+                                        onClick={() => {
+                                            onConnectionChange(option);
+                                            setDropdownOpen(false);
+                                        }}
+                                    >
+                                        {formatString(option)}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>}
+            </div>
 
-      {/* Document Title and Type */}
-      <div className="w-5/12 flex flex-row gap-3">
+            {/* Document Title and Type */}
+            <div className="lg:w-5/12 md:w-1/2 sm:w-1/2 flex flex-row gap-3">
         {/* Vertical Line */}
         <div className="w-0.5 bg-white opacity-10"></div>
 
@@ -464,26 +463,25 @@ const DocumentItem = ({
         </div>
       </div>
 
-      <div className="flex flex-col w-4/12 gap-2 justify-content-between align-items-end">
-        {/* Date */}
-        <div className="text-sm top-3 right-5 text-gray-400">{date}</div>
+            <div className="flex flex-col lg:w-4/12 md:w-full sm:w-full gap-2 justify-content-between align-items-end">
+                {/* Date */}
+                <div className="text-sm top-3 right-5 text-gray-400">{date}</div>
 
-        {/* Stakeholders */}
-        <div className="flex flex-wrap justify-content-end gap-2 bottom-4 right-5">
-          {stakeholders &&
-            stakeholders.map((stakeholder, idx) => (
-              <span
-                key={idx}
-                className={`rounded-2xl px-3 py-1 text-sm text-white_text ${getStakeholderColor(
-                  { stakeholder }
-                )}`}
-              >
-                {formatString(stakeholder)}
-              </span>
-            ))}
-        </div>
+                {/* Stakeholders */}
+                <div className="flex flex-wrap justify-content-end gap-2 bottom-4 right-5">
+                    {stakeholders && stakeholders.map((stakeholder, idx) => (
+                        <span
+                            key={idx}
+                            className={`rounded-2xl px-3 py-1 text-sm text-white_text ${getStakeholderColor(
+                                {stakeholder}
+                            )}`}
+                        >
+                          {formatString(stakeholder)}
+                        </span>
+                    ))}
+                </div>
+            </div>
       </div>
-    </div>
   );
 };
 
@@ -511,15 +509,14 @@ const SelectedDocument = ({
     }
   }, [filteredOptions]);
 
-  return (
-    <div
-      className={`flex flex-row rounded-xl bg-document_item_radient_blue_light dark:bg-document_item_radient_blue p-3 gap-3`}
-    >
-      <div className="flex flex-col w-1/2 self-center">
-        <label>Connections:</label>
-        {selectedOption.map((option, idx) => (
-          <div key={idx} className="flex items-center">
-            <span className="flex flex-row align-items-center gap-2 rounded-md px-3 py-1 bg-customPill_light dark:bg-customPill text-black_text dark:text-white_text mr-2 mt-1">
+    return (
+        <div className={`flex flex-wrap rounded-xl bg-document_item_radient_blue_light dark:bg-document_item_radient_blue p-3 gap-3`}>
+            <div className="flex flex-col lg:w-[43%] md:w-[43%] sm:w-full self-center">
+                <label>Connections:</label>
+                {selectedOption.map((option, idx) => (
+                    <div key={idx} className="flex items-center">
+                <span
+                className="flex flex-row align-items-center gap-2 rounded-md px-3 py-1 bg-customPill_light dark:bg-customPill text-black_text dark:text-white_text mr-2 mt-1">
               {formatString(option)}
               <button
                 className="text-my_red text-xl"
@@ -528,50 +525,44 @@ const SelectedDocument = ({
                 <i className="bi bi-x-circle"></i>
               </button>
             </span>
-          </div>
-        ))}
-        {filteredOptions && filteredOptions.length > 0 && (
-          <div className="mt-3 flex flex-row gap-2 align-items-center relative">
-            <button
-              className="flex flex-row align-items-center drop-shadow-lg bg-[#FFFFFFaa] dark:bg-customBlue text-black_text dark:text-white_text rounded-md gap-2 px-2 py-1"
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-            >
-              <i className="bi bi-plus-circle text-base"></i>
-              Add Connection
-            </button>
-            {dropdownOpen && (
-              <div className="absolute top-full mt-2 bg-customGray3_30 backdrop-blur-xl text-black_text dark:text-white_text rounded-md drop-shadow-2xl z-10">
-                {filteredOptions.map((option, idx) => (
-                  <div
-                    key={idx}
-                    className={`px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md cursor-pointer`}
-                    onClick={() => {
-                      onConnectionChange(option);
-                      setDropdownOpen(false);
-                    }}
-                  >
-                    {formatString(option)}
-                  </div>
+                    </div>
                 ))}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-      <div className="w-0.5 bg-white opacity-10"></div>
-      <div className="mx-4 flex-col">
-        <div className="text-base mb-3 font-normal line-clamp-2">
-          {formatString(title)}
-        </div>
-        <div className="text-sm font-light flex items-center">
-          <img
-            src={getIcon({ type: type }, { darkMode: isDarkMode })}
-            className="w-8 mr-2"
-            alt="type_icon"
-          />
-          {formatString(type)}
-        </div>
-      </div>
+                {filteredOptions && filteredOptions.length > 0 &&
+                    <div className="mt-3 flex flex-row gap-2 align-items-center relative">
+                        <button
+                            className="flex flex-row align-items-center drop-shadow-lg bg-[#FFFFFFaa] dark:bg-customBlue text-black_text dark:text-white_text rounded-md gap-2 px-2 py-1"
+                            onClick={() => setDropdownOpen(!dropdownOpen)}
+                        >
+                            <i className="bi bi-plus-circle text-base"></i>
+                            <p className="m-0 p-0 lg:inline-block md:hidden sm:hidden">Add Connection</p>
+                        </button>
+                        {dropdownOpen && (
+                            <div
+                                className="absolute top-full mt-2 bg-customGray3_30 backdrop-blur-xl text-black_text dark:text-white_text rounded-md drop-shadow-2xl z-10">
+                                {filteredOptions.map((option, idx) => (
+                                    <div
+                                        key={idx}
+                                        className={`px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md cursor-pointer`}
+                                        onClick={() => {
+                                            onConnectionChange(option);
+                                            setDropdownOpen(false);
+                                        }}
+                                    >
+                                        {formatString(option)}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>}
+            </div>
+            <div className="w-0.5 bg-white opacity-10 lg:inline-block md:hidden sm:hidden"></div>
+            <div className="flex flex-col lg:w-[45%] md:w-full sm:w-full">
+                <div className="text-base mb-3 font-normal line-clamp-2">{formatString(title)}</div>
+                <div className="text-sm font-light flex items-center">
+                    <img src={getIcon({type: type}, {darkMode: isDarkMode})} className="w-8 mr-2" alt="type_icon"/>
+                    {formatString(type)}
+                </div>
+            </div>
     </div>
   );
 };

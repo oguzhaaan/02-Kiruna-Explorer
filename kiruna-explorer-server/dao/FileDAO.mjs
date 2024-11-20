@@ -18,7 +18,7 @@ export default function FileDAO() {
                         if (err) {
                             reject(err);
                         } else {
-                            resolve(this.lastID);
+                            resolve([this.lastID,fileId]);
                         }
                     });
                 }
@@ -64,12 +64,11 @@ export default function FileDAO() {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM file WHERE id = ?";
             db.get(query, [id], (err, row) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    console.log(row);
-                    resolve(row.path);
-                }
+                if (err) return reject(err);
+                if (!row) return resolve(undefined)
+                console.log(row);
+                return resolve(row.path);
+                
             });
         });
     }

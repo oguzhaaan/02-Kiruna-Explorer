@@ -63,7 +63,7 @@ function NavHeader(props) {
                                         </Col>
                                     </Row>
                                     <div className={`separator ${isDarkMode ? 'bg-white_text' : 'bg-black_text'} opacity-20`}></div>
-                                    <Row
+                                    { user.role === "urban_planner" && (<Row
                                         className={`offcanvas-item w-100 p-1 ${currentRoute.includes("documents") ? (isDarkMode ? 'bg-customBlue' : 'bg-blue-200') : ''}`}
                                         onClick={() => { navigate("/documents") }}
                                     >
@@ -73,7 +73,7 @@ function NavHeader(props) {
                                         <Col className={`${isDarkMode ? 'text-white_text' : 'text-black_text'} my-auto`}>
                                             Documents
                                         </Col>
-                                    </Row>
+                                    </Row>)}
                                     <Row
                                         className={`offcanvas-item w-100 p-1 ${currentRoute.includes("map") ? (isDarkMode ? 'bg-customBlue' : 'bg-blue-200') : ''}`}
                                         onClick={() => { navigate("/mapDocuments")}}

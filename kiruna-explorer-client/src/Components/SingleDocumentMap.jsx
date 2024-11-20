@@ -7,7 +7,7 @@ import { getLanguageName } from "./Utilities/Languages.jsx";
 import API from "../API/API.mjs";
 import { useTheme } from "../contexts/ThemeContext.jsx";
 
-function SingleDocumentMap({ id, setShowSingleDocument }) {
+function SingleDocumentMap({ setDocumentId, id, setShowSingleDocument }) {
 
     const { isDarkMode } = useTheme();
 
@@ -272,7 +272,7 @@ function SingleDocumentMap({ id, setShowSingleDocument }) {
                                         <div key={idx} className="flex flex-col gap-1">
                                             <div
                                                 onClick={() => {
-                                                    navigate(`/documents/${connection.id}`);
+                                                    setDocumentId(connection.id);
                                                 }}
                                                 className="flex flex-row items-center gap-2 bg-[#FFFFFF77] dark:bg-[#d9d9d947] px-3 py-3 rounded-lg hover:bg-[#d9d9d934] transition cursor-pointer"
                                             >

@@ -14,7 +14,6 @@ export const UserProvider = ({ children }) => {
       const user = await API.logIn(credentials);
       setIsLoggedIn(true);
       setUser(user);
-      console.log(`Welcome, ${user.username}!`, "success");
     }
     catch (error) {
       throw new Error(error);
@@ -24,7 +23,6 @@ export const UserProvider = ({ children }) => {
   const logOut = async () => {
     try {
         await API.logOut();
-        console.log(`Goodbye, ${user.username}!`, "success");
         setIsLoggedIn(false);
     }
     catch (error) {

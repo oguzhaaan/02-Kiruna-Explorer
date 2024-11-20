@@ -119,7 +119,7 @@ export default function DocumentDAO(areaDAO) {
             const [document, allDocuments, allAreas] = await Promise.all([
                 this.getDocumentById(documentId),
                 this.getAllDocuments(),
-                areaDAO.getAllAreas()
+                areaDAO.getAllAreas(),
             ]);
 
             // Validate the current document and areas
@@ -131,12 +131,13 @@ export default function DocumentDAO(areaDAO) {
                 throw new AreaNotFound();
             }
 
+            if (oldAreaId == newAreaId) return true;
+
             // Update the document's areaId to newAreaId
             await new Promise((resolve, reject) => {
                 const updateQuery = "UPDATE document SET areaId = ? WHERE id = ?";
                 db.run(updateQuery, [newAreaId, documentId], function (err) {
                     if (err) {
-                        console.log("AAAAAAAA:" +  err);
                         return reject(err);
                     }
                     resolve();
@@ -148,7 +149,7 @@ export default function DocumentDAO(areaDAO) {
             const updatedAreaIdsInDoc = updatedDocuments.map(doc => doc.areaId);
 
             // If oldAreaId is no longer in use, delete it
-            if (!updatedAreaIdsInDoc.includes(oldAreaId)) {
+            if (!updatedAreaIdsInDoc.includes(oldAreaId) && oldAreaId!=1) {
                 await areaDAO.deleteAreaById(oldAreaId);
             }
 

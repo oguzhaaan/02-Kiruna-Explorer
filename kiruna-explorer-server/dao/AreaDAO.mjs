@@ -9,15 +9,22 @@ export default function AreaDAO() {
             INSERT INTO area (geoJson)
             VALUES (?)
         `;
-        console.log(geoJson)
-        return new Promise((resolve, reject) => {
-            db.run(query, [geoJson], function(err) {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(this.lastID);
-                }
-            });
+        return new Promise( async (resolve, reject) => {
+
+            const equalid = await this.compareAreas(geoJson)
+            if(equalid) {
+                return resolve(equalid) 
+            }
+            else {
+                db.run(query, [geoJson], function(err) {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(this.lastID);
+                    }
+                });
+            }
+            
         });
     }
 
@@ -66,5 +73,20 @@ export default function AreaDAO() {
             });
         });
     };
+
+    this.compareAreas = (geoJson) => {
+        const query = "SELECT * FROM area";
+        
+        return new Promise((resolve, reject) => {
+            db.all(query,[], (err, rows) => {
+                if (err) {
+                    return reject(err);
+                }
+                const equal = rows.filter((e)=>e.geoJson == geoJson)
+                if (equal) resolve(equal[0].id);
+                else resolve(null)
+            });
+        });
+    }
     
 }

@@ -208,6 +208,11 @@ function GeoreferenceMap(props) {
         setShowSave(false);
     };
 
+    const onEditStop = () => {
+        setShowExit(true);
+        setShowSave(true);
+    };
+
     const createLayerToUpdate = async (areaId) => {
         try {
             const updateArea = await API.getAreaById(areaId)
@@ -367,6 +372,7 @@ function GeoreferenceMap(props) {
                         onDeleted={onDeleted}
                         onDrawStart={onDrawStart}
                         onEditStart={onEditStart}
+                        onEditStop={onEditStop}
                         onDrawStop={onDrawStop}
                         draw={{
                             rectangle: false,

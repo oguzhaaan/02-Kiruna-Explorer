@@ -9,7 +9,7 @@ import AreaDAO from "../dao/AreaDAO.mjs";
 import Area from "../models/Area.mjs";
 import DocumentLinksDAO from "../dao/DocumentLinksDAO.mjs";
 import Link from "../models/Link.mjs";
-import { isLoggedIn } from "../auth/authMiddleware.mjs";
+import { isLoggedIn,  } from "../auth/authMiddleware.mjs";
 import { InvalidArea, AreaNotFound } from "../models/Area.mjs";
 import { DocumentNotFound } from "../models/Document.mjs";
 import { authorizeRoles } from "../auth/authMiddleware.mjs";
@@ -73,6 +73,7 @@ const __dirname = path.dirname("../");
 
 router.get("/",
     isLoggedIn,
+    authorizeRoles('admin', 'urban_planner'),
     async (req, res) => {
         try {
             const documents = await DocumentDao.getAllDocuments();
@@ -153,6 +154,7 @@ const validStakeholders = ["lkab", "municipality", "regional authority", "archit
 
 router.post("/",
     isLoggedIn,
+    authorizeRoles('admin', 'urban_planner'),
     [
         body("title")
             .trim()
@@ -304,6 +306,7 @@ router.get("/:DocId/links",
 );
 
 router.delete("/:DocId/links",
+    authorizeRoles('admin', 'urban_planner'),
     isLoggedIn,
     [
         param("DocId")
@@ -338,6 +341,7 @@ router.delete("/:DocId/links",
 /* POST /api/documents/link */
 
 router.post("/link",
+    authorizeRoles('admin', 'urban_planner'),
     isLoggedIn,
     [
         body("doc1Id")
@@ -405,6 +409,7 @@ router.post("/link",
 
 router.post("/links",
     isLoggedIn,
+    authorizeRoles('admin', 'urban_planner'),
     [
         body("links")
             .isArray({ min: 0 })
@@ -558,12 +563,13 @@ const upload = multer({
     }
 });
 
-const MAX_SIZE = 2 * 1024 * 1024;
+const MAX_SIZE = 20 * 1024 * 1024;
 
 // API route to handle file upload
 router.post(
     '/:DocId/files',
     isLoggedIn,
+    authorizeRoles('admin', 'urban_planner'),
     upload.single('file'), // Use multer middleware
     [
         param("DocId")
@@ -667,6 +673,7 @@ router.get('/:DocId/files/download/:FileId',
     });
 
 router.delete('/:DocId/files/:FileId', isLoggedIn,
+    authorizeRoles('admin', 'urban_planner'),
     [
         param("DocId")
             .isNumeric()

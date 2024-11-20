@@ -306,8 +306,8 @@ router.get("/:DocId/links",
 );
 
 router.delete("/:DocId/links",
-    authorizeRoles('admin', 'urban_planner'),
     isLoggedIn,
+    authorizeRoles('admin', 'urban_planner'),
     [
         param("DocId")
             .isNumeric()

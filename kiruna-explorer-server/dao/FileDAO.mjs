@@ -50,6 +50,7 @@ export default function FileDAO() {
             const query = `DELETE FROM file WHERE id = ?`;
             db.run(query, [FileId], function (err) {
                 if (err) {
+                    console.log(err);
                     reject(err);
                 } else {
                     console.log(this.changes);

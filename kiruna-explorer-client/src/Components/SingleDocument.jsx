@@ -168,6 +168,13 @@ function SingleDocument(props) {
     }, [id])
 
     useEffect(() => {
+        if(props.updateAreaId && props.updateAreaId.areaId === "done") {
+            props.setUpdateAreaId({areaId:null,docId:null})
+            props.setAlertMessage(["Document moved successfully", "success"])
+        }
+    }, [props.updateAreaId])
+
+    useEffect(() => {
         const getFiles = async () => {
             try {
                 const fileData = await API.getDocumentFiles(id); // Aggiungi un'API per i file
@@ -362,7 +369,7 @@ function SingleDocument(props) {
                             </div>
                             {/* Other Buttons */}
                             <div className="flex flex-row gap-3 font-normal pt-3">
-                                <button
+                                <button onClick={()=>{props.setUpdateAreaId({areaId:document.areaId,docId:document.id}); navigate("/map"); }}
                                     className="flex flex-row gap-2 align-items-center text-black_text dark:text-white_text text-sm bg-[#76767655] dark:bg-[#a0a0a058] hover:bg-[#FFFFFF55] dark:hover:bg-[#d9d9d974] transition rounded-2xl px-3 py-2 drop-shadow-lg">
                                     <i className="bi bi-globe-europe-africa text-base"></i>
                                     <p className="m-0 p-0">See on the map</p>

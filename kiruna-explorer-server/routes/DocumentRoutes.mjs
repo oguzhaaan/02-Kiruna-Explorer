@@ -19,9 +19,8 @@ import FileDAO from "../dao/FileDAO.mjs";
 
 
 const router = express.Router();
-
-const DocumentDao = new DocumentDAO();
 const AreaDao = new AreaDAO();
+const DocumentDao = new DocumentDAO(AreaDao);
 const DocumentLinksDao = new DocumentLinksDAO();
 const FileDao = new FileDAO();
 
@@ -491,6 +490,7 @@ router.put('/:DocId/area', isLoggedIn, authorizeRoles('admin', 'urban_planner'),
     const { DocId } = req.params;
     const { newAreaId } = req.body;
 
+    console.log("AAA: " + DocId, newAreaId);
     DocumentDao.updateDocumentAreaId(Number(DocId), Number(newAreaId))
         .then(() => {
             res.status(200).json({ message: 'Document areaId updated successfully' });
@@ -500,6 +500,8 @@ router.put('/:DocId/area', isLoggedIn, authorizeRoles('admin', 'urban_planner'),
                 res.status(400).json({ error: 'Invalid area ID' });
             } else if (error instanceof AreaNotFound) {
                 res.status(404).json({ error: 'Area not found' });
+            } else if (error instanceof DocumentNotFound) {
+                res.status(404).json({ error: 'Document not found' });
             } else {
                 res.status(500).json({ error: 'Internal server error' });
             }

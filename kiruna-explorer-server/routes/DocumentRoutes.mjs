@@ -359,10 +359,10 @@ router.post("/link",
     ],
 
     async (req, res) => {
-        console.log(req.body)
+        //console.log(req.body)
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            console.log(errors.array().map((e) => e.msg));
+            //console.log(errors.array().map((e) => e.msg));
             return res.status(400).json({ errors: errors.array() });
         }
         //check if connection type is valid
@@ -469,7 +469,7 @@ router.post("/links",
                 const existingLink = await DocumentLinksDao.checkLinkExists(link.originalDocId, link.selectedDocId, link.connectionType);
 
                 if (existingLink) {
-                    console.log(`Connection already exists for ${link.originalDocId} and ${link.selectedDocId}`);
+                    //console.log(`Connection already exists for ${link.originalDocId} and ${link.selectedDocId}`);
                 }
                 else {
                     const newLink = {
@@ -478,7 +478,7 @@ router.post("/links",
                         date: link.date,
                         connection: link.connectionType
                     };
-                    //console.log(link);
+                    ////console.log(link);
                     await DocumentLinksDao.addLinktoDocument(newLink); // Aggiungi ogni link al database
                 }
             }
@@ -596,7 +596,7 @@ router.post(
         if (!allowedTypes.includes(req.body.fileType)) {
             return res.status(400).json({ error: 'Invalid file type. Allowed types: attachment, original' });
         }
-        // console.log(req.file);
+        // //console.log(req.file);
 
         const docId = req.params.DocId;
         const file = {
@@ -650,7 +650,7 @@ router.get('/:DocId/files/download/:FileId',
             if (!FilePath) {
                 return res.status(404).json({ error: "File not found" });
             }
-            console.log(FilePath);
+            //console.log(FilePath);
 
             // Costruisci il percorso assoluto del file
             const filePathToDownload = "." + FilePath;
@@ -696,16 +696,16 @@ router.delete('/:DocId/files/:FileId', isLoggedIn,
             if (!FilePath) {
                 return res.status(404).json({ error: "File not found" });
             }
-            console.log(FilePath);
+            //console.log(FilePath);
 
             await fs.unlink("." + FilePath, async (err) => {
                 if (err) {
-                    console.log('Error deleting file:', err);
+                    //console.log('Error deleting file:', err);
                     return res.status(500).json({ error: "Failed to delete the physical file" });
                 }
             });
-            console.log("File deleted successfully");
-            console.log("Deleting file with ID:", FileId);
+            //console.log("File deleted successfully");
+            //console.log("Deleting file with ID:", FileId);
             // Ora rimuovi la riga nel database
             const deleteResult = await FileDao.deleteFile(FileId);
 
@@ -733,7 +733,7 @@ router.get('/:DocId/files',
 
 
         const docId = req.params.DocId;
-        console.log(docId);
+        //console.log(docId);
 
         try {
             // Use the DAO function to get files

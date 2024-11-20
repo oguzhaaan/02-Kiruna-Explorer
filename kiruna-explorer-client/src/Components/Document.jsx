@@ -130,7 +130,7 @@ function Document(props) {
       links: props.connections.length > 0 ? props.connections : null,
     };
 
-    console.log(documentData);
+    //console.log(documentData);
 
     if (!validateFields()) {
       setAlertMessage(["Please fill all the mandatory fields.", "error"]);
@@ -145,7 +145,7 @@ function Document(props) {
       resetForm();
       toggleModal();
     } catch (error) {
-      console.log(error);
+      //console.log(error);
       setAlertMessage([error.message, "error"]);
     }
   };

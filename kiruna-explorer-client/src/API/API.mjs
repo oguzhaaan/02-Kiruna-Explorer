@@ -175,7 +175,7 @@ const getAreaById = async (areaId) => {
     }
     
     const result = await response.json();
-    console.log(result)
+    //console.log(result)
     const geoJsonresult = JSON.parse(result.geoJson)
     return geoJsonresult
     
@@ -186,7 +186,7 @@ const getAreaById = async (areaId) => {
 };
 
 const addArea = async (geoJson) => {
-  console.log("Sending GeoJSON:", JSON.stringify(geoJson, null, 2));  // Controllo per verificare cosa viene inviato
+  //console.log("Sending GeoJSON:", JSON.stringify(geoJson, null, 2));  // Controllo per verificare cosa viene inviato
 
   try {
     const response = await fetch(`${SERVER_URL}/api/areas`, {
@@ -223,7 +223,7 @@ const getAllDocuments = async () => {
     }
 
     const result = await response.json();
-    console.log(result)
+    //console.log(result)
     return result;
 
   } catch (error) {
@@ -267,7 +267,7 @@ const getFilteredDocuments = async (filters) => {
 
     // Parse and return the response JSON
     const data = await response.json();
-    console.log(data)
+    //console.log(data)
     return data;
   } catch (error) {
     console.error('Error fetching filtered documents:', error);
@@ -390,7 +390,7 @@ const uploadFile = async (id, formData) => {
     if (response.ok) {
       return result;
     } else {
-      console.log(result);
+      //console.log(result);
       throw new Error(result.error + "");
     }
   } catch (error) {
@@ -418,7 +418,7 @@ const getDocumentFiles = async (DocId) => {
 const deleteFile = async (DocId, FileId) => {
 
   //const encodedFilePath = encodeURIComponent(FilePath);
-  console.log(DocId, FileId);
+  //console.log(DocId, FileId);
   try {
     const response = await fetch(`${SERVER_URL}/api/documents/${DocId}/files/${FileId}`, {
       method: 'DELETE',

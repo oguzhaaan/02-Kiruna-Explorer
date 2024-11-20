@@ -91,7 +91,7 @@ describe("Integration Test GET /:DocId - Get Document by ID", () => {
             .expect(404)
             .catch(err=>err)
 
-        console.log(result.text.error)
+        //console.log(result.text.error)
     
         expect(result.body.error.customMessage).toEqual("Document Not Found");
     });

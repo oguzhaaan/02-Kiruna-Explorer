@@ -310,7 +310,7 @@ function GeoreferenceMap(props) {
 
         } catch (err) {
             setAlertCustomMessage([err.message, 'error'])
-            console.log(err)
+            //console.log(err)
         }
     }
 
@@ -335,7 +335,7 @@ function GeoreferenceMap(props) {
             navigate(-1);
         } catch (err) {
             setAlertCustomMessage(["We encountered some errors, check your connection and retry", 'error'])
-            console.log(err)
+            //console.log(err)
         }
     }
 

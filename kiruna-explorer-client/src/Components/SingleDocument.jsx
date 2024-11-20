@@ -60,7 +60,7 @@ function SingleDocument(props) {
 
             try {
                 setUploading(true); // Imposta lo stato di upload in corso
-                console.log(formData.get('file')); // Puoi vedere il file selezionato
+                //console.log(formData.get('file')); // Puoi vedere il file selezionato
 
                 await sleep(2000);
                 // Chiamata API per caricare il file
@@ -107,11 +107,11 @@ function SingleDocument(props) {
 
     const handleDownload = (file) => {
         if (file) {
-            console.log('Downloading:', file.name);
+            //console.log('Downloading:', file.name);
             // Chiama la funzione downloadFile dal tuo API
             API.downloadFile(id, file.id, file.path)
                 .then(() => {
-                    console.log('File downloaded successfully');
+                    //console.log('File downloaded successfully');
                 })
                 .catch(error => {
                     setAlertMessage([error.message, 'error']);
@@ -123,7 +123,7 @@ function SingleDocument(props) {
 
 
     const handleDelete = async (FileId) => {
-        console.log(FileId);
+        //console.log(FileId);
 
         try {
             const response = await API.deleteFile(id, FileId);
@@ -168,7 +168,7 @@ function SingleDocument(props) {
             }
             catch (err) {
                 navigate("/documents")
-                console.log(err)
+                //console.log(err)
             }
         }
         if (id) getDoc()
@@ -185,7 +185,7 @@ function SingleDocument(props) {
         const getFiles = async () => {
             try {
                 const fileData = await API.getDocumentFiles(id); // Aggiungi un'API per i file
-                console.log(fileData);
+                //console.log(fileData);
                 setFiles(fileData);
             } catch (error) {
                 console.error(error);
@@ -203,7 +203,7 @@ function SingleDocument(props) {
         const getLinks = async () => {
             try {
                 const links = await API.getDocuemntLinks(id) // [{link1}, {link2}]
-                console.log(links)
+                //console.log(links)
                 setDocumentLinks(links)
             } catch (error) {
                 console.error(error)
@@ -253,7 +253,7 @@ function SingleDocument(props) {
                                 <button
                                     onClick={() => {
                                         setShowModalDeleteConfirm(false);
-                                        console.log(selectedFile);
+                                        //console.log(selectedFile);
                                         handleDelete(selectedFile.id);
                                     }}
                                     className="bg-my_red dark:bg-my_red hover:bg-red-500 dark:hover:bg-red-500 transition text-white_text w-40 h-16 rounded-xl text-xl"
@@ -554,7 +554,7 @@ function SingleDocument(props) {
                                                                         ${isDarkMode ? 'text-white' : 'text-black'} 
                                                                         flex items-center text-left cursor-pointer hover:opacity-70 transition`}
                                                                 onClick={() => {
-                                                                    console.log("TODO")
+                                                                    //console.log("TODO")
                                                                 }}
                                                             >
                                                                 <i className="bi bi-paperclip mr-2"></i> Attachments
@@ -638,7 +638,7 @@ const FileItem = ({ file, isDarkMode, handleDownload, setShowModalDeleteConfirm,
                         <button
                             className={`py-2 px-2.5 text-sm text-my_red flex hover:opacity-70 items-center text-left cursor-pointer rounded-b-md transition`}
                             onClick={() => {
-                                console.log(file);
+                                //console.log(file);
                                 setSelectedFile(file);
                                 setShowModalDeleteConfirm(true);
                                 onDropdownToggle(); // Chiude il dropdown dopo l'azione

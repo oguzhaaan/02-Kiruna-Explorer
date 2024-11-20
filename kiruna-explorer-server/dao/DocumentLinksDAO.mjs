@@ -54,7 +54,7 @@ export default function DocumentLinksDAO() {
         }
 
         // Log per verificare i valori
-        console.log("Links to keep:", linksToKeep);
+        //console.log("Links to keep:", linksToKeep);
 
         return new Promise((resolve, reject) => {
             // Trova i link attualmente presenti nel database con lo stesso doc1Id o doc2Id invertiti
@@ -70,7 +70,7 @@ export default function DocumentLinksDAO() {
                         return reject(new Error("Unable to retrieve links for deletion."));
                     }
 
-                    console.log(rows);
+                    //console.log(rows);
 
                     if (rows.length === 0) {
                         // Non ci sono link da eliminare
@@ -81,7 +81,7 @@ export default function DocumentLinksDAO() {
                     const idsToDelete = rows.map(row => row.id);
 
                     // Log per verificare gli ID da eliminare
-                    console.log("IDs to delete:", idsToDelete);
+                    //console.log("IDs to delete:", idsToDelete);
 
                     // Query per eliminare i link
                     const queryDelete = `

@@ -209,10 +209,10 @@ const LinkDocuments = ({
       setConnectionsInForm(linkArray);
       navigate(-1);
     } else if (mode === "save") {
-      console.log(linkArray);
+      //console.log(linkArray);
       // In "save" mode, make an API call to save the connections
       try {
-        //console.log(link)
+        ////console.log(link)
         if (linkArray.length == 0) {
           await API.deleteAll(originalDocId);
         } else {

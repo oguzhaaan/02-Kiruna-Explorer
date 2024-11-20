@@ -166,7 +166,7 @@ function Markers({ area, handleClick, clickedArea, setDocumentId, setShowSingleD
   const [groupedDocs, setGroupedDocs] = useState([]);
 
 
- // console.log(geometry.coordinates[0])
+ // //console.log(geometry.coordinates[0])
   const GenericPoints = L.icon({
     iconUrl: markerpin,
     iconSize: [35, 45],
@@ -201,7 +201,7 @@ function Markers({ area, handleClick, clickedArea, setDocumentId, setShowSingleD
           acc[item.type]++;
           return acc;
         }, {})
-        //console.log(groupedByType)
+        ////console.log(groupedByType)
         setGroupedDocs(Object.entries(groupedByType))
       } catch (err) {
         setAreaDoc([])

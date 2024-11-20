@@ -271,8 +271,8 @@ describe("Unit Test updateDocumentAreaId", () => {
         ]);
 
         vitest.spyOn(db, "run").mockImplementation((query, params, callback) => {
-            console.log("db.run called with query:", query);
-            console.log("db.run called with params:", params);
+            //console.log("db.run called with query:", query);
+            //console.log("db.run called with params:", params);
             callback(null);
         });
     

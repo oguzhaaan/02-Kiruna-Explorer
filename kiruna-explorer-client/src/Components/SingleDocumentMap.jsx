@@ -45,11 +45,11 @@ function SingleDocumentMap({ setDocumentId, id, setShowSingleDocument }) {
 
     const handleDownload = (file) => {
         if (file) {
-            console.log('Downloading:', file.name);
+            //console.log('Downloading:', file.name);
             // Chiama la funzione downloadFile dal tuo API
             API.downloadFile(id, file.id, file.path)
                 .then(() => {
-                    console.log('File downloaded successfully');
+                    //console.log('File downloaded successfully');
                 })
                 .catch(error => {
                     setAlertMessage([error.message, 'error']);
@@ -79,7 +79,7 @@ function SingleDocumentMap({ setDocumentId, id, setShowSingleDocument }) {
             }
             catch (err) {
                 navigate("/mapDocuments")
-                console.log(err)
+                //console.log(err)
             }
         }
         if (id) getDoc()
@@ -89,7 +89,7 @@ function SingleDocumentMap({ setDocumentId, id, setShowSingleDocument }) {
         const getFiles = async () => {
             try {
                 const fileData = await API.getDocumentFiles(id); // Aggiungi un'API per i file
-                console.log(fileData);
+                //console.log(fileData);
                 setFiles(fileData);
             } catch (error) {
                 console.error(error);
@@ -107,7 +107,7 @@ function SingleDocumentMap({ setDocumentId, id, setShowSingleDocument }) {
         const getLinks = async () => {
             try {
                 const links = await API.getDocuemntLinks(id) // [{link1}, {link2}]
-                console.log(links)
+                //console.log(links)
                 setDocumentLinks(links)
             } catch (error) {
                 console.error(error)

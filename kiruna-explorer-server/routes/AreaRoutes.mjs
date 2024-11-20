@@ -52,7 +52,7 @@ router.post("/", isLoggedIn, authorizeRoles('admin', 'urban_planner'),
             //.isString().withMessage("GeoJSON must be a string")
     ],
     async (req, res) => {
-        console.log(req.body)
+        //console.log(req.body)
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });

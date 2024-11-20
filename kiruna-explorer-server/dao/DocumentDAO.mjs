@@ -16,10 +16,11 @@ export default function DocumentDAO(areaDAO) {
                     const documents = rows.map(row => this.convertDBRowToDocument(row));
                     resolve(documents);
                 }
-        })
-    }
-    )};
-    
+            })
+        }
+        )
+    };
+
     this.getDocumentById = (id) => {
         const query = "SELECT * FROM document WHERE id = ?";
 
@@ -27,7 +28,7 @@ export default function DocumentDAO(areaDAO) {
             db.get(query, [id], (err, row) => {
                 if (err) {
                     return reject(err);
-                } else if (row === undefined) {
+                } else if (!row) {
                     return reject(new DocumentNotFound());
                 } else {
                     // Converti la riga del database in un oggetto Document
@@ -42,17 +43,17 @@ export default function DocumentDAO(areaDAO) {
         return new Promise((resolve, reject) => {
             let query = "SELECT * FROM document WHERE 1=1";
             const params = [];
-    
+
             if (type) {
                 query += " AND type = ?";
                 params.push(type);
             }
-    
+
             if (title) {
                 query += " AND title LIKE ?";
                 params.push(`%${title}%`);
             }
-    
+
             if (stakeholders) {
                 query += " AND (";
                 const stakeholderConditions = [];
@@ -62,17 +63,17 @@ export default function DocumentDAO(areaDAO) {
                 query += stakeholderConditions.join(" AND ");
                 query += ")";
             }
-    
+
             if (startDate) {
                 query += " AND date >= ?";
                 params.push(startDate);
             }
-    
+
             if (endDate) {
                 query += " AND date <= ?";
                 params.push(endDate);
             }
-    
+
             db.all(query, params, (err, rows) => {
                 if (err) {
                     return reject(err);
@@ -90,7 +91,7 @@ export default function DocumentDAO(areaDAO) {
             db.all(query, [areaId], (err, rows) => {
                 if (err) {
                     return reject(err);
-                }else if(!Number.isInteger(areaId)) {
+                } else if (!Number.isInteger(areaId)) {
                     return reject(new InvalidArea());
                 }
                 else if (rows.length === 0) {
@@ -98,57 +99,64 @@ export default function DocumentDAO(areaDAO) {
                     return reject(new DocumentNotFound());
                 } else if (areaId === null && !areaDAO.getAllAreas().includes(areaId)) {
                     return reject(new AreaNotFound());
-                
-                } 
-                 else {
+
+                }
+                else {
                     resolve(rows.map(row => this.convertDBRowToDocument(row)));
                 }
             });
         });
     }
 
-    this.updateDocumentAreaId = (documentId, newAreaId) => {
-        return new Promise((resolve, reject) => {
-            // Fetch oldAreaId, areaIdsInDoc, and allAreas at the same time
-            Promise.all([
-                this.getDocumentById(documentId).then(document => document.areaId).catch(err => reject(err)),
-                this.getAllDocuments().then(documents => documents.map(doc => doc.areaId)),
-                areaDAO.getAllAreas().then(areas => areas.map(area => area.id)) // Get all valid area IDs
-            ]).then(([oldAreaId, areaIdsInDoc, allAreaIds]) => {
-                const this_self = this
+    this.updateDocumentAreaId = async (documentId, newAreaId) => {
+        try {
+            // Validate the newAreaId
+            if (!Number.isInteger(newAreaId) || newAreaId <= 0) {
+                throw new InvalidArea();
+            }
 
-                if (!Number.isInteger(newAreaId) || newAreaId <= 0) {
-                    return reject(new InvalidArea());
-                }
+            // Fetch required data
+            const [document, allDocuments, allAreas] = await Promise.all([
+                this.getDocumentById(documentId),
+                this.getAllDocuments(),
+                areaDAO.getAllAreas()
+            ]);
 
-                // Check if oldAreaId and newAreaId exists in areaIdsInDoc
-                if (!areaIdsInDoc.includes(oldAreaId) || !allAreaIds.includes(newAreaId)) {
-                    return reject(new AreaNotFound());
-                }
+            // Validate the current document and areas
+            const oldAreaId = document.areaId;
+            const areaIdsInDoc = allDocuments.map(doc => doc.areaId);
+            const allAreaIds = allAreas.map(area => area.id);
 
-                // Proceed to update the document's areaId to newAreaId
+            if (!areaIdsInDoc.includes(oldAreaId) || !allAreaIds.includes(newAreaId)) {
+                throw new AreaNotFound();
+            }
+
+            // Update the document's areaId to newAreaId
+            await new Promise((resolve, reject) => {
                 const updateQuery = "UPDATE document SET areaId = ? WHERE id = ?";
                 db.run(updateQuery, [newAreaId, documentId], function (err) {
                     if (err) {
+                        console.log("AAAAAAAA:" +  err);
                         return reject(err);
                     }
-
-                    // Re-fetch documents to check if oldAreaId is still in use
-                    this_self.getAllDocuments().then(updatedDocuments => {
-                        const updatedAreaIdsInDoc = updatedDocuments.map(doc => doc.areaId);
-
-                        if (!updatedAreaIdsInDoc.includes(oldAreaId)) {
-                            // If oldAreaId is no longer in use, delete it from the area table
-                            Promise.all([
-                                areaDAO.deleteAreaById(oldAreaId)
-                            ]).then(() => resolve(true)).catch(reject);
-                        } else {
-                            resolve(true); // Resolve without deleting if still in use
-                        }
-                    }).catch(reject); // Catch errors from re-fetching documents
+                    resolve();
                 });
-            }).catch(reject); // Catch errors from initial promises
-        });
+            });
+
+            // Re-fetch documents to check if oldAreaId is still in use
+            const updatedDocuments = await this.getAllDocuments();
+            const updatedAreaIdsInDoc = updatedDocuments.map(doc => doc.areaId);
+
+            // If oldAreaId is no longer in use, delete it
+            if (!updatedAreaIdsInDoc.includes(oldAreaId)) {
+                await areaDAO.deleteAreaById(oldAreaId);
+            }
+
+            return true; // Successfully updated and cleaned up old area if necessary
+        } catch (error) {
+            // Handle errors appropriately
+            throw error;
+        }
     };
 
     this.addDocument = (documentData) => {
@@ -195,7 +203,7 @@ export default function DocumentDAO(areaDAO) {
             language: documentData.language,
             description: documentData.description,
             scale: documentData.scale,
-            areaId: documentData.areaId ? documentData.areaId:null,
+            areaId: documentData.areaId ? documentData.areaId : null,
             pages: documentData.pages,
             planNumber: documentData.planNumber,
             lkab: documentData.stakeholders.includes("lkab"),

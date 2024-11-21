@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUserContext } from "../contexts/UserContext.jsx";
+import Alert from "./Alert.jsx";
 
 function LoginPage(props) {
   const { logIn } = useUserContext();
   const navigate = useNavigate();
+
+  const [alertMessage, setAlertMessage] = useState(['', '']);
 
   const [formData, setFormData] = useState({
     username: "",
@@ -19,9 +22,13 @@ function LoginPage(props) {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    logIn(formData);
+    try {
+      await logIn(formData);
+    } catch (error) {
+      setAlertMessage([error.message, 'error']);
+    }
   };
 
   const handleCancel = () => {
@@ -41,17 +48,20 @@ function LoginPage(props) {
           "url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Kiruna.jpg/2560px-Kiruna.jpg')",
       }}
     >
+      <Alert message={alertMessage[0]} type={alertMessage[1]}
+             clearMessage={() => setAlertMessage(['', ''])}></Alert>
+
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-black opacity-50"></div>
 
       {/* Login box */}
       <div className="relative z-10 p-10 max-w-md w-full text-white text-opacity-80">
-        <h2 className="text-4xl text-center mb-8">Login</h2>
+        <h2 className="text-3xl text-center mb-8">Login</h2>
 
         <form onSubmit={handleSubmit}>
           <div className="mb-7 relative">
             <label
-              className="block text-xl font-normal mb-3"
+              className="block text-lg font-normal mb-3"
               htmlFor="username"
             >
               Username
@@ -63,13 +73,13 @@ function LoginPage(props) {
               value={formData.username}
               onChange={handleChange}
               placeholder="Enter your username"
-              className="w-100 px-4 h-12 rounded-full bg-customGray bg-opacity-30 backdrop-blur shadow text-white text-lg focus:outline-none"
+              className="w-100 px-4 h-12 rounded-full bg-customGray bg-opacity-30 backdrop-blur shadow text-white text-base focus:outline-none"
             />
           </div>
 
           <div className="mb-16">
             <label
-              className="block text-xl font-normal mb-3"
+              className="block text-lg font-normal mb-3"
               htmlFor="password"
             >
               Password
@@ -81,7 +91,7 @@ function LoginPage(props) {
               value={formData.password}
               onChange={handleChange}
               placeholder="Enter your password"
-              className="w-full px-4 h-12  rounded-full bg-customGray bg-opacity-30 backdrop-blur shadow text-white text-lg focus:outline-none"
+              className="w-full px-4 h-12  rounded-full bg-customGray bg-opacity-30 backdrop-blur shadow text-white text-base focus:outline-none"
             />
           </div>
 
@@ -89,13 +99,13 @@ function LoginPage(props) {
             <button
               type="button"
               onClick={handleCancel}
-              className="w-44 h-14 bg-customGray bg-opacity-80 shadow text-2xl  font-normal text-black rounded-full hover:bg-gray-400"
+              className="w-44 h-14 bg-customGray bg-opacity-80 shadow text-xl  font-normal text-black rounded-full hover:bg-gray-400"
             >
               Go back
             </button>
             <button
               type="submit"
-              className="w-44 h-14  bg-customBlue bg-opacity-100 shadow text-2xl  font-normal rounded-full hover:bg-[#2e5c79]"
+              className="w-44 h-14  bg-customBlue bg-opacity-100 shadow text-xl  font-normal rounded-full hover:bg-[#2e5c79]"
             >
               Enter
             </button>

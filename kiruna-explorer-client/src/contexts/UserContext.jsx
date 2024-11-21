@@ -14,27 +14,26 @@ export const UserProvider = ({ children }) => {
       const user = await API.logIn(credentials);
       setIsLoggedIn(true);
       setUser(user);
-      console.log(`Welcome, ${user.username}!`, "success");
-    } catch (error) {
-      console.log(error, "danger");
+    }
+    catch (error) {
+      throw new Error(error);
     }
   };
 
   const logOut = async () => {
-    await API.logOut();
-    console.log(`Goodbye, ${user.username}!`, "success");
-    setIsLoggedIn(false);
+    try {
+        await API.logOut();
+        setIsLoggedIn(false);
+    }
+    catch (error) {
+      throw new Error(error);
+    }
   };
 
   const checkAuth = async () => {
-    try{
     const user = await API.getUserInfo();
     setIsLoggedIn(true);
     setUser(user);
-    }
-    catch(err){
-      console.log(err)
-    }
   };
 
   return (

@@ -1,32 +1,93 @@
 import express from "express";
+import multer from 'multer'; // Package: multer
+import { fileURLToPath } from 'url';
+import path from 'path';
+import { promises as fs } from 'fs';
 import DocumentDAO from "../dao/DocumentDAO.mjs";
 import { body, param, validationResult } from "express-validator";
 import AreaDAO from "../dao/AreaDAO.mjs";
 import Area from "../models/Area.mjs";
 import DocumentLinksDAO from "../dao/DocumentLinksDAO.mjs";
 import Link from "../models/Link.mjs";
-import { isLoggedIn } from "../auth/authMiddleware.mjs";
+import { isLoggedIn,  } from "../auth/authMiddleware.mjs";
 import { InvalidArea, AreaNotFound } from "../models/Area.mjs";
 import { DocumentNotFound } from "../models/Document.mjs";
-const router = express.Router();
-const DocumentDao = new DocumentDAO();
-const AreaDao = new AreaDAO();
-const DocumentLinksDao = new DocumentLinksDAO();
+import { authorizeRoles } from "../auth/authMiddleware.mjs";
+import { query } from "express-validator";
 
+import FileDAO from "../dao/FileDAO.mjs";
+
+
+const router = express.Router();
+const AreaDao = new AreaDAO();
+const DocumentDao = new DocumentDAO(AreaDao);
+const DocumentLinksDao = new DocumentLinksDAO();
+const FileDao = new FileDAO();
+
+
+/* GET /api/documents/filter */
+/*
+some examples of queries:
+/api/documents/filter?type=technical&title=Document%201&stakeholders=lkab,municipality&startDate=2023-01-01&endDate=2023-12-31
+/api/documents/filter?type=technical&title=Document%201&stakeholders=lkab,municipality
+/api/documents/filter?type=technical&title=Document%201
+/api/documents/filter?type=technical
+/api/documents/filter?title=Document%201
+/api/documents/filter?stakeholders=lkab,municipality
+/api/documents/filter
+*/
+router.get("/filter", isLoggedIn,
+    [
+        query("type").optional().isString().withMessage("Type must be a string"),
+        query("title").optional().isString().withMessage("title must be a string"),
+        query("stakeholders").optional().isString().withMessage("Stakeholders must be a comma-separated string"),
+        query("startDate").optional().isISO8601().withMessage("Start date must be a valid date"),
+        query("endDate").optional().isISO8601().withMessage("End date must be a valid date")
+    ],
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        try {
+            const { type, title, stakeholders, startDate, endDate } = req.query;
+            const stakeholdersArray = stakeholders ? stakeholders.split(',') : null;
+
+            const documents = await DocumentDao.getDocumentsByFilter({
+                type,
+                title,
+                stakeholders: stakeholdersArray,
+                startDate,
+                endDate
+            });
+
+            res.status(200).json(documents);
+        } catch (err) {
+            console.error("Error fetching documents:", err);
+            res.status(500).json({ error: "Internal server error", details: err.message });
+        }
+    });
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname("../");
 
 router.get("/",
+    isLoggedIn,
+    authorizeRoles('admin', 'urban_planner'),
     async (req, res) => {
         try {
             const documents = await DocumentDao.getAllDocuments();
 
-            res.json(documents);
+            res.status(200).json(documents);
         }
         catch (error) {
-            console.error("Error in getDocumentById function:", error.message);
+            console.error("Error in getAllDocuments function:", error.message);
             res.status(500).json({ error: err.message });
         }
     }
 );
+
+
 
 /* GET /api/documents/:DocId */
 router.get("/:DocId", isLoggedIn,
@@ -53,6 +114,8 @@ router.get("/:DocId", isLoggedIn,
             res.status(err.status).json({ error: err });
         }
     })
+    
+    
 
 /* GET /api/documents/area/:areaId */
 router.get("/area/:areaId", isLoggedIn,
@@ -87,10 +150,11 @@ router.get("/area/:areaId", isLoggedIn,
     });
 
 
-const validStakeholders = ["lkab", "municipality", "regional authority", "architecture firms", "citizens", "others" ];
+const validStakeholders = ["lkab", "municipality", "regional authority", "architecture firms", "citizens", "others"];
 
 router.post("/",
     isLoggedIn,
+    authorizeRoles('admin', 'urban_planner'),
     [
         body("title")
             .trim()
@@ -189,6 +253,7 @@ router.post("/",
 /* GET /api/documents/:DocId/links */
 
 router.get("/:DocId/links",
+    isLoggedIn,
     [
         param("DocId")
             .isNumeric()
@@ -241,6 +306,8 @@ router.get("/:DocId/links",
 );
 
 router.delete("/:DocId/links",
+    isLoggedIn,
+    authorizeRoles('admin', 'urban_planner'),
     [
         param("DocId")
             .isNumeric()
@@ -274,6 +341,8 @@ router.delete("/:DocId/links",
 /* POST /api/documents/link */
 
 router.post("/link",
+    authorizeRoles('admin', 'urban_planner'),
+    isLoggedIn,
     [
         body("doc1Id")
             .isNumeric()
@@ -290,10 +359,10 @@ router.post("/link",
     ],
 
     async (req, res) => {
-        console.log(req.body)
+        //console.log(req.body)
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            console.log(errors.array().map((e) => e.msg));
+            //console.log(errors.array().map((e) => e.msg));
             return res.status(400).json({ errors: errors.array() });
         }
         //check if connection type is valid
@@ -317,13 +386,13 @@ router.post("/link",
         //check if documents exist
         try {
             const doc1Exists = await DocumentDao.getDocumentById(req.body.doc1Id);
-            
+
             const doc2Exists = await DocumentDao.getDocumentById(req.body.doc2Id);
-            
+
         } catch (error) {
             console.error("Error in isLink function:", error.message);
             return res.status(404).json({ error: "Document 1 or 2 not found" });
-          //  throw new Error("Unable to check if documents exist. Please check your connection and try again.");
+            //  throw new Error("Unable to check if documents exist. Please check your connection and try again.");
         }
 
         try {
@@ -339,6 +408,8 @@ router.post("/link",
 );
 
 router.post("/links",
+    isLoggedIn,
+    authorizeRoles('admin', 'urban_planner'),
     [
         body("links")
             .isArray({ min: 0 })
@@ -372,9 +443,9 @@ router.post("/links",
 
         // Controlla se i documenti esistono
         try {
-            // Controlliamo che ogni documenti esista
+            // Controlliamo che ogni documento esista
             for (const link of links) {
-                console.log
+
                 const doc1Exists = await DocumentDao.getDocumentById(link.originalDocId);
                 if (!doc1Exists) {
                     return res.status(404).json({ error: `Document with ID ${link.originalDocId} not found` });
@@ -398,7 +469,7 @@ router.post("/links",
                 const existingLink = await DocumentLinksDao.checkLinkExists(link.originalDocId, link.selectedDocId, link.connectionType);
 
                 if (existingLink) {
-                    console.log(`Connection already exists for ${link.originalDocId} and ${link.selectedDocId}`);
+                    //console.log(`Connection already exists for ${link.originalDocId} and ${link.selectedDocId}`);
                 }
                 else {
                     const newLink = {
@@ -407,7 +478,7 @@ router.post("/links",
                         date: link.date,
                         connection: link.connectionType
                     };
-                    //console.log(link);
+                    ////console.log(link);
                     await DocumentLinksDao.addLinktoDocument(newLink); // Aggiungi ogni link al database
                 }
             }
@@ -420,7 +491,261 @@ router.post("/links",
     }
 );
 
+router.put('/:DocId/area', isLoggedIn, authorizeRoles('admin', 'urban_planner'), (req, res) => {
+    const { DocId } = req.params;
+    const { newAreaId } = req.body;
+
+    DocumentDao.updateDocumentAreaId(Number(DocId), Number(newAreaId))
+        .then(() => {
+            res.status(200).json({ message: 'Document areaId updated successfully' });
+        })
+        .catch((error) => {
+            if (error instanceof InvalidArea) {
+                res.status(400).json({ error: 'Invalid area ID' });
+            } else if (error instanceof AreaNotFound) {
+                res.status(404).json({ error: 'Area not found' });
+            } else if (error instanceof DocumentNotFound) {
+                res.status(404).json({ error: 'Document not found' });
+            } else {
+                res.status(500).json({ error: 'Internal server error' });
+            }
+        });
+});
 
 
+
+// Configure Multer for file storage
+const storage = multer.diskStorage({
+    destination: async (req, file, cb) => {
+        const uploadPath = path.join(__dirname, 'uploads');
+        try {
+            await fs.mkdir(uploadPath, { recursive: true });
+        } catch (error) {
+            return cb(error);
+        }
+        cb(null, uploadPath);
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        cb(null, `${uniqueSuffix}-${file.originalname}`);
+    },
+});
+
+const multerErrorHandler = (err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        // Errori specifici di Multer (es: dimensione file)
+        return res.status(400).json({ error: `Multer error: ${err.message}` });
+    } else if (err.code === 'INVALID_FILE_TYPE') {
+        // Errore personalizzato per tipo di file non valido
+        return res.status(400).json({ error: err.message });
+    }
+    // Errori generici
+    next(err);
+};
+
+const upload = multer({
+    storage: storage,
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = [
+            'image/jpeg',
+            'image/png',
+            'application/pdf',
+            'image/jpg',
+            'image/svg+xml',
+            'text/plain'
+        ];
+        if (!allowedTypes.includes(file.mimetype)) {
+            const error = new Error('Invalid file type. Only JPEG, PNG, PDF, JPG, SVG, and TXT are allowed.');
+            error.code = 'INVALID_FILE_TYPE'; // Custom error code
+            return cb(error);
+        }
+        cb(null, true);
+    }
+});
+
+const MAX_SIZE = 20 * 1024 * 1024;
+
+// API route to handle file upload
+router.post(
+    '/:DocId/files',
+    isLoggedIn,
+    authorizeRoles('admin', 'urban_planner'),
+    upload.single('file'), // Use multer middleware
+    [
+        param("DocId")
+            .isNumeric()
+            .withMessage("Document ID must be a valid number")
+
+    ],
+    async (req, res) => {
+        // Handle validation errors
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+        //check if file was uploaded
+        if (!req.file) {
+            return res.status(400).json({ error: 'File upload failed. No file provided.' });
+        }
+        // Check file size
+        if (req.file.size > MAX_SIZE) {
+            return res.status(400).json({ error: 'File size exceeds the maximum limit of 20MB.' });
+        }
+        //check if file type is allowed
+        const allowedTypes = ['attachment', 'original'];
+        if (!allowedTypes.includes(req.body.fileType)) {
+            return res.status(400).json({ error: 'Invalid file type. Allowed types: attachment, original' });
+        }
+        // //console.log(req.file);
+
+        const docId = req.params.DocId;
+        const file = {
+            name: req.file.originalname,
+            type: req.body.fileType,
+            path: `/uploads/${req.file.filename}`,
+        }
+        try {
+            const [attachmentID, fileId] = await FileDao.storeFile(docId, file);
+            // File successfully uploaded
+            if (!attachmentID) {
+                return res.status(500).json({ error: "Unable to store file. Please try again later." });
+            }
+            res.status(200).json({
+                message: 'File uploaded successfully',
+                fileId: fileId,
+                fileName: req.file.filename,
+                filePath: `/uploads/${req.file.filename}`,
+            });
+        }
+        catch (error) {
+            console.error("Error in storeFile function:", error.message);
+            return res.status(500).json({ error: "Unable to store file. Please try again later." });
+        }
+    }, multerErrorHandler
+);
+
+router.get('/:DocId/files/download/:FileId',
+    isLoggedIn,
+    [
+        param("DocId")
+            .isNumeric()
+            .withMessage("Document ID must be a valid number"),
+        param("FileId")
+            .isNumeric()
+            .withMessage("File ID must be a valid number")
+    ],
+
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+        try {
+            const { DocId, FileId } = req.params;
+
+
+            //add function to get file path from id
+            const FilePath = await FileDao.getFilePathById(FileId);
+
+            if (!FilePath) {
+                return res.status(404).json({ error: "File not found" });
+            }
+            //console.log(FilePath);
+
+            // Costruisci il percorso assoluto del file
+            const filePathToDownload = "." + FilePath;
+
+            try {
+                await fs.access(filePathToDownload);  // Verifica se il file esiste
+                res.download(filePathToDownload, (err) => {
+                    if (err) {
+                        res.status(500).json({ error: "Failed to download the file" });
+                    }
+                });
+            } catch (error) {
+                // Se il file non esiste, invia un errore senza far crashare l'app
+                res.status(404).json({ error: "File not found" });
+            }
+        } catch (error) {
+            console.error('Error in file download:', error.message);
+            res.status(500).json({ error: error.message });
+        }
+    });
+
+router.delete('/:DocId/files/:FileId', isLoggedIn,
+    authorizeRoles('admin', 'urban_planner'),
+    [
+        param("DocId")
+            .isNumeric()
+            .withMessage("Document ID must be a valid number"),
+        param("FileId")
+            .isNumeric()
+            .withMessage("File ID must be a valid number")
+    ],
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+        try {
+            const { DocId, FileId } = req.params;
+
+            //add function to get file path from id
+            const FilePath = await FileDao.getFilePathById(FileId);
+
+            if (!FilePath) {
+                return res.status(404).json({ error: "File not found" });
+            }
+            //console.log(FilePath);
+
+            await fs.unlink("." + FilePath, async (err) => {
+                if (err) {
+                    //console.log('Error deleting file:', err);
+                    return res.status(500).json({ error: "Failed to delete the physical file" });
+                }
+            });
+            //console.log("File deleted successfully");
+            //console.log("Deleting file with ID:", FileId);
+            // Ora rimuovi la riga nel database
+            const deleteResult = await FileDao.deleteFile(FileId);
+
+            if (deleteResult.deletedCount === 0) {
+                return res.status(405).json({ error: "File not found in database" });
+            }
+
+            res.status(200).json({ message: "File deleted successfully" });
+        }
+        catch (error) {
+            res.status(500).json({ error: "Error in the delete function" });
+        }
+    }
+
+)
+
+router.get('/:DocId/files',
+    isLoggedIn,
+    [
+        param("DocId")
+            .isNumeric()
+            .withMessage("Document ID must be a valid number")
+    ],
+    async (req, res) => {
+
+
+        const docId = req.params.DocId;
+        //console.log(docId);
+
+        try {
+            // Use the DAO function to get files
+            const files = await FileDao.getFilesByDocumentId(docId);
+
+            // Return the files as a JSON response
+            res.status(200).json(files);
+        } catch (error) {
+            // Handle errors and return a response
+            console.error("Error fetching files:", error);
+            res.status(500).json({ error: 'An error occurred while fetching files.' });
+        }
+    });
 
 export default router;

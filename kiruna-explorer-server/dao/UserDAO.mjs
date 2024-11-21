@@ -16,7 +16,7 @@ export default function UserDAO() {
           resolve(false);
         } else {
           const user = new User(row.id, row.role, row.username);
-          console.log(user);
+          //console.log(user);
 
           crypto.scrypt(password, row.salt, 32, function (err, hashedPassword) {
             if (err) reject(err);

@@ -32,8 +32,8 @@ const login = async (userInfo) => {
 
 
 // Example Parameters for the tests
-const residentUser = { id:1, username: "Romeo", password: "1111", role: Role.URBAN_PLANNER}
-const urbanplannerUser = { id:2, username: "Juliet", password: "2222", role: Role.RESIDENT}
+const urbanplannerUser = { id:1, username: "Romeo", password: "1111", role: Role.URBAN_PLANNER}
+const residentUser  = { id:2, username: "Juliet", password: "2222", role: Role.RESIDENT}
 const no_profile = { id:3, username: "user1", password: "pass1", role: null}
 //cookie for the login, in case of API that needs an authentication before
 let resident_cookie
@@ -149,7 +149,7 @@ describe("Integration Test POST /link", () => {
         const result = await request(app)
             .post(`${basePath}/link`)
             .send({})
-            .set("Cookie", resident_cookie)
+            .set("Cookie", urbanplanner_cookie)
             .expect(400);
 
     });
@@ -157,11 +157,11 @@ describe("Integration Test POST /link", () => {
     test("should return 402 if link has invalid connection type", async () => {
         const invalidConnection = {...mockLinkbody, connection: 'invalid'}
        
-        console.log(invalidConnection)
+        //console.log(invalidConnection)
         const result = await request(app)
             .post(`${basePath}/link`)
             .send(invalidConnection)
-            .set("Cookie", resident_cookie)
+            .set("Cookie", urbanplanner_cookie)
             .expect(402);
     });
 
@@ -171,18 +171,18 @@ describe("Integration Test POST /link", () => {
         const result = await request(app)
             .post(`${basePath}/link`)
             .send(invalidDocId)
-            .set("Cookie", resident_cookie)
+            .set("Cookie", urbanplanner_cookie)
             .expect(404);
     });
 
-    test("should return 404 if document does not exist", async () => {
+    test("should return 403 because the resident user is not allowed to do it", async () => {
         const invalidDocId = {...mockLinkbody, doc2Id: 29}
 
         const result = await request(app)
             .post(`${basePath}/link`)
             .send(invalidDocId)
             .set("Cookie", resident_cookie)
-            .expect(404);
+            .expect(403);
     });
     
     test("should return 200 if link is valid", async () => {

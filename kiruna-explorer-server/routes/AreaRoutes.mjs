@@ -1,7 +1,7 @@
 // 02-Kiruna-Explorer/kiruna-explorer-server/routes/AreaRoutes.mjs
 import express from 'express';
 import AreaDAO from "../dao/AreaDAO.mjs";
-import { body, validationResult } from "express-validator";
+import { body,param, validationResult } from "express-validator";
 import { isLoggedIn } from "../auth/authMiddleware.mjs";
 const router = express.Router();
 const areaDao = new AreaDAO();
@@ -22,6 +22,27 @@ router.get("/", isLoggedIn, async (req, res) => {
     }
 });
 
+router.get("/:areaId", isLoggedIn,[
+    param("areaId")
+        .isNumeric()
+        .withMessage("Area ID must be a valid number")
+    ], 
+    async (req, res) => {
+    try {
+        const params = req.params;
+        const areaId = params.areaId
+
+        const area = await areaDao.getAreaById(areaId);
+        res.status(200).json(area);
+    } catch (err) {
+        if (err instanceof AreaNotFound) {
+            res.status(404).json({ error: "Area not found" });
+        }
+        console.error("Error fetching areas:", err);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
 // POST /api/areas - Create a new area
 router.post("/", isLoggedIn, authorizeRoles('admin', 'urban_planner'),
     [
@@ -31,7 +52,7 @@ router.post("/", isLoggedIn, authorizeRoles('admin', 'urban_planner'),
             //.isString().withMessage("GeoJSON must be a string")
     ],
     async (req, res) => {
-        console.log(req.body)
+        //console.log(req.body)
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });

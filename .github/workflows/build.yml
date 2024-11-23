@@ -22,7 +22,7 @@ jobs:
         run: npm install
         working-directory: kiruna-explorer-server
       - name: Run tests with coverage
-        run: npm test --coverage --allowOnly
+        run: npm test -- --coverage --allowOnly
         working-directory: kiruna-explorer-server
       - name: SonarQube Cloud Scan
         uses: SonarSource/sonarcloud-github-action@master

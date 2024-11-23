@@ -25,10 +25,12 @@ Here's the Table of Contents with all the APIs listed:
       - [**Edit area id**:](#edit-area-id)
       - [**Add Files**:](#add-files)
       - [**Delete File**](#delete-file)
-      - [**Get Files**:](#get-files)
-      - [**Download File**:](#download-a-file)
+      - [**Get Files**](#get-files)
+      - [**Download a File**](#download-a-file)
+      - [**Get Attachments**](#get-attachments)
     - [5. Users Credentials](#5-users-credentials)
     - [6. Dockerization](#6-dockerization)
+    - [SCREENSHOTS](#screenshots)
   - [LICENSE](#license)
 
 
@@ -590,6 +592,17 @@ $docker compose up
 ```
 
 **note**: You need to have Docker Desktop installed and opened in background
+
+### SCREENSHOTS
+
+![Screenshot 1](Screenshots/listDocuments.png)
+*List of all documents*
+
+![Screenshot 2](Screenshots/viewDocument.png)
+*Visualization of a document*
+
+![Screenshot 3](Screenshots/map.png)
+*Map*
 
 ## LICENSE
 

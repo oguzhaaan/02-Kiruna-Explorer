@@ -56,8 +56,17 @@ function FilterMenu({ filterValues, setFilterValues, toggleFilterMenu }) {
                     flex flex-col relative w-full sm:w-80 h-auto p-3`}
         onClick={(e) => e.stopPropagation()}
       >
+        <div className="flex flex-row mb-5">
+          <div className="text-black_text dark:text-white_text text-3xl">
+            <i className="bi bi-sort-down-alt w-10 " />
+          </div>
+          <label className="text-black_text dark:text-white_text mb-1 text-3xl w-full ml-2 text-left">
+            Filters
+          </label>
+        </div>
+
         {/* Type */}
-        <div className="input-type mb-1 w-full">
+        <div className="input-type mb-3 w-full">
           <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">
             Type:
           </label>
@@ -76,7 +85,7 @@ function FilterMenu({ filterValues, setFilterValues, toggleFilterMenu }) {
           </select>
         </div>
         {/* Stakeholders */}
-        <div className="input-stakeholder mb-1 w-full">
+        <div className="input-stakeholder mb-3 w-full">
           <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">
             Stakeholders:
           </label>
@@ -97,7 +106,7 @@ function FilterMenu({ filterValues, setFilterValues, toggleFilterMenu }) {
         </div>
         {/* Issuance Date */}
         {!isFilterDateRange && (
-          <div className="input-date mb-1 w-full">
+          <div className="input-date mb-3 w-full">
             <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">
               Issuance Date:
             </label>

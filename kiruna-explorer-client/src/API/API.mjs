@@ -49,7 +49,7 @@ const addDocument = async (documentData) => {
         scale: documentData.scale,
         planNumber: documentData.planNumber,
         date: documentData.date,
-        type: documentData.type,
+        typeId: documentData.typeId,
         language: documentData.language,
         pages: documentData.pageNumber,
         description: documentData.description,
@@ -243,7 +243,7 @@ const getFilteredDocuments = async (filters) => {
       if (value !== undefined && value !== null && value !== "" && value.length > 0) {
         if (Array.isArray(value)) {
           // Convert arrays to comma-separated strings for stakeholders
-          queryParams.append(key, value.map(item => item.value.toLowerCase().replace(/\s+/g, '_')).join(","));
+          queryParams.append(key, value.map(item => item.label).join(','));
         } else {
           queryParams.append(key, value);
         }

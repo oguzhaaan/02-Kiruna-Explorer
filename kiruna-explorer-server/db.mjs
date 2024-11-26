@@ -13,14 +13,14 @@ let env = process.env.NODE_ENV ? process.env.NODE_ENV.trim() : "development"
 const dbPath = env === "test" ? path.resolve(__dirname, "database_test.db") : path.resolve(__dirname, "database.db");
 
 // Log the database path to verify
-//console.log("Using database at:", dbPath);
+console.log("Using database at:", dbPath);
 
 // Create and export the database instance
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
     console.error("Error opening database:", err.message);
   } else {
-    //console.log("Connected to the SQLite database.");
+    console.log("Connected to the SQLite database.");
   }
 });
 

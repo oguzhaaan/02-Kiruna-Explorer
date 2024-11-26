@@ -150,7 +150,7 @@ router.get("/area/:areaId", isLoggedIn,
     });
 
 
-const validStakeholders = ["lkab", "municipality", "regional authority", "architecture firms", "citizens", "others"];
+// const validStakeholders = ["lkab", "municipality", "regional authority", "architecture firms", "citizens", "others"];
 
 router.post("/",
     isLoggedIn,
@@ -168,9 +168,9 @@ router.post("/",
         body("date")
             .notEmpty().withMessage("Date is required"),
 
-        body("type")
-            .notEmpty().withMessage("Type is required")
-            .isIn(["design", "informative", "prescriptive", "technical", "agreement", "conflict", "consultation", "material effects"]).withMessage("Invalid document type"),
+        // body("type")
+        //     .notEmpty().withMessage("Type is required")
+        //     .isIn(["design", "informative", "prescriptive", "technical", "agreement", "conflict", "consultation", "material effects"]).withMessage("Invalid document type"),
 
         body("language")
             .optional({ nullable: true, checkFalsy: true }) // Ignora se è `null` o stringa vuota
@@ -192,16 +192,16 @@ router.post("/",
             .optional({ nullable: true, checkFalsy: true })
             .isInt().withMessage("Area ID must be a number"),
 
-        body("stakeholders")
-            .isArray({ min: 1 }).withMessage("Stakeholders must be a non-empty array")
-            .custom((stakeholders) => {
-                stakeholders.forEach((stakeholder) => {
-                    if (!validStakeholders.includes(stakeholder)) {
-                        throw new Error(`Each stakeholder must be one of the following: ${validStakeholders.join(", ")}`);
-                    }
-                });
-                return true;
-            }),
+        // body("stakeholders")
+        //     .isArray({ min: 1 }).withMessage("Stakeholders must be a non-empty array")
+        //     .custom((stakeholders) => {
+        //         stakeholders.forEach((stakeholder) => {
+        //             if (!validStakeholders.includes(stakeholder)) {
+        //                 throw new Error(`Each stakeholder must be one of the following: ${validStakeholders.join(", ")}`);
+        //             }
+        //         });
+        //         return true;
+        //     }),
 
         body("planNumber")
             .if((_, { req }) => req.body.scale === "plan")

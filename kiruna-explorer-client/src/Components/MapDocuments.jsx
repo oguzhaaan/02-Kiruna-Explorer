@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
-import { MapContainer, TileLayer, Polygon, Popup, Marker, ZoomControl, useMap, Tooltip } from "react-leaflet";
+import { MapContainer, TileLayer, Polygon, Popup, Marker, ZoomControl, useMap, Tooltip, GeoJSON } from "react-leaflet";
 import "./map.css"
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
@@ -13,14 +13,48 @@ import { useTheme } from "../contexts/ThemeContext.jsx";
 import { getIcon } from "./Utilities/DocumentIcons.jsx";
 import { formatString } from "./Utilities/StringUtils.js";
 import { SingleDocumentMap } from "./SingleDocumentMap.jsx";
+import { collect } from "@turf/turf";
+
+function calculateCentroid(coordinates) {
+  const polygon = L.polygon(coordinates.map(coord => [coord[1], coord[0]])); // Inverti [lng, lat] -> [lat, lng]
+
+  const bounds = polygon.getBounds();
+
+  // return center
+  return bounds.getCenter();
+}
+
+function calculateBounds(coordinates, Municipal = false) {
+  if (Municipal){
+    let bounds = L.latLngBounds();
+
+    console.log("Processing MultiPolygon");
+    
+    // Itera su ciascun poligono del MultiPolygon
+    coordinates.forEach(polygonCoordinates => {
+      // Ogni poligono potrebbe avere anelli multipli (esterno e isole)
+      polygonCoordinates.forEach(ring => {
+        // Inverti [lng, lat] in [lat, lng] e calcola i bounds di ogni anello
+        const polygonBounds = L.polygon(ring.map(coord => [coord[1], coord[0]])).getBounds();
+        bounds.extend(polygonBounds); // Estendi i bounds complessivi
+      });
+    });
+
+    return bounds;
+  }
+  else{
+    const polygon = L.polygon(coordinates.map(coord => [coord[1], coord[0]])); // Inverti [lng, lat] -> [lat, lng]
+
+    return polygon.getBounds();
+  }
+}
 
 function GeoreferenceMapDoc(props) {
   const { isDarkMode } = useTheme();
   const navigate = useNavigate()
   
   //define default  position to "center of Kiruna"
-  const latitude = 67.8558; 
-  const longitude = 20.2253;
+  const center = [68.20805,20.593249999999998]
 
   const [presentAreas, setPresentAreas] = useState(null);
   const [clickedArea, setClickedArea] = useState(null);
@@ -28,8 +62,9 @@ function GeoreferenceMapDoc(props) {
   const [OpenTooltipDocs, setOpenTooltipDocs] = useState(null)
   const [ShowSingleDocument, setShowSingleDocument] = useState(false);
   const [documentId, setDocumentId] = useState(null);
-
-
+  const [cityBounds, setCityBounds] = useState(null);
+  const [municipalGeoJson, setMunicipalGeoJson] = useState(null)
+  
   const mapRef = useRef(null);
 
   {/* Clear Alert message after 5 sec*/ }
@@ -48,6 +83,11 @@ function GeoreferenceMapDoc(props) {
       props.setNavShow(true);
       const areas = await API.getAllAreas()
       setPresentAreas(areas)
+      console.log(areas)
+
+      const bounds = calculateBounds(areas[0].geoJson.geometry.coordinates, true)
+      setCityBounds(bounds)
+      setMunicipalGeoJson(areas[0].geoJson)
     }
     handleAreas()
   }, []);
@@ -57,28 +97,20 @@ function GeoreferenceMapDoc(props) {
     //refresh
   }, [presentAreas, ShowSingleDocument])
 
-  const cityBounds = [
-    [67.92532085836797, 20.245374612817344],
-    [67.85139867724654, 20.65936775042602],
-    [67.77576380313107, 20.246345676166037],
-    [67.86274503663387, 19.86795112123954]
-  ];
-
-  {/* Click on area */ }
-  const handleClick = (e, content) => {
-
-    if (content === clickedArea) {
-      setClickedArea(null)
-    } else {
-      if (content === 1) {
-        setAlertMessage(`Municipal Area`)
-      }
-      else {
-        setAlertMessage(`Area N.${content}`)
-      }
-      setClickedArea(content)
+  // Mouse over the area
+  const handleMouseOver = (e, content) => {
+    if (content === 1) {
+      setAlertMessage(`Municipal Area`)
     }
-
+    else {
+      setAlertMessage(`Area N.${content}`)
+    }
+    setClickedArea(content)
+  };
+  // Mouse out the area
+  const handleMouseOut = (e) => {
+    setClickedArea(null)
+    setAlertMessage(``)
   };
 
   return (
@@ -86,15 +118,15 @@ function GeoreferenceMapDoc(props) {
       <div className={isDarkMode ? "dark" : "light"}>
         {ShowSingleDocument && <SingleDocumentMap setDocumentId={setDocumentId} id={documentId}  setShowSingleDocument={setShowSingleDocument}></SingleDocumentMap>}
         <MapContainer
-          center={[latitude, longitude]}
-          zoom={13} ref={mapRef}
+          center={center}
+          zoom={8} ref={mapRef}
           zoomControl={false}
           style={{
             height: "100vh",
             width: "100vw"
           }}
           maxBounds={cityBounds}
-          minZoom={12}
+          minZoom={8}
         >
           <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -102,11 +134,11 @@ function GeoreferenceMapDoc(props) {
               className={isDarkMode ? "custom-tile-layer" : ""}
           />
           <ZoomControl position="topright" />
-
+          {municipalGeoJson && <GeoJSON data={municipalGeoJson} pathOptions={{color:`${isDarkMode?"#CCCCCC":"grey"}`, weight: 2,dashArray: "5, 5"}} />}
           {/* Visualize All present Areas*/}
           {
             presentAreas && presentAreas.map((area, index) =>
-              <Markers key={index} area={area} setDocumentId={setDocumentId} setShowSingleDocument={setShowSingleDocument} handleClick={handleClick} OpenTooltipDocs={OpenTooltipDocs} setOpenTooltipDocs={setOpenTooltipDocs} clickedArea={clickedArea}></Markers>
+              <Markers key={index} center={center} area={area} cityBounds={cityBounds} setDocumentId={setDocumentId} setShowSingleDocument={setShowSingleDocument} handleMouseOver={handleMouseOver} handleMouseOut={handleMouseOut} OpenTooltipDocs={OpenTooltipDocs} setOpenTooltipDocs={setOpenTooltipDocs} clickedArea={clickedArea}></Markers>
             )
           }
         </MapContainer>
@@ -136,28 +168,7 @@ function GeoreferenceMapDoc(props) {
   )
 }
 
-function calculateCentroid(coordinates) {
-  let xSum = 0, ySum = 0, area = 0;
-
-  const n = coordinates.length;
-  for (let i = 0; i < n; i++) {
-    const [x1, y1] = coordinates[i];
-    const [x2, y2] = coordinates[(i + 1) % n];
-
-    const a = x1 * y2 - x2 * y1;
-    xSum += (x1 + x2) * a;
-    ySum += (y1 + y2) * a;
-    area += a;
-  }
-
-  area *= 0.5;
-  const centroidX = xSum / (6 * area);
-  const centroidY = ySum / (6 * area);
-
-  return [centroidY, centroidX]; // Restituisci in formato [latitudine, longitudine]
-}
-
-function Markers({ area, handleClick, clickedArea, setDocumentId, setShowSingleDocument, OpenTooltipDocs, setOpenTooltipDocs }) {
+function Markers({ area, center,cityBounds, handleMouseOver, handleMouseOut, clickedArea, setDocumentId, setShowSingleDocument, OpenTooltipDocs, setOpenTooltipDocs }) {
   const map = useMap()
   const [areaDoc, setAreaDoc] = useState([])
   const geometry = area.geoJson.geometry;
@@ -232,17 +243,18 @@ function Markers({ area, handleClick, clickedArea, setDocumentId, setShowSingleD
   }, [map]);
 
   return (
-    geometry.type === 'Polygon' ? (
+    geometry.type === 'Polygon' || geometry.type === "MultiPolygon" ? (
       areaDoc && (
         <>
           <Marker
-            position={calculateCentroid(geometry.coordinates[0])} // Inverti lat/lng per Leaflet
+            position={area.id === 1 ? center: calculateCentroid(geometry.coordinates[0])} // Inverti lat/lng per Leaflet
             icon={area.id === 1 ? MunicipalArea : GenericPolygon} // Puoi scegliere di usare un'icona personalizzata per i punti
             eventHandlers={{
               click: (e) => {
-                handleClick(e, area.id),
-                  map.panTo(calculateCentroid(geometry.coordinates[0]))
-              }
+                  map.fitBounds(area.id === 1 ? cityBounds : calculateBounds(geometry.coordinates[0]))
+              },
+              mouseover: (e)=> handleMouseOver(e, area.id),
+              mouseout: (e)=> handleMouseOut(e),
             }}
           >
             {OpenTooltipDocs !== area.id ? (
@@ -284,10 +296,16 @@ function Markers({ area, handleClick, clickedArea, setDocumentId, setShowSingleD
           </Marker>
 
           {clickedArea === area.id && (
+            area.id != 1?
             <Polygon
               positions={geometry.coordinates[0].map(coord => [coord[1], coord[0]])} // Inverti le coordinate per Leaflet
-              pathOptions={{ color: 'blue' }}
-            />
+              pathOptions={{ color: "#a020f0" }}
+            />:
+            <GeoJSON
+              data={area.geoJson}
+              pathOptions={{color: "red"}}
+            >
+            </GeoJSON>
           )}
         </>
       )
@@ -300,9 +318,10 @@ function Markers({ area, handleClick, clickedArea, setDocumentId, setShowSingleD
             icon={GenericPoints} // Puoi scegliere di usare un'icona personalizzata per i punti
             eventHandlers={{
               click: (e) => {
-                handleClick(e, area.id),
-                  map.panTo([geometry.coordinates[1], geometry.coordinates[0]])
-              }
+                  map.setView([geometry.coordinates[1], geometry.coordinates[0]],14)
+              },
+              mouseover: (e)=> handleMouseOver(e, area.id),
+              mouseout: (e)=> handleMouseOut(e),
             }}
           >
             {OpenTooltipDocs !== area.id ? (

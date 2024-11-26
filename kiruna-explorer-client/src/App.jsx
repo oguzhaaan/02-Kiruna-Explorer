@@ -12,6 +12,7 @@ import { GeoreferenceMap } from "./Components/Map.jsx";
 import DocumentClass from "./classes/Document.mjs";
 import { GeoreferenceMapDoc } from "./Components/MapDocuments.jsx";
 import { ThemeProvider } from "./contexts/ThemeContext.jsx";
+import API from "./API/API.mjs";
 
 function App() {
   const { user, isLoggedIn, checkAuth } = useUserContext();
@@ -24,6 +25,7 @@ function App() {
   const [mode, setMode] = useState("return");
   const [docId, setoriginalDocId] = useState(-1);
   const [updateAreaId, setUpdateAreaId] = useState({ areaId: null, docId: null })
+  const [municipalGeoJson, setMunicipalGeoJson] = useState(null)
 
   useEffect(() => {
     try {
@@ -33,6 +35,16 @@ function App() {
       //console.log(err)
     }
   }, []);
+
+  // get municipal area
+  useEffect(() => {
+    const getMunicipalArea = async () => {
+        const muniArea = await API.getAreaById(1)
+        console.log(muniArea)
+        setMunicipalGeoJson(muniArea)
+    }
+    getMunicipalArea()
+}, [])
 
   return (
     <>
@@ -56,7 +68,7 @@ function App() {
 
             <Route path="/documents/:id" element={(isLoggedIn && user.role === "urban_planner") ? <Document updateAreaId={updateAreaId} setUpdateAreaId={setUpdateAreaId} setoriginalDocId={setoriginalDocId} setMode={setMode} connections={connections} setConnections={setConnections} setNavShow={setNavShow} setIsModalOpen={setIsModalOpen} isModalOpen={isModalOpen} newAreaId={newAreaId} setnewAreaId={setnewAreaId} setNewDocument={setNewDocument} newDocument={newDocument} /> : <Navigate replace to="/" />} />
 
-            <Route path="/map" element={(isLoggedIn && user.role === "urban_planner")  ? <GeoreferenceMap setUpdateAreaId={setUpdateAreaId} updateAreaId={updateAreaId} setNavShow={setNavShow} setnewAreaId={setnewAreaId} /> : <Navigate replace to="/" />} />
+            <Route path="/map" element={(isLoggedIn && user.role === "urban_planner")  ? <GeoreferenceMap municipalGeoJson={municipalGeoJson} setUpdateAreaId={setUpdateAreaId} updateAreaId={updateAreaId} setNavShow={setNavShow} setnewAreaId={setnewAreaId} /> : <Navigate replace to="/" />} />
 
             <Route path="/mapDocuments" element={isLoggedIn ? <GeoreferenceMapDoc setNavShow={setNavShow} /> : <Navigate replace to="/" />} />
 

@@ -1,12 +1,12 @@
 import React, { useRef, useState, useEffect } from "react";
-import { MapContainer, TileLayer, Polygon, Popup, Marker, ZoomControl, useMap, Tooltip } from "react-leaflet";
+import { MapContainer, TileLayer, Polygon, Popup, Marker, ZoomControl, useMap, Tooltip, GeoJSON } from "react-leaflet";
 import { EditControl } from "react-leaflet-draw";
 import { FeatureGroup } from "react-leaflet";
-import { polygon, booleanPointInPolygon } from '@turf/turf';
+import * as turf from '@turf/turf';
 import "./map.css"
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
-import L, { geoJSON } from "leaflet";
+import L, { geoJSON, contains, featureGroup, bounds } from "leaflet";
 import { useNavigate } from "react-router-dom";
 import API from "../API/API.mjs";
 import { useTheme } from "../contexts/ThemeContext.jsx";
@@ -16,24 +16,53 @@ import municipalarea from "../assets/municipal-area.svg"
 import { getIcon } from "./Utilities/DocumentIcons.jsx";
 import Alert from "./Alert.jsx";
 
-function CenterMap({ lat, lng }) {
+function CenterMap({ latlng }) {
     const map = useMap();
-    map.panTo([lat, lng]);
+    map.panTo(latlng);
     return null;
 }
 
-function CenterMapPolygon({ bounds }) {
-    const map = useMap();
-    map.fitBounds(bounds);
-    return null;
+function calculateCentroid(coordinates) {
+    const polygon = L.polygon(coordinates.map(coord => [coord[1], coord[0]])); // Inverti [lng, lat] -> [lat, lng]
+
+    const bounds = polygon.getBounds();
+
+    // return center
+    return bounds.getCenter();
+}
+
+function calculateBounds(coordinates, Municipal = false) {
+    if (Municipal) {
+        let bounds = L.latLngBounds();
+
+        console.log("Processing MultiPolygon");
+
+        // Itera su ciascun poligono del MultiPolygon
+        coordinates.forEach(polygonCoordinates => {
+            // Ogni poligono potrebbe avere anelli multipli (esterno e isole)
+            polygonCoordinates.forEach(ring => {
+                // Inverti [lng, lat] in [lat, lng] e calcola i bounds di ogni anello
+                const latLngs = ring.map(coord => [coord[1], coord[0]]);
+                const polygonBounds = L.polygon(latLngs).getBounds();
+                bounds.extend(polygonBounds); // Estendi i bounds complessivi
+            });
+        });
+        console.log("Bounds" + bounds)
+        return bounds;
+    }
+    else {
+        const polygon = L.polygon(coordinates.map(coord => [coord[1], coord[0]])); // Inverti [lng, lat] -> [lat, lng]
+
+        return polygon.getBounds();
+    }
 }
 
 const HomeButton = ({ handleMunicipalAreas }) => {
+    const map = useMap()
     return (
         <div title="Municipal Area" className="custom-home-button" onClick={() => {
-            handleMunicipalAreas()
+            handleMunicipalAreas(), map.setView([68.20805, 20.593249999999998], 8)
         }}>
-            <CenterMap lat={67.8524} lng={20.2438}></CenterMap>
             <i className="bi bi-house-door-fill text-[#464646]"></i>
         </div>
     );
@@ -43,8 +72,12 @@ function GeoreferenceMap(props) {
     const { isDarkMode } = useTheme();
     const navigate = useNavigate()
 
-    const latitude = 67.8558;
-    const longitude = 20.2253;
+    const center = [68.20805, 20.593249999999998]
+
+    const boundaries = L.latLngBounds(
+        L.latLng(67.3562, 17.8998),  // sud-ovest
+        L.latLng(69.0599, 23.2867)   // nord-est
+    );
 
     const [drawnObject, setDrawnObject] = useState(null);
     const [showSave, setShowSave] = useState(false);
@@ -57,11 +90,24 @@ function GeoreferenceMap(props) {
     const [alertCustomMessage, setAlertCustomMessage] = useState(['', '']);
     const [showManually, setShowManually] = useState(false)
     const [markerLayer, setMarkerLayer] = useState(null);
+    const [polygonLayer, setPolygonLayer] = useState(null);
+
     const [markerCoordinates, setMarkerCoordinates] = useState({ lat: "", lng: "" });
+    const [polygonCoordinates, setPolygonCoordinates] = useState(null);
+
     const [coordinatesErr, setCoordinatesErr] = useState(false)
 
     const mapRef = useRef(null);
     const featureGroupRef = useRef(null);
+    /*
+    // Put clearer name for button finish drawing
+    const element = document.querySelector('.leaflet-draw-actions-top a[title="Finish drawing"]');
+    if (element) {
+        element.textContent = "Connect last point";
+    } else {
+        console.error("Element not found");
+    }*/
+
     {/* Clear Alert message after 5 sec*/
     }
     useEffect(() => {
@@ -83,46 +129,32 @@ function GeoreferenceMap(props) {
     }
     useEffect(() => {
         //refresh
-    }, [showExit, showSave, presentAreas, coordinatesErr])
-
-    const cityBounds = [
-        [67.92532085836797, 20.245374612817344],
-        [67.85139867724654, 20.65936775042602],
-        [67.77576380313107, 20.246345676166037],
-        [67.86274503663387, 19.86795112123954]
-    ];
-
-    const BoundsConnected = polygon([[
-        [20.245374612817344, 67.92532085836797],
-        [20.65936775042602, 67.85139867724654],
-        [20.246345676166037, 67.77576380313107],
-        [19.86795112123954, 67.86274503663387],
-        [20.245374612817344, 67.92532085836797]
-    ]]);
-
-    {/* Check if point is in city bounds */
-    }
-    const isPointInCityBounds = (lat, lng) => {
-        const point = [lng, lat];
-        return booleanPointInPolygon(point, BoundsConnected);
-    };
+    }, [showExit, showSave, presentAreas, coordinatesErr, clickedArea])
 
     {/* Click on area */
     }
-    const handleClick = (e, content) => {
-        if (content === clickedArea) {
+    const handleClick = (e, content, map) => {
+        if (content.id === clickedArea) {
             setClickedArea(null)
             setAlertMessage(``)
             setShowSave(false)
+            map.setView(center, 8)
         }
         else {
-            if (content === 1) {
+            if (content.id === 1) {
                 setAlertMessage(`You selected Municipality Area`)
+                map.fitBounds(boundaries);
             }
             else {
                 setAlertMessage(`You selected a Georeference`)
+                if (content.geoJson.geometry.type === "Polygon") {
+                    map.fitBounds(calculateBounds(content.geoJson.geometry.coordinates[0]));
+                }
+                else {
+                    map.setView([content.geoJson.geometry.coordinates[1], content.geoJson.geometry.coordinates[0]], 14)
+                }
             }
-            setClickedArea(content)
+            setClickedArea(content.id)
             setShowSave(true)
         }
 
@@ -134,43 +166,88 @@ function GeoreferenceMap(props) {
 
         const { layer } = e;
         if (layer instanceof L.Polygon) {
-            setShowManually(false)
-            setAlertMessage("You selected a new custom area");
+            const latlngs = layer.getLatLngs()
+            if (isPolygonInCityBounds(latlngs)) {
+                setShowManually(false)
+                setAlertMessage("You selected a new custom area");
+                const geoJson = layer.toGeoJSON();
+                setPolygonLayer(layer)
+                setPolygonCoordinates(latlngs)
+                setDrawnObject(geoJson);
+                setShowMuniAreas(false)
+                setShowExit(true);
+                setShowSave(true);
+            }
+            else {
+                setAlertMessage("The Polygon has points out of city bounds");
+                if (mapRef && featureGroupRef) {
+                    mapRef.current.removeLayer(layer)
+                    featureGroupRef.current.removeLayer(layer)
+                }
+            }
         } else if (layer instanceof L.Marker) {
-            setShowManually(true)
             const markerPosition = layer.getLatLng();
-            setAlertMessage("You selected a new custom point");
-            setMarkerLayer(layer);
-            setMarkerCoordinates({ lat: markerPosition.lat, lng: markerPosition.lng });
+            if (isPointInCityBounds(markerPosition.lat, markerPosition.lng)) {
+                setShowManually(true)
+                setAlertMessage("You selected a new custom point");
+                setMarkerLayer(layer);
+                setMarkerCoordinates({ lat: markerPosition.lat, lng: markerPosition.lng });
+                const geoJson = layer.toGeoJSON();
+                setDrawnObject(geoJson);
+                setShowMuniAreas(false)
+                setShowExit(true);
+                setShowSave(true);
+            }
+            else {
+                setAlertMessage("The point is out of city bounds");
+                if (mapRef && featureGroupRef) {
+                    mapRef.current.removeLayer(layer)
+                    featureGroupRef.current.removeLayer(layer)
+                }
+            }
         }
-
-        const geoJson = layer.toGeoJSON();
-        setDrawnObject(geoJson);
-        setShowMuniAreas(false)
-        setShowExit(true);
-        setShowSave(true);
     };
 
     const onEdited = (e) => {
         const layers = e.layers;
         layers.eachLayer((layer) => {
             const geoJson = layer.toGeoJSON();
-            setDrawnObject(geoJson);
+
             if (layer instanceof L.Polygon) {
-                setShowManually(false)
-                setAlertMessage("You edited the custom area");
+                const latlngs = layer.getLatLngs()
+                if (isPolygonInCityBounds(latlngs)) {
+                    setDrawnObject(geoJson);
+                    setShowManually(false)
+                    setAlertMessage("You edited the custom area");
+                    setShowExit(true);
+                    setShowSave(true);
+                    setPolygonLayer(layer)
+                    setPolygonCoordinates(latlngs)
+                }
+                else {
+                    setAlertMessage("Point out of city bounds");
+                    if (polygonLayer) {
+                        polygonLayer.setLatLngs(polygonCoordinates);
+                    }
+                }
             } else if (layer instanceof L.Marker) {
-                setShowManually(true)
                 const markerPosition = layer.getLatLng();
-                setAlertMessage("You edited the point position");
-                setMarkerLayer(layer);
-                setMarkerCoordinates({ lat: markerPosition.lat, lng: markerPosition.lng });
-            } else {
-                console.warn("Tipo di layer non supportato.");
+                if (isPointInCityBounds(markerPosition.lat, markerPosition.lng)) {
+                    setDrawnObject(geoJson);
+                    setShowManually(true)
+                    setMarkerLayer(layer);
+                    setMarkerCoordinates({ lat: markerPosition.lat, lng: markerPosition.lng });
+                    setShowExit(true);
+                    setShowSave(true);
+                } else {
+                    setAlertMessage("Point out of city bounds");
+                    if (markerLayer) {
+                        console.log(markerCoordinates)
+                        markerLayer.setLatLng([markerCoordinates.lat, markerCoordinates.lng]);
+                    }
+                }
             }
         });
-        setShowExit(true);
-        setShowSave(true);
     };
 
     const onDeleted = (e) => {
@@ -182,6 +259,7 @@ function GeoreferenceMap(props) {
         setAlertMessage("");
         setMarkerLayer(null)
         setMarkerCoordinates({ lat: "", lng: "" })
+
     };
 
     const onDrawStart = () => {
@@ -268,7 +346,6 @@ function GeoreferenceMap(props) {
         if (markerLayer) {
             // Aggiorna lo stato per riflettere le nuove coordinate
             setMarkerCoordinates({ lat, lng });
-
             if (isPointInCityBounds(lat, lng)) {
                 // Aggiorna la posizione del marker esistente
                 markerLayer.setLatLng([lat, lng]);
@@ -314,6 +391,34 @@ function GeoreferenceMap(props) {
         }
     }
 
+    {/* Check if point is in city bounds */
+    }
+    const isPolygonInCityBounds = (latlngs) => {
+        let flag = true
+        for (let coord of latlngs[0]) {
+            if (!isPointInCityBounds(coord.lat, coord.lng)) {
+                flag = false
+            }
+        }
+        return flag
+    };
+
+    const isPointInCityBounds = (lat, lng) => {
+
+        const polygons = props.municipalGeoJson.geometry.coordinates;
+        const point = turf.point([lng, lat])
+        let flag = false
+        polygons.forEach((polygon, polyIndex) => {
+            polygon.forEach((ring) => {
+                const p = turf.polygon([ring])
+                if (turf.booleanPointInPolygon(point, p)) {
+                    flag = true
+                }
+            })
+        });
+        return flag;
+    };
+
     {/* Save the area selected */
     }
     const handleSave = async () => {
@@ -342,21 +447,24 @@ function GeoreferenceMap(props) {
     return (
         <div className={isDarkMode ? "dark" : "light"}>
             <Alert message={alertCustomMessage[0]} type={alertCustomMessage[1]}
-                   clearMessage={() => setAlertCustomMessage(['', ''])}></Alert>
+                clearMessage={() => setAlertCustomMessage(['', ''])}></Alert>
             <MapContainer
-                whenCreated={(map) => (mapRef.current = map)}
-                center={[latitude, longitude]}
-                zoom={13} ref={mapRef}
+                whenCreated={(map) => {
+                    mapRef.current = map;
+                }}
+                center={center}
+                zoom={5} ref={mapRef}
                 zoomControl={false}
                 style={{
                     height: "100vh",
                     width: "100vw"
                 }}
-                maxBounds={cityBounds}
-                minZoom={12}
+                maxBounds={boundaries}
+                minZoom={7.5}
                 whenReady={() => { if (props.updateAreaId.docId && !drawnObject) createLayerToUpdate(props.updateAreaId.areaId) }}
             >
                 {mapRef.current && !drawnObject && showMuniAreas && <HomeButton handleMunicipalAreas={handleMunicipalAreas} />}
+                {props.municipalGeoJson && <GeoJSON data={props.municipalGeoJson} pathOptions={{ color: `${isDarkMode ? "#CCCCCC" : "grey"}`, weight: 2, dashArray: "5, 5" }} />}
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -382,24 +490,24 @@ function GeoreferenceMap(props) {
                             polyline: false,
                             polygon: drawnObject == null
                         }}
-                        maxBounds={cityBounds}
+                        maxBounds={boundaries}
                         minZoom={12} />
                 </FeatureGroup>
 
                 {/* Center Map in drown object*/}
                 {
                     drawnObject && drawnObject.geometry.type === "Point" &&
-                    <CenterMap lat={drawnObject.geometry.coordinates[1]} lng={drawnObject.geometry.coordinates[0]}></CenterMap>
+                    <CenterMap latlng={[drawnObject.geometry.coordinates[1], drawnObject.geometry.coordinates[0]]}></CenterMap>
                 }
                 {
                     drawnObject && drawnObject.geometry.type === "Polygon" &&
-                    <CenterMap lat={calculateCentroid(drawnObject.geometry.coordinates[0])[0]} lng={calculateCentroid(drawnObject.geometry.coordinates[0])[1]}></CenterMap>
+                    <CenterMap latlng={calculateCentroid(drawnObject.geometry.coordinates[0])} ></CenterMap>
                 }
 
                 {/* Visualize All present Areas*/}
                 {
                     presentAreas && presentAreas.map((area, index) =>
-                        <Markers key={index} area={area} handleClick={handleClick} clickedArea={clickedArea}></Markers>
+                        <Markers key={index} area={area} center={center} handleClick={handleClick} clickedArea={clickedArea}></Markers>
                     )
                 }
             </MapContainer>
@@ -527,35 +635,14 @@ function GeoreferenceMap(props) {
     )
 }
 
-function calculateCentroid(coordinates) {
-    let xSum = 0, ySum = 0, area = 0;
-
-    const n = coordinates.length;
-    for (let i = 0; i < n; i++) {
-        const [x1, y1] = coordinates[i];
-        const [x2, y2] = coordinates[(i + 1) % n];
-
-        const a = x1 * y2 - x2 * y1;
-        xSum += (x1 + x2) * a;
-        ySum += (y1 + y2) * a;
-        area += a;
-    }
-
-    area *= 0.5;
-    const centroidX = xSum / (6 * area);
-    const centroidY = ySum / (6 * area);
-
-    return [centroidY, centroidX]; // return centroid of a polygon to center the map
-}
-
-function Markers({ area, handleClick, clickedArea }) {
+function Markers({ area, center, handleClick, clickedArea }) {
     const map = useMap()
     const [areaDoc, setAreaDoc] = useState([])
     const geometry = area.geoJson.geometry;
-    const [tooltipVisible, setTooltipVisible] = useState(true);
     const [isZoomLevelLow, setIsZoomLevelLow] = useState(false);
     const { isDarkMode } = useTheme();
     const [groupedDocs, setGroupedDocs] = useState([])
+    const [overArea, setOverArea] = useState(null)
 
     const GenericPoints = L.icon({
         iconUrl: markerpin,
@@ -617,17 +704,18 @@ function Markers({ area, handleClick, clickedArea }) {
     }, [map]);
 
     return (
-        geometry.type === 'Polygon' ? (
+        geometry.type === 'Polygon' || geometry.type === "MultiPolygon" ? (
             areaDoc && (
                 <>
                     <Marker
-                        position={calculateCentroid(geometry.coordinates[0])} 
-                        icon={area.id === 1 ? MunicipalArea : GenericPolygon} 
+                        position={area.id === 1 ? center : calculateCentroid(geometry.coordinates[0])}
+                        icon={area.id === 1 ? MunicipalArea : GenericPolygon}
                         eventHandlers={{
                             click: (e) => {
-                                handleClick(e, area.id),
-                                    map.panTo(calculateCentroid(geometry.coordinates[0]))
-                            }
+                                handleClick(e, area, map)
+                            },
+                            mouseover: (e) => { setOverArea(area.id) },
+                            mouseout: (e) => { setOverArea(null) },
                         }}
                     >
                         <Tooltip permanent>
@@ -653,11 +741,18 @@ function Markers({ area, handleClick, clickedArea }) {
                         </Tooltip>
 
                     </Marker>
-                    {clickedArea === area.id && (
-                        <Polygon
-                            positions={geometry.coordinates[0].map(coord => [coord[1], coord[0]])}
-                            pathOptions={{ color: 'blue' }}
-                        />
+                    {(clickedArea === area.id || overArea == area.id) && (
+                        area.id != 1 ?
+                            <Polygon
+                                positions={geometry.coordinates[0].map(coord => [coord[1], coord[0]])}
+                                pathOptions={{ color: `${area.id == 1 ? "red" : "#a020f0"}` }}
+                            />
+                            :
+                            <GeoJSON
+                                data={area.geoJson}
+                                pathOptions={{ color: "red" }}
+                            >
+                            </GeoJSON>
                     )}
                 </>
             )
@@ -666,13 +761,14 @@ function Markers({ area, handleClick, clickedArea }) {
                 <>
                     <Marker
                         key={area.id}
-                        position={[geometry.coordinates[1], geometry.coordinates[0]]} 
-                        icon={GenericPoints} 
+                        position={[geometry.coordinates[1], geometry.coordinates[0]]}
+                        icon={GenericPoints}
                         eventHandlers={{
                             click: (e) => {
-                                handleClick(e, area.id),
-                                    map.panTo([geometry.coordinates[1], geometry.coordinates[0]])
-                            }
+                                handleClick(e, area, map)
+                            },
+                            mouseover: (e) => { setOverArea(area.id) },
+                            mouseout: (e) => { setOverArea(null) },
                         }}
                     >
                         <Tooltip permanent>

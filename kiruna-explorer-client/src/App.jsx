@@ -6,12 +6,12 @@ import { Route, Routes, Outlet, Navigate } from "react-router-dom";
 import { useUserContext } from "./contexts/UserContext.jsx";
 import { NavHeader } from "./Components/NavHeader.jsx"
 import { HomePage } from "./Components/HomePage.jsx";
-import { Document } from "./Components/Document.jsx";
 import LinkDocuments from "./Components/LinkDocuments.jsx";
 import { GeoreferenceMap } from "./Components/Map.jsx";
 import DocumentClass from "./classes/Document.mjs";
 import { GeoreferenceMapDoc } from "./Components/MapDocuments.jsx";
 import { ThemeProvider } from "./contexts/ThemeContext.jsx";
+import DocumentsPage from "./Components/DocumentsPage.jsx";
 
 function App() {
   const { user, isLoggedIn, checkAuth } = useUserContext();
@@ -52,9 +52,9 @@ function App() {
 
             <Route path="/login" element={ isLoggedIn ? (user.role === "urban_planner" ? <Navigate replace to="/documents" /> : user.role === "resident" ? <Navigate replace to="/mapDocuments" /> : <LoginPage setNavShow={setNavShow} />) : <LoginPage setNavShow={setNavShow} />} />
 
-            <Route path="/documents" element={(isLoggedIn && user.role === "urban_planner") ? <Document updateAreaId={updateAreaId} setUpdateAreaId={setUpdateAreaId} setoriginalDocId={setoriginalDocId} setMode={setMode} connections={connections} setConnections={setConnections} setNavShow={setNavShow} setIsModalOpen={setIsModalOpen} isModalOpen={isModalOpen} newAreaId={newAreaId} setnewAreaId={setnewAreaId} setNewDocument={setNewDocument} newDocument={newDocument} /> : <Navigate replace to="/" />} />
+            <Route path="/documents" element={(isLoggedIn && user.role === "urban_planner") ? <DocumentsPage updateAreaId={updateAreaId} setUpdateAreaId={setUpdateAreaId} setoriginalDocId={setoriginalDocId} setMode={setMode} connections={connections} setConnections={setConnections} setNavShow={setNavShow} setIsModalOpen={setIsModalOpen} isModalOpen={isModalOpen} newAreaId={newAreaId} setnewAreaId={setnewAreaId} setNewDocument={setNewDocument} newDocument={newDocument} /> : <Navigate replace to="/" />} />
 
-            <Route path="/documents/:id" element={(isLoggedIn && user.role === "urban_planner") ? <Document updateAreaId={updateAreaId} setUpdateAreaId={setUpdateAreaId} setoriginalDocId={setoriginalDocId} setMode={setMode} connections={connections} setConnections={setConnections} setNavShow={setNavShow} setIsModalOpen={setIsModalOpen} isModalOpen={isModalOpen} newAreaId={newAreaId} setnewAreaId={setnewAreaId} setNewDocument={setNewDocument} newDocument={newDocument} /> : <Navigate replace to="/" />} />
+            <Route path="/documents/:id" element={(isLoggedIn && user.role === "urban_planner") ? <DocumentsPage updateAreaId={updateAreaId} setUpdateAreaId={setUpdateAreaId} setoriginalDocId={setoriginalDocId} setMode={setMode} connections={connections} setConnections={setConnections} setNavShow={setNavShow} setIsModalOpen={setIsModalOpen} isModalOpen={isModalOpen} newAreaId={newAreaId} setnewAreaId={setnewAreaId} setNewDocument={setNewDocument} newDocument={newDocument} /> : <Navigate replace to="/" />} />
 
             <Route path="/map" element={(isLoggedIn && user.role === "urban_planner")  ? <GeoreferenceMap setUpdateAreaId={setUpdateAreaId} updateAreaId={updateAreaId} setNavShow={setNavShow} setnewAreaId={setnewAreaId} /> : <Navigate replace to="/" />} />
 

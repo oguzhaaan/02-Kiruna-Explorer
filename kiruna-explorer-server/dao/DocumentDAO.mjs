@@ -43,7 +43,14 @@ export default function DocumentDAO(areaDAO) {
 
         // Filter by stakeholders if provided
         if (stakeholders && stakeholders.length > 0) {
-            query += " AND document.id IN (SELECT DISTINCT documentId FROM document_stakeholder WHERE stakeholderId IN (" + stakeholders.map(() => "?").join(", ") + "))";
+            query += `
+                AND document.id IN (
+                    SELECT documentId 
+                    FROM document_stakeholder 
+                    JOIN stakeholder ON stakeholder.id = document_stakeholder.stakeholderId
+                    WHERE stakeholder.name IN (${stakeholders.map(() => "?").join(", ")})
+                )
+            `;
             params.push(...stakeholders);
         }
 
@@ -111,27 +118,30 @@ export default function DocumentDAO(areaDAO) {
 
     // Simplified function to fetch a document by ID
     this.getDocumentById = (id) => {
-        const query = "SELECT * FROM document LEFT JOIN document_type ON document.typeId = document_type.id WHERE document.id = ?";
-        
+        const query = `
+            SELECT document.*, document_type.name AS type_name 
+            FROM document 
+            LEFT JOIN document_type ON document.typeId = document_type.id 
+            WHERE document.id = ?
+        `;
+    
         return new Promise((resolve, reject) => {
             db.get(query, [id], async (err, row) => {
-                if (err) {
-                    return reject(err);
-                } else if (!row) {
-                    return reject(new DocumentNotFound());
-                } else {
-                    // Fetch stakeholders for the current document
+                if (err) return reject(err);
+                if (!row) return reject(new DocumentNotFound());
+    
+                try {
                     const stakeholders = await this.getStakeholdersForDocument(row.id);
-                    
-                    // Convert DB row to Document with the fetched stakeholders
                     const document = this.convertDBRowToDocument(row, stakeholders);
-                    document.type = row.type_name;  // Add document type
-
+                    document.type = row.type_name || "Unknown"; // Handle missing type gracefully
                     resolve(document);
+                } catch (error) {
+                    reject(error);
                 }
             });
         });
     };
+    
 
     // Refactored function to filter documents by criteria
     this.getDocumentsByFilter = ({ type, title, stakeholders, startDate, endDate }) => {

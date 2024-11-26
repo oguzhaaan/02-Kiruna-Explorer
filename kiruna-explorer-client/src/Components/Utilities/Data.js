@@ -22,3 +22,61 @@ export const popularLanguages = [
   { code: "ar", name: "Arabic" },
   { code: "it", name: "Italian" },
 ];
+
+export const documentTypes = [
+  {
+    id: 1,
+    name: "Design",
+  },
+  {
+    id: 2,
+    name: "Informative",
+  },
+  {
+    id: 3,
+    name: "Prescriptive",
+  },
+  {
+    id: 4,
+    name: "Technical",
+  },
+  {
+    id: 5,
+    name: "Agreement",
+  },
+  {
+    id: 6,
+    name: "Conflict",
+  },
+  {
+    id: 7,
+    name: "Consultation",
+  },
+  {
+    id: 8,
+    name: "Material Effects",
+  },
+];
+
+export const stakeholders = [
+  {
+    id: 1,
+    name: "LKAB",
+  },
+  {
+    id: 2,
+    name: "Municipality",
+  },
+  {
+    id: 3,
+    name: "Regional Authority",
+  },
+  {
+    id: 4,
+    name: "Architecture Firms",
+  },
+  {
+    id: 5,
+    name: "Citizens",
+  },
+];

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Select from "react-select";
 import customDropdownStyles from "./Utilities/CustomDropdownStyles";
-import { stakeholderOptions } from "./Utilities/Data";
+import { stakeholders, documentTypes } from "./Utilities/Data.js";
 import { useTheme } from "../contexts/ThemeContext";
 
 function FilterMenu({ filterValues, setFilterValues, toggleFilterMenu }) {
@@ -68,14 +68,11 @@ function FilterMenu({ filterValues, setFilterValues, toggleFilterMenu }) {
             className={`w-full px-3 text-base py-2 text-black_text dark:text-white_text bg-input_color_light dark:bg-input_color_dark rounded-md focus:outline-none dark:[&>option]:bg-[#333333]`}
           >
             <option value="none">None</option>
-            <option value="Design">Design</option>
-            <option value="Informative">Informative</option>
-            <option value="Prescriptive">Prescriptive</option>
-            <option value="Technical">Technical</option>
-            <option value="Agreement">Agreement</option>
-            <option value="Conflict">Conflict</option>
-            <option value="Consultation">Consultation</option>
-            <option value="Material Effects">Material Effects</option>
+            {documentTypes.map((type) => (
+              <option key={type.id} value={type.name}>
+                {type.name}
+              </option>
+            ))}
           </select>
         </div>
         {/* Stakeholders */}
@@ -85,7 +82,10 @@ function FilterMenu({ filterValues, setFilterValues, toggleFilterMenu }) {
           </label>
           <Select
             isMulti
-            options={stakeholderOptions}
+            options={stakeholders.map((stakeholder) => ({
+              value: stakeholder.id,
+              label: stakeholder.name,
+            }))}
             value={tempFilterValues.stakeholders}
             onChange={(e) => handleTempChange("stakeholders", e)}
             styles={customDropdownStyles(isDarkMode)}
@@ -110,7 +110,7 @@ function FilterMenu({ filterValues, setFilterValues, toggleFilterMenu }) {
                 handleTempChange("endDate", e.target.value);
               }}
               className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md ${
-                  isDarkMode ? "dark-mode" : "light-mode"
+                isDarkMode ? "dark-mode" : "light-mode"
               }  focus:outline-none`}
             />
           </div>

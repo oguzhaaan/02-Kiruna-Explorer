@@ -12,70 +12,12 @@ import { getStakeholderColor } from "./Utilities/StakeholdersColors";
 import { getIcon } from "./Utilities/DocumentIcons";
 import { formatString } from "./Utilities/StringUtils.js";
 import customDropdownStyles from "./Utilities/CustomDropdownStyles.js";
-import { stakeholderOptions, popularLanguages } from "./Utilities/Data.js";
+import { stakeholders, popularLanguages, documentTypes } from "./Utilities/Data.js";
 import FilterMenu from "./FilterMenu.jsx";
 import FilterLabels from "./FilterLabels.jsx";
 import { useDocuments } from "../hooks/useDocuments.mjs";
 
 function Document(props) {
-  const documentTypes = [
-    {
-      id: 1,
-      name: "Design",
-    },
-    {
-      id: 2,
-      name: "Informative",
-    },
-    {
-      id: 3,
-      name: "Prescriptive",
-    },
-    {
-      id: 4,
-      name: "Technical",
-    },
-    {
-      id: 5,
-      name: "Agreement",
-    },
-    {
-      id: 6,
-      name: "Conflict",
-    },
-    {
-      id: 7,
-      name: "Consultation",
-    },
-    {
-      id: 8,
-      name: "Material Effects",
-    },
-  ];
-
-  const stakeholders = [
-    {
-      id: 1,
-      name: "LKAB",
-    },
-    {
-      id: 2,
-      name: "Municipality",
-    },
-    {
-      id: 3,
-      name: "Regional Authority",
-    },
-    {
-      id: 4,
-      name: "Architecture Firms",
-    },
-    {
-      id: 5,
-      name: "Citizens",
-    },
-  ];
-
   const navigate = useNavigate();
 
   const { isDarkMode, toggleTheme } = useTheme();
@@ -132,7 +74,6 @@ function Document(props) {
         return remainingErrors;
       });
     }
-    console.log(field, value)
   };
 
   // --- Errors ---
@@ -189,7 +130,7 @@ function Document(props) {
       links: props.connections.length > 0 ? props.connections : null,
     };
 
-    //console.log(documentData);
+    console.log(documentData);
 
     if (!validateFields()) {
       setAlertMessage(["Please fill all the mandatory fields.", "error"]);

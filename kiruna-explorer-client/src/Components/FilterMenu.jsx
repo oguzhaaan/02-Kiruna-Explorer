@@ -68,14 +68,14 @@ function FilterMenu({ filterValues, setFilterValues, toggleFilterMenu }) {
             className={`w-full px-3 text-base py-2 text-black_text dark:text-white_text bg-input_color_light dark:bg-input_color_dark rounded-md focus:outline-none dark:[&>option]:bg-[#333333]`}
           >
             <option value="none">None</option>
-            <option value="design">Design document</option>
-            <option value="informative">Informative document</option>
-            <option value="prescriptive">Prescriptive document</option>
-            <option value="technical">Technical document</option>
-            <option value="agreement">Agreement</option>
-            <option value="conflict">Conflict</option>
-            <option value="consultation">Consultation</option>
-            <option value="material effects">Material effects</option>
+            <option value="Design">Design</option>
+            <option value="Informative">Informative</option>
+            <option value="Prescriptive">Prescriptive</option>
+            <option value="Technical">Technical</option>
+            <option value="Agreement">Agreement</option>
+            <option value="Conflict">Conflict</option>
+            <option value="Consultation">Consultation</option>
+            <option value="Material Effects">Material Effects</option>
           </select>
         </div>
         {/* Stakeholders */}

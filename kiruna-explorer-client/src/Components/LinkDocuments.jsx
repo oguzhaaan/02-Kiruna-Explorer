@@ -471,14 +471,12 @@ const DocumentItem = ({
 
                 {/* Stakeholders */}
                 <div className="flex flex-wrap justify-content-end gap-2 bottom-4 right-5">
-                    {stakeholders && stakeholders.map((stakeholder, idx) => (
+                    {stakeholders && stakeholders.map((stakeholder) => (
                         <span
-                            key={idx}
-                            className={`rounded-2xl px-3 py-1 text-sm text-white_text ${getStakeholderColor(
-                                {stakeholder}
-                            )}`}
+                            key={stakeholder.id}
+                            className={`rounded-2xl px-3 py-1 text-sm text-white_text `}
                         >
-                          {formatString(stakeholder)}
+                          {formatString(stakeholder.name)}
                         </span>
                     ))}
                 </div>

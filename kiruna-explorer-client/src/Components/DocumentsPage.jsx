@@ -7,8 +7,8 @@ import { useNavigate } from "react-router-dom";
 import Select from "react-select";
 import DocumentClass from "../classes/Document.mjs";
 import { useTheme } from "../contexts/ThemeContext.jsx";
-import { getStakeholderColor } from "./Utilities/StakeholdersColors";
-import { getIcon } from "./Utilities/DocumentIcons";
+import { getStakeholderColor } from "./Utilities/StakeholdersColors.jsx";
+import { getIcon } from "./Utilities/DocumentIcons.jsx";
 import customDropdownStyles from "./Utilities/CustomDropdownStyles.js";
 import {
   stakeholders,
@@ -19,7 +19,7 @@ import FilterMenu from "./FilterMenu.jsx";
 import FilterLabels from "./FilterLabels.jsx";
 import { useDocuments } from "../hooks/useDocuments.mjs";
 
-function Document(props) {
+function DocumentsPage(props) {
   const navigate = useNavigate();
 
   const { isDarkMode, toggleTheme } = useTheme();
@@ -237,7 +237,7 @@ function Document(props) {
           </div>
         </div>
         <div className="flex flex-row w-full">
-          <div className="flex flex-col mt-8 w-1/4">
+          <div className="flex flex-col mt-8 mx-7 w-1/4">
             <FilterMenu
               filterValues={filterValues}
               setFilterValues={setFilterValues}
@@ -632,10 +632,13 @@ const DocumentItem = ({
           navigate(/documents/ + documentId);
         }}
       >
-        {/* Document Title and Type */}
-        <div className="w-1/2 flex flex-col text-black_text dark:text-white_text">
-          <div className="text-xl mb-3 font-normal">{title}</div>
-          <div className="text-base font-light flex items-center">
+        <div className="grid grid-cols-4 w-full gap-4 text-black_text dark:text-white_text">
+          {/* Document Title*/}
+          <div className="col-span-3 text-xl font-normal">{title}</div>
+          {/* Date */}
+          <div className="flex justify-end text-sm text-gray-400 ">{date}</div>
+          {/* Document Type */}
+          <div className="flex flex-row items-center text-base font-light">
             <img
               src={getIcon(
                 { type: type.toLowerCase() },
@@ -646,13 +649,9 @@ const DocumentItem = ({
             />
             {type}
           </div>
-        </div>
 
-        <div className="flex flex-col gap-2 w-1/2 justify-content-between align-items-end">
-          {/* Date */}
-          <div className="text-sm top-3 right-5 text-gray-400">{date}</div>
           {/* Stakeholders */}
-          <div className="flex flex-wrap justify-end gap-2 bottom-3 right-1 text-white_text">
+          <div className="col-span-3 flex flex-wrap justify-end gap-2 text-white_text">
             {stakeholders &&
               stakeholders.length > 0 &&
               stakeholders.map((stakeholder) => (
@@ -672,4 +671,4 @@ const DocumentItem = ({
   );
 };
 
-export { Document };
+export default DocumentsPage;

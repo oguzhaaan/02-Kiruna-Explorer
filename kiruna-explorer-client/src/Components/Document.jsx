@@ -12,7 +12,11 @@ import { getStakeholderColor } from "./Utilities/StakeholdersColors";
 import { getIcon } from "./Utilities/DocumentIcons";
 import { formatString } from "./Utilities/StringUtils.js";
 import customDropdownStyles from "./Utilities/CustomDropdownStyles.js";
-import { stakeholders, popularLanguages, documentTypes } from "./Utilities/Data.js";
+import {
+  stakeholders,
+  popularLanguages,
+  documentTypes,
+} from "./Utilities/Data.js";
 import FilterMenu from "./FilterMenu.jsx";
 import FilterLabels from "./FilterLabels.jsx";
 import { useDocuments } from "../hooks/useDocuments.mjs";
@@ -550,32 +554,34 @@ const DocumentItem = ({
         }}
       >
         {/* Document Title and Type */}
-        <div className="w-1/2 flex flex-row text-black_text dark:text-white_text">
-          <div>
-            <div className="text-base mb-3 font-normal">{title}</div>
-            <div className="text-sm font-light flex items-center">
-              <img
-                src={getIcon({ type: type }, { darkMode: isDarkMode })}
-                className="w-8 mr-2"
-                alt="type_icon"
-              />
-              {type}
-            </div>
+        <div className="w-1/2 flex flex-col text-black_text dark:text-white_text">
+          <div className="text-base mb-3 font-normal">{title}</div>
+          <div className="text-sm font-light flex items-center">
+            <img
+              src={getIcon(
+                { type: type.toLowerCase() },
+                { darkMode: isDarkMode }
+              )}
+              className="w-8 mr-2"
+              alt="type_icon"
+            />
+            {type}
           </div>
         </div>
 
         <div className="flex flex-col gap-2 w-1/2 justify-content-between align-items-end">
           {/* Date */}
           <div className="text-sm top-3 right-5 text-gray-400">{date}</div>
-
           {/* Stakeholders */}
-          <div className="flex flex-wrap justify-content-end gap-2 bottom-4 right-5">
+          <div className="flex flex-wrap justify-end gap-2 bottom-3 right-1 text-white_text">
             {stakeholders &&
               stakeholders.length > 0 &&
               stakeholders.map((stakeholder) => (
                 <span
                   key={stakeholder.id} // Use the stakeholder id for key to avoid index as key.
-                  className={`rounded-2xl px-3 py-1 text-sm text-black`}
+                  className={`rounded-2xl w-fit px-2 py-0.5 text-xs ${getStakeholderColor(
+                    { stakeholder: stakeholder.name.toLowerCase() }
+                  )}`}
                 >
                   {stakeholder.name}
                 </span>

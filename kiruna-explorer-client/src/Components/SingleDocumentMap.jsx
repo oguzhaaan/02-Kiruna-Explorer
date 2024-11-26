@@ -176,7 +176,7 @@ function SingleDocumentMap({ setDocumentId, id, setShowSingleDocument }) {
                                         return (
                                             <div key={index}
                                                 className={`text-center ${getStakeholderColor({ stakeholder: stakeholder })} rounded-2xl py-1 px-3`}>
-                                                <p className="m-0 p-0 text-center">{capitalizeWords(stakeholder)}</p>
+                                                <p className="m-0 p-0 text-center">{stakeholder.name}</p>
                                             </div>
                                         );
                                     }) : ""

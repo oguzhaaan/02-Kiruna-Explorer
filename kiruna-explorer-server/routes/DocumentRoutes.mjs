@@ -72,7 +72,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname("../");
 
 router.get("/",
-    isLoggedIn,
+    isLoggedIn, 
     authorizeRoles('admin', 'urban_planner'),
     async (req, res) => {
         try {
@@ -118,7 +118,8 @@ router.get("/:DocId", isLoggedIn,
     
 
 /* GET /api/documents/area/:areaId */
-router.get("/area/:areaId", isLoggedIn,
+router.get("/area/:areaId",
+   // isLoggedIn, //tODO probably to be removed
     [
         param("areaId")
             .isInt().withMessage("Area ID must be a valid integer")
@@ -253,7 +254,7 @@ router.post("/",
 /* GET /api/documents/:DocId/links */
 
 router.get("/:DocId/links",
-    isLoggedIn,
+    isLoggedIn, //TODO probably to be removed for visitor?
     [
         param("DocId")
             .isNumeric()
@@ -625,7 +626,7 @@ router.post(
 );
 
 router.get('/:DocId/files/download/:FileId',
-    isLoggedIn,
+    isLoggedIn,  //TODO probably to be removed for visitor?
     [
         param("DocId")
             .isNumeric()
@@ -723,7 +724,7 @@ router.delete('/:DocId/files/:FileId', isLoggedIn,
 )
 
 router.get('/:DocId/files',
-    isLoggedIn,
+    isLoggedIn, //TODO probably to be removed for visitor?
     [
         param("DocId")
             .isNumeric()

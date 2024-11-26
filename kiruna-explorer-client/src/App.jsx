@@ -14,7 +14,7 @@ import { GeoreferenceMapDoc } from "./Components/MapDocuments.jsx";
 import { ThemeProvider } from "./contexts/ThemeContext.jsx";
 
 function App() {
-  const { user, isLoggedIn, checkAuth } = useUserContext();
+  const { user, isLoggedIn, checkAuth, isVisitorLoggedIn } = useUserContext();
 
   const [navShow, setNavShow] = useState(true);
   const [newAreaId, setnewAreaId] = useState(null);
@@ -48,7 +48,7 @@ function App() {
             </>
           }>
 
-            <Route path="/" element={isLoggedIn ? (user.role === "urban_planner" ? <Navigate replace to="/documents" /> : user.role === "resident" ? <Navigate replace to="/mapDocuments" /> : <HomePage />) : <HomePage />} />
+            <Route path="/" element={(isLoggedIn || isVisitorLoggedIn) ? (user.role === "urban_planner" ? <Navigate replace to="/documents" /> : user.role === "resident" ? <Navigate replace to="/mapDocuments" /> : <HomePage />) : <HomePage />} />
 
             <Route path="/login" element={ isLoggedIn ? (user.role === "urban_planner" ? <Navigate replace to="/documents" /> : user.role === "resident" ? <Navigate replace to="/mapDocuments" /> : <LoginPage setNavShow={setNavShow} />) : <LoginPage setNavShow={setNavShow} />} />
 
@@ -58,7 +58,8 @@ function App() {
 
             <Route path="/map" element={(isLoggedIn && user.role === "urban_planner")  ? <GeoreferenceMap setUpdateAreaId={setUpdateAreaId} updateAreaId={updateAreaId} setNavShow={setNavShow} setnewAreaId={setnewAreaId} /> : <Navigate replace to="/" />} />
 
-            <Route path="/mapDocuments" element={isLoggedIn ? <GeoreferenceMapDoc setNavShow={setNavShow} /> : <Navigate replace to="/" />} />
+            {/* <Route path="/mapDocuments" element={isLoggedIn ? <GeoreferenceMapDoc setNavShow={setNavShow} /> : <Navigate replace to="/" />} /> */}
+            <Route path="/mapDocuments" element={(isLoggedIn || isVisitorLoggedIn) ? <GeoreferenceMapDoc setNavShow={setNavShow} /> : <Navigate replace to="/" />} />
 
             <Route path="/linkDocuments" element={(isLoggedIn && user.role === "urban_planner") ? <LinkDocuments setOriginalDocId={setoriginalDocId} originalDocId={docId} mode={mode} setConnectionsInForm={setConnections} /> : <Navigate replace to="/" />} />
 

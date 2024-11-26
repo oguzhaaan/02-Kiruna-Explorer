@@ -10,20 +10,27 @@ function NavHeader(props) {
     const navigate = useNavigate();
     const location = useLocation();
     const currentRoute = location.pathname;
-    const { user, isLoggedIn, logOut } = useUserContext();
+    const { user, isLoggedIn, logOut, handleVisitor, isVisitorLoggedIn } = useUserContext();
 
     return (
         <div className={`${isDarkMode ? 'dark' : 'light'}`}>
-            {!isLoggedIn ?
+            {(!isLoggedIn && !isVisitorLoggedIn )?
                 props.navShow &&
                 <Navbar expand="false" className="fixed z-[2000]">
                     <Container fluid className="text-center w-screen justify-end">
+                        <Navbar.Brand className="text-white_text text-xl flex items-center justify-center mt-4 mr-10">
+                            <Link to="mapDocuments" className="text-inherit no-underline hover:text-slate-300" onClick={() => handleVisitor()}>
+                                <i className="bi bi-person fs-2 align-middle mx-2"></i>
+                                Enter as a visitor
+                            </Link>
+                        </Navbar.Brand>
                         <Navbar.Brand className="text-white_text text-xl flex items-center justify-center mt-4 mr-10">
                             <Link to="login" className="text-inherit no-underline hover:text-slate-300" onClick={() => props.setNavShow(false)}>
                                 <i className="bi bi-person fs-2 align-middle mx-2"></i>
                                 Login
                             </Link>
                         </Navbar.Brand>
+
                     </Container>
                 </Navbar>
                 :
@@ -63,7 +70,7 @@ function NavHeader(props) {
                                         </Col>
                                     </Row>
                                     <div className={`separator ${isDarkMode ? 'bg-white_text' : 'bg-black_text'} opacity-20`}></div>
-                                    { user.role === "urban_planner" && (<Row
+                                    {user.role === "urban_planner" && (<Row
                                         className={`offcanvas-item w-100 p-1 ${currentRoute.includes("documents") ? (isDarkMode ? 'bg-customBlue' : 'bg-blue-200') : ''}`}
                                         onClick={() => { navigate("/documents") }}
                                     >
@@ -76,7 +83,7 @@ function NavHeader(props) {
                                     </Row>)}
                                     <Row
                                         className={`offcanvas-item w-100 p-1 ${currentRoute.includes("map") ? (isDarkMode ? 'bg-customBlue' : 'bg-blue-200') : ''}`}
-                                        onClick={() => { navigate("/mapDocuments")}}
+                                        onClick={() => { navigate("/mapDocuments") }}
                                     >
                                         <Col xs="auto">
                                             <i className={`bi bi-globe-americas fs-3 align-middle ${isDarkMode ? 'text-white_text' : 'text-black_text'}`}></i>
@@ -97,7 +104,7 @@ function NavHeader(props) {
                                         </Col>
                                     </Row>
                                 </div>
-                                <div className="offcanvas-content" onClick={() => { logOut(); props.setNavShow(true); }}>
+                                <div className="offcanvas-content" onClick={() => { logOut(); props.setNavShow(true); handleVisitor() }}>
                                     <Row className="offcanvas-item w-100 p-1">
                                         <Col xs="auto">
                                             <i className={`bi bi-door-open-fill fs-3 align-middle ${isDarkMode ? 'text-white_text' : 'text-black_text'}`}></i>

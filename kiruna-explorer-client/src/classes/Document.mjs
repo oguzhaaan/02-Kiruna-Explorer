@@ -4,7 +4,7 @@
  * @param {string} title
  * @param {array} stakeholders
  * @param {string} date
- * @param {string} type
+ * @param {number} typeId
  * @param {string} language
  * @param {string} description
  * @param {number} areaId
@@ -14,11 +14,11 @@
  */
 
 export default class DocumentClass {
-    constructor(title="", stakeholders=[], date="", type="none", language="", description="", areaId=null, scale="none", pages="", planNumber="", links=[]) {
+    constructor(title="", stakeholders=[], date="", typeId=0, language="", description="", areaId=null, scale="none", pages="", planNumber="", links=[]) {
         this.title = title;
         this.stakeholders = stakeholders;
         this.date = date;
-        this.type = type;
+        this.typeId = typeId;
         this.language = language;
         this.description = description;
         this.areaId = areaId;

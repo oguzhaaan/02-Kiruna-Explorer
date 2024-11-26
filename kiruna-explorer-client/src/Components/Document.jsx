@@ -18,6 +18,64 @@ import FilterLabels from "./FilterLabels.jsx";
 import { useDocuments } from "../hooks/useDocuments.mjs";
 
 function Document(props) {
+  const documentTypes = [
+    {
+      id: 1,
+      name: "Design",
+    },
+    {
+      id: 2,
+      name: "Informative",
+    },
+    {
+      id: 3,
+      name: "Prescriptive",
+    },
+    {
+      id: 4,
+      name: "Technical",
+    },
+    {
+      id: 5,
+      name: "Agreement",
+    },
+    {
+      id: 6,
+      name: "Conflict",
+    },
+    {
+      id: 7,
+      name: "Consultation",
+    },
+    {
+      id: 8,
+      name: "Material Effects",
+    },
+  ];
+
+  const stakeholders = [
+    {
+      id: 1,
+      name: "LKAB",
+    },
+    {
+      id: 2,
+      name: "Municipality",
+    },
+    {
+      id: 3,
+      name: "Regional Authority",
+    },
+    {
+      id: 4,
+      name: "Architecture Firms",
+    },
+    {
+      id: 5,
+      name: "Citizens",
+    },
+  ];
+
   const navigate = useNavigate();
 
   const { isDarkMode, toggleTheme } = useTheme();
@@ -74,6 +132,7 @@ function Document(props) {
         return remainingErrors;
       });
     }
+    console.log(field, value)
   };
 
   // --- Errors ---
@@ -91,9 +150,9 @@ function Document(props) {
         ? { planNumber: "Plan Number is required for scale 'plan'" }
         : {}),
       ...(props.newDocument.date ? {} : { date: "Date is required" }),
-      ...(props.newDocument.type && props.newDocument.type !== "none"
-        ? {}
-        : { type: "Type is required" }),
+      // ...(props.newDocument.type && props.newDocument.type !== "none"
+      //   ? {}
+      //   : { type: "Type is required" }),
       ...(props.newDocument.description
         ? {}
         : { description: "Description is required" }),
@@ -122,7 +181,7 @@ function Document(props) {
       scale: props.newDocument.scale,
       planNumber: props.newDocument.planNumber, // Optional
       date: props.newDocument.date, //day is optional
-      type: props.newDocument.type,
+      typeId: props.newDocument.typeId,
       language: props.newDocument.language || null, // Set to null if not provided
       pageNumber: props.newDocument.pages || null, // Set to null if not provided
       description: props.newDocument.description, // Mandatory
@@ -322,7 +381,10 @@ function Document(props) {
               </label>
               <Select
                 isMulti
-                options={stakeholderOptions}
+                options={stakeholders.map((stakeholder) => ({
+                  value: stakeholder.id,
+                  label: stakeholder.name,
+                }))}
                 value={props.newDocument.stakeholders}
                 onChange={(e) => handleFieldChange("stakeholders", e || [])}
                 styles={customDropdownStyles(isDarkMode)}
@@ -403,7 +465,7 @@ function Document(props) {
               <select
                 id="document-type"
                 value={props.newDocument.type}
-                onChange={(e) => handleFieldChange("type", e.target.value)}
+                onChange={(e) => handleFieldChange("typeId", e.target.value)}
                 className={`w-full px-3 text-base py-2 text-black_text dark:text-white_text bg-input_color_light dark:bg-input_color_dark rounded-md ${
                   errors.type
                     ? "border-red-500 border-1"
@@ -411,14 +473,11 @@ function Document(props) {
                 } focus:outline-none`}
               >
                 <option value="none">None</option>
-                <option value="design">Design document</option>
-                <option value="informative">Informative document</option>
-                <option value="prescriptive">Prescriptive document</option>
-                <option value="technical">Technical document</option>
-                <option value="agreement">Agreement</option>
-                <option value="conflict">Conflict</option>
-                <option value="consultation">Consultation</option>
-                <option value="material effects">Material effects</option>
+                {documentTypes.map((type) => (
+                  <option key={type.id} value={type.id}>
+                    {type.name}
+                  </option>
+                ))}
               </select>
             </div>
             {/* Language */}

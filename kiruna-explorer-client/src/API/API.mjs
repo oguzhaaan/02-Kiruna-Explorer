@@ -49,7 +49,7 @@ const addDocument = async (documentData) => {
         scale: documentData.scale,
         planNumber: documentData.planNumber,
         date: documentData.date,
-        type: documentData.type,
+        typeId: documentData.typeId,
         language: documentData.language,
         pages: documentData.pageNumber,
         description: documentData.description,

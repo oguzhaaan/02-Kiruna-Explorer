@@ -215,61 +215,126 @@ export default function DocumentDAO(areaDAO) {
         }
     };
 
-    this.addDocument = (documentData) => {
-        // Converti il documento per l'inserimento nel database
-        const dbDocument = this.convertDocumentForDB(documentData);
-
-        // Query per inserire il documento
-        const insertDocumentQuery = `
-            INSERT INTO document (title, date, type, language, description, scale, areaId, pages, planNumber, lkab, municipality, regional_authority, architecture_firms, citizens, others)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `;
-
-        return new Promise((resolve, reject) => {
-            db.run(insertDocumentQuery, [
-                dbDocument.title,
-                dbDocument.date,
-                dbDocument.type,
-                dbDocument.language,
-                dbDocument.description,
-                dbDocument.scale,
-                dbDocument.areaId,
-                dbDocument.pages,
-                dbDocument.planNumber,
-                dbDocument.lkab,
-                dbDocument.municipality,
-                dbDocument.regional_authority,
-                dbDocument.architecture_firms,
-                dbDocument.citizens,
-                dbDocument.others
-            ], function (err) {
-                if (err) {
-                    return reject(err); // Rifiuta la promessa in caso di errore
-                }
-                resolve(this.lastID); // Risolvi la promessa con l'ID del documento inserito
+    this.addDocument = async (documentData) => {
+        try {
+            console.log("Received document data:", documentData);
+    
+            // Convert input data into a format suitable for the database
+            const dbDocument = this.convertDocumentForDB(documentData);
+    
+            // SQL query to insert a new document
+            const insertDocumentQuery = `
+                INSERT INTO document (title, date, typeId, language, description, scale, areaId, pages, planNumber)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+    
+            // Insert the document and retrieve the new document ID
+            const documentId = await new Promise((resolve, reject) => {
+                db.run(insertDocumentQuery, [
+                    dbDocument.title,
+                    dbDocument.date,
+                    dbDocument.typeId,
+                    dbDocument.language,
+                    dbDocument.description,
+                    dbDocument.scale,
+                    dbDocument.areaId,
+                    dbDocument.pages,
+                    dbDocument.planNumber
+                ], function (err) {
+                    if (err) {
+                        console.error("Error inserting document:", err.message);
+                        return reject(err);
+                    }
+                    resolve(this.lastID); // Fetch document ID using proper context
+                });
             });
-        });
+    
+            // Check if documentId is valid
+            if (!documentId) {
+                throw new Error("Failed to retrieve the documentId after insertion");
+            }
+    
+            // Add stakeholders to the document
+            await this.addStakeholders(documentId, dbDocument.stakeholders);
+    
+            console.log(`Document with ID ${documentId} added successfully`);
+            return documentId; // Return the newly created document ID
+        } catch (error) {
+            console.error("Error adding document:", error.message);
+            throw error; // Re-throw the error to the caller
+        }
     };
-
+    
+    
+    
+    
+    
+    
     this.convertDocumentForDB = (documentData) => {
+        // Map stakeholders to their IDs. Handle both array of IDs and array of objects with 'value'
+        const stakeholders = documentData.stakeholders?.map(stakeholder => 
+            typeof stakeholder === "object" ? stakeholder.value : stakeholder
+        ) || [];
+    
         return {
             title: documentData.title,
             date: documentData.date,
-            type: documentData.type,
+            typeId: documentData.typeId, // Assuming this is provided in the documentData
             language: documentData.language,
             description: documentData.description,
             scale: documentData.scale,
-            areaId: documentData.areaId ? documentData.areaId : null,
+            areaId: documentData.areaId || null, // Default to null if areaId is not provided
             pages: documentData.pages,
             planNumber: documentData.planNumber,
-            lkab: documentData.stakeholders.includes("lkab"),
-            municipality: documentData.stakeholders.includes("municipality"),
-            regional_authority: documentData.stakeholders.includes("regional authority"),
-            architecture_firms: documentData.stakeholders.includes("architecture firms"),
-            citizens: documentData.stakeholders.includes("citizens"),
-            others: documentData.stakeholders.includes("others"),
+            stakeholders: stakeholders  // Array of stakeholder IDs
         };
     };
+    
+    
+    // Method to associate the document with stakeholders
+    this.addStakeholders = (documentId, stakeholderIds) => {
+        // Return immediately if there are no stakeholders
+        if (!stakeholderIds || stakeholderIds.length === 0) {
+            return Promise.resolve();
+        }
+    
+        const values = stakeholderIds.map(stakeholderId => [documentId, stakeholderId]);
+        const placeholders = values.map(() => "(?, ?)").join(", ");
+        const query = `
+            INSERT INTO document_stakeholder (documentId, stakeholderId)
+            VALUES ${placeholders}
+        `;
+        const flattenedValues = values.flat();
+    
+        return new Promise((resolve, reject) => {
+            db.run("BEGIN TRANSACTION", (err) => {
+                if (err) return reject(err); // Handle transaction start error
+    
+                db.run(query, flattenedValues, (err) => {
+                    if (err) {
+                        return db.run("ROLLBACK", (rollbackErr) => {
+                            if (rollbackErr) {
+                                console.error("Rollback failed:", rollbackErr.message);
+                            }
+                            reject(err); // Reject with the original error
+                        });
+                    }
+    
+                    db.run("COMMIT", (commitErr) => {
+                        if (commitErr) {
+                            console.error("Commit failed:", commitErr.message);
+                            return reject(commitErr);
+                        }
+                        resolve();
+                    });
+                });
+            });
+        });
+    };
+    
+    
+    
+    
 
     this.convertDBRowToDocument = (row, stakeholders) => {
         // Create a new Document instance with the fetched stakeholders

@@ -25,29 +25,10 @@ function calculateCentroid(coordinates) {
   return bounds.getCenter();
 }
 
-function calculateBounds(coordinates, Municipal = false) {
-  if (Municipal) {
-    let bounds = L.latLngBounds();
-
-    console.log("Processing MultiPolygon");
-
-    // Itera su ciascun poligono del MultiPolygon
-    coordinates.forEach(polygonCoordinates => {
-      // Ogni poligono potrebbe avere anelli multipli (esterno e isole)
-      polygonCoordinates.forEach(ring => {
-        // Inverti [lng, lat] in [lat, lng] e calcola i bounds di ogni anello
-        const polygonBounds = L.polygon(ring.map(coord => [coord[1], coord[0]])).getBounds();
-        bounds.extend(polygonBounds); // Estendi i bounds complessivi
-      });
-    });
-
-    return bounds;
-  }
-  else {
+function calculateBounds(coordinates) {
     const polygon = L.polygon(coordinates.map(coord => [coord[1], coord[0]])); // Inverti [lng, lat] -> [lat, lng]
 
     return polygon.getBounds();
-  }
 }
 
 function GeoreferenceMapDoc(props) {
@@ -68,20 +49,8 @@ function GeoreferenceMapDoc(props) {
   const [OpenTooltipDocs, setOpenTooltipDocs] = useState(null)
   const [ShowSingleDocument, setShowSingleDocument] = useState(false);
   const [documentId, setDocumentId] = useState(null);
-  const [cityBounds, setCityBounds] = useState(null);
-  const [municipalGeoJson, setMunicipalGeoJson] = useState(null)
 
   const mapRef = useRef(null);
-
-  {/* Clear Alert message after 5 sec*/ }
-  useEffect(() => {
-    if (alertMessage != "") {
-      const tid = setTimeout(() => {
-        setAlertMessage("")
-      }, 5000)
-      return () => clearTimeout(tid);
-    }
-  }, [alertMessage])
 
   {/* Hide navbar at start and take all present areas*/ }
   useEffect(() => {
@@ -90,10 +59,6 @@ function GeoreferenceMapDoc(props) {
       const areas = await API.getAllAreas()
       setPresentAreas(areas)
       console.log(areas)
-
-      const bounds = calculateBounds(areas[0].geoJson.geometry.coordinates, true)
-      setCityBounds(bounds)
-      setMunicipalGeoJson(areas[0].geoJson)
     }
     handleAreas()
   }, []);
@@ -101,17 +66,17 @@ function GeoreferenceMapDoc(props) {
   {/* Refresh to show modifications*/ }
   useEffect(() => {
     //refresh
-  }, [presentAreas, ShowSingleDocument])
+  }, [presentAreas, ShowSingleDocument, props.municipalGeoJson])
 
   // Mouse over the area
-  const handleMouseOver = (e, content) => {
-    if (content === 1) {
-      setAlertMessage(`Municipal Area`)
+  const handleMouseOver = (e, id, content) => {
+    if (id === 1) {
+      setAlertMessage(`${content} documents in Municipal Area`)
     }
     else {
-      setAlertMessage(`Area N.${content}`)
+      setAlertMessage(`${content} documents in this spot`)
     }
-    setClickedArea(content)
+    setClickedArea(id)
   };
   // Mouse out the area
   const handleMouseOut = (e) => {
@@ -140,7 +105,7 @@ function GeoreferenceMapDoc(props) {
             className={isDarkMode ? "custom-tile-layer" : ""}
           />
           <ZoomControl position="topright" />
-          {municipalGeoJson && <GeoJSON data={municipalGeoJson} pathOptions={{ color: `${isDarkMode ? "#CCCCCC" : "grey"}`, weight: 2, dashArray: "5, 5" }} />}
+          {props.municipalGeoJson && <GeoJSON data={props.municipalGeoJson} pathOptions={{ color: `${isDarkMode ? "#CCCCCC" : "grey"}`, weight: 2, dashArray: "5, 5" }} />}
           {/* Visualize All present Areas*/}
           {
 
@@ -178,7 +143,7 @@ function GeoreferenceMapDoc(props) {
               }}
             >
               {presentAreas.map((area, index) =>
-                <Markers key={index} center={center} area={area} cityBounds={cityBounds} setDocumentId={setDocumentId} setShowSingleDocument={setShowSingleDocument} handleMouseOver={handleMouseOver} handleMouseOut={handleMouseOut} OpenTooltipDocs={OpenTooltipDocs} setOpenTooltipDocs={setOpenTooltipDocs} clickedArea={clickedArea}></Markers>
+                <Markers key={index} center={center} area={area} boundaries={boundaries} setDocumentId={setDocumentId} setShowSingleDocument={setShowSingleDocument} handleMouseOver={handleMouseOver} handleMouseOut={handleMouseOut} OpenTooltipDocs={OpenTooltipDocs} setOpenTooltipDocs={setOpenTooltipDocs} clickedArea={clickedArea}></Markers>
               )
               }
             </MarkerClusterGroup>
@@ -186,31 +151,45 @@ function GeoreferenceMapDoc(props) {
         </MapContainer>
 
         {/* Alert message */}
-        {alertMessage && (
-          <div style={{
-            position: "fixed",
-            top: "20px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            backgroundColor: "rgba(0, 0, 0, 0.7)",
-            color: "#fff",
-            padding: "10px 20px",
-            borderRadius: "10px",
-            fontSize: "20px",
-            zIndex: 1000,
-            textAlign: "center"
-          }}
-            className={` max-md:text-xs`}
-          >
-            {alertMessage}
-          </div>
-        )}
+        {alertMessage && (<Message alertMessage={alertMessage} setAlertMessage={setAlertMessage}></Message>)}
       </div>
     </>
   )
 }
 
-function Markers({ area, center, cityBounds, handleMouseOver, handleMouseOut, clickedArea, setDocumentId, setShowSingleDocument, OpenTooltipDocs, setOpenTooltipDocs }) {
+function Message({alertMessage, setAlertMessage}) {
+   {/* Clear Alert message after 5 sec*/ }
+   useEffect(() => {
+    if (alertMessage != "") {
+      const tid = setTimeout(() => {
+        setAlertMessage("")
+      }, 5000)
+      return () => clearTimeout(tid);
+    }
+  }, [alertMessage])
+
+  return (
+    <div style={{
+      position: "fixed",
+      top: "20px",
+      left: "50%",
+      transform: "translateX(-50%)",
+      backgroundColor: "rgba(0, 0, 0, 0.7)",
+      color: "#fff",
+      padding: "10px 20px",
+      borderRadius: "10px",
+      fontSize: "20px",
+      zIndex: 1000,
+      textAlign: "center"
+    }}
+      className={` max-md:text-xs`}
+    >
+      {alertMessage}
+    </div>
+  )
+}
+
+function Markers({ area, center, boundaries, handleMouseOver, handleMouseOut, clickedArea, setDocumentId, setShowSingleDocument, OpenTooltipDocs, setOpenTooltipDocs }) {
   const map = useMap()
   const [areaDoc, setAreaDoc] = useState([])
   const geometry = area.geoJson.geometry;
@@ -266,7 +245,7 @@ function Markers({ area, center, cityBounds, handleMouseOver, handleMouseOut, cl
   useEffect(() => {
     // Funzione per monitorare il livello di zoom
     const handleZoom = () => {
-      if (map.getZoom() <= 13) {
+      if (map.getZoom() <= 10) {
         setIsZoomLevelLow(true); // Livello di zoom basso, mostra solo il numero di documenti
         setOpenTooltipDocs(null);
       } else {
@@ -293,9 +272,9 @@ function Markers({ area, center, cityBounds, handleMouseOver, handleMouseOut, cl
             icon={area.id === 1 ? MunicipalArea : GenericPolygon} // Puoi scegliere di usare un'icona personalizzata per i punti
             eventHandlers={{
               click: (e) => {
-                map.fitBounds(area.id === 1 ? cityBounds : calculateBounds(geometry.coordinates[0]))
+                map.fitBounds(area.id === 1 ? boundaries : calculateBounds(geometry.coordinates[0]))
               },
-              mouseover: (e) => handleMouseOver(e, area.id),
+              mouseover: (e) => handleMouseOver(e, area.id, areaDoc.length),
               mouseout: (e) => handleMouseOut(e),
             }}
           >
@@ -362,7 +341,7 @@ function Markers({ area, center, cityBounds, handleMouseOver, handleMouseOut, cl
               click: (e) => {
                 map.setView([geometry.coordinates[1], geometry.coordinates[0]], 14)
               },
-              mouseover: (e) => handleMouseOver(e, area.id),
+              mouseover: (e) => handleMouseOver(e, area.id, areaDoc.length),
               mouseout: (e) => handleMouseOut(e),
             }}
           >

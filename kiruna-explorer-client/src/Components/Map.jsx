@@ -100,25 +100,18 @@ function GeoreferenceMap(props) {
 
     const mapRef = useRef(null);
     const featureGroupRef = useRef(null);
-    /*
+    
     // Put clearer name for button finish drawing
-    const element = document.querySelector('.leaflet-draw-actions-top a[title="Finish drawing"]');
-    if (element) {
-        element.textContent = "Connect last point";
-    } else {
-        console.error("Element not found");
-    }*/
-
-    {/* Clear Alert message after 5 sec*/
-    }
-    useEffect(() => {
-        if (alertMessage != "") {
-            const tid = setTimeout(() => {
-                setAlertMessage("")
-            }, 5000)
-            return () => clearTimeout(tid);
+    /*
+    const changeName = () =>{
+        const element = document.querySelector('.leaflet-draw-actions-top a[title="Finish drawing"]');
+        if (element) {
+            element.textContent = "Connect last point";
+        } else {
+            console.error("Element not found");
         }
-    }, [alertMessage])
+    }
+    */
 
     {/* Hide navbar at start*/
     }
@@ -130,7 +123,7 @@ function GeoreferenceMap(props) {
     }
     useEffect(() => {
         //refresh
-    }, [showExit, showSave, presentAreas, coordinatesErr, clickedArea])
+    }, [showExit, showSave, presentAreas, coordinatesErr, clickedArea, props.municipalGeoJson])
 
     {/* Click on area */
     }
@@ -452,7 +445,7 @@ function GeoreferenceMap(props) {
                 clearMessage={() => setAlertCustomMessage(['', ''])}></Alert>
             <MapContainer
                 whenCreated={(map) => {
-                    mapRef.current = map;
+                    mapRef.current = map
                 }}
                 center={center}
                 zoom={5} ref={mapRef}
@@ -463,7 +456,7 @@ function GeoreferenceMap(props) {
                 }}
                 maxBounds={boundaries}
                 minZoom={8}
-                whenReady={() => { if (props.updateAreaId.docId && !drawnObject) createLayerToUpdate(props.updateAreaId.areaId) }}
+                whenReady={() => { if (props.updateAreaId.docId && !drawnObject) createLayerToUpdate(props.updateAreaId.areaId)}}
             >
                 {mapRef.current && !drawnObject && showMuniAreas && <HomeButton handleMunicipalAreas={handleMunicipalAreas} />}
                 {props.municipalGeoJson && <GeoJSON data={props.municipalGeoJson} pathOptions={{ color: `${isDarkMode ? "#CCCCCC" : "grey"}`, weight: 2, dashArray: "5, 5" }} />}
@@ -578,25 +571,7 @@ function GeoreferenceMap(props) {
             }
 
             {/* Alert message */}
-            {alertMessage && (
-                <div style={{
-                    position: "fixed",
-                    top: "20px",
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    backgroundColor: "rgba(0, 0, 0, 0.7)",
-                    color: "#fff",
-                    padding: "10px 20px",
-                    borderRadius: "10px",
-                    fontSize: "20px",
-                    zIndex: 1000,
-                    textAlign: "center"
-                }}
-                    className={`${(coordinatesErr) && showManually && 'border-red-500 border-1'} max-md:text-xs`}
-                >
-                    {alertMessage}
-                </div>
-            )}
+            {alertMessage && (<Message alertMessage={alertMessage} setAlertMessage={setAlertMessage}></Message>)}
 
             <div
                 className={`absolute flex flex-row bottom-5 w-100 ${showManually ? "justify-between" : "justify-end"} z-[1000] max-md:flex-col max-md:block`}>
@@ -671,6 +646,38 @@ function GeoreferenceMap(props) {
     )
 }
 
+function Message({alertMessage, setAlertMessage}) {
+    {/* Clear Alert message after 5 sec*/ }
+    useEffect(() => {
+     if (alertMessage != "") {
+       const tid = setTimeout(() => {
+         setAlertMessage("")
+       }, 5000)
+       return () => clearTimeout(tid);
+     }
+   }, [alertMessage])
+ 
+   return (
+     <div style={{
+       position: "fixed",
+       top: "20px",
+       left: "50%",
+       transform: "translateX(-50%)",
+       backgroundColor: "rgba(0, 0, 0, 0.7)",
+       color: "#fff",
+       padding: "10px 20px",
+       borderRadius: "10px",
+       fontSize: "20px",
+       zIndex: 1000,
+       textAlign: "center"
+     }}
+       className={` max-md:text-xs`}
+     >
+       {alertMessage}
+     </div>
+   )
+ }
+
 function Markers({ area, center, handleClick, clickedArea }) {
     const map = useMap()
     const [areaDoc, setAreaDoc] = useState([])
@@ -724,7 +731,7 @@ function Markers({ area, center, handleClick, clickedArea }) {
 
     useEffect(() => {
         const handleZoom = () => {
-            if (map.getZoom() <= 13) {
+            if (map.getZoom() <= 10) {
                 setIsZoomLevelLow(true); // low zoom level
             } else {
                 setIsZoomLevelLow(false); // high zoom level

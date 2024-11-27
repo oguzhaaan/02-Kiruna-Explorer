@@ -109,7 +109,7 @@ function GeoreferenceMap(props) {
     }
     useEffect(() => {
         //refresh
-    }, [showExit, showSave, presentAreas, coordinatesErr, clickedArea, props.municipalGeoJson])
+    }, [showExit, showSave, presentAreas, coordinatesErr, clickedArea, props.municipalGeoJson, polygonLayer])
 
     {/* Check if polygon is in city bounds */ }
     const isPolygonInCityBounds = (latlngs) => {
@@ -179,7 +179,7 @@ function GeoreferenceMap(props) {
                 setAlertMessage("You selected a new custom area");
                 const geoJson = layer.toGeoJSON();
                 setPolygonLayer(layer)
-                setPolygonCoordinates(latlngs)
+                setPolygonCoordinates(latlngs.map((ring) => ring.map((latlng) => ({ lat: latlng.lat, lng: latlng.lng }))))
                 setDrawnObject(geoJson);
                 setShowMuniAreas(false)
                 setShowExit(true);
@@ -191,6 +191,7 @@ function GeoreferenceMap(props) {
                     mapRef.current.removeLayer(layer)
                     featureGroupRef.current.removeLayer(layer)
                 }
+                return
             }
         } else if (layer instanceof L.Marker) {
             const markerPosition = layer.getLatLng();
@@ -211,6 +212,7 @@ function GeoreferenceMap(props) {
                     mapRef.current.removeLayer(layer)
                     featureGroupRef.current.removeLayer(layer)
                 }
+                return
             }
         }
     };
@@ -221,7 +223,7 @@ function GeoreferenceMap(props) {
             const geoJson = layer.toGeoJSON();
 
             if (layer instanceof L.Polygon) {
-                const latlngs = layer.getLatLngs()
+                const latlngs = layer.getLatLngs();
                 if (isPolygonInCityBounds(latlngs)) {
                     setDrawnObject(geoJson);
                     setShowManually(false)
@@ -229,12 +231,18 @@ function GeoreferenceMap(props) {
                     setShowExit(true);
                     setShowSave(true);
                     setPolygonLayer(layer)
-                    setPolygonCoordinates(latlngs)
+                    setPolygonCoordinates(latlngs.map((ring) => ring.map((latlng) => ({ lat: latlng.lat, lng: latlng.lng }))))
                 }
                 else {
                     setAlertMessage("Point out of city bounds");
-                    if (polygonLayer) {
-                        polygonLayer.setLatLngs(polygonCoordinates);
+                    if (polygonLayer && mapRef && featureGroupRef) {
+                        const featureGroup = featureGroupRef.current;
+                        // Rimuovi il layer precedente
+                        featureGroup.clearLayers();
+                        // Crea un nuovo layer con le coordinate originali
+                        const restoredLayer = L.polygon(polygonCoordinates)
+                        // Aggiungi il nuovo layer al feature group
+                        featureGroup.addLayer(restoredLayer)
                     }
                 }
             } else if (layer instanceof L.Marker) {
@@ -249,7 +257,6 @@ function GeoreferenceMap(props) {
                 } else {
                     setAlertMessage("Point out of city bounds");
                     if (markerLayer) {
-                        console.log(markerCoordinates)
                         markerLayer.setLatLng([markerCoordinates.lat, markerCoordinates.lng]);
                     }
                 }
@@ -280,7 +287,7 @@ function GeoreferenceMap(props) {
 
     const onDrawStop = () => {
         setCoordinatesErr(false)
-        if (markerLayer === null) {
+        if (markerLayer === null && polygonLayer === null) {
             setShowMuniAreas(true)
             setShowExit(true)
             setAlertMessage("")

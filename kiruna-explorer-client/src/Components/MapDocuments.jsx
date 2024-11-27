@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import { MapContainer, TileLayer, Polygon, Popup, Marker, ZoomControl, useMap, Tooltip, GeoJSON } from "react-leaflet";
+import MarkerClusterGroup from "react-leaflet-markercluster"
 import "./map.css"
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
@@ -25,11 +26,11 @@ function calculateCentroid(coordinates) {
 }
 
 function calculateBounds(coordinates, Municipal = false) {
-  if (Municipal){
+  if (Municipal) {
     let bounds = L.latLngBounds();
 
     console.log("Processing MultiPolygon");
-    
+
     // Itera su ciascun poligono del MultiPolygon
     coordinates.forEach(polygonCoordinates => {
       // Ogni poligono potrebbe avere anelli multipli (esterno e isole)
@@ -42,7 +43,7 @@ function calculateBounds(coordinates, Municipal = false) {
 
     return bounds;
   }
-  else{
+  else {
     const polygon = L.polygon(coordinates.map(coord => [coord[1], coord[0]])); // Inverti [lng, lat] -> [lat, lng]
 
     return polygon.getBounds();
@@ -52,9 +53,14 @@ function calculateBounds(coordinates, Municipal = false) {
 function GeoreferenceMapDoc(props) {
   const { isDarkMode } = useTheme();
   const navigate = useNavigate()
-  
+
   //define default  position to "center of Kiruna"
-  const center = [68.20805,20.593249999999998]
+  const center = [68.20805, 20.593249999999998]
+
+  const boundaries = L.latLngBounds(
+    L.latLng(67.3562, 17.8998),  // sud-ovest
+    L.latLng(69.0599, 23.2867)   // nord-est
+);
 
   const [presentAreas, setPresentAreas] = useState(null);
   const [clickedArea, setClickedArea] = useState(null);
@@ -64,7 +70,7 @@ function GeoreferenceMapDoc(props) {
   const [documentId, setDocumentId] = useState(null);
   const [cityBounds, setCityBounds] = useState(null);
   const [municipalGeoJson, setMunicipalGeoJson] = useState(null)
-  
+
   const mapRef = useRef(null);
 
   {/* Clear Alert message after 5 sec*/ }
@@ -116,30 +122,66 @@ function GeoreferenceMapDoc(props) {
   return (
     <>
       <div className={isDarkMode ? "dark" : "light"}>
-        {ShowSingleDocument && <SingleDocumentMap setDocumentId={setDocumentId} id={documentId}  setShowSingleDocument={setShowSingleDocument}></SingleDocumentMap>}
+        {ShowSingleDocument && <SingleDocumentMap setDocumentId={setDocumentId} id={documentId} setShowSingleDocument={setShowSingleDocument}></SingleDocumentMap>}
         <MapContainer
           center={center}
-          zoom={8} ref={mapRef}
+          zoom={5} ref={mapRef}
           zoomControl={false}
           style={{
             height: "100vh",
             width: "100vw"
           }}
-          maxBounds={cityBounds}
+          maxBounds={boundaries}
           minZoom={8}
         >
           <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              className={isDarkMode ? "custom-tile-layer" : ""}
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            className={isDarkMode ? "custom-tile-layer" : ""}
           />
           <ZoomControl position="topright" />
-          {municipalGeoJson && <GeoJSON data={municipalGeoJson} pathOptions={{color:`${isDarkMode?"#CCCCCC":"grey"}`, weight: 2,dashArray: "5, 5"}} />}
+          {municipalGeoJson && <GeoJSON data={municipalGeoJson} pathOptions={{ color: `${isDarkMode ? "#CCCCCC" : "grey"}`, weight: 2, dashArray: "5, 5" }} />}
           {/* Visualize All present Areas*/}
           {
-            presentAreas && presentAreas.map((area, index) =>
-              <Markers key={index} center={center} area={area} cityBounds={cityBounds} setDocumentId={setDocumentId} setShowSingleDocument={setShowSingleDocument} handleMouseOver={handleMouseOver} handleMouseOut={handleMouseOut} OpenTooltipDocs={OpenTooltipDocs} setOpenTooltipDocs={setOpenTooltipDocs} clickedArea={clickedArea}></Markers>
-            )
+
+            presentAreas && <MarkerClusterGroup
+              showCoverageOnHover={false}  // Disabilita il poligono di copertura al passaggio del mouse
+              maxClusterRadius={50}       // Riduce il raggio massimo dei cluster
+              spiderfyOnMaxZoom={true}    // Espande i marker alla massima distanza di zoom
+              disableClusteringAtZoom={14} // Disabilita il clustering a zoom elevati
+              iconCreateFunction={(cluster) => {
+                const count = cluster.getChildCount(); // Numero di marker nel cluster
+            
+                // Colori personalizzati in base al numero di marker
+                let clusterColor = count > 10 ? 'red' : count > 5 ? 'orange' : 'green';
+            
+                return L.divIcon({
+                  html: `
+                    <div style="
+                      background-color: ${clusterColor};
+                      border-radius: 50%;
+                      width: 50px;
+                      height: 50px;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      color: white;
+                      font-size: 16px;
+                      font-weight: bold;
+                      border: 2px solid white;">
+                      ${count}
+                    </div>
+                  `,
+                  className: '', // Lascia vuoto per evitare stili predefiniti
+                  iconSize: L.point(50, 50), // Dimensioni del cluster
+                });
+              }}
+            >
+              {presentAreas.map((area, index) =>
+                <Markers key={index} center={center} area={area} cityBounds={cityBounds} setDocumentId={setDocumentId} setShowSingleDocument={setShowSingleDocument} handleMouseOver={handleMouseOver} handleMouseOut={handleMouseOut} OpenTooltipDocs={OpenTooltipDocs} setOpenTooltipDocs={setOpenTooltipDocs} clickedArea={clickedArea}></Markers>
+              )
+              }
+            </MarkerClusterGroup>
           }
         </MapContainer>
 
@@ -168,7 +210,7 @@ function GeoreferenceMapDoc(props) {
   )
 }
 
-function Markers({ area, center,cityBounds, handleMouseOver, handleMouseOut, clickedArea, setDocumentId, setShowSingleDocument, OpenTooltipDocs, setOpenTooltipDocs }) {
+function Markers({ area, center, cityBounds, handleMouseOver, handleMouseOut, clickedArea, setDocumentId, setShowSingleDocument, OpenTooltipDocs, setOpenTooltipDocs }) {
   const map = useMap()
   const [areaDoc, setAreaDoc] = useState([])
   const geometry = area.geoJson.geometry;
@@ -177,7 +219,7 @@ function Markers({ area, center,cityBounds, handleMouseOver, handleMouseOut, cli
   const [groupedDocs, setGroupedDocs] = useState([]);
 
 
- // //console.log(geometry.coordinates[0])
+  // //console.log(geometry.coordinates[0])
   const GenericPoints = L.icon({
     iconUrl: markerpin,
     iconSize: [35, 45],
@@ -247,41 +289,41 @@ function Markers({ area, center,cityBounds, handleMouseOver, handleMouseOut, cli
       areaDoc && (
         <>
           <Marker
-            position={area.id === 1 ? center: calculateCentroid(geometry.coordinates[0])} // Inverti lat/lng per Leaflet
+            position={area.id === 1 ? center : calculateCentroid(geometry.coordinates[0])} // Inverti lat/lng per Leaflet
             icon={area.id === 1 ? MunicipalArea : GenericPolygon} // Puoi scegliere di usare un'icona personalizzata per i punti
             eventHandlers={{
               click: (e) => {
-                  map.fitBounds(area.id === 1 ? cityBounds : calculateBounds(geometry.coordinates[0]))
+                map.fitBounds(area.id === 1 ? cityBounds : calculateBounds(geometry.coordinates[0]))
               },
-              mouseover: (e)=> handleMouseOver(e, area.id),
-              mouseout: (e)=> handleMouseOut(e),
+              mouseover: (e) => handleMouseOver(e, area.id),
+              mouseout: (e) => handleMouseOut(e),
             }}
           >
             {OpenTooltipDocs !== area.id ? (
-              <div style={{zIndex:-100}}>
-              <Tooltip permanent className="cursor-pointer border-none text-black_text dark:text-white_text bg-box_white_color dark:bg-box_color backdrop-blur-2xl outline outline-1 outline-[#00000055] dark:outline-[#FFFFFF55]">
-                <div onClick={() => { setOpenTooltipDocs(area.id) }} style={{ cursor: 'pointer', pointerEvents: 'auto' }}>
-                  {/* Se il livello di zoom è basso, mostra solo il numero di documenti */}
-                  {isZoomLevelLow ? (
-                    <span className="w-full counter-documents text-lg">{areaDoc.length}</span>
-                  ) : (
-                    <div className=" flex flex-row ">
-                      {
-                        groupedDocs.map(([type, num]) => (
-                          <div key={type} style={{ display: 'flex', minWidth: '4em', minHeight: '1.5em', margin: '5px', flexDirection: 'row' }}>
-                            <img
-                              src={getIcon({ type: type }, { darkMode: isDarkMode })}
-                              alt={type}
-                              style={{ width: '30px', height: '30px', marginRight: '5px' }}
-                            />
-                            <span className="counter-documents text-lg">{num}</span>
-                          </div>
-                        ))
-                      }
-                    </div>
-                  )}
-                </div>
-              </Tooltip>
+              <div style={{ zIndex: -100 }}>
+                <Tooltip permanent className="cursor-pointer border-none text-black_text dark:text-white_text bg-box_white_color dark:bg-box_color backdrop-blur-2xl outline outline-1 outline-[#00000055] dark:outline-[#FFFFFF55]">
+                  <div onClick={() => { setOpenTooltipDocs(area.id) }} style={{ cursor: 'pointer', pointerEvents: 'auto' }}>
+                    {/* Se il livello di zoom è basso, mostra solo il numero di documenti */}
+                    {isZoomLevelLow ? (
+                      <span className="w-full counter-documents text-lg">{areaDoc.length}</span>
+                    ) : (
+                      <div className=" flex flex-row ">
+                        {
+                          groupedDocs.map(([type, num]) => (
+                            <div key={type} style={{ display: 'flex', minWidth: '4em', minHeight: '1.5em', margin: '5px', flexDirection: 'row' }}>
+                              <img
+                                src={getIcon({ type: type }, { darkMode: isDarkMode })}
+                                alt={type}
+                                style={{ width: '30px', height: '30px', marginRight: '5px' }}
+                              />
+                              <span className="counter-documents text-lg">{num}</span>
+                            </div>
+                          ))
+                        }
+                      </div>
+                    )}
+                  </div>
+                </Tooltip>
               </div>
             ) :
 
@@ -296,16 +338,16 @@ function Markers({ area, center,cityBounds, handleMouseOver, handleMouseOut, cli
           </Marker>
 
           {clickedArea === area.id && (
-            area.id != 1?
-            <Polygon
-              positions={geometry.coordinates[0].map(coord => [coord[1], coord[0]])} // Inverti le coordinate per Leaflet
-              pathOptions={{ color: "#a020f0" }}
-            />:
-            <GeoJSON
-              data={area.geoJson}
-              pathOptions={{color: "red"}}
-            >
-            </GeoJSON>
+            area.id != 1 ?
+              <Polygon
+                positions={geometry.coordinates[0].map(coord => [coord[1], coord[0]])} // Inverti le coordinate per Leaflet
+                pathOptions={{ color: "#a020f0" }}
+              /> :
+              <GeoJSON
+                data={area.geoJson}
+                pathOptions={{ color: "red" }}
+              >
+              </GeoJSON>
           )}
         </>
       )
@@ -318,37 +360,37 @@ function Markers({ area, center,cityBounds, handleMouseOver, handleMouseOut, cli
             icon={GenericPoints} // Puoi scegliere di usare un'icona personalizzata per i punti
             eventHandlers={{
               click: (e) => {
-                  map.setView([geometry.coordinates[1], geometry.coordinates[0]],14)
+                map.setView([geometry.coordinates[1], geometry.coordinates[0]], 14)
               },
-              mouseover: (e)=> handleMouseOver(e, area.id),
-              mouseout: (e)=> handleMouseOut(e),
+              mouseover: (e) => handleMouseOver(e, area.id),
+              mouseout: (e) => handleMouseOut(e),
             }}
           >
             {OpenTooltipDocs !== area.id ? (
-              <div style={{zIndex:-100}}>
-              <Tooltip permanent className="cursor-pointer border-none text-black_text dark:text-white_text bg-box_white_color dark:bg-box_color backdrop-blur-2xl outline outline-1 outline-[#00000055] dark:outline-[#FFFFFF55]" >
-                <div onClick={() => { setOpenTooltipDocs(area.id); }} style={{ cursor: 'pointer', pointerEvents: 'auto' }}>
-                  {/* Se il livello di zoom è basso, mostra solo il numero di documenti */}
-                  {isZoomLevelLow ? (
-                    <span className="w-full counter-documents text-lg">{areaDoc.length}</span>
-                  ) : (
-                    <div className=" flex flex-row ">
-                      {
-                        groupedDocs.map(([type, num]) => (
-                          <div key={type} style={{ display: 'flex', minWidth: '4em', minHeight: '1.5em', margin: '5px', flexDirection: 'row' }}>
-                            <img
+              <div style={{ zIndex: -100 }}>
+                <Tooltip permanent className="cursor-pointer border-none text-black_text dark:text-white_text bg-box_white_color dark:bg-box_color backdrop-blur-2xl outline outline-1 outline-[#00000055] dark:outline-[#FFFFFF55]" >
+                  <div onClick={() => { setOpenTooltipDocs(area.id); }} style={{ cursor: 'pointer', pointerEvents: 'auto' }}>
+                    {/* Se il livello di zoom è basso, mostra solo il numero di documenti */}
+                    {isZoomLevelLow ? (
+                      <span className="w-full counter-documents text-lg">{areaDoc.length}</span>
+                    ) : (
+                      <div className=" flex flex-row ">
+                        {
+                          groupedDocs.map(([type, num]) => (
+                            <div key={type} style={{ display: 'flex', minWidth: '4em', minHeight: '1.5em', margin: '5px', flexDirection: 'row' }}>
+                              <img
                                 src={getIcon({ type: type }, { darkMode: isDarkMode })}
-                              alt={type}
-                              style={{ width: '30px', height: '30px', marginRight: '5px' }}
-                            />
-                            <span className="counter-documents text-lg">{num}</span>
-                          </div>
-                        ))
-                      }
-                    </div>
-                  )}
-                </div>
-              </Tooltip>
+                                alt={type}
+                                style={{ width: '30px', height: '30px', marginRight: '5px' }}
+                              />
+                              <span className="counter-documents text-lg">{num}</span>
+                            </div>
+                          ))
+                        }
+                      </div>
+                    )}
+                  </div>
+                </Tooltip>
               </div>
             ) :
 
@@ -370,7 +412,7 @@ function ListDocuments({ docs, setOpenTooltipDocs, setDocumentId, setShowSingleD
   const { isDarkMode } = useTheme();
   const [query, setQuery] = useState("");
 
-  const filteredDocs = docs.filter((e)=>{
+  const filteredDocs = docs.filter((e) => {
     return (e.title.toLowerCase().includes(query.toLowerCase()) || e.type.toLowerCase().includes(query.toLowerCase()));
   })
 
@@ -392,16 +434,16 @@ function ListDocuments({ docs, setOpenTooltipDocs, setDocumentId, setShowSingleD
           </button>
         </div>
         <div className="z-[0] relative mb-1">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-black_text">
-                <i className="bi bi-search"></i>
-            </span>
-            <input
-                type="text"
-                placeholder="Search"
-                input={query}
-                onChange={(e) => setQuery(e.target.value)}
-                className="outline outline-1 outline-customGray1 dark:outline-none bg-search_dark_color w-auto py-2 pl-10 pr-4 text-black_text rounded-[50px] placeholder-black_text"
-            />
+          <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-black_text">
+            <i className="bi bi-search"></i>
+          </span>
+          <input
+            type="text"
+            placeholder="Search"
+            input={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="outline outline-1 outline-customGray1 dark:outline-none bg-search_dark_color w-auto py-2 pl-10 pr-4 text-black_text rounded-[50px] placeholder-black_text"
+          />
         </div>
         {/* Lista di documenti */}
         {filteredDocs.map((doc) => (

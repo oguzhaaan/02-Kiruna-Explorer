@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { MapContainer, TileLayer, Polygon, Popup, Marker, ZoomControl, useMap, Tooltip, GeoJSON } from "react-leaflet";
 import { EditControl } from "react-leaflet-draw";
+import MarkerClusterGroup from "react-leaflet-markercluster"
 import { FeatureGroup } from "react-leaflet";
 import * as turf from '@turf/turf';
 import "./map.css"
@@ -373,7 +374,8 @@ function GeoreferenceMap(props) {
     const handleMunicipalAreas = async () => {
         try {
             if (!presentAreas) {
-                const allAreas = await API.getAllAreas()
+                const allAreas = await API.getAllAreas();
+                console.log(allAreas)
                 setPresentAreas(allAreas)
                 setAlertMessage("Select existing area")
                 setShowManually(false)
@@ -460,7 +462,7 @@ function GeoreferenceMap(props) {
                     width: "100vw"
                 }}
                 maxBounds={boundaries}
-                minZoom={7.5}
+                minZoom={8}
                 whenReady={() => { if (props.updateAreaId.docId && !drawnObject) createLayerToUpdate(props.updateAreaId.areaId) }}
             >
                 {mapRef.current && !drawnObject && showMuniAreas && <HomeButton handleMunicipalAreas={handleMunicipalAreas} />}
@@ -491,7 +493,7 @@ function GeoreferenceMap(props) {
                             polygon: drawnObject == null
                         }}
                         maxBounds={boundaries}
-                        minZoom={12} />
+                        minZoom={10} />
                 </FeatureGroup>
 
                 {/* Center Map in drown object*/}
@@ -506,9 +508,43 @@ function GeoreferenceMap(props) {
 
                 {/* Visualize All present Areas*/}
                 {
-                    presentAreas && presentAreas.map((area, index) =>
+                    presentAreas && <MarkerClusterGroup
+                    showCoverageOnHover={false}  // Disabilita il poligono di copertura al passaggio del mouse
+                    maxClusterRadius={50}       // Riduce il raggio massimo dei cluster
+                    spiderfyOnMaxZoom={true}    // Espande i marker alla massima distanza di zoom
+                    disableClusteringAtZoom={13} // Disabilita il clustering a zoom elevati
+                    iconCreateFunction={(cluster) => {
+                      const count = cluster.getChildCount(); // Numero di marker nel cluster
+                  
+                      // Colori personalizzati in base al numero di marker
+                      let clusterColor = count > 10 ? 'red' : count > 5 ? 'orange' : 'green';
+                  
+                      return L.divIcon({
+                        html: `
+                          <div style="
+                            background-color: ${clusterColor};
+                            border-radius: 50%;
+                            width: 50px;
+                            height: 50px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            color: white;
+                            font-size: 16px;
+                            font-weight: bold;
+                            border: 2px solid white;">
+                            ${count}
+                          </div>
+                        `,
+                        className: '', // Lascia vuoto per evitare stili predefiniti
+                        iconSize: L.point(50, 50), // Dimensioni del cluster
+                      });
+                    }}
+                    >
+                        {presentAreas.map((area, index) =>
                         <Markers key={index} area={area} center={center} handleClick={handleClick} clickedArea={clickedArea}></Markers>
-                    )
+                    )}
+                    </MarkerClusterGroup>
                 }
             </MapContainer>
 
@@ -718,6 +754,7 @@ function Markers({ area, center, handleClick, clickedArea }) {
                             mouseout: (e) => { setOverArea(null) },
                         }}
                     >
+                        {groupedDocs &&
                         <Tooltip permanent>
                             {/* if the zoom level is low shows only the number of documents */}
                             {isZoomLevelLow ? (
@@ -739,8 +776,9 @@ function Markers({ area, center, handleClick, clickedArea }) {
                                 </div>
                             )}
                         </Tooltip>
-
+                        }   
                     </Marker>
+
                     {(clickedArea === area.id || overArea == area.id) && (
                         area.id != 1 ?
                             <Polygon

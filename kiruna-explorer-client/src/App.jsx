@@ -48,7 +48,7 @@ function App() {
             </>
           }>
 
-            <Route path="/" element={(isLoggedIn || isVisitorLoggedIn) ? (user.role === "urban_planner" ? <Navigate replace to="/documents" /> : user.role === "resident" ? <Navigate replace to="/mapDocuments" /> : <HomePage />) : <HomePage />} />
+            <Route path="/" element={(isLoggedIn || isVisitorLoggedIn) ? (user.role === "urban_planner" ? <Navigate replace to="/documents" /> : <Navigate replace to="/mapDocuments" />)  : <HomePage /> } />
 
             <Route path="/login" element={ isLoggedIn ? (user.role === "urban_planner" ? <Navigate replace to="/documents" /> : user.role === "resident" ? <Navigate replace to="/mapDocuments" /> : <LoginPage setNavShow={setNavShow} />) : <LoginPage setNavShow={setNavShow} />} />
 

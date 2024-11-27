@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useUserContext } from "../contexts/UserContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTheme } from "../contexts/ThemeContext.jsx";
+import { useEffect } from "react";
 
 function NavHeader(props) {
     const { isDarkMode } = useTheme();
@@ -12,15 +13,16 @@ function NavHeader(props) {
     const currentRoute = location.pathname;
     const { user, isLoggedIn, logOut, handleVisitor, isVisitorLoggedIn } = useUserContext();
 
+
     return (
         <div className={`${isDarkMode ? 'dark' : 'light'}`}>
-            {(!isLoggedIn && !isVisitorLoggedIn )?
+            {(!isLoggedIn && !isVisitorLoggedIn) ?
                 props.navShow &&
                 <Navbar expand="false" className="fixed z-[2000]">
                     <Container fluid className="text-center w-screen justify-end">
                         <Navbar.Brand className="text-white_text text-xl flex items-center justify-center mt-4 mr-10">
                             <Link to="mapDocuments" className="text-inherit no-underline hover:text-slate-300" onClick={() => handleVisitor()}>
-                                <i className="bi bi-person fs-2 align-middle mx-2"></i>
+                                <i className="bi bi-map fs-2 align-middle mx-2"></i>
                                 Enter as a visitor
                             </Link>
                         </Navbar.Brand>
@@ -104,7 +106,7 @@ function NavHeader(props) {
                                         </Col>
                                     </Row>
                                 </div>
-                                <div className="offcanvas-content" onClick={() => { logOut(); props.setNavShow(true); handleVisitor() }}>
+                                <div className="offcanvas-content" onClick={() => { (isVisitorLoggedIn) ? handleVisitor() : logOut(); props.setNavShow(true); }}>
                                     <Row className="offcanvas-item w-100 p-1">
                                         <Col xs="auto">
                                             <i className={`bi bi-door-open-fill fs-3 align-middle ${isDarkMode ? 'text-white_text' : 'text-black_text'}`}></i>

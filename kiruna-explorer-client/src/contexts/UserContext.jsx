@@ -12,13 +12,14 @@ export const UserProvider = ({ children }) => {
     const visitor = localStorage.getItem("isVisitorLoggedIn");
     return visitor ? JSON.parse(visitor) : false; // Default to false
   });
+
   // Update localStorage whenever the visitor changes
   useEffect(() => {
     localStorage.setItem("isVisitorLoggedIn", JSON.stringify(isVisitorLoggedIn));
   }, [isVisitorLoggedIn]);
 
   const handleVisitor = () => {
-    setisVisitorLoggedIn(prev => !prev);
+    setisVisitorLoggedIn(prev => !prev);    
   }
 
   const logIn = async (credentials) => {

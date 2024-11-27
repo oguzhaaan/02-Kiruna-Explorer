@@ -90,7 +90,8 @@ router.get("/",
 
 
 /* GET /api/documents/:DocId */
-router.get("/:DocId", isLoggedIn,
+router.get("/:DocId",
+    // isLoggedIn,
     [
         param("DocId")
             .isNumeric()
@@ -254,7 +255,7 @@ router.post("/",
 /* GET /api/documents/:DocId/links */
 
 router.get("/:DocId/links",
-    isLoggedIn, //TODO probably to be removed for visitor?
+    //isLoggedIn, //TODO probably to be removed for visitor?
     [
         param("DocId")
             .isNumeric()
@@ -724,7 +725,7 @@ router.delete('/:DocId/files/:FileId', isLoggedIn,
 )
 
 router.get('/:DocId/files',
-    isLoggedIn, //TODO probably to be removed for visitor?
+  //  isLoggedIn, //TODO probably to be removed for visitor?
     [
         param("DocId")
             .isNumeric()

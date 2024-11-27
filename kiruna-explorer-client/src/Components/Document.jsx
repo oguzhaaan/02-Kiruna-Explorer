@@ -113,6 +113,13 @@ function Document(props) {
 
     //CAMPI OPZIONALI: PAGE + LANGUAGE + GIORNO DELLA DATA(?) + COORDINATES
     //CAMPI OBBLIGATORI: TITLE + STAKEHOLDER + SCALE(PLANE NUMBER IN CASE) + DATE + DESCRIPTION + TYPE
+    let area_id;
+    if (props.newAreaId.geoJson){
+      area_id = await API.addArea(props.newAreaId.geoJson)
+    }
+    else{
+      area_id = props.newAreaId
+    }
 
     const documentData = {
       title: props.newDocument.title,
@@ -126,7 +133,7 @@ function Document(props) {
       language: props.newDocument.language || null, // Set to null if not provided
       pageNumber: props.newDocument.pages || null, // Set to null if not provided
       description: props.newDocument.description, // Mandatory
-      areaId: props.newAreaId,
+      areaId: area_id,
       links: props.connections.length > 0 ? props.connections : null,
     };
 

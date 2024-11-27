@@ -17,12 +17,16 @@ import municipalarea from "../assets/municipal-area.svg"
 import { getIcon } from "./Utilities/DocumentIcons.jsx";
 import Alert from "./Alert.jsx";
 
+{/* Helper functions*/ }
+
+{/*Center the map */ }
 function CenterMap({ latlng }) {
     const map = useMap();
     map.panTo(latlng);
     return null;
 }
 
+{/*Calculate centroid of a polygon*/ }
 function calculateCentroid(coordinates) {
     const polygon = L.polygon(coordinates.map(coord => [coord[1], coord[0]])); // Inverti [lng, lat] -> [lat, lng]
 
@@ -32,30 +36,11 @@ function calculateCentroid(coordinates) {
     return bounds.getCenter();
 }
 
-function calculateBounds(coordinates, Municipal = false) {
-    if (Municipal) {
-        let bounds = L.latLngBounds();
+{/*Calculate bounds of a polygon */ }
+function calculateBounds(coordinates) {
+    const polygon = L.polygon(coordinates.map(coord => [coord[1], coord[0]])); // Inverti [lng, lat] -> [lat, lng]
 
-        console.log("Processing MultiPolygon");
-
-        // Itera su ciascun poligono del MultiPolygon
-        coordinates.forEach(polygonCoordinates => {
-            // Ogni poligono potrebbe avere anelli multipli (esterno e isole)
-            polygonCoordinates.forEach(ring => {
-                // Inverti [lng, lat] in [lat, lng] e calcola i bounds di ogni anello
-                const latLngs = ring.map(coord => [coord[1], coord[0]]);
-                const polygonBounds = L.polygon(latLngs).getBounds();
-                bounds.extend(polygonBounds); // Estendi i bounds complessivi
-            });
-        });
-        console.log("Bounds" + bounds)
-        return bounds;
-    }
-    else {
-        const polygon = L.polygon(coordinates.map(coord => [coord[1], coord[0]])); // Inverti [lng, lat] -> [lat, lng]
-
-        return polygon.getBounds();
-    }
+    return polygon.getBounds();
 }
 
 const HomeButton = ({ handleMunicipalAreas }) => {
@@ -69,6 +54,7 @@ const HomeButton = ({ handleMunicipalAreas }) => {
     );
 };
 
+{/*Map Component*/ }
 function GeoreferenceMap(props) {
     const { isDarkMode } = useTheme();
     const navigate = useNavigate()
@@ -100,7 +86,7 @@ function GeoreferenceMap(props) {
 
     const mapRef = useRef(null);
     const featureGroupRef = useRef(null);
-    
+
     // Put clearer name for button finish drawing
     /*
     const changeName = () =>{
@@ -125,6 +111,33 @@ function GeoreferenceMap(props) {
         //refresh
     }, [showExit, showSave, presentAreas, coordinatesErr, clickedArea, props.municipalGeoJson])
 
+    {/* Check if polygon is in city bounds */ }
+    const isPolygonInCityBounds = (latlngs) => {
+        let flag = true
+        for (let coord of latlngs[0]) {
+            if (!isPointInCityBounds(coord.lat, coord.lng)) {
+                flag = false
+            }
+        }
+        return flag
+    };
+
+    {/* Check if point is in city bounds */ }
+    const isPointInCityBounds = (lat, lng) => {
+
+        const polygons = props.municipalGeoJson.geometry.coordinates;
+        const point = turf.point([lng, lat])
+        let flag = false
+        polygons.forEach((polygon, polyIndex) => {
+            polygon.forEach((ring) => {
+                const p = turf.polygon([ring])
+                if (turf.booleanPointInPolygon(point, p)) {
+                    flag = true
+                }
+            })
+        });
+        return flag;
+    };
     {/* Click on area */
     }
     const handleClick = (e, content, map) => {
@@ -285,6 +298,7 @@ function GeoreferenceMap(props) {
         setShowSave(true);
     };
 
+    {/* Update a point/area from single document*/ }
     const createLayerToUpdate = async (areaId) => {
         try {
             const updateArea = await API.getAreaById(areaId)
@@ -336,6 +350,7 @@ function GeoreferenceMap(props) {
         }
     };
 
+    {/* Update a point from input coordinates*/ }
     const updateMarkerPosition = (lat, lng) => {
         if (markerLayer) {
             // Aggiorna lo stato per riflettere le nuove coordinate
@@ -386,51 +401,29 @@ function GeoreferenceMap(props) {
         }
     }
 
-    {/* Check if point is in city bounds */
-    }
-    const isPolygonInCityBounds = (latlngs) => {
-        let flag = true
-        for (let coord of latlngs[0]) {
-            if (!isPointInCityBounds(coord.lat, coord.lng)) {
-                flag = false
-            }
-        }
-        return flag
-    };
-
-    const isPointInCityBounds = (lat, lng) => {
-
-        const polygons = props.municipalGeoJson.geometry.coordinates;
-        const point = turf.point([lng, lat])
-        let flag = false
-        polygons.forEach((polygon, polyIndex) => {
-            polygon.forEach((ring) => {
-                const p = turf.polygon([ring])
-                if (turf.booleanPointInPolygon(point, p)) {
-                    flag = true
-                }
-            })
-        });
-        return flag;
-    };
-
     {/* Save the area selected */
     }
     const handleSave = async () => {
         try {
-            let area_id
+            let area
             //If he drows a new area
             if (drawnObject) {
-                area_id = await API.addArea(drawnObject)
-                setDrawnObject(null)
+                if (props.updateAreaId.docId) {
+                    area = await API.addArea(drawnObject)
+                    setDrawnObject(null)
+                }
+                else {
+                    area = { geoJson: drawnObject }
+                    setDrawnObject(null)
+                }
             }
             //if he clicked an existing one
             else if (clickedArea) {
-                area_id = clickedArea
+                area = clickedArea
             }
 
             // if update area is not null then update, else set new area id for the form
-            props.updateAreaId.docId ? await API.updateDocumentArea(props.updateAreaId.docId, area_id) : props.setnewAreaId(area_id)
+            props.updateAreaId.docId ? await API.updateDocumentArea(props.updateAreaId.docId, area) : props.setnewAreaId(area)
             props.setUpdateAreaId({ areaId: "done", docId: "done" })
             navigate(-1);
         } catch (err) {
@@ -456,7 +449,7 @@ function GeoreferenceMap(props) {
                 }}
                 maxBounds={boundaries}
                 minZoom={8}
-                whenReady={() => { if (props.updateAreaId.docId && !drawnObject) createLayerToUpdate(props.updateAreaId.areaId)}}
+                whenReady={() => { if (props.updateAreaId.docId && !drawnObject) createLayerToUpdate(props.updateAreaId.areaId) }}
             >
                 {mapRef.current && !drawnObject && showMuniAreas && <HomeButton handleMunicipalAreas={handleMunicipalAreas} />}
                 {props.municipalGeoJson && <GeoJSON data={props.municipalGeoJson} pathOptions={{ color: `${isDarkMode ? "#CCCCCC" : "grey"}`, weight: 2, dashArray: "5, 5" }} />}
@@ -502,18 +495,18 @@ function GeoreferenceMap(props) {
                 {/* Visualize All present Areas*/}
                 {
                     presentAreas && <MarkerClusterGroup
-                    showCoverageOnHover={false}  // Disabilita il poligono di copertura al passaggio del mouse
-                    maxClusterRadius={50}       // Riduce il raggio massimo dei cluster
-                    spiderfyOnMaxZoom={true}    // Espande i marker alla massima distanza di zoom
-                    disableClusteringAtZoom={13} // Disabilita il clustering a zoom elevati
-                    iconCreateFunction={(cluster) => {
-                      const count = cluster.getChildCount(); // Numero di marker nel cluster
-                  
-                      // Colori personalizzati in base al numero di marker
-                      let clusterColor = count > 10 ? 'red' : count > 5 ? 'orange' : 'green';
-                  
-                      return L.divIcon({
-                        html: `
+                        showCoverageOnHover={false}  // Disabilita il poligono di copertura al passaggio del mouse
+                        maxClusterRadius={50}       // Riduce il raggio massimo dei cluster
+                        spiderfyOnMaxZoom={true}    // Espande i marker alla massima distanza di zoom
+                        disableClusteringAtZoom={13} // Disabilita il clustering a zoom elevati
+                        iconCreateFunction={(cluster) => {
+                            const count = cluster.getChildCount(); // Numero di marker nel cluster
+
+                            // Colori personalizzati in base al numero di marker
+                            let clusterColor = count > 10 ? 'red' : count > 5 ? 'orange' : 'green';
+
+                            return L.divIcon({
+                                html: `
                           <div style="
                             background-color: ${clusterColor};
                             border-radius: 50%;
@@ -529,14 +522,14 @@ function GeoreferenceMap(props) {
                             ${count}
                           </div>
                         `,
-                        className: '', // Lascia vuoto per evitare stili predefiniti
-                        iconSize: L.point(50, 50), // Dimensioni del cluster
-                      });
-                    }}
+                                className: '', // Lascia vuoto per evitare stili predefiniti
+                                iconSize: L.point(50, 50), // Dimensioni del cluster
+                            });
+                        }}
                     >
                         {presentAreas.map((area, index) =>
-                        <Markers key={index} area={area} center={center} handleClick={handleClick} clickedArea={clickedArea}></Markers>
-                    )}
+                            <Markers key={index} area={area} center={center} handleClick={handleClick} clickedArea={clickedArea}></Markers>
+                        )}
                     </MarkerClusterGroup>
                 }
             </MapContainer>
@@ -646,37 +639,37 @@ function GeoreferenceMap(props) {
     )
 }
 
-function Message({alertMessage, setAlertMessage}) {
+function Message({ alertMessage, setAlertMessage }) {
     {/* Clear Alert message after 5 sec*/ }
     useEffect(() => {
-     if (alertMessage != "") {
-       const tid = setTimeout(() => {
-         setAlertMessage("")
-       }, 5000)
-       return () => clearTimeout(tid);
-     }
-   }, [alertMessage])
- 
-   return (
-     <div style={{
-       position: "fixed",
-       top: "20px",
-       left: "50%",
-       transform: "translateX(-50%)",
-       backgroundColor: "rgba(0, 0, 0, 0.7)",
-       color: "#fff",
-       padding: "10px 20px",
-       borderRadius: "10px",
-       fontSize: "20px",
-       zIndex: 1000,
-       textAlign: "center"
-     }}
-       className={` max-md:text-xs`}
-     >
-       {alertMessage}
-     </div>
-   )
- }
+        if (alertMessage != "") {
+            const tid = setTimeout(() => {
+                setAlertMessage("")
+            }, 5000)
+            return () => clearTimeout(tid);
+        }
+    }, [alertMessage])
+
+    return (
+        <div style={{
+            position: "fixed",
+            top: "20px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            backgroundColor: "rgba(0, 0, 0, 0.7)",
+            color: "#fff",
+            padding: "10px 20px",
+            borderRadius: "10px",
+            fontSize: "20px",
+            zIndex: 1000,
+            textAlign: "center"
+        }}
+            className={` max-md:text-xs`}
+        >
+            {alertMessage}
+        </div>
+    )
+}
 
 function Markers({ area, center, handleClick, clickedArea }) {
     const map = useMap()
@@ -762,28 +755,28 @@ function Markers({ area, center, handleClick, clickedArea }) {
                         }}
                     >
                         {groupedDocs &&
-                        <Tooltip permanent>
-                            {/* if the zoom level is low shows only the number of documents */}
-                            {isZoomLevelLow ? (
-                                <span className="w-full counter-documents text-lg">{areaDoc.length}</span>
-                            ) : (
-                                <div className=" flex flex-row ">
-                                    {
-                                        groupedDocs.map(([type, num]) => (
-                                            <div key={type} style={{ display: 'flex', minWidth: '4em', minHeight: '1.5em', margin: '5px', flexDirection: 'row' }}>
-                                                <img
-                                                    src={getIcon({ type: type }, { isDarkMode })}
-                                                    alt={type}
-                                                    style={{ width: '30px', height: '30px', marginRight: '5px' }}
-                                                />
-                                                <span className="counter-documents text-lg">{num}</span>
-                                            </div>
-                                        ))
-                                    }
-                                </div>
-                            )}
-                        </Tooltip>
-                        }   
+                            <Tooltip permanent>
+                                {/* if the zoom level is low shows only the number of documents */}
+                                {isZoomLevelLow ? (
+                                    <span className="w-full counter-documents text-lg">{areaDoc.length}</span>
+                                ) : (
+                                    <div className=" flex flex-row ">
+                                        {
+                                            groupedDocs.map(([type, num]) => (
+                                                <div key={type} style={{ display: 'flex', minWidth: '4em', minHeight: '1.5em', margin: '5px', flexDirection: 'row' }}>
+                                                    <img
+                                                        src={getIcon({ type: type }, { isDarkMode })}
+                                                        alt={type}
+                                                        style={{ width: '30px', height: '30px', marginRight: '5px' }}
+                                                    />
+                                                    <span className="counter-documents text-lg">{num}</span>
+                                                </div>
+                                            ))
+                                        }
+                                    </div>
+                                )}
+                            </Tooltip>
+                        }
                     </Marker>
 
                     {(clickedArea === area.id || overArea == area.id) && (

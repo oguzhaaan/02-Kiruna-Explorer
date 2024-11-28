@@ -31,9 +31,14 @@ export const UserProvider = ({ children }) => {
   };
 
   const checkAuth = async () => {
+    try{
     const user = await API.getUserInfo();
     setIsLoggedIn(true);
     setUser(user);
+    }
+    catch(error){
+      console.log(error)
+    }
   };
 
   return (

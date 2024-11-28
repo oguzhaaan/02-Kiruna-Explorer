@@ -16,77 +16,90 @@ describe("Unit Test addArea", () => {
     });
 
     // Caso base: inserimento riuscito
-    test("should return the id of the newly created area on successful insert", async () => {
-        const lastID = 42; // ID di esempio per il documento inserito
+    test("should return the ID of the newly created area on successful insert", async () => {
+        // Mock data
         const geoJson = '{"type": "Polygon", "coordinates": [[...]]}';
-
-        // Mock della funzione db.run per simulare un'inserzione con successo
-        vi.spyOn(db, "run").mockImplementation((_sql, _params, callback) => {
-            callback.call({ lastID }, null); // Simula l'inserzione con successo e lastID
+        const newAreaId = 15; // Expected ID of the newly created area
+    
+        // Mock `compareAreas` to return null (no existing area matches)
+        vi.spyOn(areaDao, "compareAreas").mockResolvedValueOnce(null);
+    
+        // Mock `db.run` to simulate a successful insert into the database
+        const dbRunMock = vi.spyOn(db, "run").mockImplementation((_query, _params, callback) => {
+            callback.call({ lastID: newAreaId }, null); // Simulate insert with new area ID
         });
-
-        // Esegui la funzione addArea
-        const id = await areaDao.addArea(geoJson);
-
-        // Verifica che l'id restituito sia corretto
-        expect(id).toEqual(lastID);
-
-        // Verifica che db.run sia stata chiamata con i parametri corretti
-        expect(db.run).toHaveBeenCalledTimes(1);
-        expect(db.run).toHaveBeenCalledWith(
-            expect.stringContaining("INSERT INTO area (geoJson)"),
+    
+        // Execute the function
+        const result = await areaDao.addArea(geoJson);
+    
+        // Assertions
+        expect(result).toBe(newAreaId); // Should return the ID of the newly created area
+        expect(areaDao.compareAreas).toHaveBeenCalledWith(geoJson); // Ensure `compareAreas` was called with the correct GeoJSON
+        expect(dbRunMock).toHaveBeenCalledWith(
+            expect.stringMatching(/INSERT INTO area \(geoJson\)\s+VALUES \(\?\)/),
             [geoJson],
             expect.any(Function)
-        );
+        ); // Match query ignoring whitespace differences
     });
+    
+    
 
     // Caso di errore durante l'inserimento
     test("should throw an error if db.run returns an error", async () => {
+        // Mock data
         const geoJson = '{"type": "Polygon", "coordinates": [[...]]}';
-        const expectedError = new Error("Database Error");
-
-        // Mock di db.run per simulare un errore
-        vi.spyOn(db, "run").mockImplementation((_sql, _params, callback) => {
-            callback(expectedError); // Simula un errore
+        const dbError = new Error("Database error");
+    
+        // Mock `compareAreas` to return null (no existing area matches)
+        vi.spyOn(areaDao, "compareAreas").mockResolvedValueOnce(null);
+    
+        // Mock `db.run` to simulate an error
+        const dbRunMock = vi.spyOn(db, "run").mockImplementation((_query, _params, callback) => {
+            callback(dbError); // Simulate a database error
         });
-
-        // Verifica che venga lanciato un errore con il messaggio corretto
-        await expect(areaDao.addArea(geoJson)).rejects.toThrow("Database Error");
-
-        // Verifica che db.run sia stata chiamata
-        expect(db.run).toHaveBeenCalledTimes(1);
+    
+        // Execute the function and verify it throws an error
+        await expect(areaDao.addArea(geoJson)).rejects.toThrow(dbError);
+    
+        // Assertions
+        expect(areaDao.compareAreas).toHaveBeenCalledWith(geoJson); // Ensure `compareAreas` was called with the correct GeoJSON
+        expect(dbRunMock).toHaveBeenCalledWith(
+            expect.stringMatching(/INSERT INTO area \(geoJson\)\s+VALUES \(\?\)/),
+            [geoJson],
+            expect.any(Function)
+        ); // Match query ignoring whitespace differences
     });
+    
 
-    // Caso di parametro geoJson nullo
     test("should throw an error if geoJson is null", async () => {
+        // Mock data
         const geoJson = null;
-        const expectedError = new Error("Database Error");
-
-
-        vi.spyOn(db, "run").mockImplementation((_sql, _params, callback) => {
-            callback(expectedError); // Simula un errore
-        });
-
-        await expect(areaDao.addArea(geoJson)).rejects.toThrow("Database Error");
-
-        // db.run non dovrebbe essere chiamato in questo caso
-        expect(db.run).toHaveBeenCalled(1);
+    
+        // Mock `compareAreas` to ensure it is not called
+        const compareAreasMock = vi.spyOn(areaDao, "compareAreas");
+    
+        // Execute the function and verify it throws an error
+        await expect(areaDao.addArea(geoJson)).rejects.toThrow("GeoJson cannot be null");
+    
+        // Ensure `compareAreas` is never called
+        expect(compareAreasMock).not.toHaveBeenCalled();
     });
-
+    
     // Caso di parametro geoJson undefined
     test("should throw an error if geoJson is undefined", async () => {
         const geoJson = undefined;
-        const expectedError = new Error("Database Error");
+        const expectedError = new Error("GeoJson cannot be null or undefined");
 
         vi.spyOn(db, "run").mockImplementation((_sql, _params, callback) => {
             callback(expectedError); // Simula un errore
         });
+        const compareAreasMock = vi.spyOn(areaDao, "compareAreas");
 
         // Verifica che la funzione lanci un errore di tipo
-        await expect(areaDao.addArea(geoJson)).rejects.toThrow("Database Error");
+        await expect(areaDao.addArea(geoJson)).rejects.toThrow("GeoJson cannot be null or undefined");
 
         // db.run non dovrebbe essere chiamato in questo caso
-        expect(db.run).toHaveBeenCalled(1);
+        expect(compareAreasMock).not.toHaveBeenCalled();
     });
 });
 

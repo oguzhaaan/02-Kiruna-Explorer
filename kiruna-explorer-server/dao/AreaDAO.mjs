@@ -5,6 +5,10 @@ import { AreaNotFound } from "../models/Area.mjs";
 export default function AreaDAO() {
 
     this.addArea = (geoJson) => {
+        if (!geoJson) {
+            return Promise.reject(new Error("GeoJson cannot be null or undefined"));
+        }
+
         const query = `
             INSERT INTO area (geoJson)
             VALUES (?)

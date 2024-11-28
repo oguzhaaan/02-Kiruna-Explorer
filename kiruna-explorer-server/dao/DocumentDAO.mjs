@@ -6,84 +6,149 @@ import { InvalidArea } from "../models/Area.mjs";
 
 export default function DocumentDAO(areaDAO) {
 
-    this.getAllDocuments = () => {
-        const query = "SELECT * FROM document";
+    // Simplified function to fetch documents and their stakeholders
+    this.getAllDocuments = ({ type, title, stakeholders, startDate, endDate } = {}) => {
+        // Build the base query with WHERE 1=1
+        let query = `
+            SELECT 
+                document.id, 
+                document.title, 
+                document.date, 
+                document.language, 
+                document.description, 
+                document.scale, 
+                document.areaId, 
+                document.pages, 
+                document.planNumber,
+                document_type.name AS type_name
+            FROM document
+            LEFT JOIN document_type ON document.typeId = document_type.id
+            WHERE 1=1
+        `;
+        const params = [];
+
+        // Apply filters if provided
+
+        // Filter by document type
+        if (type) {
+            query += " AND document_type.name = ?";
+            params.push(type);
+        }
+
+        // Filter by document title
+        if (title) {
+            query += " AND document.title LIKE ?";
+            params.push(`%${title}%`);
+        }
+
+        // Filter by stakeholders if provided
+        if (stakeholders && stakeholders.length > 0) {
+            query += `
+                AND document.id IN (
+                    SELECT documentId 
+                    FROM document_stakeholder 
+                    JOIN stakeholder ON stakeholder.id = document_stakeholder.stakeholderId
+                    WHERE stakeholder.name IN (${stakeholders.map(() => "?").join(", ")})
+                )
+            `;
+            params.push(...stakeholders);
+        }
+
+        // Filter by start date if provided
+        if (startDate) {
+            query += " AND document.date >= ?";
+            params.push(startDate);
+        }
+
+        // Filter by end date if provided
+        if (endDate) {
+            query += " AND document.date <= ?";
+            params.push(endDate);
+        }
+
+        // Execute the query to fetch documents
         return new Promise((resolve, reject) => {
-            db.all(query, (err, rows) => {
+            db.all(query, params, async (err, rows) => {
+                if (err) {
+                    return reject(err);
+                } else {
+                    // Fetch stakeholders and convert the DB rows to Document objects
+                    try {
+                        const documentsPromises = rows.map(async (row) => {
+                            // Fetch stakeholders for the current document
+                            const stakeholdersForDocument = await this.getStakeholdersForDocument(row.id);
+                            
+                            // Convert DB row to Document with stakeholders
+                            const document = this.convertDBRowToDocument(row, stakeholdersForDocument);
+                            document.type = row.type_name;  // Add document type
+
+                            return document;
+                        });
+
+                        // Wait for all documents with stakeholders to be resolved
+                        const documents = await Promise.all(documentsPromises);
+                        resolve(documents);
+                    } catch (error) {
+                        reject(error);
+                    }
+                }
+            });
+        });
+    };
+
+    // Fetch stakeholders for a given document (kept as a separate function)
+    this.getStakeholdersForDocument = (documentId) => {
+        const stakeholdersQuery = `
+            SELECT stakeholder.id, stakeholder.name
+            FROM stakeholder
+            JOIN document_stakeholder ON stakeholder.id = document_stakeholder.stakeholderId
+            WHERE document_stakeholder.documentId = ?
+        `;
+        
+        return new Promise((resolve, reject) => {
+            db.all(stakeholdersQuery, [documentId], (err, stakeholdersRows) => {
                 if (err) {
                     reject(err);
                 } else {
-                    const documents = rows.map(row => this.convertDBRowToDocument(row));
-                    resolve(documents);
+                    resolve(stakeholdersRows);
                 }
-            })
-        }
-        )
+            });
+        });
     };
 
+    // Simplified function to fetch a document by ID
     this.getDocumentById = (id) => {
-        const query = "SELECT * FROM document WHERE id = ?";
-
+        const query = `
+            SELECT document.*, document_type.name AS type_name 
+            FROM document 
+            LEFT JOIN document_type ON document.typeId = document_type.id 
+            WHERE document.id = ?
+        `;
+    
         return new Promise((resolve, reject) => {
-            db.get(query, [id], (err, row) => {
-                if (err) {
-                    return reject(err);
-                } else if (!row) {
-                    return reject(new DocumentNotFound());
-                } else {
-                    // Converti la riga del database in un oggetto Document
-                    const document = this.convertDBRowToDocument(row);
+            db.get(query, [id], async (err, row) => {
+                if (err) return reject(err);
+                if (!row) return reject(new DocumentNotFound());
+    
+                try {
+                    const stakeholders = await this.getStakeholdersForDocument(row.id);
+                    const document = this.convertDBRowToDocument(row, stakeholders);
+                    document.type = row.type_name || "Unknown"; // Handle missing type gracefully
                     resolve(document);
+                } catch (error) {
+                    reject(error);
                 }
             });
         });
     };
+    
 
+    // Refactored function to filter documents by criteria
     this.getDocumentsByFilter = ({ type, title, stakeholders, startDate, endDate }) => {
-        return new Promise((resolve, reject) => {
-            let query = "SELECT * FROM document WHERE 1=1";
-            const params = [];
-
-            if (type) {
-                query += " AND type = ?";
-                params.push(type);
-            }
-
-            if (title) {
-                query += " AND title LIKE ?";
-                params.push(`%${title}%`);
-            }
-
-            if (stakeholders) {
-                query += " AND (";
-                const stakeholderConditions = [];
-                stakeholders.forEach(stakeholder => {
-                    stakeholderConditions.push(`${stakeholder} = TRUE`);
-                });
-                query += stakeholderConditions.join(" AND ");
-                query += ")";
-            }
-
-            if (startDate) {
-                query += " AND date >= ?";
-                params.push(startDate);
-            }
-
-            if (endDate) {
-                query += " AND date <= ?";
-                params.push(endDate);
-            }
-
-            db.all(query, params, (err, rows) => {
-                if (err) {
-                    return reject(err);
-                }
-                else {
-                    resolve(rows.map(row => this.convertDBRowToDocument(row)));
-                }
-            });
-        });
+        return this.getAllDocuments({ type, title, stakeholders, startDate, endDate });
     };
+
+
 
     this.getDocumentsByAreaId = (areaId) => {
         const query = "SELECT * FROM document WHERE areaId = ?";
@@ -160,83 +225,142 @@ export default function DocumentDAO(areaDAO) {
         }
     };
 
-    this.addDocument = (documentData) => {
-        // Converti il documento per l'inserimento nel database
-        const dbDocument = this.convertDocumentForDB(documentData);
-
-        // Query per inserire il documento
-        const insertDocumentQuery = `
-            INSERT INTO document (title, date, type, language, description, scale, areaId, pages, planNumber, lkab, municipality, regional_authority, architecture_firms, citizens, others)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `;
-
-        return new Promise((resolve, reject) => {
-            db.run(insertDocumentQuery, [
-                dbDocument.title,
-                dbDocument.date,
-                dbDocument.type,
-                dbDocument.language,
-                dbDocument.description,
-                dbDocument.scale,
-                dbDocument.areaId,
-                dbDocument.pages,
-                dbDocument.planNumber,
-                dbDocument.lkab,
-                dbDocument.municipality,
-                dbDocument.regional_authority,
-                dbDocument.architecture_firms,
-                dbDocument.citizens,
-                dbDocument.others
-            ], function (err) {
-                if (err) {
-                    return reject(err); // Rifiuta la promessa in caso di errore
-                }
-                resolve(this.lastID); // Risolvi la promessa con l'ID del documento inserito
+    this.addDocument = async (documentData) => {
+        try {
+            console.log("Received document data:", documentData);
+    
+            // Convert input data into a format suitable for the database
+            const dbDocument = this.convertDocumentForDB(documentData);
+    
+            // SQL query to insert a new document
+            const insertDocumentQuery = `
+                INSERT INTO document (title, date, typeId, language, description, scale, areaId, pages, planNumber)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+    
+            // Insert the document and retrieve the new document ID
+            const documentId = await new Promise((resolve, reject) => {
+                db.run(insertDocumentQuery, [
+                    dbDocument.title,
+                    dbDocument.date,
+                    dbDocument.typeId,
+                    dbDocument.language,
+                    dbDocument.description,
+                    dbDocument.scale,
+                    dbDocument.areaId,
+                    dbDocument.pages,
+                    dbDocument.planNumber
+                ], function (err) {
+                    if (err) {
+                        console.error("Error inserting document:", err.message);
+                        return reject(err);
+                    }
+                    resolve(this.lastID); // Fetch document ID using proper context
+                });
             });
-        });
+    
+            // Check if documentId is valid
+            if (!documentId) {
+                throw new Error("Failed to retrieve the documentId after insertion");
+            }
+    
+            // Add stakeholders to the document
+            await this.addStakeholders(documentId, dbDocument.stakeholders);
+    
+            console.log(`Document with ID ${documentId} added successfully`);
+            return documentId; // Return the newly created document ID
+        } catch (error) {
+            console.error("Error adding document:", error.message);
+            throw error; // Re-throw the error to the caller
+        }
     };
-
+    
+    
+    
+    
+    
+    
     this.convertDocumentForDB = (documentData) => {
+        // Map stakeholders to their IDs. Handle both array of IDs and array of objects with 'value'
+        const stakeholders = documentData.stakeholders?.map(stakeholder => 
+            typeof stakeholder === "object" ? stakeholder.value : stakeholder
+        ) || [];
+    
         return {
             title: documentData.title,
             date: documentData.date,
-            type: documentData.type,
+            typeId: documentData.typeId, // Assuming this is provided in the documentData
             language: documentData.language,
             description: documentData.description,
             scale: documentData.scale,
-            areaId: documentData.areaId ? documentData.areaId : null,
+            areaId: documentData.areaId || null, // Default to null if areaId is not provided
             pages: documentData.pages,
             planNumber: documentData.planNumber,
-            lkab: documentData.stakeholders.includes("lkab"),
-            municipality: documentData.stakeholders.includes("municipality"),
-            regional_authority: documentData.stakeholders.includes("regional authority"),
-            architecture_firms: documentData.stakeholders.includes("architecture firms"),
-            citizens: documentData.stakeholders.includes("citizens"),
-            others: documentData.stakeholders.includes("others"),
+            stakeholders: stakeholders  // Array of stakeholder IDs
         };
     };
+    
+    
+    // Method to associate the document with stakeholders
+    this.addStakeholders = (documentId, stakeholderIds) => {
+        // Return immediately if there are no stakeholders
+        if (!stakeholderIds || stakeholderIds.length === 0) {
+            return Promise.resolve();
+        }
+    
+        const values = stakeholderIds.map(stakeholderId => [documentId, stakeholderId]);
+        const placeholders = values.map(() => "(?, ?)").join(", ");
+        const query = `
+            INSERT INTO document_stakeholder (documentId, stakeholderId)
+            VALUES ${placeholders}
+        `;
+        const flattenedValues = values.flat();
+    
+        return new Promise((resolve, reject) => {
+            db.run("BEGIN TRANSACTION", (err) => {
+                if (err) return reject(err); // Handle transaction start error
+    
+                db.run(query, flattenedValues, (err) => {
+                    if (err) {
+                        return db.run("ROLLBACK", (rollbackErr) => {
+                            if (rollbackErr) {
+                                console.error("Rollback failed:", rollbackErr.message);
+                            }
+                            reject(err); // Reject with the original error
+                        });
+                    }
+    
+                    db.run("COMMIT", (commitErr) => {
+                        if (commitErr) {
+                            console.error("Commit failed:", commitErr.message);
+                            return reject(commitErr);
+                        }
+                        resolve();
+                    });
+                });
+            });
+        });
+    };
+    
+    
+    
+    
 
-    this.convertDBRowToDocument = (row) => {
-        const stakeholders = [];
-        if (row.lkab) stakeholders.push("lkab");
-        if (row.municipality) stakeholders.push("municipality");
-        if (row.regional_authority) stakeholders.push("regional authority");
-        if (row.architecture_firms) stakeholders.push("architecture firms");
-        if (row.citizens) stakeholders.push("citizens");
-        if (row.others) stakeholders.push("others");
-
+    this.convertDBRowToDocument = (row, stakeholders) => {
+        // Create a new Document instance with the fetched stakeholders
         return new Document(
             row.id,
             row.title,
-            stakeholders, // Array di stakeholder
+            stakeholders, // Array of stakeholders passed from the `getStakeholdersForDocument` function
             row.date,
             row.type,
             row.language,
             row.description,
             row.areaId,
-            row.scale, // Aggiunto pages
+            row.scale,
             row.pages,
             row.planNumber
         );
     };
+    
 }

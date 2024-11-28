@@ -175,8 +175,8 @@ function SingleDocumentMap({ setDocumentId, id, setShowSingleDocument }) {
                                     document.stakeholders ? document.stakeholders.map((stakeholder, index) => {
                                         return (
                                             <div key={index}
-                                                className={`text-center ${getStakeholderColor({ stakeholder: stakeholder })} rounded-2xl py-1 px-3`}>
-                                                <p className="m-0 p-0 text-center">{capitalizeWords(stakeholder)}</p>
+                                                className={`text-center ${getStakeholderColor({ stakeholder: stakeholder.name.toLowerCase() })} rounded-2xl py-1 px-3`}>
+                                                <p className="m-0 p-0 text-center">{stakeholder.name}</p>
                                             </div>
                                         );
                                     }) : ""

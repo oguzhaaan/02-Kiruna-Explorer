@@ -40,7 +40,7 @@ function getIcon({ type }, { darkMode }) {
             return darkMode ? consultationIcon : consultationIconLight;
         case "design":
             return darkMode ? designIcon : designIconLight;
-        case "material effect":
+        case "material effects":
             return darkMode ? materialEffectIcon : materialEffectIconLight;
         case "prescriptive":
             return darkMode ? prescriptiveIcon : prescriptiveIconLight;

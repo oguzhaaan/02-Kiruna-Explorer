@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import dayjs from "dayjs";
 import "./document.css";
 import Alert from "./Alert.jsx";
 import API from "../API/API.mjs";
@@ -8,16 +7,19 @@ import { useNavigate } from "react-router-dom";
 import Select from "react-select";
 import DocumentClass from "../classes/Document.mjs";
 import { useTheme } from "../contexts/ThemeContext.jsx";
-import { getStakeholderColor } from "./Utilities/StakeholdersColors";
-import { getIcon } from "./Utilities/DocumentIcons";
-import { formatString } from "./Utilities/StringUtils.js";
+import { getStakeholderColor } from "./Utilities/StakeholdersColors.jsx";
+import { getIcon } from "./Utilities/DocumentIcons.jsx";
 import customDropdownStyles from "./Utilities/CustomDropdownStyles.js";
-import { stakeholderOptions, popularLanguages } from "./Utilities/Data.js";
+import {
+  stakeholders,
+  popularLanguages,
+  documentTypes,
+} from "./Utilities/Data.js";
 import FilterMenu from "./FilterMenu.jsx";
 import FilterLabels from "./FilterLabels.jsx";
 import { useDocuments } from "../hooks/useDocuments.mjs";
 
-function Document(props) {
+function DocumentsPage(props) {
   const navigate = useNavigate();
 
   const { isDarkMode, toggleTheme } = useTheme();
@@ -52,7 +54,7 @@ function Document(props) {
     const handler = setTimeout(() => {
       setDebouncedQuery(searchQuery); // Update debounced query after delay
     }, 500); // Wait 500ms
-  
+
     return () => {
       clearTimeout(handler); // Clear timeout if searchQuery changes before 500ms
     };
@@ -91,9 +93,9 @@ function Document(props) {
         ? { planNumber: "Plan Number is required for scale 'plan'" }
         : {}),
       ...(props.newDocument.date ? {} : { date: "Date is required" }),
-      ...(props.newDocument.type && props.newDocument.type !== "none"
-        ? {}
-        : { type: "Type is required" }),
+      // ...(props.newDocument.type && props.newDocument.type !== "none"
+      //   ? {}
+      //   : { type: "Type is required" }),
       ...(props.newDocument.description
         ? {}
         : { description: "Description is required" }),
@@ -129,7 +131,7 @@ function Document(props) {
       scale: props.newDocument.scale,
       planNumber: props.newDocument.planNumber, // Optional
       date: props.newDocument.date, //day is optional
-      type: props.newDocument.type,
+      typeId: props.newDocument.typeId,
       language: props.newDocument.language || null, // Set to null if not provided
       pageNumber: props.newDocument.pages || null, // Set to null if not provided
       description: props.newDocument.description, // Mandatory
@@ -137,7 +139,7 @@ function Document(props) {
       links: props.connections.length > 0 ? props.connections : null,
     };
 
-    //console.log(documentData);
+    console.log(documentData);
 
     if (!validateFields()) {
       setAlertMessage(["Please fill all the mandatory fields.", "error"]);
@@ -177,102 +179,99 @@ function Document(props) {
   return (
     <div className={isDarkMode ? "dark" : "light"}>
       <div className="bg-background_color_white dark:bg-background_color min-h-screen flex flex-col items-center">
-        <SingleDocument updateAreaId={props.updateAreaId} setUpdateAreaId={props.setUpdateAreaId} setNavShow={props.setNavShow} setMode={props.setMode}
-                        setoriginalDocId={props.setoriginalDocId} setAlertMessage={setAlertMessage}></SingleDocument>
+        <SingleDocument
+          updateAreaId={props.updateAreaId}
+          setUpdateAreaId={props.setUpdateAreaId}
+          setNavShow={props.setNavShow}
+          setMode={props.setMode}
+          setoriginalDocId={props.setoriginalDocId}
+          setAlertMessage={setAlertMessage}
+        ></SingleDocument>
         <Alert
           message={alertMessage[0]}
           type={alertMessage[1]}
           clearMessage={() => setAlertMessage(["", ""])}
         ></Alert>
-        <div className="sticky-top w-full bg-[#f3f3f3ef] dark:bg-[#313131ef] rounded-b-md px-36">
-        <div className="flex flex-row justify-content-between align-items-center h-16 px-3 w-full">
-          <div className="flex flex-row items-center gap-3">
-            {/* Search Bar */}
-            <div className="z-[0] relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-black_text">
-                <i className="bi bi-search"></i>
-              </span>
-              <input
-                type="text"
-                placeholder="Search"
-                className="outline outline-1 outline-customGray1 dark:outline-none bg-search_dark_color lg:md:w-60 sm:w-36 py-2 pl-10 pr-4 text-black_text rounded-[50px] placeholder-black_text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+        <div className="sticky-top w-full bg-[#f3f3f3ef] dark:bg-[#313131ef] rounded-b-md px-20">
+          <div className="flex flex-row justify-content-between align-items-center h-16  w-full">
+            <div className="flex flex-row items-center gap-3">
+              {/* Search Bar */}
+              <div className="z-[0] relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-black_text">
+                  <i className="bi bi-search"></i>
+                </span>
+                <input
+                  type="text"
+                  placeholder="Search"
+                  className="outline outline-1 outline-customGray1 dark:outline-none bg-search_dark_color lg:md:w-72 sm:w-48 py-2 pl-10 pr-4 text-black_text rounded-[50px] placeholder-black_text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
             </div>
-            <div className="relative">
-              {/* Filter Button */}
+
+            <div className="flex flex-row justify-content-end gap-3 align-items-center left-2">
+              {/* Add document Button */}
               <button
-                className="text-black_text dark:text-white_text text-2xl"
-                onClick={toggleFilterMenu}
-              >
-                <i className="bi bi-sort-down-alt"></i>
-              </button>
-
-              {/* Conditional Filter Menu */}
-              {isFilterMenuOpen && (
-                <div className="absolute top-full left-0 mt-2 z-50">
-                  <FilterMenu
-                    filterValues={filterValues}
-                    setFilterValues={setFilterValues}
-                    toggleFilterMenu={toggleFilterMenu}
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="flex flex-row justify-content-end gap-3 align-items-center">
-            {/* Add document Button */}
-            <button
                 onClick={toggleModal}
                 className="bg-primary_color_light dark:bg-primary_color_dark hover:bg-[#2E6A8E66] transition text-black_text dark:text-white_text flex flex-row gap-2 justify-items-end py-2 px-3 rounded-md"
-            >
-              <i className="bi bi-file-earmark-plus"></i>
-              <p className="text-base m-0 p-0 lg:inline-block md:inline-block sm:hidden">Add document</p>
-            </button>
+              >
+                <i className="bi bi-file-earmark-plus"></i>
+                <p className="text-base m-0 p-0 lg:inline-block md:inline-block sm:hidden">
+                  Add document
+                </p>
+              </button>
 
-            {/* Change Theme Button */}
-            <button
-              className="text-black_text dark:text-white_text grid justify-items-center transition-transform transform hover:scale-105 active:scale-95"
-              onClick={() => {
-                toggleTheme();
-              }}
-            >
-              <div className="flex justify-center items-center gap-2 relative">
-                <i
-                  className="bi bi-sun-fill transition-opacity duration-300 ease-in-out text-2xl"
-                  style={{ opacity: isDarkMode ? 0.2 : 1 }}
-                ></i>
-                <i
-                  className="bi bi-moon-fill transition-opacity duration-300 ease-in-out text-2xl"
-                  style={{ opacity: isDarkMode ? 1 : 0.2 }}
-                ></i>
-              </div>
-            </button>
+              {/* Change Theme Button */}
+              <button
+                className="text-black_text dark:text-white_text grid justify-items-center transition-transform transform hover:scale-105 active:scale-95"
+                onClick={() => {
+                  toggleTheme();
+                }}
+              >
+                <div className="flex justify-center items-center gap-2 relative">
+                  <i
+                    className="bi bi-sun-fill transition-opacity duration-300 ease-in-out text-2xl"
+                    style={{ opacity: isDarkMode ? 0.2 : 1 }}
+                  ></i>
+                  <i
+                    className="bi bi-moon-fill transition-opacity duration-300 ease-in-out text-2xl"
+                    style={{ opacity: isDarkMode ? 1 : 0.2 }}
+                  ></i>
+                </div>
+              </button>
+            </div>
           </div>
         </div>
-        </div>
-        {/* Documents List */}
-        <div className="flex flex-col gap-3 w-2/3 overflow-y-scroll">
-          {/* Filter Labels */}
-          <div className="w-full">
-            <FilterLabels
+        <div className="flex flex-row w-full">
+          <div className="flex flex-col mt-8 mx-7 w-1/4">
+            <FilterMenu
+              filterValues={filterValues}
+              setFilterValues={setFilterValues}
+              toggleFilterMenu={toggleFilterMenu}
+            />
+          </div>
+          <div className="flex flex-col gap-3 w-3/4 overflow-y-scroll mr-7">
+            {/* Filter Labels */}
+            <div className="w-full">
+              <FilterLabels
                 filterValues={filterValues}
                 setFilterValues={setFilterValues}
-            />
+              />
+            </div>
+            {/* Documents List */}
+            {documents.map((doc) => (
+              <DocumentItem
+                key={doc.id}
+                documentId={doc.id}
+                title={doc.title}
+                type={doc.type}
+                date={doc.date}
+                stakeholders={doc.stakeholders}
+                isDarkMode={isDarkMode}
+              />
+            ))}
           </div>
-          {documents.map((doc) => (
-            <DocumentItem
-              key={doc.id}
-              documentId={doc.id}
-              title={doc.title}
-              type={doc.type}
-              date={doc.date}
-              stakeholders={doc.stakeholders}
-              isDarkMode={isDarkMode}
-            />
-          ))}
         </div>
       </div>
       {/* Add Document Form */}
@@ -321,14 +320,17 @@ function Document(props) {
               </label>
               <Select
                 isMulti
-                options={stakeholderOptions}
+                options={stakeholders.map((stakeholder) => ({
+                  value: stakeholder.id,
+                  label: stakeholder.name,
+                }))}
                 value={props.newDocument.stakeholders}
                 onChange={(e) => handleFieldChange("stakeholders", e || [])}
                 styles={customDropdownStyles(isDarkMode)}
                 placeholder="None"
                 isClearable={false}
                 isSearchable={false}
-                className="select text-black_text"
+                className="select w-full text-black_text"
               />
             </div>
             {/* Scale */}
@@ -376,6 +378,98 @@ function Document(props) {
               </div>
             )}
             {/* Date */}
+            <div className="input-type mb-4 w-full">
+              {/* Label for the date */}
+              <label
+                htmlFor="issuance-date"
+                className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left"
+              >
+                Issuance date<span className="text-red-400">*</span>
+              </label>
+              {/* Date Dropdowns */}
+              <div className="flex flex-row space-x-4 items-center">
+                {/* Year Dropdown */}
+                <select
+                  id="document-date-year"
+                  className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md ${
+                    isDarkMode ? "dark-mode" : "light-mode"
+                  } ${
+                    errors.date
+                      ? "border-red-500 border-1"
+                      : "focus:border-blue-400 border-1 border-transparent"
+                  } focus:outline-none`}
+                >
+                  <option value="" disabled selected>
+                    Year
+                  </option>
+                  {Array.from({ length: 100 }, (_, i) => {
+                    const year = new Date().getFullYear() - i;
+                    return (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    );
+                  })}
+                </select>
+
+                {/* Month Dropdown */}
+                <select
+                  id="document-date-month"
+                  className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md ${
+                    isDarkMode ? "dark-mode" : "light-mode"
+                  } ${
+                    errors.date
+                      ? "border-red-500 border-1"
+                      : "focus:border-blue-400 border-1 border-transparent"
+                  } focus:outline-none`}
+                >
+                  <option value="" disabled selected>
+                    Month
+                  </option>
+                  {[
+                    "January",
+                    "February",
+                    "March",
+                    "April",
+                    "May",
+                    "June",
+                    "July",
+                    "August",
+                    "September",
+                    "October",
+                    "November",
+                    "December",
+                  ].map((month, index) => (
+                    <option key={index + 1} value={index + 1}>
+                      {month}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Day Dropdown */}
+                <select
+                  id="document-date-day"
+                  className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md ${
+                    isDarkMode ? "dark-mode" : "light-mode"
+                  } ${
+                    errors.date
+                      ? "border-red-500 border-1"
+                      : "focus:border-blue-400 border-1 border-transparent"
+                  } focus:outline-none`}
+                >
+                  <option value="" disabled selected>
+                    Day
+                  </option>
+                  {Array.from({ length: 31 }, (_, i) => (
+                    <option key={i + 1} value={i + 1}>
+                      {i + 1}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Date */}
             <div className="input-date mb-4 w-full">
               <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">
                 Issuance date<span className="text-red-400">*</span>
@@ -402,7 +496,7 @@ function Document(props) {
               <select
                 id="document-type"
                 value={props.newDocument.type}
-                onChange={(e) => handleFieldChange("type", e.target.value)}
+                onChange={(e) => handleFieldChange("typeId", e.target.value)}
                 className={`w-full px-3 text-base py-2 text-black_text dark:text-white_text bg-input_color_light dark:bg-input_color_dark rounded-md ${
                   errors.type
                     ? "border-red-500 border-1"
@@ -410,14 +504,11 @@ function Document(props) {
                 } focus:outline-none`}
               >
                 <option value="none">None</option>
-                <option value="design">Design document</option>
-                <option value="informative">Informative document</option>
-                <option value="prescriptive">Prescriptive document</option>
-                <option value="technical">Technical document</option>
-                <option value="agreement">Agreement</option>
-                <option value="conflict">Conflict</option>
-                <option value="consultation">Consultation</option>
-                <option value="material effects">Material effects</option>
+                {documentTypes.map((type) => (
+                  <option key={type.id} value={type.id}>
+                    {type.name}
+                  </option>
+                ))}
               </select>
             </div>
             {/* Language */}
@@ -480,7 +571,7 @@ function Document(props) {
               {props.newAreaId && (
                 <label className="text-black_text dark:text-white_text text-base w-full text-left py-1">
                   <i className="bi bi-check-lg align-middle text-green-400"></i>{" "}
-                  You selected {" "}
+                  You selected{" "}
                   {props.newAreaId === 1
                     ? "Municipality Area"
                     : `a Georeference`}
@@ -543,45 +634,43 @@ const DocumentItem = ({
   return (
     <div className={isDarkMode ? "dark" : "light"}>
       <div
-          className={`flex flex-wrap drop-shadow-xl rounded-xl bg-document_item_radient_grey_light dark:bg-document_item_radient_grey p-3 cursor-pointer`}
-          onClick={() => {
-            navigate(/documents/ + documentId);
-          }}
+        className={`flex flex-wrap drop-shadow-xl rounded-xl bg-document_item_radient_grey_light dark:bg-document_item_radient_grey p-3 cursor-pointer `}
+        onClick={() => {
+          navigate(/documents/ + documentId);
+        }}
       >
-        {/* Document Title and Type */}
-        <div className="w-1/2 flex flex-row text-black_text dark:text-white_text">
-          <div>
-            <div className="text-base mb-3 font-normal">
-              {formatString(title)}
-            </div>
-            <div className="text-sm font-light flex items-center">
-              <img
-                  src={getIcon({type: type}, {darkMode: isDarkMode})}
-                  className="w-8 mr-2"
-                  alt="type_icon"
-              />
-              {formatString(type)}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-2 w-1/2 justify-content-between align-items-end">
+        <div className="grid grid-cols-4 w-full gap-4 text-black_text dark:text-white_text">
+          {/* Document Title*/}
+          <div className="col-span-3 text-xl font-normal">{title}</div>
           {/* Date */}
-          <div className="text-sm top-3 right-5 text-gray-400">{date}</div>
+          <div className="flex justify-end text-sm text-gray-400 ">{date}</div>
+          {/* Document Type */}
+          <div className="flex flex-row items-center text-base font-light">
+            <img
+              src={getIcon(
+                { type: type.toLowerCase() },
+                { darkMode: isDarkMode }
+              )}
+              className="w-8 mr-2"
+              alt="type_icon"
+            />
+            {type}
+          </div>
 
           {/* Stakeholders */}
-          <div className="flex flex-wrap justify-content-end gap-2 bottom-4 right-5">
+          <div className="col-span-3 flex flex-wrap justify-end gap-2 text-white_text">
             {stakeholders &&
-                stakeholders.map((stakeholder, idx) => (
-                    <span
-                        key={idx}
-                        className={`rounded-2xl px-3 py-1 text-sm text-white_text ${getStakeholderColor(
-                            {stakeholder}
-                        )}`}
-                    >
-                  {formatString(stakeholder)}
+              stakeholders.length > 0 &&
+              stakeholders.map((stakeholder) => (
+                <span
+                  key={stakeholder.id} // Use the stakeholder id for key to avoid index as key.
+                  className={`rounded-2xl w-fit px-3 py-1 text-sm ${getStakeholderColor(
+                    { stakeholder: stakeholder.name.toLowerCase() }
+                  )}`}
+                >
+                  {stakeholder.name}
                 </span>
-                ))}
+              ))}
           </div>
         </div>
       </div>
@@ -589,4 +678,4 @@ const DocumentItem = ({
   );
 };
 
-export {Document};
+export default DocumentsPage;

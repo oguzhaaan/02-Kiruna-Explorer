@@ -87,7 +87,7 @@ function NavHeader(props) {
                                     </Row>
                                     <Row
                                         className={`offcanvas-item w-100 p-1 ${currentRoute.includes("diagram") ? (isDarkMode ? 'bg-customBlue' : 'bg-blue-200') : ''}`}
-                                        onClick={() => { }}
+                                        onClick={() => { navigate("/diagram") }}
                                     >
                                         <Col xs="auto">
                                             <i className={`bi bi-diagram-3 fs-3 align-middle ${isDarkMode ? 'text-white_text' : 'text-black_text'}`}></i>

@@ -94,6 +94,31 @@
   font-size: 18px;
 }
 
+.custom-switch-button {
+  background-color: #c0c0c0;
+  outline: 2px solid rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 30px;
+  height: 30px;
+  position: absolute;
+  top: 24em;
+  right: 12px;
+  z-index: 1000;
+}
+
+.custom-switch-button:hover {
+  background-color: #939393;
+}
+
+.custom-switch-button i {
+  font-size: 18px;
+}
+
 .custom-tile-layer img {
   filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
 }

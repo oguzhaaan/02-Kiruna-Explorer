@@ -54,9 +54,17 @@ const HomeButton = ({ handleMunicipalAreas }) => {
     );
 };
 
+const SwitchMapButton = ({ toggleMap, isSatelliteMap }) => {
+    return (
+        <div title={isSatelliteMap?"Street View":"Satellite View"} className="custom-switch-button" onClick={() =>toggleMap()}>
+            <i className="bi bi-arrow-left-right text-[#464646]"></i>
+        </div>
+    );
+};
+
 {/*Map Component*/ }
 function GeoreferenceMap(props) {
-    const { isDarkMode } = useTheme();
+    const { isDarkMode, isSatelliteMap, toggleMap } = useTheme();
     const navigate = useNavigate()
 
     const center = [68.20805, 20.593249999999998]
@@ -109,7 +117,8 @@ function GeoreferenceMap(props) {
     }
     useEffect(() => {
         //refresh
-    }, [showExit, showSave, presentAreas, coordinatesErr, clickedArea, props.municipalGeoJson, polygonLayer])
+        console.log(isSatelliteMap)
+    }, [showExit, showSave, presentAreas, coordinatesErr, clickedArea, props.municipalGeoJson, polygonLayer, isSatelliteMap, isDarkMode])
 
     {/* Check if polygon is in city bounds */ }
     const isPolygonInCityBounds = (latlngs) => {
@@ -458,14 +467,17 @@ function GeoreferenceMap(props) {
                 minZoom={8}
                 whenReady={() => { if (props.updateAreaId.docId && !drawnObject) createLayerToUpdate(props.updateAreaId.areaId) }}
             >
+                <TileLayer
+                    attribution={isSatelliteMap? '&copy; <a href="https://www.esri.com/">Esri</a> contributors': "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"}
+                    url={isSatelliteMap? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" :"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"}
+                    className={isSatelliteMap? " " : `${isDarkMode ? "custom-tile-layer":""}`}
+                />
+
+                <SwitchMapButton toggleMap={toggleMap} isSatelliteMap={isSatelliteMap}></SwitchMapButton>
                 {mapRef.current && !drawnObject && showMuniAreas && <HomeButton handleMunicipalAreas={handleMunicipalAreas} />}
                 {props.municipalGeoJson && <GeoJSON data={props.municipalGeoJson} pathOptions={{ color: `${isDarkMode ? "#CCCCCC" : "grey"}`, weight: 2, dashArray: "5, 5" }} />}
-                <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    className={isDarkMode ? "custom-tile-layer" : ""}
-                />
                 <ZoomControl position="topright" />
+
                 <FeatureGroup ref={featureGroupRef}>
                     <EditControl
                         key={drawnObject}

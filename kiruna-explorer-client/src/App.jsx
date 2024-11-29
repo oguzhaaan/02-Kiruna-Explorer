@@ -26,6 +26,7 @@ function App() {
   const [docId, setoriginalDocId] = useState(-1);
   const [updateAreaId, setUpdateAreaId] = useState({ areaId: null, docId: null })
   const [municipalGeoJson, setMunicipalGeoJson] = useState(null)
+  const [showArea, setShowArea] = useState(null)
 
   useEffect(() => {
     try {
@@ -69,13 +70,13 @@ function App() {
 
             <Route path="/login" element={isLoggedIn ? (user.role === "urban_planner" ? <Navigate replace to="/documents" /> : user.role === "resident" ? <Navigate replace to="/mapDocuments" /> : <LoginPage setNavShow={setNavShow} />) : <LoginPage setNavShow={setNavShow} />} />
 
-            <Route path="/documents" element={(isLoggedIn && user.role === "urban_planner") ? <DocumentsPage updateAreaId={updateAreaId} setUpdateAreaId={setUpdateAreaId} setoriginalDocId={setoriginalDocId} setMode={setMode} connections={connections} setConnections={setConnections} setNavShow={setNavShow} setIsModalOpen={setIsModalOpen} isModalOpen={isModalOpen} newAreaId={newAreaId} setnewAreaId={setnewAreaId} setNewDocument={setNewDocument} newDocument={newDocument} /> : <Navigate replace to="/" />} />
+            <Route path="/documents" element={(isLoggedIn && user.role === "urban_planner") ? <DocumentsPage setShowArea={setShowArea} municipalGeoJson={municipalGeoJson} updateAreaId={updateAreaId} setUpdateAreaId={setUpdateAreaId} setoriginalDocId={setoriginalDocId} setMode={setMode} connections={connections} setConnections={setConnections} setNavShow={setNavShow} setIsModalOpen={setIsModalOpen} isModalOpen={isModalOpen} newAreaId={newAreaId} setnewAreaId={setnewAreaId} setNewDocument={setNewDocument} newDocument={newDocument} /> : <Navigate replace to="/" />} />
 
-            <Route path="/documents/:id" element={(isLoggedIn && user.role === "urban_planner") ? <DocumentsPage updateAreaId={updateAreaId} setUpdateAreaId={setUpdateAreaId} setoriginalDocId={setoriginalDocId} setMode={setMode} connections={connections} setConnections={setConnections} setNavShow={setNavShow} setIsModalOpen={setIsModalOpen} isModalOpen={isModalOpen} newAreaId={newAreaId} setnewAreaId={setnewAreaId} setNewDocument={setNewDocument} newDocument={newDocument} /> : <Navigate replace to="/" />} />
+            <Route path="/documents/:id" element={(isLoggedIn && user.role === "urban_planner") ? <DocumentsPage setShowArea={setShowArea} municipalGeoJson={municipalGeoJson} updateAreaId={updateAreaId} setUpdateAreaId={setUpdateAreaId} setoriginalDocId={setoriginalDocId} setMode={setMode} connections={connections} setConnections={setConnections} setNavShow={setNavShow} setIsModalOpen={setIsModalOpen} isModalOpen={isModalOpen} newAreaId={newAreaId} setnewAreaId={setnewAreaId} setNewDocument={setNewDocument} newDocument={newDocument} /> : <Navigate replace to="/" />} />
 
             <Route path="/map" element={(isLoggedIn && user.role === "urban_planner") ? <GeoreferenceMap municipalGeoJson={municipalGeoJson} setUpdateAreaId={setUpdateAreaId} updateAreaId={updateAreaId} setNavShow={setNavShow} setnewAreaId={setnewAreaId} /> : <Navigate replace to="/" />} />
 
-            <Route path="/mapDocuments" element={isLoggedIn ? <GeoreferenceMapDoc setNavShow={setNavShow} municipalGeoJson={municipalGeoJson} /> : <Navigate replace to="/" />} />
+            <Route path="/mapDocuments" element={isLoggedIn ? <GeoreferenceMapDoc showArea={showArea} setShowArea={setShowArea} setNavShow={setNavShow} municipalGeoJson={municipalGeoJson} /> : <Navigate replace to="/" />} />
 
             <Route path="/linkDocuments" element={(isLoggedIn && user.role === "urban_planner") ? <LinkDocuments setOriginalDocId={setoriginalDocId} originalDocId={docId} mode={mode} setConnectionsInForm={setConnections} /> : <Navigate replace to="/" />} />
 

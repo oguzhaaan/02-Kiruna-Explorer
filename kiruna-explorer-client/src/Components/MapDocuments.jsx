@@ -5,7 +5,7 @@ import "./map.css"
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
 import L, { geoJSON } from "leaflet";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import API from "../API/API.mjs";
 import markerpin from "../assets/marker-pin.svg";
 import polygonpin from "../assets/polygon-pin.svg";
@@ -26,22 +26,34 @@ function calculateCentroid(coordinates) {
 }
 
 function calculateBounds(coordinates) {
-    const polygon = L.polygon(coordinates.map(coord => [coord[1], coord[0]])); // Inverti [lng, lat] -> [lat, lng]
+  const polygon = L.polygon(coordinates.map(coord => [coord[1], coord[0]])); // Inverti [lng, lat] -> [lat, lng]
 
-    return polygon.getBounds();
+  return polygon.getBounds();
 }
 
-function GeoreferenceMapDoc(props) {
-  const { isDarkMode } = useTheme();
-  const navigate = useNavigate()
+const SwitchMapButton = ({ toggleMap, isSatelliteMap }) => {
+  return (
+      <div title={isSatelliteMap?"Street View":"Satellite View"} className="custom-switch-button" onClick={() => {
+          toggleMap()
+      }}>
+          <i className="bi bi-arrow-left-right text-[#464646]"></i>
+      </div>
+  );
+};
 
+function GeoreferenceMapDoc(props) {
+  const { isDarkMode, isSatelliteMap, toggleMap } = useTheme();
+  const location = useLocation();
+  const currentRoute = location.pathname;
+
+  const isSingleDoc = currentRoute.includes("documents")
   //define default  position to "center of Kiruna"
   const center = [68.20805, 20.593249999999998]
 
   const boundaries = L.latLngBounds(
     L.latLng(67.3562, 17.8998),  // sud-ovest
     L.latLng(69.0599, 23.2867)   // nord-est
-);
+  );
 
   const [presentAreas, setPresentAreas] = useState(null);
   const [clickedArea, setClickedArea] = useState(null);
@@ -55,7 +67,7 @@ function GeoreferenceMapDoc(props) {
   {/* Hide navbar at start and take all present areas*/ }
   useEffect(() => {
     const handleAreas = async () => {
-      props.setNavShow(true);
+      if (props.setNavShow) props.setNavShow(true);
       const areas = await API.getAllAreas()
       setPresentAreas(areas)
       console.log(areas)
@@ -66,10 +78,10 @@ function GeoreferenceMapDoc(props) {
   {/* Refresh to show modifications*/ }
   useEffect(() => {
     //refresh
-  }, [presentAreas, ShowSingleDocument, props.municipalGeoJson])
+  }, [presentAreas, ShowSingleDocument, props.municipalGeoJson, props.showArea, isSatelliteMap, isDarkMode])
 
   // Mouse over the area
-  const handleMouseOver = (e, id, content) => {
+  const handleMouseOver = (id, content) => {
     if (id === 1) {
       setAlertMessage(`${content} documents in Municipal Area`)
     }
@@ -92,18 +104,17 @@ function GeoreferenceMapDoc(props) {
           center={center}
           zoom={5} ref={mapRef}
           zoomControl={false}
-          style={{
-            height: "100vh",
-            width: "100vw"
-          }}
+          scrollWheelZoom={!isSingleDoc}
+          className={`${isSingleDoc ? "h-[50vh] w-[80vh]" : " h-screen w-screen"}`}
           maxBounds={boundaries}
           minZoom={8}
         >
           <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            className={isDarkMode ? "custom-tile-layer" : ""}
+            attribution={isSatelliteMap? '&copy; <a href="https://www.esri.com/">Esri</a> contributors': "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"}
+            url={isSatelliteMap? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" :"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"}
+            className={isSatelliteMap? " " : `${isDarkMode ? "custom-tile-layer":""}`}
           />
+          <SwitchMapButton toggleMap={toggleMap} isSatelliteMap={isSatelliteMap}></SwitchMapButton>
           <ZoomControl position="topright" />
           {props.municipalGeoJson && <GeoJSON data={props.municipalGeoJson} pathOptions={{ color: `${isDarkMode ? "#CCCCCC" : "grey"}`, weight: 2, dashArray: "5, 5" }} />}
           {/* Visualize All present Areas*/}
@@ -116,10 +127,10 @@ function GeoreferenceMapDoc(props) {
               disableClusteringAtZoom={14} // Disabilita il clustering a zoom elevati
               iconCreateFunction={(cluster) => {
                 const count = cluster.getChildCount(); // Numero di marker nel cluster
-            
+
                 // Colori personalizzati in base al numero di marker
                 let clusterColor = count > 10 ? 'red' : count > 5 ? 'orange' : 'green';
-            
+
                 return L.divIcon({
                   html: `
                     <div style="
@@ -143,7 +154,7 @@ function GeoreferenceMapDoc(props) {
               }}
             >
               {presentAreas.map((area, index) =>
-                <Markers key={index} center={center} area={area} boundaries={boundaries} setDocumentId={setDocumentId} setShowSingleDocument={setShowSingleDocument} handleMouseOver={handleMouseOver} handleMouseOut={handleMouseOut} OpenTooltipDocs={OpenTooltipDocs} setOpenTooltipDocs={setOpenTooltipDocs} clickedArea={clickedArea}></Markers>
+                <Markers key={index} setShowArea={props.setShowArea} showArea={props.showArea} isSingleDoc={isSingleDoc} currentDocAreaId={props.currentDocAreaId} center={center} area={area} boundaries={boundaries} setDocumentId={setDocumentId} setShowSingleDocument={setShowSingleDocument} handleMouseOver={handleMouseOver} handleMouseOut={handleMouseOut} OpenTooltipDocs={OpenTooltipDocs} setOpenTooltipDocs={setOpenTooltipDocs} clickedArea={clickedArea}></Markers>
               )
               }
             </MarkerClusterGroup>
@@ -151,15 +162,15 @@ function GeoreferenceMapDoc(props) {
         </MapContainer>
 
         {/* Alert message */}
-        {alertMessage && (<Message alertMessage={alertMessage} setAlertMessage={setAlertMessage}></Message>)}
+        {alertMessage && !isSingleDoc && (<Message alertMessage={alertMessage} setAlertMessage={setAlertMessage}></Message>)}
       </div>
     </>
   )
 }
 
-function Message({alertMessage, setAlertMessage}) {
-   {/* Clear Alert message after 5 sec*/ }
-   useEffect(() => {
+function Message({ alertMessage, setAlertMessage }) {
+  {/* Clear Alert message after 5 sec*/ }
+  useEffect(() => {
     if (alertMessage != "") {
       const tid = setTimeout(() => {
         setAlertMessage("")
@@ -189,7 +200,7 @@ function Message({alertMessage, setAlertMessage}) {
   )
 }
 
-function Markers({ area, center, boundaries, handleMouseOver, handleMouseOut, clickedArea, setDocumentId, setShowSingleDocument, OpenTooltipDocs, setOpenTooltipDocs }) {
+function Markers({ showArea, setShowArea, area, currentDocAreaId, center, boundaries, isSingleDoc, handleMouseOver, handleMouseOut, clickedArea, setDocumentId, setShowSingleDocument, OpenTooltipDocs, setOpenTooltipDocs }) {
   const map = useMap()
   const [areaDoc, setAreaDoc] = useState([])
   const geometry = area.geoJson.geometry;
@@ -197,6 +208,7 @@ function Markers({ area, center, boundaries, handleMouseOver, handleMouseOut, cl
   const { isDarkMode } = useTheme();
   const [groupedDocs, setGroupedDocs] = useState([]);
 
+  const navigate = useNavigate()
 
   // //console.log(geometry.coordinates[0])
   const GenericPoints = L.icon({
@@ -263,6 +275,23 @@ function Markers({ area, center, boundaries, handleMouseOver, handleMouseOut, cl
     };
   }, [map]);
 
+  useEffect(() => {
+    const setCurrentView = () => {
+      if (geometry.type === "Polygon") {
+        map.fitBounds(calculateBounds(geometry.coordinates[0]))
+      }
+      else if (geometry.type === "MultiPolygon") {
+        map.fitBounds(boundaries)
+      }
+      else {
+        map.setView([geometry.coordinates[1], geometry.coordinates[0]], 14)
+      }
+      handleMouseOver(area.id, areaDoc.length)
+      setShowArea(null)
+    }
+    if (currentDocAreaId == area.id || showArea == area.id) setCurrentView()
+  }, [currentDocAreaId, showArea, areaDoc])
+
   return (
     geometry.type === 'Polygon' || geometry.type === "MultiPolygon" ? (
       areaDoc && (
@@ -272,13 +301,19 @@ function Markers({ area, center, boundaries, handleMouseOver, handleMouseOut, cl
             icon={area.id === 1 ? MunicipalArea : GenericPolygon} // Puoi scegliere di usare un'icona personalizzata per i punti
             eventHandlers={{
               click: (e) => {
-                map.fitBounds(area.id === 1 ? boundaries : calculateBounds(geometry.coordinates[0]))
+                if (isSingleDoc) {
+                  setShowArea(area.id)
+                  navigate("/mapDocuments")
+                }
+                else{
+                  map.fitBounds(area.id === 1 ? boundaries : calculateBounds(geometry.coordinates[0]))
+                }
               },
-              mouseover: (e) => handleMouseOver(e, area.id, areaDoc.length),
+              mouseover: (e) => handleMouseOver(area.id, areaDoc.length),
               mouseout: (e) => handleMouseOut(e),
             }}
           >
-            {OpenTooltipDocs !== area.id ? (
+            {OpenTooltipDocs !== area.id && !isSingleDoc ? (
               <div style={{ zIndex: -100 }}>
                 <Tooltip permanent className="cursor-pointer border-none text-black_text dark:text-white_text bg-box_white_color dark:bg-box_color backdrop-blur-2xl outline outline-1 outline-[#00000055] dark:outline-[#FFFFFF55]">
                   <div onClick={() => { setOpenTooltipDocs(area.id) }} style={{ cursor: 'pointer', pointerEvents: 'auto' }}>
@@ -306,7 +341,7 @@ function Markers({ area, center, boundaries, handleMouseOver, handleMouseOut, cl
               </div>
             ) :
 
-              (
+              (!isSingleDoc &&
                 <Tooltip permanent className="cursor-pointer border-none text-black_text dark:text-white_text bg-white_text dark:bg-black_text outline outline-1 outline-[#00000055] dark:outline-[#FFFFFF55]">
                   <div style={{ cursor: 'pointer', pointerEvents: 'auto' }}>
                     <ListDocuments setDocumentId={setDocumentId} setShowSingleDocument={setShowSingleDocument} docs={areaDoc} setOpenTooltipDocs={setOpenTooltipDocs}></ListDocuments>
@@ -339,13 +374,19 @@ function Markers({ area, center, boundaries, handleMouseOver, handleMouseOut, cl
             icon={GenericPoints} // Puoi scegliere di usare un'icona personalizzata per i punti
             eventHandlers={{
               click: (e) => {
-                map.setView([geometry.coordinates[1], geometry.coordinates[0]], 14)
+                if (isSingleDoc) {
+                  setShowArea(area.id)
+                  navigate("/mapDocuments")
+                }
+                else {
+                  map.setView([geometry.coordinates[1], geometry.coordinates[0]], 14);
+                }
               },
-              mouseover: (e) => handleMouseOver(e, area.id, areaDoc.length),
+              mouseover: (e) => handleMouseOver(area.id, areaDoc.length),
               mouseout: (e) => handleMouseOut(e),
             }}
           >
-            {OpenTooltipDocs !== area.id ? (
+            {OpenTooltipDocs !== area.id && !isSingleDoc ? (
               <div style={{ zIndex: -100 }}>
                 <Tooltip permanent className="cursor-pointer border-none text-black_text dark:text-white_text bg-box_white_color dark:bg-box_color backdrop-blur-2xl outline outline-1 outline-[#00000055] dark:outline-[#FFFFFF55]" >
                   <div onClick={() => { setOpenTooltipDocs(area.id); }} style={{ cursor: 'pointer', pointerEvents: 'auto' }}>
@@ -373,7 +414,7 @@ function Markers({ area, center, boundaries, handleMouseOver, handleMouseOut, cl
               </div>
             ) :
 
-              (
+              (!isSingleDoc &&
                 <Tooltip permanent className="cursor-pointer border-none text-black_text dark:text-white_text bg-white_text dark:bg-black_text outline outline-1 outline-[#00000055] dark:outline-[#FFFFFF55]">
                   <div style={{ cursor: 'pointer', pointerEvents: 'auto' }}>
                     <ListDocuments setDocumentId={setDocumentId} setShowSingleDocument={setShowSingleDocument} docs={areaDoc} setOpenTooltipDocs={setOpenTooltipDocs}></ListDocuments>
@@ -467,4 +508,4 @@ const DocumentItem = ({ documentId, title, type, setShowSingleDocument, setDocum
   );
 };
 
-export { GeoreferenceMapDoc }
+export { GeoreferenceMapDoc, calculateBounds, calculateCentroid }

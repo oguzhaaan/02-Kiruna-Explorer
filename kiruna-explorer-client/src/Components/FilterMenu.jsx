@@ -157,19 +157,19 @@ function FilterMenu({ filterValues, setFilterValues }) {
         Select Range
       </label>
       {/* Filter Menu Buttons */}
-      <div className="flex justify-center mt-8 w-full space-x-5">
+      <div className="flex justify-between mt-8 w-full space-x-3">
         <button
           className={`bg-[#FFFFFFcc] dark:bg-customGray hover:bg-[#FFFFFFff] dark:hover:bg-[#938888] opacity-60
-                        w-5/12 h-12
-                        transition text-black rounded-xl text-xl`}
+                        w-full h-12
+                        transition text-black rounded-lg text-xl`}
           onClick={clearFilters}
         >
           Clear
         </button>
         <button
           className={`bg-primary_color_light dark:bg-customBlue hover:bg-blue-300 dark:hover:bg-[#317199]
-                        w-5/12 h-12
-                        transition text-black_text dark:text-white_text rounded-xl text-xl`}
+                        w-full h-12
+                        transition text-black_text dark:text-white_text rounded-lg text-xl`}
           onClick={handleApply}
         >
           Apply

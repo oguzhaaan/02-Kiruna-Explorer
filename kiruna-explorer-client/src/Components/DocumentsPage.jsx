@@ -47,6 +47,16 @@ function DocumentsPage(props) {
     fetchFilteredDocuments({ ...filterValues, title: debouncedQuery });
   }, [filterValues, debouncedQuery]);
 
+  const [page, setPage] = useState(1);
+  const [totalNumberOfPages, setTotalNumberOfPages] = useState(1);
+  const numberOfDocumentsInPage = 5;
+  const nextPage = () => {
+    setPage((prev) => prev + 1);
+  };
+  const previousPage = () => {
+    if (page > 1) setPage((prev) => prev - 1);
+  };
+
   // --- others ---
   const [alertMessage, setAlertMessage] = useState(["", ""]);
 
@@ -126,12 +136,29 @@ function DocumentsPage(props) {
           </div>
         </div>
         <div className="flex flex-row w-full">
-          {/* Filter Menu */}
           <div className="flex flex-col mt-8 mx-7 w-1/4">
+            {/* Filter Menu */}
             <FilterMenu
               filterValues={filterValues}
               setFilterValues={setFilterValues}
             />
+            {/* Page selection */}
+            <div className="flex flex-row items-center justify-between py-2 text-black_text dark:text-white_text bg-box_white_color dark:bg-box_color mt-24 rounded-lg">
+              <i
+                className="ml-3 bi bi-arrow-left cursor-pointer text-3xl"
+                onClick={previousPage}
+              />
+              <div className="text-xl">
+                <span className="bg-slate-400 rounded-md px-2">{page}</span>
+                <span className="mx-2 px-2">of</span>
+                <span className="px-2">{totalNumberOfPages}</span>
+              </div>
+
+              <i
+                className="mr-3 bi bi-arrow-right cursor-pointer  text-3xl"
+                onClick={nextPage}
+              />
+            </div>
           </div>
           <div className="flex flex-col gap-3 w-3/4 overflow-y-scroll mr-7">
             {/* Filter Labels */}

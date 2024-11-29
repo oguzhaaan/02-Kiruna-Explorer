@@ -4,7 +4,7 @@ import { isLoggedIn } from "../auth/authMiddleware.mjs";
 const router = express.Router();
 import { InvalidDocumentType, DocumentTypeNameAlreadyExists } from "../models/DocumentType.mjs";
 import { authorizeRoles } from "../auth/authMiddleware.mjs";
-import DocumentTypeDAO from "../dao/DocumentTypeDao.mjs";
+import DocumentTypeDAO from "../dao/DocumentTypDAO.mjs";
 
 const DocumentTypeDao = new DocumentTypeDAO();
 

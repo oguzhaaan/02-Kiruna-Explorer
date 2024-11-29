@@ -468,6 +468,7 @@ function GeoreferenceMap(props) {
                 whenReady={() => { if (props.updateAreaId.docId && !drawnObject) createLayerToUpdate(props.updateAreaId.areaId) }}
             >
                 <TileLayer
+                    key={`${isDarkMode}-${isSatelliteMap}`}
                     attribution={isSatelliteMap? '&copy; <a href="https://www.esri.com/">Esri</a> contributors': "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"}
                     url={isSatelliteMap? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" :"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"}
                     className={isSatelliteMap? " " : `${isDarkMode ? "custom-tile-layer":""}`}

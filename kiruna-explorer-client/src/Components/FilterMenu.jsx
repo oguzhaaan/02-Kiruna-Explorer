@@ -4,7 +4,7 @@ import customDropdownStyles from "./Utilities/CustomDropdownStyles";
 import { stakeholders, documentTypes } from "./Utilities/Data.js";
 import { useTheme } from "../contexts/ThemeContext";
 
-function FilterMenu({ filterValues, setFilterValues, toggleFilterMenu }) {
+function FilterMenu({ filterValues, setFilterValues }) {
   const { isDarkMode } = useTheme();
   const [isFilterDateRange, setIsFilterDateRange] = useState(
     filterValues.startDate !== "" &&
@@ -38,12 +38,10 @@ function FilterMenu({ filterValues, setFilterValues, toggleFilterMenu }) {
       endDate: "",
     };
     setFilterValues(clearedValues);
-    toggleFilterMenu();
   };
 
   const handleApply = () => {
     setFilterValues(tempFilterValues);
-    toggleFilterMenu();
   };
 
   return (

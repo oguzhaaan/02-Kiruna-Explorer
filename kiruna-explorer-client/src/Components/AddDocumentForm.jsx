@@ -15,12 +15,20 @@ const AddDocumentForm = (props) => {
   const { isDarkMode } = useTheme();
   const navigate = useNavigate();
 
-  // --- Handle Fields Changes ---
   const handleFieldChange = (field, value) => {
-    props.setNewDocument((prevDoc) => ({
-      ...prevDoc,
-      [field]: value,
-    }));
+    props.setNewDocument((prevDoc) => {
+      const updatedDoc = { ...prevDoc, [field]: value };
+
+      if (["year", "month", "day"].includes(field)) {
+        const { year, month, day } = updatedDoc;
+        updatedDoc.date = year || "";
+        if (year && month) updatedDoc.date = `${year}-${month}`;
+        if (year && month && day) updatedDoc.date = `${year}-${month}-${day}`;
+      }
+
+      return updatedDoc;
+    });
+
     if (value && value !== "none") {
       setErrors((prevErrors) => {
         const { [field]: removedError, ...remainingErrors } = prevErrors;
@@ -32,6 +40,29 @@ const AddDocumentForm = (props) => {
   // --- Errors ---
   const [errors, setErrors] = useState({});
   const validateFields = () => {
+    const validateDate = (date) => {
+      if (!date) return false; // No date is invalid
+      const parts = date.split("-");
+      if (parts.length === 1 && parts[0].length === 4) return true; // yyyy
+      if (
+        parts.length === 2 &&
+        parts[0].length === 4 &&
+        parts[1].length > 0 &&
+        parts[1].length <= 2
+      )
+        return true; // yyyy-mm
+      if (
+        parts.length === 3 &&
+        parts[0].length === 4 &&
+        parts[1].length > 0 &&
+        parts[1].length <= 2 &&
+        parts[2].length > 0 &&
+        parts[2].length <= 2
+      )
+        return true; // yyyy-mm-dd
+      return false; // Invalid format
+    };
+
     const newErrors = {
       ...(props.newDocument.title ? {} : { title: "Title is required" }),
       ...(props.newDocument.stakeholders?.length > 0
@@ -43,10 +74,12 @@ const AddDocumentForm = (props) => {
       ...(props.newDocument.scale === "plan" && !props.newDocument.planNumber
         ? { planNumber: "Plan Number is required for scale 'plan'" }
         : {}),
-      ...(props.newDocument.date ? {} : { date: "Date is required" }),
-      ...(props.newDocument.typeId 
-        ? {}
-        : { type: "Type is required" }),
+      ...(props.newDocument.date
+        ? validateDate(props.newDocument.date)
+          ? {}
+          : { date: "Invalid date format. Use yyyy, yyyy-mm, or yyyy-mm-dd." }
+        : { date: "Date is required" }),
+      ...(props.newDocument.typeId ? {} : { type: "Type is required" }),
       ...(props.newDocument.description
         ? {}
         : { description: "Description is required" }),
@@ -74,7 +107,12 @@ const AddDocumentForm = (props) => {
       }),
       scale: props.newDocument.scale,
       planNumber: props.newDocument.planNumber, // Optional
-      date: props.newDocument.date, //day is optional
+      date: props.newDocument.date
+        ? props.newDocument.date
+            .split("-")
+            .map((part, index) => (index === 0 ? part : part.padStart(2, "0")))
+            .join("-")
+        : "",
       typeId: props.newDocument.typeId,
       language: props.newDocument.language || null, // Set to null if not provided
       pageNumber: props.newDocument.pages || null, // Set to null if not provided
@@ -110,10 +148,26 @@ const AddDocumentForm = (props) => {
     props.toggleModal();
     clearErrors();
     resetForm();
-  }
+  };
 
   const resetForm = () => {
     props.setNewDocument(new DocumentClass());
+  };
+
+  const calculateDaysInMonth = (year, month) => {
+    if (month === 2) {
+      // February: Check for leap year
+      return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0 ? 29 : 28;
+    }
+    // Months with 31 days
+    if ([1, 3, 5, 7, 8, 10, 12].includes(month)) {
+      return 31;
+    }
+    // Months with 30 days
+    if ([4, 6, 9, 11].includes(month)) {
+      return 30;
+    }
+    return 31; // Default to 31 days
   };
 
   return (
@@ -230,6 +284,8 @@ const AddDocumentForm = (props) => {
             {/* Year Dropdown */}
             <select
               id="document-date-year"
+              value={props.newDocument.date?.split("-")[0] || ""}
+              onChange={(e) => handleFieldChange("year", e.target.value)}
               className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md ${
                 isDarkMode ? "dark-mode" : "light-mode"
               } ${
@@ -254,7 +310,10 @@ const AddDocumentForm = (props) => {
             {/* Month Dropdown */}
             <select
               id="document-date-month"
-              className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md ${
+              value={props.newDocument.date?.split("-")[1] || ""}
+              disabled={!Boolean(props.newDocument.date?.split("-")[0])} // Check if year is seleceted
+              onChange={(e) => handleFieldChange("month", e.target.value)}
+              className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md disabled:opacity-30 ${
                 isDarkMode ? "dark-mode" : "light-mode"
               } ${
                 errors.date
@@ -262,7 +321,7 @@ const AddDocumentForm = (props) => {
                   : "focus:border-blue-400 border-1 border-transparent"
               } focus:outline-none`}
             >
-              <option value="" disabled selected>
+              <option value="" selected>
                 Month
               </option>
               {[
@@ -287,8 +346,11 @@ const AddDocumentForm = (props) => {
 
             {/* Day Dropdown */}
             <select
+              value={props.newDocument.date?.split("-")[2] || ""}
+              onChange={(e) => handleFieldChange("day", e.target.value)}
               id="document-date-day"
-              className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md ${
+              disabled={!Boolean(props.newDocument.date?.split("-")[1])} // Check if month is seleceted
+              className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md disabled:opacity-30 ${
                 isDarkMode ? "dark-mode" : "light-mode"
               } ${
                 errors.date
@@ -296,20 +358,28 @@ const AddDocumentForm = (props) => {
                   : "focus:border-blue-400 border-1 border-transparent"
               } focus:outline-none`}
             >
-              <option value="" disabled selected>
+              <option value="" selected>
                 Day
               </option>
-              {Array.from({ length: 31 }, (_, i) => (
-                <option key={i + 1} value={i + 1}>
-                  {i + 1}
-                </option>
-              ))}
+              {Array.from(
+                {
+                  length: calculateDaysInMonth(
+                    parseInt(props.newDocument.date?.split("-")[0]), // year
+                    parseInt(props.newDocument.date?.split("-")[1]) // month
+                  ),
+                },
+                (_, i) => (
+                  <option key={i + 1} value={i + 1}>
+                    {i + 1}
+                  </option>
+                )
+              )}
             </select>
           </div>
         </div>
 
-        {/* Date */}
-        <div className="input-date mb-4 w-full">
+        {/* Old Date */}
+        {/* <div className="input-date mb-4 w-full">
           <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">
             Issuance date<span className="text-red-400">*</span>
           </label>
@@ -326,7 +396,7 @@ const AddDocumentForm = (props) => {
                 : "focus:border-blue-400 border-1 border-transparent"
             } focus:outline-none`}
           />
-        </div>
+        </div> */}
         {/* Type */}
         <div className="input-type mb-4 w-full">
           <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">

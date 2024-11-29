@@ -126,6 +126,7 @@ function DocumentsPage(props) {
           </div>
         </div>
         <div className="flex flex-row w-full">
+          {/* Filter Menu */}
           <div className="flex flex-col mt-8 mx-7 w-1/4">
             <FilterMenu
               filterValues={filterValues}

@@ -75,9 +75,11 @@ function DocumentsPage(props) {
           updateAreaId={props.updateAreaId}
           setUpdateAreaId={props.setUpdateAreaId}
           setNavShow={props.setNavShow}
+          municipalGeoJson={props.municipalGeoJson}
           setMode={props.setMode}
           setoriginalDocId={props.setoriginalDocId}
           setAlertMessage={setAlertMessage}
+          setShowArea={props.setShowArea}
         ></SingleDocument>
         <Alert
           message={alertMessage[0]}

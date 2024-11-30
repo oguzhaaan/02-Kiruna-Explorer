@@ -8,6 +8,7 @@ import { getStakeholderColor } from "./Utilities/StakeholdersColors.jsx";
 import { getLanguageName } from "./Utilities/Languages.jsx";
 import API from "../API/API.mjs";
 import { useTheme } from "../contexts/ThemeContext.jsx";
+import { GeoreferenceMapDoc, calculateBounds,calculateCentroid } from "./MapDocuments.jsx";
 
 function SingleDocument(props) {
 
@@ -373,6 +374,10 @@ function SingleDocument(props) {
 
                                 {/* Description */}
                                 <div className="font-normal text-base">{document.description}</div>
+                                {/* Map Georeference*/}
+                                <div>
+                                    {document.areaId && !isCharging && <GeoreferenceMapDoc setShowArea={props.setShowArea} municipalGeoJson={props.municipalGeoJson} currentDocAreaId={document.areaId}></GeoreferenceMapDoc>}
+                                </div>
                             </div>
                             {/* Other Buttons */}
                             <div className="flex flex-row gap-3 font-normal pt-3">

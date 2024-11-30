@@ -47,14 +47,14 @@ function DocumentsPage(props) {
     fetchFilteredDocuments({ ...filterValues, title: debouncedQuery });
   }, [filterValues, debouncedQuery]);
 
-  const [page, setPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
   const [totalNumberOfPages, setTotalNumberOfPages] = useState(1);
   const numberOfDocumentsInPage = 5;
   const nextPage = () => {
-    setPage((prev) => prev + 1);
+    setCurrentPage((prev) => prev + 1);
   };
   const previousPage = () => {
-    if (page > 1) setPage((prev) => prev - 1);
+    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
   };
 
   // --- others ---
@@ -149,7 +149,7 @@ function DocumentsPage(props) {
                 onClick={previousPage}
               />
               <div className="text-xl">
-                <span className="bg-slate-400 rounded-md px-2">{page}</span>
+                <span className="bg-slate-400 rounded-md px-2">{currentPage}</span>
                 <span className="mx-2 px-2">of</span>
                 <span className="px-2">{totalNumberOfPages}</span>
               </div>

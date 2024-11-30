@@ -29,41 +29,41 @@ function CustomBackgroundNode({
             </div> */}
 
             {/* Text (0 to 350)px */}
-            <div className={`absolute w-full text-[#44444455] dark:text-[#cccccc55] top-[165px] px-5 text-3xl`}>Text
+            <div className={`absolute w-full text-black_text dark:text-white_text top-[165px] px-5 text-3xl`}>Text
             </div>
 
             {/* Concept (350 to 700)px */}
             <div className={`absolute w-full bg-[#44444455] dark:bg-[#cccccc55] h-[2px] top-[350px]`}></div>
             <div
-                className={`absolute w-full text-[#44444455] dark:text-[#cccccc55] top-[515px] px-5 text-3xl`}>Concept
+                className={`absolute w-full text-black_text dark:text-white_text top-[515px] px-5 text-3xl`}>Concept
             </div>
 
             {/* Plan (125 + 175 + 300 + 175 + 125) (700 to 1600)px */}
             <div className={`absolute w-full bg-[#44444455] dark:bg-[#cccccc55] h-[2px] top-[700px]`}></div>
             <div
-                className={`absolute w-full text-[#44444455] dark:text-[#cccccc55] top-[1140px] px-5 text-3xl`}>Plan
+                className={`absolute w-full text-black_text dark:text-white_text top-[1140px] px-5 text-3xl`}>Plan
             </div>
 
             <div
-                className={`absolute w-full text-[#44444455] dark:text-[#cccccc55] top-[805px] px-5 text-3xl left-[200px]`}>1:100,000
+                className={`absolute w-full text-black_text dark:text-white_text top-[805px] px-5 text-3xl left-[200px]`}>1:100,000
             </div>
             <div
                 className={`absolute w-full bg-[#44444455] dark:bg-[#cccccc55] h-[2px] top-[825px] left-[400px]`}></div>
 
             <div
-                className={`absolute w-full text-[#44444455] dark:text-[#cccccc55] top-[980px] px-5 text-3xl left-[200px]`}>1:10,000
+                className={`absolute w-full text-black_text dark:text-white_text top-[980px] px-5 text-3xl left-[200px]`}>1:10,000
             </div>
             <div
                 className={`absolute w-full bg-[#44444455] dark:bg-[#cccccc55] h-[2px] top-[1000px] left-[400px]`}></div>
 
             <div
-                className={`absolute w-full text-[#44444455] dark:text-[#cccccc55] top-[1280px] px-5 text-3xl left-[200px]`}>1:5,000
+                className={`absolute w-full text-black_text dark:text-white_text top-[1280px] px-5 text-3xl left-[200px]`}>1:5,000
             </div>
             <div
                 className={`absolute w-full bg-[#44444455] dark:bg-[#cccccc55] h-[2px] top-[1300px] left-[400px]`}></div>
 
             <div
-                className={`absolute w-full text-[#44444455] dark:text-[#cccccc55] top-[1455px] px-5 text-3xl left-[200px]`}>1:1,000
+                className={`absolute w-full text-black_text dark:text-white_text top-[1455px] px-5 text-3xl left-[200px]`}>1:1,000
             </div>
             <div
                 className={`absolute w-full bg-[#44444455] dark:bg-[#cccccc55] h-[2px] top-[1475px] left-[400px]`}></div>
@@ -72,7 +72,7 @@ function CustomBackgroundNode({
             {/* Blueprints/effects (1600 to 2160)px */}
             <div className={`absolute w-full bg-[#44444455] dark:bg-[#cccccc55] h-[2px] top-[1600px]`}></div>
             <div
-                className={`absolute w-full text-[#44444455] dark:text-[#cccccc55] top-[1870px] px-5 text-3xl`}>Blueprints/effects
+                className={`absolute w-full text-black_text dark:text-white_text top-[1870px] px-5 text-3xl`}>Blueprints/effects
             </div>
         </div>
     );

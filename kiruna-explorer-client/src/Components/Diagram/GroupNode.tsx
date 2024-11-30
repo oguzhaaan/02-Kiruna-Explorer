@@ -10,25 +10,35 @@ interface GroupNodeProps extends NodeProps {
     data: {
         years: string[];
         distanceBetweenYears: number;
+        clickedNode: string | null;
     };
 }
 
 function GroupNode({
-                       data: {}
+                       id,
+                       data
                    }: GroupNodeProps) {
     const {isDarkMode} = useTheme();
 
-    const mockData = [{id: 1, text: "ciao1", icon: "conflict"}, {id: 2, text: "ciao2", icon: "design"}, {id: 3, text: "ciao3", icon: "technical"}]
+    const mockData = [{id: 1, text: "ciao1", icon: "conflict"}, {id: 2, text: "ciao2", icon: "design"}, {
+        id: 3,
+        text: "ciao3",
+        icon: "technical"
+    }]
     const [selectedDocument, setSelectedDocument] = useState(2);
+
+    const isClicked = data.clickedNode === id;
 
     const [isDropDownOpen, setIsDropDownOpen] = useState(false);
 
     return (
         <>
-            <div className="w-16 h-16 p-1" title={mockData[selectedDocument-1].text}>
+            <div className={`w-16 h-16 p-1 ${isClicked ? "" : "opacity-35"}`}
+                 title={mockData[selectedDocument - 1].text}>
                 <div
                     className={`flex flex-row justify-content-center align-content-center w-100 h-100 text-black_text dark:text-white_text rounded-full bg-light_node dark:bg-dark_node`}>
-                    <img src={getIcon({type: mockData[selectedDocument-1].icon}, {darkMode: isDarkMode})} alt="document icon" className="p-[0.75rem]"/>
+                    <img src={getIcon({type: mockData[selectedDocument - 1].icon}, {darkMode: isDarkMode})}
+                         alt="document icon" className="p-[0.75rem]"/>
                 </div>
 
                 <div
@@ -71,7 +81,8 @@ function GroupNode({
                                      }}>
                                     <img src={getIcon({type: data.icon}, {darkMode: isDarkMode})} alt="document icon"
                                          className="w-6"/>
-                                    <div className="font-normal text-truncate line-clamp-1" title={data.text}>{data.text}</div>
+                                    <div className="font-normal text-truncate line-clamp-1"
+                                         title={data.text}>{data.text}</div>
                                 </div>))
                             }
                         </div>

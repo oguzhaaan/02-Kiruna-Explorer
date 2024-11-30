@@ -69,7 +69,7 @@ function FilterMenu({ filterValues, setFilterValues }) {
           onChange={(e) => handleTempChange("type", e.target.value)}
           className={`w-full px-3 text-base py-2 text-black_text dark:text-white_text bg-input_color_light dark:bg-input_color_dark rounded-md focus:outline-none dark:[&>option]:bg-[#333333]`}
         >
-          <option value="none">None</option>
+          <option value="">None</option>
           {documentTypes.map((type) => (
             <option key={type.id} value={type.name}>
               {type.name}

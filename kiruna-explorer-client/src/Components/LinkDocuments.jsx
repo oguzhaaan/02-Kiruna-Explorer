@@ -82,7 +82,7 @@ const LinkDocuments = ({
 
         // Filter out the document with the same ID as originalDocId
         const availableDocuments = allDocuments.filter(
-          (doc) => doc.id !== originalDocId
+          (doc) => doc.id != originalDocId
         );
 
         let tempLinks = {};

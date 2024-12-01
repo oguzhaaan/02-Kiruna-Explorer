@@ -103,15 +103,18 @@ router.post("/:docId",
 
         try {
             const docId = req.params.docId;
-            const stakeholderIds = req.body.stakeholders;
-
+            const stakeholders = req.body.stakeholders;
+            console.log(stakeholders);
             // Add all stakeholders to the document by using the ids
-            for (const stakeholderId of stakeholderIds) {
-                const stakeholder = await StakeholderDao.getStakeHolderById(stakeholderId);
+            for (const stakeholderName of stakeholders) {
+                const lowerName = stakeholderName.toLowerCase();
+                const formattedName = lowerName.replace(/\b\w/g, match => match.toUpperCase());
+                const stakeholder = await StakeholderDao.getStakeholderByName(formattedName);
                 if (!stakeholder) {
-                    return res.status(400).json({ error: "Stakeholder not found" });
+                    
+                    return res.status(404).json({ error: "Stakeholder not found" });
                 }
-                await StakeholderDao.addDocumentStakeholder(stakeholderId, docId);
+                await StakeholderDao.addDocumentStakeholder(stakeholder.id, docId);
             }
 
             res.status(201).json({ message: "Stakeholders matched to document successfully" });

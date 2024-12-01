@@ -68,9 +68,9 @@ export default function StakeholderDAO(){
     };
 
     this.addDocumentStakeholder = async (stakeholderId, docId) => {
-        const query = `INSERT INTO document_stakeholder (stakeholderId, docId) VALUES (?, ?)`;
+        const query = `INSERT INTO document_stakeholder (documentId, stakeholderId) VALUES (?, ?)`;
         return new Promise((resolve, reject) => {
-            db.run(query, [stakeholderId, docId], (err) => {
+            db.run(query, [docId, stakeholderId], (err) => {
                 if (err) {
                     return reject(err);
                 }

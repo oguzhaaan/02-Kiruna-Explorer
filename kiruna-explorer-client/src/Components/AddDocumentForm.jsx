@@ -1,6 +1,7 @@
 import Select from "react-select";
 import {
   popularLanguages,
+  stakeholders,
 } from "./Utilities/Data";
 import customDropdownStyles from "./Utilities/CustomDropdownStyles";
 import { useTheme } from "../contexts/ThemeContext";
@@ -245,7 +246,7 @@ const AddDocumentForm = (props) => {
   const handleConfirm = async () => {
 
     props.setNewDocument(newDocument);
-    const documentData = {
+    let documentData = {
       title: newDocument.title,
       scale: newDocument.scale,
       planNumber: newDocument.planNumber, // Optional
@@ -311,12 +312,27 @@ const AddDocumentForm = (props) => {
       }
     }
 
-    let oldStakeholderIds = oldStakeholdersSelected.map((st) => st.id);
+    const stakeholdersName = newDocument.stakeholders.map((s) => s.label);
 
-    const stakeholdersIdFinal = [
-      ...oldStakeholderIds, // Aggiungi gli ID dei vecchi stakeholders
-      ...stakeholdersId,    // Aggiungi gli ID dei nuovi stakeholders
-    ];
+    props.setNewDocument(newDocument);
+    documentData = {
+      title: newDocument.title,
+      scale: newDocument.scale,
+      planNumber: newDocument.planNumber, // Optional
+      date: newDocument.date
+        ? newDocument.date
+          .split("-")
+          .map((part, index) => (index === 0 ? part : part.padStart(2, "0")))
+          .join("-")
+        : "",
+      typeId: newDocument.typeId,
+      language: newDocument.language || null, // Set to null if not provided
+      pageNumber: newDocument.pages || null, // Set to null if not provided
+      description: newDocument.description, // Mandatory
+      areaId: props.newAreaId,
+      links: props.connections.length > 0 ? props.connections : null,
+    };
+
 
     try {
       let documentId = await API.addDocument(documentData);
@@ -324,7 +340,7 @@ const AddDocumentForm = (props) => {
       props.setnewAreaId(null);
       props.setConnections([]);
       closeForm();
-      await API.addStakeholdersToDocument(documentId, stakeholdersIdFinal);
+      await API.addStakeholdersToDocument(documentId.lastId,stakeholdersName);
     } catch (error) {
       console.log(error);
       props.setAlertMessage([error.message, "error"]);

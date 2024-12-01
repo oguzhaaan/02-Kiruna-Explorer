@@ -541,8 +541,8 @@ const addType = async (TypeName) => {
     }
 
     const result = await response.json();
-    console.log("Result addType: " + result.id); //TypeId
-    return result.id;
+    console.log("Result addType: " + result.typeId); //TypeId
+    return result.typeId;
 
   } catch (error) {
     console.error("Error in addType:", error.message);
@@ -575,13 +575,13 @@ const addNewStakeholders = async (stakeholders) => {
   }
 };
 
-const addStakeholdersToDocument = async (documentId, stakeholdersId) => {
+const addStakeholdersToDocument = async (documentId, stakeholders) => {
 
   try {
     const response = await fetch(`${SERVER_URL}/api/document-stakeholders/${documentId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ stakeholders: (stakeholdersId) }),
+      body: JSON.stringify({ stakeholders: (stakeholders) }),
       credentials: 'include'
     });
 

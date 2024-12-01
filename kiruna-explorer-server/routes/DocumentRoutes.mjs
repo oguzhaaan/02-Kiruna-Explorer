@@ -237,6 +237,7 @@ router.post("/",
 
 
             // If typeId is provided, verify if it exists
+            console.log(typeId);
             const typeExists = await DocumentTypeDao.getDocumentTypeById(typeId);
             if (!typeExists) {
                 return res.status(404).json({ message: "Type not found" });

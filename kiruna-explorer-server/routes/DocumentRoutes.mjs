@@ -195,17 +195,17 @@ router.post("/",
             .optional({ nullable: true, checkFalsy: true })
             .isInt().withMessage("Area ID must be a number"),
 
-        body("stakeholders")
-            .isArray({ min: 1 }).withMessage("Stakeholders must be a non-empty array")
-            //array of stakehodlers ids
-            .custom((stakeholders) => {
-                for (const stakeholder of stakeholders) {
-                    if (typeof stakeholder !== "number") {
-                        return false;
-                    }
-                }
-                return true;
-            }),
+        // body("stakeholders")
+        //     .isArray({ min: 1 }).withMessage("Stakeholders must be a non-empty array")
+        //     //array of stakehodlers ids
+        //     .custom((stakeholders) => {
+        //         for (const stakeholder of stakeholders) {
+        //             if (typeof stakeholder !== "number") {
+        //                 return false;
+        //             }
+        //         }
+        //         return true;
+        //     }),
 
         body("planNumber")
             .if((_, { req }) => req.body.scale === "plan")

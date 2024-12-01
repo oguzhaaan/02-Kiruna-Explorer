@@ -19,10 +19,12 @@ const AddDocumentForm = (props) => {
   const [selectedOption, setSelectedOption] = useState("");
   const [isAddingNewStakeholder, setIsAddingNewStakeholder] = useState(false);
   const [newStakeholderName, setNewStakeholderName] = useState("");
+  const [newStakeholders, setNewStakeholders] = useState([]);
 
   const [typeOptions, setTypeOptions] = useState(documentTypes); // 'types' è la lista iniziale di tipi
   const [isAddingNewType, setIsAddingNewType] = useState(false);
   const [newTypeName, setNewTypeName] = useState("");
+  const [selectedType, setSelectedType] = useState("");
 
   const [newDocument, setNewDocument] = useState(props.newDocument);
 
@@ -30,9 +32,11 @@ const AddDocumentForm = (props) => {
 
   const handleTypeChange = (selectedType) => {
     const typeName = selectedType.target.value;
+
     if (typeName === "Add a new one...") {
       setIsAddingNewType(true);
     } else {
+      setSelectedType(typeName);
       // Trova l'ID del tipo selezionato
       const typeId = getTypeIdByName(typeName, typeOptions);
       setNewDocument((prevDoc) => ({
@@ -53,7 +57,7 @@ const AddDocumentForm = (props) => {
         id: typeOptions.length + 1, // Genera un ID univoco
         name: newTypeName,
       };
-  
+
       // Aggiungi il nuovo tipo alla lista delle opzioni
       setTypeOptions((prevOptions) => {
         const updatedOptions = [
@@ -62,22 +66,21 @@ const AddDocumentForm = (props) => {
         ];
         return updatedOptions;
       });
-  
+
       // Aggiorna il documento con il nuovo tipo selezionato (impostando il typeId)
       setNewDocument((prevDoc) => ({
         ...prevDoc,
         typeId: newType.id, // Imposta direttamente l'ID del nuovo tipo
       }));
-  
+
       // Imposta l'opzione selezionata
-      setSelectedOption(newTypeName);
+      setSelectedType(newTypeName);
     }
     setIsAddingNewType(false);
     setNewTypeName("");
   };
 
   const handleSelectChange = (selectedValues) => {
-    console.log("dentro");
     if (selectedValues[selectedValues.length - 1]?.label === "Add a new one...") {
       setIsAddingNewStakeholder(true);
     } else {
@@ -112,6 +115,10 @@ const AddDocumentForm = (props) => {
       }));
 
       setSelectedOption(newStakeholderName);
+      setNewStakeholders((prev) => [
+        ...prev, // Spread dell'array precedente
+        newStakeholderName // Nuovo elemento aggiunto alla fine
+      ]);
     }
     setIsAddingNewStakeholder(false);
     setNewStakeholderName("");
@@ -215,12 +222,18 @@ const AddDocumentForm = (props) => {
 
     //CAMPI OPZIONALI: PAGE + LANGUAGE + GIORNO DELLA DATA(?) + COORDINATES
     //CAMPI OBBLIGATORI: TITLE + STAKEHOLDER + SCALE(PLANE NUMBER IN CASE) + DATE + DESCRIPTION + TYPE
+    console.log("Tipo selezionato: " + selectedType);
+    console.log("Stakeholders selezionati: " + newDocument.stakeholders);
+    let newStakeholdersSelected = newStakeholders.filter((st) => {
+      return newDocument.stakeholders.some((s) => {
+        return s.label === st
+      });
+    });
+    console.log("Nuovi stakeholders selezionati: " + newStakeholdersSelected);
+    console.log("Tipo id selezionato:" + newDocument.typeId);
     props.setNewDocument(newDocument);
     const documentData = {
       title: newDocument.title,
-      stakeholder: newDocument.stakeholders.map((e) => {
-        return e.value;
-      }),
       scale: newDocument.scale,
       planNumber: newDocument.planNumber, // Optional
       date: newDocument.date
@@ -360,7 +373,7 @@ const AddDocumentForm = (props) => {
             </label>
             <Select
               isMulti
-              options={ moveAddNewOptionToEnd(stakeholderOptions).map((stakeholder) => ({
+              options={moveAddNewOptionToEnd(stakeholderOptions).map((stakeholder) => ({
                 value: stakeholder.id,
                 label: stakeholder.name,
               }))}
@@ -569,10 +582,10 @@ const AddDocumentForm = (props) => {
                 </button>
               )}
             </div>
-          ) :  (
+          ) : (
             <select
               id="document-type"
-              value={newDocument.type}
+              value={selectedType}
               onChange={handleTypeChange}
               className={`w-full px-3 text-base py-2 text-black_text dark:text-white_text bg-input_color_light dark:bg-input_color_dark rounded-md ${errors.type
                 ? "border-red-500 border-1"
@@ -582,10 +595,10 @@ const AddDocumentForm = (props) => {
               <option value="none">None</option>
               {
                 moveAddNewOptionToEnd(typeOptions).map((type) => (
-                <option key={type.id} value={type.name}>
-                  {type.name}
-                </option>
-              ))}
+                  <option key={type.id} value={type.name}>
+                    {type.name}
+                  </option>
+                ))}
             </select>
           )}
         </div>

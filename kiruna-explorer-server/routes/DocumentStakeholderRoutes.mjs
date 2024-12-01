@@ -1,5 +1,5 @@
 import express from 'express';
-import { body,param, validationResult } from "express-validator";
+import { body, param, validationResult } from "express-validator";
 import { isLoggedIn } from "../auth/authMiddleware.mjs";
 const router = express.Router();
 import { authorizeRoles } from "../auth/authMiddleware.mjs";
@@ -9,13 +9,13 @@ const StakeholderDao = new StakeholderDAO();
 
 router.post("/new-stakeholder",
     isLoggedIn,
-    authorizeRoles('admin', 'urban_planner'), 
+    authorizeRoles('admin', 'urban_planner'),
     [
         body("name")
             .trim()
             .notEmpty().withMessage("Stakeholder name is required")
             .isString().withMessage("Stakeholder name must be a string")
-        
+
     ],
     async (req, res) => {
         const errors = validationResult(req);
@@ -24,31 +24,23 @@ router.post("/new-stakeholder",
         }
         try {
             let name = req.body.name;
-            
-            //put first letter to uppercase
-            // const firstLetter = name.charAt(0).toUpperCase();
-            // const restOfName = name.slice(1);
-            // const formattedName = firstLetter + restOfName;
-
-            // // insert new stakeholder: mUnicipality
-            // // db : Municipality
-            // //check if stakeholder already exists
-            // const stakeholderExists = await StakeholderDao.getStakeholderByName(formattedName);
 
             // Check if stakeholder already exists
             const stakeholders = await StakeholderDao.getStakeholders();
 
-            for (const stakeholder of stakeholders) {
-                if (stakeholder.name === name) {
-                    return res.status(403).json({ error: "Stakeholder already exists" });
-                }
-            }
             // Convert name to lowercase
             name = name.toLowerCase();
 
+            // Check if stakeholder already exists
+            for (const stakeholder of stakeholders) {
+                if (stakeholder.name.toLowerCase() === name) {
+                    return res.status(403).json({ error: "Stakeholder already exists" });
+                }
+            }
+
             // Convert first letters to uppercase
-            const formattedName =  name.replace(/\b\w/g, match => match.toUpperCase());
-            
+            const formattedName = name.replace(/\b\w/g, match => match.toUpperCase());
+
             await StakeholderDao.addStakeholder(formattedName);
             res.status(201).json({ message: "Stakeholder added successfully" });
         } catch (err) {
@@ -72,16 +64,17 @@ router.get("/",
     }
 )
 
-router.post("/",
+router.post("/:docId",
     isLoggedIn,
     authorizeRoles('admin', 'urban_planner'),
     [
-        body("docId")
+        body("stakeholders")
+            .isArray()
+            .notEmpty()
+            .withMessage("Stakeholders must be an array"),
+        param("docId")
             .isNumeric()
-            .withMessage("Document ID must be a valid number"),
-        body("stakeholderId")
-            .isNumeric()
-            .withMessage("Stakeholder ID must be a valid number")
+            .withMessage("Document ID must be a valid number")
     ],
     async (req, res) => {
         const errors = validationResult(req);
@@ -90,12 +83,21 @@ router.post("/",
         }
 
         try {
-            const docId = req.body.docId;
-            const stakeholderId = req.body.stakeholderId;
-            await StakeholderDao.addDocumentStakeholder(docId, stakeholderId);
-            res.status(201).json({ message: "Stakeholder matched to document successfully" });
+            const docId = req.params.docId;
+            const stakeholderIds = req.body.stakeholders;
+
+            // Add all stakeholders to the document by using the ids
+            for (const stakeholderId of stakeholderIds) {
+                const stakeholder = await StakeholderDao.getStakeHolderById(stakeholderId);
+                if (!stakeholder) {
+                    return res.status(400).json({ error: "Stakeholder not found" });
+                }
+                await StakeholderDao.addDocumentStakeholder(stakeholderId, docId);
+            }
+
+            res.status(201).json({ message: "Stakeholders matched to document successfully" });
         } catch (err) {
-            console.error("Error adding stakeholder to document:", err);
+            console.error("Error adding stakeholders to document:", err);
             res.status(500).json({ error: "Internal server error", details: err.message });
         }
     }

@@ -1,5 +1,5 @@
 import express from 'express';
-import { body,param, validationResult } from "express-validator";
+import { body, param, validationResult } from "express-validator";
 import { isLoggedIn } from "../auth/authMiddleware.mjs";
 const router = express.Router();
 import { InvalidDocumentType, DocumentTypeNameAlreadyExists } from "../models/DocumentType.mjs";
@@ -25,8 +25,21 @@ router.post("/new-type", isLoggedIn, authorizeRoles('admin', 'urban_planner'), [
         return res.status(400).json({ errors: errors.array() });
     }
 
+
+
     try {
+        //chceck if type name already exists
+        const types = await DocumentTypeDao.getAllDocumentTypes();
+
         const { name } = req.body;
+        const nameLowerCase = name.toLowerCase();
+
+        for (const type of types) {
+            if (type.name.toLowerCase() === nameLowerCase) {
+                res.status(409).json({ error: "Type name already exists" });
+            }
+        }
+
         const typeId = await DocumentTypeDao.addDocumentType(name);
         res.status(201).json({ typeId, message: "Document type added successfully" });
     } catch (err) {

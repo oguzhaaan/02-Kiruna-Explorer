@@ -6,6 +6,19 @@ GET http://localhost:3000/api/documents HTTP/1.1
 GET http://localhost:3000/api/documents/1/links HTTP/1.1
 
 ###
+POST http://localhost:3000/api/documents HTTP/1.1
+Content-Type: application/json
+
+{
+  "title": "string",
+  "scale": "plan",
+  "date": "string",
+  "typeId": 1,
+  "description": "string",
+  "planNumber": 2
+}
+
+###
 
 #should return error message, can't add link to not existing document
 POST http://localhost:3000/api/documents/links HTTP/1.1

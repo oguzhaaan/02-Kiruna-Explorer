@@ -9,12 +9,13 @@ import AreaDAO from "../dao/AreaDAO.mjs";
 import Area from "../models/Area.mjs";
 import DocumentLinksDAO from "../dao/DocumentLinksDAO.mjs";
 import Link from "../models/Link.mjs";
-import { isLoggedIn,  } from "../auth/authMiddleware.mjs";
+import { isLoggedIn, } from "../auth/authMiddleware.mjs";
 import { InvalidArea, AreaNotFound } from "../models/Area.mjs";
 import { DocumentNotFound } from "../models/Document.mjs";
 import { authorizeRoles } from "../auth/authMiddleware.mjs";
 import { query } from "express-validator";
-
+import DocumentTypDAOo from "../dao/DocumentTypDAO.mjs";
+import StakeholderDAO from "../dao/StakeholderDAO.mjs";
 import FileDAO from "../dao/FileDAO.mjs";
 
 
@@ -23,6 +24,8 @@ const AreaDao = new AreaDAO();
 const DocumentDao = new DocumentDAO(AreaDao);
 const DocumentLinksDao = new DocumentLinksDAO();
 const FileDao = new FileDAO();
+const DocumentTypeDao = new DocumentTypDAOo();
+const StakeholderDao = new StakeholderDAO();
 
 
 /* GET /api/documents/filter */
@@ -114,8 +117,8 @@ router.get("/:DocId", isLoggedIn,
             res.status(err.status).json({ error: err });
         }
     })
-    
-    
+
+
 
 /* GET /api/documents/area/:areaId */
 router.get("/area/:areaId", isLoggedIn,
@@ -168,9 +171,9 @@ router.post("/",
         body("date")
             .notEmpty().withMessage("Date is required"),
 
-        // body("type")
-        //     .notEmpty().withMessage("Type is required")
-        //     .isIn(["design", "informative", "prescriptive", "technical", "agreement", "conflict", "consultation", "material effects"]).withMessage("Invalid document type"),
+        body("typeId")
+            .notEmpty().withMessage("Type id is required")
+            .isInt().withMessage("Type id must be a number"),
 
         body("language")
             .optional({ nullable: true, checkFalsy: true }) // Ignora se è `null` o stringa vuota
@@ -192,16 +195,17 @@ router.post("/",
             .optional({ nullable: true, checkFalsy: true })
             .isInt().withMessage("Area ID must be a number"),
 
-        // body("stakeholders")
-        //     .isArray({ min: 1 }).withMessage("Stakeholders must be a non-empty array")
-        //     .custom((stakeholders) => {
-        //         stakeholders.forEach((stakeholder) => {
-        //             if (!validStakeholders.includes(stakeholder)) {
-        //                 throw new Error(`Each stakeholder must be one of the following: ${validStakeholders.join(", ")}`);
-        //             }
-        //         });
-        //         return true;
-        //     }),
+        body("stakeholders")
+            .isArray({ min: 1 }).withMessage("Stakeholders must be a non-empty array")
+            //array of stakehodlers ids
+            .custom((stakeholders) => {
+                for (const stakeholder of stakeholders) {
+                    if (typeof stakeholder !== "number") {
+                        return false;
+                    }
+                }
+                return true;
+            }),
 
         body("planNumber")
             .if((_, { req }) => req.body.scale === "plan")
@@ -218,6 +222,7 @@ router.post("/",
         try {
             const params = req.body;
             let areaId = params.areaId;
+            let typeId = params.typeId;
 
             // If areaId is provided, verify if it exists
             if (areaId) {
@@ -230,10 +235,18 @@ router.post("/",
                 areaId = null;
             }
 
+
+            // If typeId is provided, verify if it exists
+            const typeExists = await DocumentTypeDao.getDocumentTypeById(typeId);
+            if (!typeExists) {
+                return res.status(404).json({ message: "Type not found" });
+            }
+
+
             // Add the document with the areaId (which could be null)
             const newDocument = {
                 ...params,
-                areaId: areaId
+                areaId: areaId,
             };
 
             let lastId = await DocumentDao.addDocument(newDocument);

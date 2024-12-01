@@ -2,12 +2,24 @@ import db from "../db.mjs";
 import DocumentType from "../models/DocumentType.mjs";
 import { InvalidDocumentType, DocumentTypeNotFound, DocumentTypeNameAlreadyExists } from "../models/DocumentType.mjs";
 
-export default function DocumentTypeDAO() {
+export default function DocumentTypDAO() {
 
     this.getDocumentTypeByName = async (name) => {
         const query = `SELECT * FROM document_type WHERE name = ?`;
         return new Promise((resolve, reject) => {
             db.get(query, [name], (err, row) => {
+                if (err) {
+                    return reject(err);
+            }
+                resolve(row);
+            });
+        });
+    };    
+
+    this.getDocumentTypeById = async (id) => {
+        const query = `SELECT * FROM document_type WHERE id = ?`;
+        return new Promise((resolve, reject) => {
+            db.get(query, [id], (err, row) => {
                 if (err) {
                     return reject(err);
             }

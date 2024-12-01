@@ -7,13 +7,14 @@ import StakeholderDAO from "../dao/StakeholderDAO.mjs";
 
 const StakeholderDao = new StakeholderDAO();
 
-router.post("/",
+router.post(
+    "/",
     isLoggedIn,
     authorizeRoles('admin', 'urban_planner'),
     [
         body("stakeholders")
-            .isArray({ min: 1 })
-            .withMessage("Stakeholder must be a not empty array")
+            .isArray()
+            .withMessage("Stakeholders must be a non-empty array")
     ],
     async (req, res) => {
         console.log(req.body.stakeholders);
@@ -22,36 +23,45 @@ router.post("/",
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
+
         try {
             const array = req.body.stakeholders;
 
             const stakeholders = await StakeholderDao.getStakeholders();
-            const existingNames = stakeholders.map(stakeholder => stakeholder.name.toLowerCase()); // Crea un array con i nomi degli stakeholder esistenti in minuscolo
+            const existingNames = stakeholders.map(stakeholder => stakeholder.name.toLowerCase()); // Convert to lowercase
 
             let id = [];
-            const promises = array.map(async (name) => {
+            let errors = [];
 
-                name = name.toLowerCase();
-    
-                // Verifica se lo stakeholder esiste già
-                for (const stakeholder of existingNames) {
-                    console.log(stakeholder);
-                    if (stakeholder === name) {
-                        return res.status(403).json({ error: "Stakeholder already exists" });
-                    }
+            for (const name of array) {
+                const lowerName = name.toLowerCase();
+
+                // Check if stakeholder already exists
+                if (existingNames.includes(lowerName)) {
+                    errors.push({ name, error: "Stakeholder already exists" });
+                    continue; // Skip to the next stakeholder
                 }
-    
-                // Format the name to have first letters uppercase
-                const formattedName = name.replace(/\b\w/g, match => match.toUpperCase());
-    
-                // Aggiungi il nuovo stakeholder
-                let lastId = await StakeholderDao.addStakeholder(formattedName);
-                id.push(lastId);
-            });
 
-            await Promise.all(promises);
+                // Format the name
+                const formattedName = lowerName.replace(/\b\w/g, match => match.toUpperCase());
 
-            
+                try {
+                    // Add the new stakeholder
+                    const lastId = await StakeholderDao.addStakeholder(formattedName);
+                    id.push(lastId); // Add ID to the list
+                } catch (err) {
+                    errors.push({ name: formattedName, error: err.message });
+                }
+            }
+
+            if (errors.length > 0) {
+                return res.status(400).json({
+                    message: "Some stakeholders could not be processed",
+                    errors,
+                    ids: id
+                });
+            }
+
             res.status(201).json({ ids: id });
         } catch (err) {
             console.error("Error adding stakeholder:", err);

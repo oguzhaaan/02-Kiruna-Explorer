@@ -113,13 +113,13 @@ const getDocumentsFromArea = async (areaId) => {
   }
 };
 
-const updateDocumentArea = async (docId,areaId) => {
+const updateDocumentArea = async (docId, areaId) => {
   try {
     const response = await fetch(`${SERVER_URL}/api/documents/${docId}/area`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        newAreaId:areaId
+        newAreaId: areaId
       }),
       credentials: 'include'
     });
@@ -130,8 +130,8 @@ const updateDocumentArea = async (docId,areaId) => {
     }
 
     const result = await response.json();
-    return result; 
-    
+    return result;
+
   } catch (error) {
     console.error("Error in update area function:", error.message);
     throw new Error(`${error.message || 'Error while updating area.'}`);
@@ -173,12 +173,12 @@ const getAreaById = async (areaId) => {
       const errMessage = await response.json();
       throw new Error(`${errMessage.message || 'Error while getting areas.'}`);
     }
-    
+
     const result = await response.json();
     //console.log(result)
     const geoJsonresult = JSON.parse(result.geoJson)
     return geoJsonresult
-    
+
   } catch (error) {
     console.error("Error in get all areas function:", error.message);
     throw new Error(`${error.message || 'Error while getting areas.'}`);
@@ -531,7 +531,7 @@ const addType = async (TypeName) => {
     const response = await fetch(`${SERVER_URL}/api/document-types`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: JSON.stringify(TypeName) }),
+      body: JSON.stringify({ name: (TypeName) }),
       credentials: 'include'
     });
 
@@ -556,7 +556,7 @@ const addNewStakeholders = async (stakeholders) => {
     const response = await fetch(`${SERVER_URL}/api/document-stakeholders`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ stakeholders: JSON.stringify(stakeholders)}),
+      body: JSON.stringify({ stakeholders: (stakeholders) }),
       credentials: 'include'
     });
 
@@ -581,7 +581,7 @@ const addStakeholdersToDocument = async (documentId, stakeholdersId) => {
     const response = await fetch(`${SERVER_URL}/api/document-stakeholders/${documentId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ stakeholders: JSON.stringify(stakeholdersId)}),
+      body: JSON.stringify({ stakeholders: (stakeholdersId) }),
       credentials: 'include'
     });
 

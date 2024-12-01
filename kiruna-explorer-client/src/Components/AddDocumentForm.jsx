@@ -35,11 +35,11 @@ const AddDocumentForm = (props) => {
       try {
         const types = await API.getAllTypes();
         setOldTypes(types);
-        types.push({ id: types.length+1, name: "Add a new one..." });
+        types.push({ id: types.length + 1, name: "Add a new one..." });
         setTypeOptions(types);
         const stakeholders = await API.getAllStakeholders();
         setOldStakeholders(stakeholders);
-        stakeholders.push({ id: stakeholders.length+1, name: "Add a new one..." });
+        stakeholders.push({ id: stakeholders.length + 1, name: "Add a new one..." });
         setStakeholderOptions(stakeholders);
       } catch (err) {
         console.log(err.message);
@@ -112,7 +112,7 @@ const AddDocumentForm = (props) => {
   }
 
   const getLastStakeholderId = (stakeholders) => {
-    return stakeholders[stakeholders.length-1].id;
+    return stakeholders[stakeholders.length - 1].id;
   }
 
   const handleNewStakeholderSubmit = () => {
@@ -300,9 +300,10 @@ const AddDocumentForm = (props) => {
 
     let stakeholdersId = [];
     console.log(newStakeholdersSelected);
-    if(newStakeholdersSelected.length != 0 ) {
+    if (newStakeholdersSelected.length != 0) {
       try {
         stakeholdersId = await API.addNewStakeholders(newStakeholdersSelected);
+        console.log(stakeholdersId);
       } catch (error) {
         console.log(error);
         props.setAlertMessage([error.message, "error"]);
@@ -325,7 +326,7 @@ const AddDocumentForm = (props) => {
       closeForm();
       await API.addStakeholdersToDocument(documentId, stakeholdersIdFinal);
     } catch (error) {
-      //console.log(error);
+      console.log(error);
       props.setAlertMessage([error.message, "error"]);
     }
   };

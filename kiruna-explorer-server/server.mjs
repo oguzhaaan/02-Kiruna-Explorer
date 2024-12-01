@@ -9,7 +9,8 @@ import session from "express-session";
 import authRoutes from "./auth/authRoutes.mjs";
 import DocumentRoutes from "./routes/DocumentRoutes.mjs";
 import AreaRoutes from "./routes/AreaRoutes.mjs";
-
+import DocumentTypeRoutes from "./routes/DocumentTypeRoutes.mjs";
+import DocumentStakeholderRoutes from "./routes/DocumentStakeholderRoutes.mjs";
 
 // --- Middlewares ---
 const app = express();
@@ -38,6 +39,8 @@ app.use(cors(corsOptions));
 app.use(authRoutes);
 app.use('/api/documents', DocumentRoutes);
 app.use('/api/areas', AreaRoutes);
+app.use('/api/document-types', DocumentTypeRoutes);
+app.use('/api/document-stakeholders', DocumentStakeholderRoutes);
 
 
 // --- Server Activation ---
@@ -46,7 +49,4 @@ app.listen(PORT, () =>
   console.log(`Server running on http://localhost:${PORT}/`)
 );
 
-// --- Routes ---
-app.use(authRoutes);
-app.use('/api/documents', DocumentRoutes);
 export { app };

@@ -7,42 +7,52 @@ import StakeholderDAO from "../dao/StakeholderDAO.mjs";
 
 const StakeholderDao = new StakeholderDAO();
 
-router.post("/new-stakeholder",
+router.post("/",
     isLoggedIn,
     authorizeRoles('admin', 'urban_planner'),
     [
-        body("name")
-            .trim()
-            .notEmpty().withMessage("Stakeholder name is required")
-            .isString().withMessage("Stakeholder name must be a string")
-
+        body("stakeholders")
+            .isArray({ min: 1 })
+            .withMessage("Stakeholder must be a not empty array")
     ],
     async (req, res) => {
+        console.log(req.body.stakeholders);
         const errors = validationResult(req);
+        console.log(errors);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
         try {
-            let name = req.body.name;
+            const array = req.body.stakeholders;
 
-            // Check if stakeholder already exists
             const stakeholders = await StakeholderDao.getStakeholders();
+            const existingNames = stakeholders.map(stakeholder => stakeholder.name.toLowerCase()); // Crea un array con i nomi degli stakeholder esistenti in minuscolo
 
-            // Convert name to lowercase
-            name = name.toLowerCase();
+            let id = [];
+            const promises = array.map(async (name) => {
 
-            // Check if stakeholder already exists
-            for (const stakeholder of stakeholders) {
-                if (stakeholder.name.toLowerCase() === name) {
-                    return res.status(403).json({ error: "Stakeholder already exists" });
+                name = name.toLowerCase();
+    
+                // Verifica se lo stakeholder esiste già
+                for (const stakeholder of existingNames) {
+                    console.log(stakeholder);
+                    if (stakeholder === name) {
+                        return res.status(403).json({ error: "Stakeholder already exists" });
+                    }
                 }
-            }
+    
+                // Format the name to have first letters uppercase
+                const formattedName = name.replace(/\b\w/g, match => match.toUpperCase());
+    
+                // Aggiungi il nuovo stakeholder
+                let lastId = await StakeholderDao.addStakeholder(formattedName);
+                id.push(lastId);
+            });
 
-            // Convert first letters to uppercase
-            const formattedName = name.replace(/\b\w/g, match => match.toUpperCase());
+            await Promise.all(promises);
 
-            await StakeholderDao.addStakeholder(formattedName);
-            res.status(201).json({ message: "Stakeholder added successfully" });
+            
+            res.status(201).json({ ids: id });
         } catch (err) {
             console.error("Error adding stakeholder:", err);
             res.status(500).json({ error: "Internal server error", details: err.message });
@@ -69,8 +79,7 @@ router.post("/:docId",
     authorizeRoles('admin', 'urban_planner'),
     [
         body("stakeholders")
-            .isArray()
-            .notEmpty()
+            .isArray({ min: 1 })
             .withMessage("Stakeholders must be an array"),
         param("docId")
             .isNumeric()

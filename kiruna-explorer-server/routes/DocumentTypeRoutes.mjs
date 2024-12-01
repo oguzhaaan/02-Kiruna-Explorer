@@ -8,7 +8,21 @@ import DocumentTypeDAO from "../dao/DocumentTypDAO.mjs";
 
 const DocumentTypeDao = new DocumentTypeDAO();
 
-router.post("/new-type", isLoggedIn, authorizeRoles('admin', 'urban_planner'), [
+router.get("/",
+    isLoggedIn,
+    authorizeRoles('admin', 'urban_planner'),
+    async (req, res) => {
+        try {
+            const types = await DocumentTypeDao.getAllDocumentTypes();
+            res.status(200).json(types);
+        } catch (err) {
+            console.error("Error fetching types:", err);
+            res.status(500).json({ error: "Internal server error", details: err.message });
+        }
+    }
+)
+
+router.post("/", isLoggedIn, authorizeRoles('admin', 'urban_planner'), [
     body("name")
         .trim()
         .notEmpty().withMessage("Type name is required")

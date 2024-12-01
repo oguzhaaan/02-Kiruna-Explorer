@@ -1,7 +1,5 @@
 import Select from "react-select";
 import {
-  stakeholders,
-  documentTypes,
   popularLanguages,
 } from "./Utilities/Data";
 import customDropdownStyles from "./Utilities/CustomDropdownStyles";
@@ -15,20 +13,42 @@ const AddDocumentForm = (props) => {
   const { isDarkMode } = useTheme();
   const navigate = useNavigate();
 
-  const [stakeholderOptions, setStakeholderOptions] = useState(stakeholders);
+  const [stakeholderOptions, setStakeholderOptions] = useState([]);
   const [selectedOption, setSelectedOption] = useState("");
   const [isAddingNewStakeholder, setIsAddingNewStakeholder] = useState(false);
   const [newStakeholderName, setNewStakeholderName] = useState("");
   const [newStakeholders, setNewStakeholders] = useState([]);
+  const [oldStakeholders, setOldStakeholders] = useState([]);
 
-  const [typeOptions, setTypeOptions] = useState(documentTypes); // 'types' è la lista iniziale di tipi
+  const [typeOptions, setTypeOptions] = useState([]); // 'types' è la lista iniziale di tipi
   const [isAddingNewType, setIsAddingNewType] = useState(false);
   const [newTypeName, setNewTypeName] = useState("");
   const [selectedType, setSelectedType] = useState("");
+  const [oldTypes, setOldTypes] = useState([]);
 
   const [newDocument, setNewDocument] = useState(props.newDocument);
 
   const [isValid, setIsValid] = useState(true);
+
+  useEffect(() => {
+    const inizialization = async () => {
+      try {
+        const types = await API.getAllTypes();
+        setOldTypes(types);
+        types.push({ id: types.length+1, name: "Add a new one..." });
+        setTypeOptions(types);
+        const stakeholders = await API.getAllStakeholders();
+        setOldStakeholders(stakeholders);
+        stakeholders.push({ id: stakeholders.length+1, name: "Add a new one..." });
+        setStakeholderOptions(stakeholders);
+      } catch (err) {
+        console.log(err.message);
+        props.setAlertMessage([err.message, "error"]);
+      }
+    };
+    inizialization();
+
+  }, [])
 
   const handleTypeChange = (selectedType) => {
     const typeName = selectedType.target.value;
@@ -45,6 +65,7 @@ const AddDocumentForm = (props) => {
       }));
     }
   };
+
   function getTypeIdByName(typeName, documents) {
     // Cerca il tipo nell'array e restituisce l'ID
     const type = documents.find((type) => type.name === typeName);
@@ -90,11 +111,15 @@ const AddDocumentForm = (props) => {
     }
   }
 
+  const getLastStakeholderId = (stakeholders) => {
+    return stakeholders[stakeholders.length-1].id;
+  }
+
   const handleNewStakeholderSubmit = () => {
     setIsValid(true);
     if (newStakeholderName.trim() !== "") {
       const newStakeholder = {
-        id: stakeholderOptions.length + 1,
+        id: getLastStakeholderId(stakeholderOptions) + 1,
         name: newStakeholderName,
       };
 
@@ -218,19 +243,7 @@ const AddDocumentForm = (props) => {
 
   // --- Submit Form ---
   const handleConfirm = async () => {
-    // Refresh the list of the documents
 
-    //CAMPI OPZIONALI: PAGE + LANGUAGE + GIORNO DELLA DATA(?) + COORDINATES
-    //CAMPI OBBLIGATORI: TITLE + STAKEHOLDER + SCALE(PLANE NUMBER IN CASE) + DATE + DESCRIPTION + TYPE
-    console.log("Tipo selezionato: " + selectedType);
-    console.log("Stakeholders selezionati: " + newDocument.stakeholders);
-    let newStakeholdersSelected = newStakeholders.filter((st) => {
-      return newDocument.stakeholders.some((s) => {
-        return s.label === st
-      });
-    });
-    console.log("Nuovi stakeholders selezionati: " + newStakeholdersSelected);
-    console.log("Tipo id selezionato:" + newDocument.typeId);
     props.setNewDocument(newDocument);
     const documentData = {
       title: newDocument.title,
@@ -255,12 +268,62 @@ const AddDocumentForm = (props) => {
       return;
     }
 
+    // Refresh the list of the documents
+
+    //CAMPI OPZIONALI: PAGE + LANGUAGE + GIORNO DELLA DATA(?) + COORDINATES
+    //CAMPI OBBLIGATORI: TITLE + STAKEHOLDER + SCALE(PLANE NUMBER IN CASE) + DATE + DESCRIPTION + TYPE
+    if (!oldTypes.some((type) => type.name === selectedType)) {
+      try {
+        console.log("AGGIUNGO IL NUOVO TIPO")
+        newDocument.typeId = await API.addType(selectedType);
+      } catch (error) {
+        console.log(error);
+        props.setAlertMessage([error.message, "error"]);
+        return;
+      }
+    }
+    else {
+      console.log("TIPO ESISTENTE");
+    }
+
+    let oldStakeholdersSelected = oldStakeholders.filter((st) => {
+      return newDocument.stakeholders.some((s) => {
+        return s.label === st
+      });
+    });
+
+    let newStakeholdersSelected = newStakeholders.filter((st) => {
+      return newDocument.stakeholders.some((s) => {
+        return s.label === st
+      });
+    });
+
+    let stakeholdersId = [];
+    console.log(newStakeholdersSelected);
+    if(newStakeholdersSelected.length != 0 ) {
+      try {
+        stakeholdersId = await API.addNewStakeholders(newStakeholdersSelected);
+      } catch (error) {
+        console.log(error);
+        props.setAlertMessage([error.message, "error"]);
+        return;
+      }
+    }
+
+    let oldStakeholderIds = oldStakeholdersSelected.map((st) => st.id);
+
+    const stakeholdersIdFinal = [
+      ...oldStakeholderIds, // Aggiungi gli ID dei vecchi stakeholders
+      ...stakeholdersId,    // Aggiungi gli ID dei nuovi stakeholders
+    ];
+
     try {
-      await API.addDocument(documentData);
+      let documentId = await API.addDocument(documentData);
       props.setAlertMessage(["Document added successfully!", "success"]);
       props.setnewAreaId(null);
       props.setConnections([]);
       closeForm();
+      await API.addStakeholdersToDocument(documentId, stakeholdersIdFinal);
     } catch (error) {
       //console.log(error);
       props.setAlertMessage([error.message, "error"]);

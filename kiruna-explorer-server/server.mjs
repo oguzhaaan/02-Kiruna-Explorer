@@ -40,7 +40,7 @@ app.use(authRoutes);
 app.use('/api/documents', DocumentRoutes);
 app.use('/api/areas', AreaRoutes);
 app.use('/api/document-types', DocumentTypeRoutes);
-app.use('/api/document-stakeholders', DocumentTypeRoutes);
+app.use('/api/document-stakeholders', DocumentStakeholderRoutes);
 
 
 // --- Server Activation ---

@@ -86,6 +86,10 @@ const DiagramBoard = () => {
                     event.preventDefault();
                     setHoveredNode(node.id);
                 }}
+                onMoveEnd={(event, viewport) => {
+                    setZoom(viewport.zoom);
+                    setViewport(viewport);
+                }}
             >
                 <Background gap={20} size={1} color={isDarkMode ? "#333" : "#ccc"}/>
                 <MiniMap className="opacity-70"/>

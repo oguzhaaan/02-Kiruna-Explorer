@@ -113,13 +113,13 @@ const getDocumentsFromArea = async (areaId) => {
   }
 };
 
-const updateDocumentArea = async (docId,areaId) => {
+const updateDocumentArea = async (docId, areaId) => {
   try {
     const response = await fetch(`${SERVER_URL}/api/documents/${docId}/area`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        newAreaId:areaId
+        newAreaId: areaId
       }),
       credentials: 'include'
     });
@@ -130,8 +130,8 @@ const updateDocumentArea = async (docId,areaId) => {
     }
 
     const result = await response.json();
-    return result; 
-    
+    return result;
+
   } catch (error) {
     console.error("Error in update area function:", error.message);
     throw new Error(`${error.message || 'Error while updating area.'}`);
@@ -173,12 +173,12 @@ const getAreaById = async (areaId) => {
       const errMessage = await response.json();
       throw new Error(`${errMessage.message || 'Error while getting areas.'}`);
     }
-    
+
     const result = await response.json();
     //console.log(result)
     const geoJsonresult = JSON.parse(result.geoJson)
     return geoJsonresult
-    
+
   } catch (error) {
     console.error("Error in get all areas function:", error.message);
     throw new Error(`${error.message || 'Error while getting areas.'}`);
@@ -481,6 +481,127 @@ const downloadFile = async (DocId, FileId, FilePath) => {
   }
 };
 
+const getAllTypes = async () => {
+  try {
+    const response = await fetch(`${SERVER_URL}/api/document-types`, {
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const errMessage = await response.json();
+      throw new Error(`${errMessage.message || 'Error while getting all types.'}`);
+      //throw new Error(`Error ${response.status}: ${errMessage.message || 'Error while creating the document.'}`);
+    }
+
+    const result = await response.json();
+    //console.log(result)
+    return result;
+
+  } catch (error) {
+    console.error("Error in getAllTypes function:", error.message);
+    throw new Error("Unable to get the types. Please check your connection and try again.");
+  }
+};
+
+const getAllStakeholders = async () => {
+  try {
+    const response = await fetch(`${SERVER_URL}/api/document-stakeholders`, {
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const errMessage = await response.json();
+      throw new Error(`${errMessage.message || 'Error while getting all stakeholders.'}`);
+      //throw new Error(`Error ${response.status}: ${errMessage.message || 'Error while creating the document.'}`);
+    }
+
+    const result = await response.json();
+    //console.log(result)
+    return result;
+
+  } catch (error) {
+    console.error("Error in getAllStakeholders function:", error.message);
+    throw new Error("Unable to get the stakeholders. Please check your connection and try again.");
+  }
+};
+
+const addType = async (TypeName) => {
+
+  try {
+    const response = await fetch(`${SERVER_URL}/api/document-types`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: (TypeName) }),
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const errMessage = await response.json();
+      throw new Error(`${errMessage.message || 'Error while adding a new Type.'}`);
+    }
+
+    const result = await response.json();
+    console.log("Result addType: " + result.typeId); //TypeId
+    return result.typeId;
+
+  } catch (error) {
+    console.error("Error in addType:", error.message);
+    throw new Error(`${error.message || 'Error while adding a new Type.'}`);
+  }
+};
+
+const addNewStakeholders = async (stakeholders) => {
+
+  try {
+    const response = await fetch(`${SERVER_URL}/api/document-stakeholders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stakeholders: (stakeholders) }),
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const errMessage = await response.json();
+      throw new Error(`${errMessage.message || 'Error while adding new stakeholders'}`);
+    }
+
+    const result = await response.json();
+    console.log("Result addStakeholders: " + result); //StakeholdersId
+    return result;
+
+  } catch (error) {
+    console.error("Error in addStakeholders:", error);
+    throw new Error(`${error.message || 'Error while adding new stakeholders.'}`);
+  }
+};
+
+const addStakeholdersToDocument = async (documentId, stakeholders) => {
+
+  try {
+    const response = await fetch(`${SERVER_URL}/api/document-stakeholders/${documentId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stakeholders: (stakeholders) }),
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const errMessage = await response.json();
+      throw new Error(`${errMessage.message || 'Error while adding stakeholders to the specific document.'}`);
+    }
+
+    const result = await response.json();
+    return result;
+
+  } catch (error) {
+    console.error("Error in addStakeholdersToDocument:", error.message);
+    throw new Error(`${error.message || 'Error stakeholders to the specific document.'}`);
+  }
+};
+
+
+
+
 const API = {
   logIn,
   getUserInfo,
@@ -501,7 +622,12 @@ const API = {
   uploadFile,
   getDocumentFiles,
   deleteFile,
-  downloadFile
+  downloadFile,
+  getAllTypes,
+  getAllStakeholders,
+  addType,
+  addNewStakeholders,
+  addStakeholdersToDocument
 };
 
 export default API;

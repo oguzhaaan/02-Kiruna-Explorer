@@ -6,12 +6,14 @@ import {useTheme} from "../../contexts/ThemeContext.jsx";
 import switchIcon from "../../assets/switch.svg";
 import {useState} from "react";
 import React from 'react';
+import { Item } from './DiagramBoard.js';
 
 interface GroupNodeProps extends NodeProps {
     data: {
         years: string[];
         distanceBetweenYears: number;
         clickedNode: string | null;
+        group: Item[]
     };
 }
 
@@ -21,12 +23,7 @@ function GroupNode({
                    }: GroupNodeProps) {
     const {isDarkMode} = useTheme();
 
-    const mockData = [{id: 1, text: "ciao1", icon: "conflict"}, {id: 2, text: "ciao2", icon: "design"}, {
-        id: 3,
-        text: "ciao3",
-        icon: "technical"
-    }]
-    const [selectedDocument, setSelectedDocument] = useState(2);
+    const [selectedDocument, setSelectedDocument] = useState(data.group[0]);
 
     const isClicked = data.clickedNode === id;
 
@@ -35,10 +32,10 @@ function GroupNode({
     return (
         <>
             <div className={`w-16 h-16 p-1 ${isClicked ? "" : "opacity-35"}`}
-                 title={mockData[selectedDocument - 1].text}>
+                 title={selectedDocument.title}>
                 <div
                     className={`flex flex-row justify-content-center align-content-center w-100 h-100 text-black_text dark:text-white_text rounded-full bg-light_node dark:bg-dark_node`}>
-                    <img src={getIcon({type: mockData[selectedDocument - 1].icon}, {darkMode: isDarkMode})}
+                    <img src={getIcon({type: selectedDocument.type.toLowerCase()}, {darkMode: isDarkMode})}
                          alt="document icon" className="p-[0.75rem]"/>
                 </div>
 
@@ -73,17 +70,17 @@ function GroupNode({
                             <p className="m-0 p-0">Switch the document to visualize</p>
                         </div>
                         <div className="mt-2 flex flex-col gap-2 overflow-y-auto p-1">
-                            {mockData.map((data, index) => (
+                            {data.group.map((data, index) => (
                                 <div key={index}
-                                     className={`flex flex-row gap-2 align-items-center w-full ${data.id == selectedDocument ? "bg-[#CBDCEF] dark:bg-[#11253D] outline outline-1 outline-[#44444499] dark:outline-[#cccccc]" : "bg-[#00000050] hover:bg-[#00000099]"} rounded-sm p-2 transition`}
+                                     className={`flex flex-row gap-2 align-items-center w-full ${data == selectedDocument ? "bg-[#CBDCEF] dark:bg-[#11253D] outline outline-1 outline-[#44444499] dark:outline-[#cccccc]" : "bg-[#00000050] hover:bg-[#00000099]"} rounded-sm p-2 transition`}
                                      onClick={() => {
-                                         setSelectedDocument(data.id);
+                                         setSelectedDocument(data);
                                          setIsDropDownOpen(!isDropDownOpen);
                                      }}>
-                                    <img src={getIcon({type: data.icon}, {darkMode: isDarkMode})} alt="document icon"
+                                    <img src={getIcon({type: data.type.toLowerCase()}, {darkMode: isDarkMode})} alt="document icon"
                                          className="w-6"/>
                                     <div className="font-normal text-truncate line-clamp-1"
-                                         title={data.text}>{data.text}</div>
+                                         title={data.title}>{data.title}</div>
                                 </div>))
                             }
                         </div>

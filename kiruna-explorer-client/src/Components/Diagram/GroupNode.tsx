@@ -5,6 +5,7 @@ import {useTheme} from "../../contexts/ThemeContext.jsx";
 // @ts-ignore
 import switchIcon from "../../assets/switch.svg";
 import {useState} from "react";
+import React from 'react';
 
 interface GroupNodeProps extends NodeProps {
     data: {

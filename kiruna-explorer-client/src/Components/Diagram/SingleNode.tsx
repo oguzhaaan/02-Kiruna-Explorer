@@ -3,6 +3,7 @@ import CustomHandle from "./CustomHandle";
 import {getIcon} from "../Utilities/DocumentIcons.jsx";
 import {useTheme} from "../../contexts/ThemeContext.jsx";
 import {useState} from "react";
+import React from 'react';
 
 interface SingleNodeProps extends NodeProps {
     data: {

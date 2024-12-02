@@ -1,8 +1,12 @@
 import {NodeProps} from '@xyflow/react';
+import React from 'react';
+import { useState } from 'react';
 
 interface CustomBackgroundNodeProps extends NodeProps {
     data: {
         years: string[];
+        zoom:number;
+        viewport:{x:number,y:number,zoom:number};
         distanceBetweenYears: number;
     };
 }

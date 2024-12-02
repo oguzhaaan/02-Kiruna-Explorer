@@ -1,4 +1,5 @@
 import { Handle, HandleProps } from '@xyflow/react';
+import React from 'react';
 
 function CustomHandle(props: HandleProps) {
     return (

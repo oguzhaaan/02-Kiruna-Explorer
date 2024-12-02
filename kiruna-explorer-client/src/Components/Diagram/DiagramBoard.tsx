@@ -6,6 +6,7 @@ import CustomBackgroundNode from './CustomBackgroundNode';
 import SingleNode from "./SingleNode";
 import GroupNode from "./GroupNode";
 import CustomEdge from "./CustomEdge";
+import React from "react";
 
 const DiagramBoard = () => {
     const {isDarkMode} = useTheme();

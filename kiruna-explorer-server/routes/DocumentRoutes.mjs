@@ -53,7 +53,6 @@ router.get("/filter", isLoggedIn,
         try {
             const { type, title, stakeholders, startDate, endDate } = req.query;
             const stakeholdersArray = stakeholders ? stakeholders.split(',') : null;
-
             const documents = await DocumentDao.getDocumentsByFilter({
                 type,
                 title,
@@ -68,6 +67,42 @@ router.get("/filter", isLoggedIn,
             res.status(500).json({ error: "Internal server error", details: err.message });
         }
     });
+
+    router.get("/filter/pagination", isLoggedIn,
+        [
+            query("type").optional().isString().withMessage("Type must be a string"),
+            query("title").optional().isString().withMessage("Title must be a string"),
+            query("stakeholders").optional().isString().withMessage("Stakeholders must be a comma-separated string"),
+            query("startDate").optional().isISO8601().withMessage("Start date must be a valid date"),
+            query("endDate").optional().isISO8601().withMessage("End date must be a valid date"),
+            query("offset").optional().isInt({ min: 0 }).withMessage("Offset must be a non-negative integer")
+        ],
+        async (req, res) => {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
+    
+            try {
+                const { type, title, stakeholders, startDate, endDate, offset } = req.query;
+                const stakeholdersArray = stakeholders ? stakeholders.split(',') : [];
+                
+                const documents = await DocumentDAO.get({
+                    type,
+                    title,
+                    stakeholders: stakeholdersArray,
+                    startDate,
+                    endDate,
+                    offset: parseInt(offset, 10) || 0 
+                });
+    
+                res.status(200).json(documents);
+            } catch (err) {
+                console.error("Error fetching documents:", err);
+                res.status(500).json({ error: "Internal server error", details: err.message });
+            }
+        });
+    
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname("../");
 

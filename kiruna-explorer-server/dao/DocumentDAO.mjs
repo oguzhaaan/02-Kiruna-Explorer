@@ -96,6 +96,101 @@ export default function DocumentDAO(areaDAO) {
         });
     };
 
+    this.getDocumentsWithPagination = ({ type, title, stakeholders, startDate, endDate, offset = 0 } = {}) => {
+        // Build the base query with WHERE 1=1
+        let query = `
+            SELECT 
+                document.id, 
+                document.title, 
+                document.date, 
+                document.language, 
+                document.description, 
+                document.scale, 
+                document.areaId, 
+                document.pages, 
+                document.planNumber,
+                document_type.name AS type_name
+            FROM document
+            LEFT JOIN document_type ON document.typeId = document_type.id
+            WHERE 1=1
+        `;
+        const params = [];
+    
+        // Apply filters if provided
+    
+        // Filter by document type
+        if (type) {
+            query += " AND document_type.name = ?";
+            params.push(type);
+        }
+    
+        // Filter by document title
+        if (title) {
+            query += " AND document.title LIKE ?";
+            params.push(`%${title}%`);
+        }
+    
+        // Filter by stakeholders if provided
+        if (stakeholders && stakeholders.length > 0) {
+            query += `
+                AND document.id IN (
+                    SELECT documentId 
+                    FROM document_stakeholder 
+                    JOIN stakeholder ON stakeholder.id = document_stakeholder.stakeholderId
+                    WHERE stakeholder.name IN (${stakeholders.map(() => "?").join(", ")})
+                )
+            `;
+            params.push(...stakeholders);
+        }
+    
+        // Filter by start date if provided
+        if (startDate) {
+            query += " AND document.date >= ?";
+            params.push(startDate);
+        }
+    
+        // Filter by end date if provided
+        if (endDate) {
+            query += " AND document.date <= ?";
+            params.push(endDate);
+        }
+    
+        // Add pagination
+        const limit = 5; // Fixed limit
+        query += " LIMIT ? OFFSET ?";
+        params.push(limit, offset);
+    
+        // Execute the query to fetch documents
+        return new Promise((resolve, reject) => {
+            db.all(query, params, async (err, rows) => {
+                if (err) {
+                    return reject(err);
+                } else {
+                    // Fetch stakeholders and convert the DB rows to Document objects
+                    try {
+                        const documentsPromises = rows.map(async (row) => {
+                            // Fetch stakeholders for the current document
+                            const stakeholdersForDocument = await this.getStakeholdersForDocument(row.id);
+                            
+                            // Convert DB row to Document with stakeholders
+                            const document = this.convertDBRowToDocument(row, stakeholdersForDocument);
+                            document.type = row.type_name;  // Add document type
+    
+                            return document;
+                        });
+    
+                        // Wait for all documents with stakeholders to be resolved
+                        const documents = await Promise.all(documentsPromises);
+                        resolve(documents);
+                    } catch (error) {
+                        reject(error);
+                    }
+                }
+            });
+        });
+    };
+    
+
     // Fetch stakeholders for a given document (kept as a separate function)
     this.getStakeholdersForDocument = (documentId) => {
         const stakeholdersQuery = `
@@ -147,6 +242,7 @@ export default function DocumentDAO(areaDAO) {
     this.getDocumentsByFilter = ({ type, title, stakeholders, startDate, endDate }) => {
         return this.getAllDocuments({ type, title, stakeholders, startDate, endDate });
     };
+    
 
 
 

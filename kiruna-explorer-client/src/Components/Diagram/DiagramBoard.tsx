@@ -7,6 +7,7 @@ import CustomBackgroundNode from './CustomBackgroundNode';
 import SingleNode from "./SingleNode";
 import GroupNode from "./GroupNode";
 import CustomEdge from "./CustomEdge";
+import CloseNode from "./CustomCloseNode.js";
 import React from "react";
 import API from "../../API/API.mjs"
 import { YScalePosition, getXDatePosition, getEquidistantPoints, getYPlanScale } from "../Utilities/DiagramReferencePositions.js";
@@ -47,7 +48,39 @@ const DiagramBoard = () => {
     const [documents, setDocuments] = useState<DiagramItem[] | []>([])
     const [links, setLinks] = useState<Edge[]>([])
     const [yearsRange, setYearsRange] = useState<number[]>([])
-    const [isOpen, setIsOpen] = useState<string | null>(null)
+    const [nodes, setNodes] = useState<Node[]>([])
+
+    const [nodeStates, setNodeStates] = useState<Record<number, string>>({});
+    const [nodeisOpen, setNodeIsOpen] = useState<Record<string, boolean | string>>({});
+
+
+    const setNodeSelected = (nodeindex: number, docselected: string) => {
+        console.log(`setted ${nodeindex} to ${docselected}`)
+        console.log(nodeStates)
+        setNodeStates(prev => ({
+            ...prev,
+            [nodeindex]: docselected,
+        }));
+    };
+
+    const setNodeOpen = (nodeindex: number, cancel?: boolean) => {
+        if (nodeindex == 0) {
+            setNodeIsOpen({})
+        }
+        else if (cancel) {
+            setNodeIsOpen(prev => ({
+                ...prev,
+                [nodeindex]: "closed",
+            }));
+        }
+        else {
+            setNodeIsOpen(prev => ({
+                ...prev,
+                [nodeindex]: true,
+            }));
+        }
+
+    };
 
     const distanceBetweenYears = 400;
 
@@ -92,21 +125,21 @@ const DiagramBoard = () => {
                 const docItems: DiagramItem[] = Object.entries(groupedByScaleAndDate).map((i: any[]) => {
                     const element = i[1][0]
                     let yoffset
-                    if(element.month){
+                    if (element.month) {
                         const evenMonth = element.month % 2 == 0
                         yoffset = evenMonth ? 50 : -50
                     }
-                    else{
+                    else {
                         yoffset = -100
                     }
                     let ypos
-                    if (element.scale==="plan"){
+                    if (element.scale === "plan") {
                         ypos = getYPlanScale(element.planNumber)
                     }
-                    else{
+                    else {
                         ypos = YScalePosition[element.scale]
                     }
-                
+
                     return { items: i[1], x: getXDatePosition(yearsRange[0], element.year, element.month), y: yoffset + ypos }
                 })
 
@@ -118,106 +151,118 @@ const DiagramBoard = () => {
         }
         getAllDocument()
     }, [])
-
-    useEffect(() => {
-        if (zoom <= 1.1) setIsOpen(null)
-        else if (zoom > 1.1 && clickedNode) setIsOpen(clickedNode)
-    }, [zoom])
+    /*
+        useEffect(() => {
+            if (zoom <= 1.1) setIsOpen(null)
+            else if (zoom > 1.1 && clickedNode) setIsOpen(clickedNode)
+        }, [zoom])*/
 
     const nodeTypes = {
         background: CustomBackgroundNode,
         singleNode: SingleNode,
-        groupNode: GroupNode
+        groupNode: GroupNode,
+        closeNode: CloseNode
     };
 
     const edgeTypes = {
         custom: CustomEdge,
     };
 
-    const initialNodes = [
-        {
-            id: '0',
-            type: 'background',
-            position: { x: 0, y: 0 },
-            data: { years: yearsRange, zoom: zoom, distanceBetweenYears: distanceBetweenYears },
-            draggable: false,
-            selectable: false,
-            connectable: false,
-            clickable: false,
-            style: { zIndex: -1 },
-        },
-        ...documents.flatMap((e, index: number) => {
-            const nodetype = e.items.length === 1 ? 'singleNode' : 'groupNode';
-
-            if (isOpen === `${e.items[0].docid}` && nodetype === 'groupNode') {
-                const positions = getEquidistantPoints(e.x, e.y, 5 + e.items.length * 7, e.items.length);
-                return e.items.map((item: Item, index1: number) => ({
-                    id: `${item.docid}-${index1}`,
-                    type: 'singleNode',
-                    position: { x: positions[index1].x, y: positions[index1].y },
-                    data: { clickedNode: clickedNode, group: [item], zoom: zoom },
+    useEffect(() => {
+        const getNodes = () => {
+            const initialNodes = [
+                {
+                    id: '0',
+                    type: 'background',
+                    position: { x: 0, y: 0 },
+                    data: { years: yearsRange, zoom: zoom, distanceBetweenYears: distanceBetweenYears },
                     draggable: false,
-                }));
-            } else {
-                return {
-                    id: `${e.items[0].docid}`,
-                    type: nodetype,
-                    position: { x: e.x, y: e.y },
-                    data: { clickedNode: clickedNode, group: e.items, zoom: zoom },
-                    draggable: false,
-                };
-            }
-        }),
-    ];
+                    selectable: false,
+                    connectable: false,
+                    clickable: false,
+                    style: { zIndex: -1 },
+                },
+                ...documents.flatMap((e, index: number) => {
+                    const nodetype = e.items.length === 1 ? 'singleNode' : 'groupNode';
 
-    useEffect(()=>{
-        const getLinks = async () =>{
-            const allLinks =  initialNodes.flatMap(async (node, index: number) => {
-                if(node.id=="0") return [];
-    
-                const nodetype = node.data.group.length === 1 ? 'singleNode' : 'groupNode';
-                const docid = node.data.group[0].docid
-                const docLinks = await API.getDocuemntLinks(docid)
-                if (docLinks.length===0) return [];
-                
-                const groupedLinks = docLinks.reduce((acc,linkitem)=>{
-                    if (!acc[linkitem.id]) {
-                        acc[linkitem.id] = [];
+                    const nodeSelected = nodeStates[index] || e.items[0].docid;
+                    console.log(`${index}:` + nodeisOpen[index])
+                    if (zoom > 1.1 && nodetype === 'groupNode' && nodeisOpen[index] !== "closed") setNodeOpen(index)
+
+                    if (nodeisOpen[index] === true && nodetype === 'groupNode') {
+                        const positions = getEquidistantPoints(e.x, e.y, e.items.length == 2 ? 45 : 5 + e.items.length * 7, e.items.length);
+
+                        const nodes = e.items.map((item: Item, index1: number) => ({
+                            id: `${item.docid}`,
+                            type: 'singleNode',
+                            position: { x: positions[index1].x, y: positions[index1].y },
+                            data: { clickedNode: clickedNode, group: [item], zoom: zoom, index: index },
+                            draggable: false,
+                        }));
+
+                        const closeNode = {
+                            id: `closeNode-${index}`,
+                            type: 'closeNode',
+                            position: { x: e.x + 10, y: e.y + 10 },
+                            data: { zoom: zoom, index: index },
+                            draggable: false,
+                        };
+
+                        return [...nodes, closeNode];
+                    } else {
+                        return {
+                            id: `${nodeSelected}`,
+                            type: nodetype,
+                            position: { x: e.x, y: e.y },
+                            data: { clickedNode: clickedNode, group: e.items, zoom: zoom, index: index, setNodeSelected: (id: number) => setNodeSelected(index, `${id}`) },
+                            draggable: false,
+                        };
                     }
-                    acc[linkitem.id].push(`${linkitem.connection}`);
-                    return acc;
-                }, {} as Record<string, Item[]>);
-    
-                console.log(Object.entries(groupedLinks))
-    
-                return Object.entries(groupedLinks).map((dl)=>(
-                    {
-                    id: `l${docid}-${dl[0]}`,
-                    source: `${docid}`,
-                    target: `${dl[0]}`,
-                    type: "custom",
-                    data: {typesOfConnections: dl[1] }
-                }
-            ))
-    
+                }),
+            ]
+            setNodes(initialNodes)
+        }
+        if (zoom <= 1.1) setNodeOpen(0)
+        getNodes()
+    }, [documents, clickedNode, zoom, nodeStates])
+
+    useEffect(() => {
+        const getLinks = async () => {
+            const allLinks = nodes.flatMap((node, index: number) => {
+                if (node.type === "background" || node.type === "closeNode") return [];
+
+                const nodetype = node.data.group.length === 1 ? 'singleNode' : 'groupNode';
+                return node.data.group.flatMap(async (elem: Item) => {
+                    const docid = elem.docid
+                    const docLinks = await API.getDocuemntLinks(docid)
+                    if (docLinks.length === 0) return [];
+
+                    const groupedLinks = docLinks.reduce((acc, linkitem) => {
+                        if (!acc[linkitem.id]) {
+                            acc[linkitem.id] = [];
+                        }
+                        acc[linkitem.id].push(`${linkitem.connection}`);
+                        return acc;
+                    }, {} as Record<string, Item[]>);
+
+                    return Object.entries(groupedLinks).map((dl) => (
+                        {
+                            id: `l${docid}-${dl[0]}`,
+                            source: `${docid}`,
+                            target: `${dl[0]}`,
+                            type: "custom",
+                            data: { typesOfConnections: dl[1] }
+                        }
+                    ))
+                })
             })
             const resolvedEdges = (await Promise.all(allLinks)).flat();
             setLinks(resolvedEdges)
         }
         getLinks()
-    },[documents])
+    }, [nodes, nodeStates])
 
-    useEffect(()=>{
-        console.log(links)
-    },[links])
-
-    const initialEdges = [
-
-        { id: 'e2-4', source: '4', target: '2', type: 'custom', data: { typesOfConnections: ["Direct Consequence", "Collateral Consequence", "Projection"] } },
-    ];
-
-
-    const filteredEdges = links.filter(edge => edge.source === clickedNode || edge.target === clickedNode || edge.source === hoveredNode || edge.target === hoveredNode);
+    const filteredEdges = links.filter(edge => edge.source === clickedNode || edge.source === hoveredNode);
 
     //boundaries
     const extent: [[number, number], [number, number]] = [
@@ -228,7 +273,7 @@ const DiagramBoard = () => {
     return (
         <div className={`${isDarkMode ? "dark" : "light"} w-screen h-screen`}>
             <ReactFlow
-                nodes={initialNodes}
+                nodes={nodes}
                 edges={filteredEdges}
                 nodeTypes={nodeTypes}
                 edgeTypes={edgeTypes}
@@ -236,12 +281,31 @@ const DiagramBoard = () => {
                 nodeExtent={extent}
                 translateExtent={extent}
                 onNodeClick={(event, node) => {
-                    setClickedNode((clickedNode === node.id || node.id == "0") ? null : node.id);
-                    if (node.type === "groupNode") setIsOpen((clickedNode === node.id || node.id == "0" || zoom <= 1.1) ? null : node.id)
+                    if (node.type === "closeNode") {
+                        console.log("chiudi")
+                        setNodeOpen(node.data.index, true)
+                        setClickedNode((clickedNode === node.id || node.id == "0") ? null : node.id);
+                    } else {
+                        setClickedNode((clickedNode === node.id || node.id == "0") ? null : node.id);
+                        if (clickedNode != node.id && node.type !== "groupNode") {
+                            setNodeSelected(node.data.index, node.id)
+                        }
+                        if (node.type === "groupNode") {
+                            if (zoom <= 1) {
+                                setNodeOpen(0)
+                            }
+                            else if (clickedNode == node.id) {
+                                setNodeOpen(node.data.index, true)
+                            }
+                            else {
+                                setNodeOpen(node.data.index)
+                            }
+                        }
+                    }
                 }}
                 onNodeMouseEnter={(event, node) => {
                     event.preventDefault();
-                    setHoveredNode(node.id);
+                    setHoveredNode(node.id != "0" ? node.id : null);
                 }}
                 onMoveEnd={(event, viewport) => {
                     setZoom(viewport.zoom);

@@ -1,6 +1,5 @@
 import {EdgeProps, getBezierPath} from '@xyflow/react';
-import React from 'react';
-import {useState} from "react";
+import React, {useState} from 'react';
 
 const CustomEdge = ({
                         id,
@@ -15,10 +14,10 @@ const CustomEdge = ({
                         markerEnd
                     }: EdgeProps) => {
     const [edgePath, labelX, labelY] = getBezierPath({
-        sourceX,
-        sourceY,
-        targetX,
-        targetY,
+        sourceX: sourceX || 0,
+        sourceY: sourceY || 0,
+        targetX: targetX || 0,
+        targetY: targetY || 0,
         sourcePosition,
         targetPosition
     });
@@ -31,26 +30,34 @@ const CustomEdge = ({
                 : typeOfConnection === "Projection" ? "#4F43F1"
                     : typeOfConnection === "Update" ? "#E79716"
                         : "#000000";
-    }
+    };
 
     const generateGradientStops = (colors: string[]) => {
         if (colors.length === 0) {
             colors = ["#000000"];
         }
+        if (colors.length === 1) {
+            return [
+                <stop key="start" offset="0%" stopColor={colors[0]} />,
+                <stop key="end" offset="100%" stopColor={colors[0]} />
+            ];
+        }
+
         const stops = [];
         for (let i = 0; i < colors.length; i++) {
             const offset = (i / (colors.length - 1)) * 100;
             stops.push(<stop key={i} offset={`${offset}%`} stopColor={colors[i]} />);
             if (i < colors.length - 1) {
                 const nextOffset = ((i + 0.5) / (colors.length - 1)) * 100;
-                const intermediateColor = colors[i]; // You can also blend colors[i] and colors[i+1] for a smoother transition
-                stops.push(<stop key={`${i}-intermediate`} offset={`${nextOffset}%`} stopColor={intermediateColor} />);
+                stops.push(<stop key={`${i}-intermediate`} offset={`${nextOffset}%`} stopColor={colors[i]} />);
             }
         }
         return stops;
     };
 
-    const gradientColors: string[] = Array.isArray(data.typesOfConnections) ? data.typesOfConnections.map((typeOfConnection: string) => getColor(typeOfConnection)) : [];
+    const gradientColors: string[] = Array.isArray(data.typesOfConnections)
+        ? data.typesOfConnections.map((typeOfConnection: string) => getColor(typeOfConnection))
+        : ["#000000"];
 
     return (
         <>
@@ -61,7 +68,11 @@ const CustomEdge = ({
             </defs>
             <path
                 id={id}
-                style={{...style, stroke: `url(#gradient-${id})`, pointerEvents: 'none'}}
+                style={{
+                    ...style,
+                    stroke: gradientColors.length > 0 ? `url(#gradient-${id})` : "#000000",
+                    pointerEvents: 'none'
+                }}
                 className={`react-flow__edge-path stroke-[0.2em]`}
                 d={edgePath}
                 markerEnd={markerEnd}

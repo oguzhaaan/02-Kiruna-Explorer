@@ -12,7 +12,7 @@ interface SingleNodeProps extends NodeProps {
         distanceBetweenYears: number;
         clickedNode: string | null;
         group: Item[],
-        zoom: number
+        zoom: number,
     };
 }
 
@@ -30,7 +30,8 @@ function SingleNode({
                 width: `${64 / zoom}px`,
                 height: `${64 / zoom}px`,
                 padding: `${1 / zoom}px`
-            }}>
+            }}
+            >
             <div
                 className={`flex flex-row justify-content-center align-content-center w-100 h-100 text-black_text dark:text-white_text rounded-full bg-light_node dark:bg-dark_node`}>
                 <img src={getIcon({ type: elem.type.toLowerCase() }, { darkMode: isDarkMode })} alt="document icon"

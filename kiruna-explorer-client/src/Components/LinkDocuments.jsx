@@ -9,7 +9,6 @@ import { useTheme } from "../contexts/ThemeContext.jsx";
 import { formatString } from "./Utilities/StringUtils.js";
 import FilterMenu from "./FilterMenu.jsx";
 import FilterLabels from "./FilterLabels.jsx";
-import { useDocuments } from "../hooks/useDocuments.mjs";
 
 const LinkDocuments = ({
   originalDocId,
@@ -20,6 +19,8 @@ const LinkDocuments = ({
   const navigate = useNavigate();
 
   const { isDarkMode } = useTheme();
+
+  const [documents, setDocuments] = useState([]);
 
   // --- Search ---
   const [searchQuery, setSearchQuery] = useState(""); // User's input
@@ -36,18 +37,6 @@ const LinkDocuments = ({
     endDate: "",
   });
   // --- Update Documents List ---
-  const {
-    documents,
-    loading,
-    error,
-    fetchAllDocuments,
-    fetchFilteredDocuments,
-  } = useDocuments();
-  // Fetch all documents on mount
-  useEffect(() => {
-    fetchAllDocuments();
-  }, []);
-  // Add delay
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedQuery(searchQuery); // Update debounced query after delay
@@ -59,11 +48,18 @@ const LinkDocuments = ({
   }, [searchQuery]);
   useEffect(() => {
     // Merge searchQuery into filterValues
+    const fetchFilteredDocuments = async (filters) => {
+      try {
+        const data = await API.getFilteredDocuments(filters);
+        setDocuments(data);
+      } catch (err) {
+        console.log(err.message);
+      }
+    };
     fetchFilteredDocuments({ ...filterValues, title: debouncedQuery });
   }, [filterValues, debouncedQuery]);
-  //-------
 
-  const [availableDocuments, setAvailableDocuments] = useState([]);
+  //-------
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -86,7 +82,7 @@ const LinkDocuments = ({
 
         // Filter out the document with the same ID as originalDocId
         const availableDocuments = allDocuments.filter(
-          (doc) => doc.id !== originalDocId
+          (doc) => doc.id != originalDocId
         );
 
         let tempLinks = {};

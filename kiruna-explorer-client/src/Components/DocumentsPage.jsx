@@ -24,6 +24,15 @@ function DocumentsPage(props) {
     startDate: "",
     endDate: "",
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalNumberOfPages, setTotalNumberOfPages] = useState(1);
+  const numberOfDocumentsInPage = 5;
+  const nextPage = () => {
+    if (currentPage < totalNumberOfPages) setCurrentPage((prev) => prev + 1);
+  };
+  const previousPage = () => {
+    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
+  };
   // --- Update Documents List ---
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -35,28 +44,39 @@ function DocumentsPage(props) {
     };
   }, [searchQuery]);
   useEffect(() => {
-    // Merge searchQuery into filterValues
-    const fetchFilteredDocuments = async (filters) => {
+    const fetchFilteredDocuments = async () => {
       try {
-        const data = await API.getFilteredDocuments(filters);
+        // Fetch paginated documents
+        const data = await API.getPaginatedFilteredDocuments({
+          ...filterValues,
+          title: debouncedQuery,
+          offset: ((currentPage - 1) * numberOfDocumentsInPage).toString(),
+        });
+
+        // Fetch all filtered documents to calculate total pages
+        const allData = await API.getFilteredDocuments({
+          ...filterValues,
+          title: debouncedQuery,
+        });
+
+        // Calculate total pages
+        setTotalNumberOfPages(
+          Math.ceil(allData.length / numberOfDocumentsInPage)
+        );
+
+        // Set the paginated documents
         setDocuments(data);
       } catch (err) {
-        console.log(err.message);
+        console.error("Error fetching documents:", err.message);
       }
     };
-    fetchFilteredDocuments({ ...filterValues, title: debouncedQuery });
+
+    fetchFilteredDocuments();
+  }, [filterValues, debouncedQuery, currentPage, numberOfDocumentsInPage]);
+  useEffect(() => {
+    // If filters change, reset the current page to 1
+    setCurrentPage(1);
   }, [filterValues, debouncedQuery]);
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalNumberOfPages, setTotalNumberOfPages] = useState(1);
-  const numberOfDocumentsInPage = 5;
-  const nextPage = () => {
-    setCurrentPage((prev) => prev + 1);
-  };
-  const previousPage = () => {
-    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
-  };
-
   // --- others ---
   const [alertMessage, setAlertMessage] = useState(["", ""]);
 
@@ -115,26 +135,26 @@ function DocumentsPage(props) {
                   Add document
                 </p>
               </button>
-
-            
             </div>
           </div>
         </div>
         <div className="flex flex-row w-full">
-          <div className="flex flex-col mt-8 mx-7 w-1/4">
+          <div className="flex flex-col mt-3 mx-7 w-1/4">
             {/* Filter Menu */}
             <FilterMenu
               filterValues={filterValues}
               setFilterValues={setFilterValues}
             />
             {/* Page selection */}
-            <div className="flex flex-row items-center justify-between py-2 text-black_text dark:text-white_text bg-box_white_color dark:bg-box_color mt-24 rounded-lg">
+            <div className="flex flex-row items-center justify-between py-2 text-black_text dark:text-white_text bg-box_white_color dark:bg-box_color mt-28 rounded-lg">
               <i
                 className="ml-3 bi bi-arrow-left cursor-pointer text-3xl"
                 onClick={previousPage}
               />
               <div className="text-xl">
-                <span className="bg-slate-400 rounded-md px-2">{currentPage}</span>
+                <span className="bg-slate-400 rounded-md px-2">
+                  {currentPage}
+                </span>
                 <span className="mx-2 px-2">of</span>
                 <span className="px-2">{totalNumberOfPages}</span>
               </div>
@@ -145,14 +165,14 @@ function DocumentsPage(props) {
               />
             </div>
           </div>
-          <div className="flex flex-col gap-3 w-3/4 overflow-y-scroll mr-7">
+          <div className="flex flex-col gap-3 w-3/4 overflow-y-scroll mr-7 pt-3">
             {/* Filter Labels */}
-            <div className="w-full">
+            {/*<div className="w-full">
               <FilterLabels
                 filterValues={filterValues}
                 setFilterValues={setFilterValues}
               />
-            </div>
+            </div>*/}
             {/* Documents List */}
             {documents.map((doc) => (
               <DocumentItem

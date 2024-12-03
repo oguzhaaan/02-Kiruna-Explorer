@@ -1,14 +1,28 @@
 import express from 'express';
-import { body,param, validationResult } from "express-validator";
+import { body, param, validationResult } from "express-validator";
 import { isLoggedIn } from "../auth/authMiddleware.mjs";
 const router = express.Router();
 import { InvalidDocumentType, DocumentTypeNameAlreadyExists } from "../models/DocumentType.mjs";
 import { authorizeRoles } from "../auth/authMiddleware.mjs";
-import DocumentTypeDAO from "../dao/DocumentTypeDao.mjs";
+import DocumentTypeDAO from "../dao/DocumentTypDAO.mjs";
 
 const DocumentTypeDao = new DocumentTypeDAO();
 
-router.post("/new-type", isLoggedIn, authorizeRoles('admin', 'urban_planner'), [
+router.get("/",
+    isLoggedIn,
+    authorizeRoles('admin', 'urban_planner'),
+    async (req, res) => {
+        try {
+            const types = await DocumentTypeDao.getAllDocumentTypes();
+            res.status(200).json(types);
+        } catch (err) {
+            console.error("Error fetching types:", err);
+            res.status(500).json({ error: "Internal server error", details: err.message });
+        }
+    }
+)
+
+router.post("/", isLoggedIn, authorizeRoles('admin', 'urban_planner'), [
     body("name")
         .trim()
         .notEmpty().withMessage("Type name is required")
@@ -25,8 +39,21 @@ router.post("/new-type", isLoggedIn, authorizeRoles('admin', 'urban_planner'), [
         return res.status(400).json({ errors: errors.array() });
     }
 
+
+
     try {
+        //chceck if type name already exists
+        const types = await DocumentTypeDao.getAllDocumentTypes();
+
         const { name } = req.body;
+        const nameLowerCase = name.toLowerCase();
+
+        for (const type of types) {
+            if (type.name.toLowerCase() === nameLowerCase) {
+                res.status(409).json({ error: "Type name already exists" });
+            }
+        }
+
         const typeId = await DocumentTypeDao.addDocumentType(name);
         res.status(201).json({ typeId, message: "Document type added successfully" });
     } catch (err) {

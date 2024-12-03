@@ -90,7 +90,7 @@ function FilterMenu({ filterValues, setFilterValues }) {
           }))}
           value={tempFilterValues.stakeholders}
           onChange={(e) => handleTempChange("stakeholders", e)}
-          styles={customDropdownStyles(isDarkMode)}
+          styles={customDropdownStyles(isDarkMode, true)}
           placeholder="None"
           isClearable={false}
           isSearchable={false}

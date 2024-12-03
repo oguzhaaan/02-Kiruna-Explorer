@@ -1,8 +1,7 @@
 import Select from "react-select";
 import {
-  stakeholders,
-  documentTypes,
   popularLanguages,
+  stakeholders,
 } from "./Utilities/Data";
 import customDropdownStyles from "./Utilities/CustomDropdownStyles";
 import { useTheme } from "../contexts/ThemeContext";
@@ -15,8 +14,158 @@ const AddDocumentForm = (props) => {
   const { isDarkMode } = useTheme();
   const navigate = useNavigate();
 
+  const [stakeholderOptions, setStakeholderOptions] = useState([]);
+  const [selectedOption, setSelectedOption] = useState("");
+  const [isAddingNewStakeholder, setIsAddingNewStakeholder] = useState(false);
+  const [newStakeholderName, setNewStakeholderName] = useState("");
+  const [newStakeholders, setNewStakeholders] = useState([]);
+  const [oldStakeholders, setOldStakeholders] = useState([]);
+
+  const [typeOptions, setTypeOptions] = useState([]); // 'types' è la lista iniziale di tipi
+  const [isAddingNewType, setIsAddingNewType] = useState(false);
+  const [newTypeName, setNewTypeName] = useState("");
+  const [selectedType, setSelectedType] = useState("");
+  const [oldTypes, setOldTypes] = useState([]);
+
+  const [newDocument, setNewDocument] = useState(props.newDocument);
+
+  const [isValid, setIsValid] = useState(true);
+
+  useEffect(() => {
+    const inizialization = async () => {
+      try {
+        const types = await API.getAllTypes();
+        setOldTypes(types);
+        types.push({ id: types.length + 1, name: "Add a new one..." });
+        setTypeOptions(types);
+        const stakeholders = await API.getAllStakeholders();
+        setOldStakeholders(stakeholders);
+        stakeholders.push({ id: stakeholders.length + 1, name: "Add a new one..." });
+        setStakeholderOptions(stakeholders);
+      } catch (err) {
+        console.log(err.message);
+        props.setAlertMessage([err.message, "error"]);
+      }
+    };
+    inizialization();
+
+  }, [])
+
+  const handleTypeChange = (selectedType) => {
+    const typeName = selectedType.target.value;
+
+    if (typeName === "Add a new one...") {
+      setIsAddingNewType(true);
+    } else {
+      setSelectedType(typeName);
+      // Trova l'ID del tipo selezionato
+      const typeId = getTypeIdByName(typeName, typeOptions);
+      setNewDocument((prevDoc) => ({
+        ...prevDoc,
+        typeId: typeId || "", // Usa l'ID del tipo selezionato
+      }));
+    }
+  };
+
+  function getTypeIdByName(typeName, documents) {
+    // Cerca il tipo nell'array e restituisce l'ID
+    const type = documents.find((type) => type.name === typeName);
+    return type ? type.id : null; // Restituisce null se il tipo non è trovato
+  }
+
+  const handleNewTypeSubmit = () => {
+    if (newTypeName.trim() !== "") {
+      const newType = {
+        id: typeOptions.length + 1, // Genera un ID univoco
+        name: newTypeName,
+      };
+
+      // Aggiungi il nuovo tipo alla lista delle opzioni
+      setTypeOptions((prevOptions) => {
+        const updatedOptions = [
+          ...prevOptions,
+          { id: newType.id, name: newType.name },
+        ];
+        return updatedOptions;
+      });
+
+      // Aggiorna il documento con il nuovo tipo selezionato (impostando il typeId)
+      setNewDocument((prevDoc) => ({
+        ...prevDoc,
+        typeId: newType.id, // Imposta direttamente l'ID del nuovo tipo
+      }));
+
+      // Imposta l'opzione selezionata
+      setSelectedType(newTypeName);
+    }
+    setIsAddingNewType(false);
+    setNewTypeName("");
+  };
+
+  const handleSelectChange = (selectedValues) => {
+    if (selectedValues[selectedValues.length - 1]?.label === "Add a new one...") {
+      setIsAddingNewStakeholder(true);
+    } else {
+      // Imposta il valore selezionato e aggiorna i campi come necessario
+      setSelectedOption(selectedValues[selectedValues.length - 1]?.label || "");
+      handleFieldChange("stakeholders", selectedValues || []);
+    }
+  }
+
+  const getLastStakeholderId = (stakeholders) => {
+    return stakeholders[stakeholders.length - 1].id;
+  }
+
+  const handleNewStakeholderSubmit = () => {
+    setIsValid(true);
+    if (newStakeholderName.trim() !== "") {
+      const newStakeholder = {
+        id: getLastStakeholderId(stakeholderOptions) + 1,
+        name: newStakeholderName,
+      };
+
+      // Aggiungi il nuovo stakeholder alla lista delle opzioni  WE WANT TO ADD THE STAKEHOLDER IN THE LIST IMMEDIATLY??
+      setStakeholderOptions((prevOptions) => [
+        ...prevOptions,
+        { id: newStakeholder.id, name: newStakeholder.name },
+      ]);
+
+      // Aggiungi il nuovo stakeholder al documento
+      const updatedStakeholders = [
+        ...newDocument.stakeholders,
+        { value: newStakeholder.id, label: newStakeholder.name },
+      ];
+      setNewDocument((prevDoc) => ({
+        ...prevDoc,
+        stakeholders: updatedStakeholders,
+      }));
+
+      setSelectedOption(newStakeholderName);
+      setNewStakeholders((prev) => [
+        ...prev, // Spread dell'array precedente
+        newStakeholderName // Nuovo elemento aggiunto alla fine
+      ]);
+    }
+    setIsAddingNewStakeholder(false);
+    setNewStakeholderName("");
+  };
+
+  const moveAddNewOptionToEnd = (options) => {
+    // Trova l'opzione "Add a new one..."
+    const addNewOption = options.find(option => option.name === "Add a new one...");
+    if (!addNewOption) return options; // Se non esiste, ritorna l'elenco invariato
+
+    // Rimuovi l'opzione "Add a new one..." dalla lista
+    const optionsWithoutAddNew = options.filter(option => option.name !== "Add a new one...");
+
+    // Aggiungi l'opzione "Add a new one..." alla fine
+    return [...optionsWithoutAddNew, addNewOption];
+  };
+
+
   const handleFieldChange = (field, value) => {
-    props.setNewDocument((prevDoc) => {
+    setIsValid(true);
+    setNewDocument((prevDoc) => {
       const updatedDoc = { ...prevDoc, [field]: value };
 
       if (["year", "month", "day"].includes(field)) {
@@ -64,27 +213,27 @@ const AddDocumentForm = (props) => {
     };
 
     const newErrors = {
-      ...(props.newDocument.title ? {} : { title: "Title is required" }),
-      ...(props.newDocument.stakeholders?.length > 0
+      ...(newDocument.title ? {} : { title: "Title is required" }),
+      ...(newDocument.stakeholders?.length > 0
         ? {}
         : { stakeholder: "At least one stakeholder is required" }),
-      ...(props.newDocument.scale && props.newDocument.scale !== "none"
+      ...(newDocument.scale && newDocument.scale !== "none"
         ? {}
         : { scale: "Scale is required" }),
-      ...(props.newDocument.scale === "plan" && !props.newDocument.planNumber
+      ...(newDocument.scale === "plan" && !newDocument.planNumber
         ? { planNumber: "Plan Number is required for scale 'plan'" }
         : {}),
-      ...(props.newDocument.date
-        ? validateDate(props.newDocument.date)
+      ...(newDocument.date
+        ? validateDate(newDocument.date)
           ? {}
           : { date: "Invalid date format. Use yyyy, yyyy-mm, or yyyy-mm-dd." }
         : { date: "Date is required" }),
-      ...(props.newDocument.typeId ? {} : { type: "Type is required" }),
-      ...(props.newDocument.description
+      ...(newDocument.typeId ? {} : { type: "Type is required" }),
+      ...(newDocument.description
         ? {}
         : { description: "Description is required" }),
     };
-
+    setIsValid(newDocument.stakeholders?.length > 0);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -95,47 +244,105 @@ const AddDocumentForm = (props) => {
 
   // --- Submit Form ---
   const handleConfirm = async () => {
-    // Refresh the list of the documents
 
-    //CAMPI OPZIONALI: PAGE + LANGUAGE + GIORNO DELLA DATA(?) + COORDINATES
-    //CAMPI OBBLIGATORI: TITLE + STAKEHOLDER + SCALE(PLANE NUMBER IN CASE) + DATE + DESCRIPTION + TYPE
-
-    const documentData = {
-      title: props.newDocument.title,
-      stakeholder: props.newDocument.stakeholders.map((e) => {
-        return e.value;
-      }),
-      scale: props.newDocument.scale,
-      planNumber: props.newDocument.planNumber, // Optional
-      date: props.newDocument.date
-        ? props.newDocument.date
-            .split("-")
-            .map((part, index) => (index === 0 ? part : part.padStart(2, "0")))
-            .join("-")
+    props.setNewDocument(newDocument);
+    let documentData = {
+      title: newDocument.title,
+      scale: newDocument.scale,
+      planNumber: newDocument.planNumber, // Optional
+      date: newDocument.date
+        ? newDocument.date
+          .split("-")
+          .map((part, index) => (index === 0 ? part : part.padStart(2, "0")))
+          .join("-")
         : "",
-      typeId: props.newDocument.typeId,
-      language: props.newDocument.language || null, // Set to null if not provided
-      pageNumber: props.newDocument.pages || null, // Set to null if not provided
-      description: props.newDocument.description, // Mandatory
+      typeId: newDocument.typeId,
+      language: newDocument.language || null, // Set to null if not provided
+      pageNumber: newDocument.pages || null, // Set to null if not provided
+      description: newDocument.description, // Mandatory
       areaId: props.newAreaId,
       links: props.connections.length > 0 ? props.connections : null,
     };
-
-    console.log(documentData);
 
     if (!validateFields()) {
       props.setAlertMessage(["Please fill all the mandatory fields.", "error"]);
       return;
     }
 
+    // Refresh the list of the documents
+
+    //CAMPI OPZIONALI: PAGE + LANGUAGE + GIORNO DELLA DATA(?) + COORDINATES
+    //CAMPI OBBLIGATORI: TITLE + STAKEHOLDER + SCALE(PLANE NUMBER IN CASE) + DATE + DESCRIPTION + TYPE
+    if (!oldTypes.some((type) => type.name === selectedType)) {
+      try {
+        console.log("AGGIUNGO IL NUOVO TIPO")
+        newDocument.typeId = await API.addType(selectedType);
+      } catch (error) {
+        console.log(error);
+        props.setAlertMessage([error.message, "error"]);
+        return;
+      }
+    }
+    else {
+      console.log("TIPO ESISTENTE");
+    }
+
+    let oldStakeholdersSelected = oldStakeholders.filter((st) => {
+      return newDocument.stakeholders.some((s) => {
+        return s.label === st
+      });
+    });
+
+    let newStakeholdersSelected = newStakeholders.filter((st) => {
+      return newDocument.stakeholders.some((s) => {
+        return s.label === st
+      });
+    });
+
+    let stakeholdersId = [];
+    console.log(newStakeholdersSelected);
+    if (newStakeholdersSelected.length != 0) {
+      try {
+        stakeholdersId = await API.addNewStakeholders(newStakeholdersSelected);
+        console.log(stakeholdersId);
+      } catch (error) {
+        console.log(error);
+        props.setAlertMessage([error.message, "error"]);
+        return;
+      }
+    }
+
+    const stakeholdersName = newDocument.stakeholders.map((s) => s.label);
+
+    props.setNewDocument(newDocument);
+    documentData = {
+      title: newDocument.title,
+      scale: newDocument.scale,
+      planNumber: newDocument.planNumber, // Optional
+      date: newDocument.date
+        ? newDocument.date
+          .split("-")
+          .map((part, index) => (index === 0 ? part : part.padStart(2, "0")))
+          .join("-")
+        : "",
+      typeId: newDocument.typeId,
+      language: newDocument.language || null, // Set to null if not provided
+      pageNumber: newDocument.pages || null, // Set to null if not provided
+      description: newDocument.description, // Mandatory
+      areaId: props.newAreaId,
+      links: props.connections.length > 0 ? props.connections : null,
+    };
+
+
     try {
-      await API.addDocument(documentData);
+      let documentId = await API.addDocument(documentData);
       props.setAlertMessage(["Document added successfully!", "success"]);
       props.setnewAreaId(null);
       props.setConnections([]);
       closeForm();
+      await API.addStakeholdersToDocument(documentId.lastId,stakeholdersName);
     } catch (error) {
-      //console.log(error);
+      console.log(error);
       props.setAlertMessage([error.message, "error"]);
     }
   };
@@ -151,7 +358,7 @@ const AddDocumentForm = (props) => {
   };
 
   const resetForm = () => {
-    props.setNewDocument(new DocumentClass());
+    setNewDocument(new DocumentClass());
   };
 
   const calculateDaysInMonth = (year, month) => {
@@ -172,9 +379,8 @@ const AddDocumentForm = (props) => {
 
   return (
     <div
-      className={`${
-        isDarkMode ? "dark-select" : "light-select"
-      } py-4 fixed inset-0 flex items-center justify-center scrollbar-thin scrollbar-webkit z-[1040]`}
+      className={`${isDarkMode ? "dark-select" : "light-select"
+        } py-4 fixed inset-0 flex items-center justify-center scrollbar-thin scrollbar-webkit z-[1040]`}
       onClick={closeForm}
     >
       <div
@@ -199,35 +405,67 @@ const AddDocumentForm = (props) => {
           <input
             type="text"
             placeholder="Title"
-            value={props.newDocument.title}
+            value={newDocument.title}
             onChange={(e) => handleFieldChange("title", e.target.value)}
-            className={`w-full px-3 text-base py-2 text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md ${
-              errors.title
-                ? "border-red-500 border-1"
-                : "focus:border-blue-400 border-1 border-transparent"
-            } focus:outline-none`}
+            className={`w-full px-3 text-base py-2 text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md ${errors.title
+              ? "border-red-500 border-1"
+              : "focus:border-blue-400 border-1 border-transparent"
+              } focus:outline-none`}
           />
         </div>
         {/* Stakeholders */}
-        <div className="input-stakeholder mb-4 w-full">
-          <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">
-            Stakeholders<span className="text-red-400">*</span>
-          </label>
-          <Select
-            isMulti
-            options={stakeholders.map((stakeholder) => ({
-              value: stakeholder.id,
-              label: stakeholder.name,
-            }))}
-            value={props.newDocument.stakeholders}
-            onChange={(e) => handleFieldChange("stakeholders", e || [])}
-            styles={customDropdownStyles(isDarkMode)}
-            placeholder="None"
-            isClearable={false}
-            isSearchable={false}
-            className="select w-full text-black_text"
-          />
-        </div>
+        {isAddingNewStakeholder ? (
+          <div className="input-title mb-4 w-full">
+            <label className="text-black_text dark:text-white_text w-full ml-2 mb-1 text-base text-left">
+              Add a new Stakeholder<span className="text-red-400">*</span>
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Stakeholder"
+                value={newStakeholderName}
+                onChange={(e) => setNewStakeholderName(e.target.value)}
+                className={`w-full px-3 text-base py-2 text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md ${errors.stakeholder
+                  ? "border-red-500 border-1"
+                  : "focus:border-blue-400 border-1 border-transparent"
+                  } focus:outline-none`}
+              />{newStakeholderName ? (<button
+                type="button"
+                onClick={handleNewStakeholderSubmit}
+                className="absolute top-2 right-4 text-gray-500 dark:text-white_text hover:text-blue-500"
+              >
+                <i className="bi bi-plus-lg"></i>
+              </button>) : (
+                <button
+                  type="button"
+                  onClick={() => setIsAddingNewStakeholder(false)}
+                  className="absolute top-2 right-4 text-gray-500 dark:text-white_text hover:text-blue-500"
+                >
+                  <i className="bi bi-x-lg"></i>
+                </button>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="input-stakeholder mb-4 w-full">
+            <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">
+              Stakeholders<span className="text-red-400">*</span>
+            </label>
+            <Select
+              isMulti
+              options={moveAddNewOptionToEnd(stakeholderOptions).map((stakeholder) => ({
+                value: stakeholder.id,
+                label: stakeholder.name,
+              }))}
+              value={newDocument.stakeholders}
+              onChange={handleSelectChange}
+              styles={customDropdownStyles(isDarkMode, isValid)}
+              placeholder="None"
+              isClearable={false}
+              isSearchable={false}
+              className="select w-full text-black_text"
+            />
+          </div>)}
         {/* Scale */}
         <div className="input-scale mb-4 w-full">
           <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">
@@ -235,13 +473,12 @@ const AddDocumentForm = (props) => {
           </label>
           <select
             id="document-type"
-            value={props.newDocument.scale}
+            value={newDocument.scale}
             onChange={(e) => handleFieldChange("scale", e.target.value)}
-            className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text bg-input_color_light dark:bg-input_color_dark rounded-md ${
-              errors.scale
-                ? "border-red-500 border-1"
-                : "focus:border-blue-400 border-1 border-transparent"
-            } focus:outline-none`}
+            className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text bg-input_color_light dark:bg-input_color_dark rounded-md ${errors.scale
+              ? "border-red-500 border-1"
+              : "focus:border-blue-400 border-1 border-transparent"
+              } focus:outline-none`}
           >
             <option value="none">None</option>
             <option value="text">Text</option>
@@ -251,7 +488,7 @@ const AddDocumentForm = (props) => {
           </select>
         </div>
 
-        {props.newDocument.scale === "plan" && (
+        {newDocument.scale === "plan" && (
           <div className="input-plan mb-4 w-full">
             <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">
               Enter the scale 1:n
@@ -259,14 +496,13 @@ const AddDocumentForm = (props) => {
             <input
               id="number-input"
               type="number"
-              value={props.newDocument.planNumber}
+              value={newDocument.planNumber}
               placeholder="n"
               onChange={(e) => handleFieldChange("planNumber", e.target.value)}
-              className={`w-full text-base px-3 py-2 text-text-black_text dark:text-white_text bg-input_color_light dark:bg-input_color_dark rounded-md ${
-                errors.title
-                  ? "border-red-500 border-1"
-                  : "focus:border-blue-400 border-1 border-transparent"
-              } focus:outline-none`}
+              className={`w-full text-base px-3 py-2 text-text-black_text dark:text-white_text bg-input_color_light dark:bg-input_color_dark rounded-md ${errors.planNumber
+                ? "border-red-500 border-1"
+                : "focus:border-blue-400 border-1 border-transparent"
+                } focus:outline-none`}
             ></input>
           </div>
         )}
@@ -284,17 +520,15 @@ const AddDocumentForm = (props) => {
             {/* Year Dropdown */}
             <select
               id="document-date-year"
-              value={props.newDocument.date?.split("-")[0] || ""}
+              value={newDocument.date?.split("-")[0] || ""}
               onChange={(e) => handleFieldChange("year", e.target.value)}
-              className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md ${
-                isDarkMode ? "dark-mode" : "light-mode"
-              } ${
-                errors.date
+              className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md ${isDarkMode ? "dark-mode" : "light-mode"
+                } ${errors.date
                   ? "border-red-500 border-1"
                   : "focus:border-blue-400 border-1 border-transparent"
-              } focus:outline-none`}
+                } focus:outline-none`}
             >
-              <option value="" disabled selected>
+              <option value="" disabled>
                 Year
               </option>
               {Array.from({ length: 100 }, (_, i) => {
@@ -310,18 +544,16 @@ const AddDocumentForm = (props) => {
             {/* Month Dropdown */}
             <select
               id="document-date-month"
-              value={props.newDocument.date?.split("-")[1] || ""}
-              disabled={!Boolean(props.newDocument.date?.split("-")[0])} // Check if year is seleceted
+              value={newDocument.date?.split("-")[1] || ""}
+              disabled={!Boolean(newDocument.date?.split("-")[0])} // Check if year is seleceted
               onChange={(e) => handleFieldChange("month", e.target.value)}
-              className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md disabled:opacity-30 ${
-                isDarkMode ? "dark-mode" : "light-mode"
-              } ${
-                errors.date
+              className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md disabled:opacity-30 ${isDarkMode ? "dark-mode" : "light-mode"
+                } ${errors.date
                   ? "border-red-500 border-1"
                   : "focus:border-blue-400 border-1 border-transparent"
-              } focus:outline-none`}
+                } focus:outline-none`}
             >
-              <option value="" selected>
+              <option value="">
                 Month
               </option>
               {[
@@ -346,26 +578,24 @@ const AddDocumentForm = (props) => {
 
             {/* Day Dropdown */}
             <select
-              value={props.newDocument.date?.split("-")[2] || ""}
+              value={newDocument.date?.split("-")[2] || ""}
               onChange={(e) => handleFieldChange("day", e.target.value)}
               id="document-date-day"
-              disabled={!Boolean(props.newDocument.date?.split("-")[1])} // Check if month is seleceted
-              className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md disabled:opacity-30 ${
-                isDarkMode ? "dark-mode" : "light-mode"
-              } ${
-                errors.date
+              disabled={!Boolean(newDocument.date?.split("-")[1])} // Check if month is seleceted
+              className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md disabled:opacity-30 ${isDarkMode ? "dark-mode" : "light-mode"
+                } ${errors.date
                   ? "border-red-500 border-1"
                   : "focus:border-blue-400 border-1 border-transparent"
-              } focus:outline-none`}
+                } focus:outline-none`}
             >
-              <option value="" selected>
+              <option value="">
                 Day
               </option>
               {Array.from(
                 {
                   length: calculateDaysInMonth(
-                    parseInt(props.newDocument.date?.split("-")[0]), // year
-                    parseInt(props.newDocument.date?.split("-")[1]) // month
+                    parseInt(newDocument.date?.split("-")[0]), // year
+                    parseInt(newDocument.date?.split("-")[1]) // month
                   ),
                 },
                 (_, i) => (
@@ -402,23 +632,55 @@ const AddDocumentForm = (props) => {
           <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">
             Type<span className="text-red-400">*</span>
           </label>
-          <select
-            id="document-type"
-            value={props.newDocument.type}
-            onChange={(e) => handleFieldChange("typeId", e.target.value)}
-            className={`w-full px-3 text-base py-2 text-black_text dark:text-white_text bg-input_color_light dark:bg-input_color_dark rounded-md ${
-              errors.type
+          {isAddingNewType ? (
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Type"
+                value={newTypeName}
+                onChange={(e) => setNewTypeName(e.target.value)}
+                className={`w-full px-3 text-base py-2 text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md ${errors.type
+                  ? "border-red-500 border-1"
+                  : "focus:border-blue-400 border-1 border-transparent"
+                  } focus:outline-none`}
+              />
+              {newTypeName ? (
+                <button
+                  type="button"
+                  onClick={handleNewTypeSubmit}
+                  className="absolute top-2 right-4 text-gray-500 dark:text-white_text hover:text-blue-500"
+                >
+                  <i className="bi bi-plus-lg"></i>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsAddingNewType(false)}
+                  className="absolute top-2 right-4 text-gray-500 dark:text-white_text hover:text-blue-500"
+                >
+                  <i className="bi bi-x-lg"></i>
+                </button>
+              )}
+            </div>
+          ) : (
+            <select
+              id="document-type"
+              value={selectedType}
+              onChange={handleTypeChange}
+              className={`w-full px-3 text-base py-2 text-black_text dark:text-white_text bg-input_color_light dark:bg-input_color_dark rounded-md ${errors.type
                 ? "border-red-500 border-1"
                 : "focus:border-blue-400 border-1 border-transparent"
-            } focus:outline-none`}
-          >
-            <option value="none">None</option>
-            {documentTypes.map((type) => (
-              <option key={type.id} value={type.id}>
-                {type.name}
-              </option>
-            ))}
-          </select>
+                } focus:outline-none`}
+            >
+              <option value="none">None</option>
+              {
+                moveAddNewOptionToEnd(typeOptions).map((type) => (
+                  <option key={type.id} value={type.name}>
+                    {type.name}
+                  </option>
+                ))}
+            </select>
+          )}
         </div>
         {/* Language */}
         <div className="input-language mb-4 w-full">
@@ -427,7 +689,7 @@ const AddDocumentForm = (props) => {
           </label>
           <select
             id="document-language"
-            value={props.newDocument.language}
+            value={newDocument.language}
             onChange={(e) => handleFieldChange("language", e.target.value)}
             className="w-full px-3 text-base py-2 text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md focus:border-blue-400 border-1 border-transparent focus:outline-none"
           >
@@ -447,7 +709,7 @@ const AddDocumentForm = (props) => {
           <input
             id="number-input"
             type="number"
-            value={props.newDocument.pages}
+            value={newDocument.pages}
             placeholder="Select a number"
             onChange={(e) => handleFieldChange("pages", e.target.value)}
             className="w-full text-base px-3 py-2 text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md focus:border-blue-400 border-1 border-transparent :outline-none"
@@ -460,13 +722,12 @@ const AddDocumentForm = (props) => {
           </label>
           <textarea
             placeholder="Description"
-            value={props.newDocument.description}
+            value={newDocument.description}
             onChange={(e) => handleFieldChange("description", e.target.value)}
-            className={`w-full p-2 px-3 py-2 text-base text-text-black_text dark:text-white_text border-gray-300 placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark  ${
-              errors.description
-                ? "border-red-500 border-1"
-                : "focus:border-blue-400 border-1 border-transparent"
-            } focus:outline-none`}
+            className={`w-full p-2 px-3 py-2 text-base text-text-black_text dark:text-white_text border-gray-300 placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark  ${errors.description
+              ? "border-red-500 border-1"
+              : "focus:border-blue-400 border-1 border-transparent"
+              } focus:outline-none`}
             rows="4"
           ></textarea>
         </div>
@@ -521,7 +782,7 @@ const AddDocumentForm = (props) => {
           Confirm
         </button>
       </div>
-    </div>
+    </div >
   );
 };
 

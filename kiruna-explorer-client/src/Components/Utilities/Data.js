@@ -56,6 +56,10 @@ export const documentTypes = [
     id: 8,
     name: "Material Effects",
   },
+  {
+    id: 9,
+    name: "Add a new one..."
+  }
 ];
 
 export const stakeholders = [
@@ -79,4 +83,8 @@ export const stakeholders = [
     id: 5,
     name: "Citizens",
   },
+  {
+    id: 6,
+    name: "Add a new one..."
+  }
 ];

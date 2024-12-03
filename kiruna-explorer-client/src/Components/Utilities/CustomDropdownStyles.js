@@ -1,13 +1,14 @@
 // --- Styles ---
-const customDropdownStyles = (isDarkMode) => ({
+const customDropdownStyles = (isDarkMode, isValid) => ({
   control: (provided, state) => ({
     ...provided,
     backgroundColor: isDarkMode ? "#d9d9d93f" : "#FFFFFFE2", // Sfondo del campo
     borderRadius: "0.375rem", // Bordo arrotondato
-    borderColor: "transparent", // Bordo trasparente
+    borderColor: isValid ? "transparent" : "red", // Cambia il colore del bordo se non valido
     padding: "0px 5px", // Padding per centrare il testo
     boxShadow: "none", // Rimuove l'ombra
     cursor: "pointer",
+    borderWidth: "1px", // Aggiungi la larghezza del bordo
     fontSize: "1rem",
   }),
   singleValue: (provided) => ({
@@ -59,3 +60,5 @@ const customDropdownStyles = (isDarkMode) => ({
   }),
 });
 export default customDropdownStyles;
+
+

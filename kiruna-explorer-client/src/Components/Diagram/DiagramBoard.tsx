@@ -45,8 +45,8 @@ const DiagramBoard = () => {
     const [hoveredNode, setHoveredNode] = useState<string | null>(null);
     const [clickedNode, setClickedNode] = useState<string | null>(null);
     const [documents, setDocuments] = useState<DiagramItem[] | []>([])
+    const [links, setLinks] = useState([])
     const [yearsRange, setYearsRange] = useState<number[]>([])
-    //const [nodes, setNodes] = useNodesState<Node[]>([])
     const [isOpen, setIsOpen] = useState<string | null>(null)
 
     const distanceBetweenYears = 400;
@@ -107,7 +107,10 @@ const DiagramBoard = () => {
         getAllDocument()
     }, [])
 
-    //years
+    useEffect(() => {
+        if (zoom <= 1.1) setIsOpen(null)
+        else if (zoom > 1.1 && clickedNode) setIsOpen(clickedNode)
+    }, [zoom])
 
     const nodeTypes = {
         background: CustomBackgroundNode,
@@ -155,20 +158,29 @@ const DiagramBoard = () => {
         }),
     ];
 
-    useEffect(()=>{
-        if (zoom<=1.1) setIsOpen(null)
-        else if (zoom>1.1 && clickedNode) setIsOpen(clickedNode) 
-    },[zoom])
+    const edges = [
+        ...initialNodes.flatMap(async (node, index: number) => {
+            if(node.id=="1") return;
 
-    //edges
+            const nodetype = node.data.group.length === 1 ? 'singleNode' : 'groupNode';
+            const docid = node.data.group[0].docid
+            console.log(docid)
+            const docLinks = await API.getDocuemntLinks(docid)
+            console.log(docLinks)
+            /*
+            return docLinks.map((dl)=>({
+            id: 'e2-4', 
+            source: '4', 
+            target: '2', 
+            type: 'custom', 
+            data: { typesOfConnections: ["Direct Consequence", "Collateral Consequence", "Projection"] }
+            }))*/
+
+        })
+    ]
+
     const initialEdges = [
-        {
-            id: 'e2-3',
-            source: '3',
-            target: '2',
-            type: 'custom',
-            data: { typesOfConnections: ["Collateral Consequence", "Projection", "Direct Consequence", "Update"] }
-        },
+   
         { id: 'e2-4', source: '4', target: '2', type: 'custom', data: { typesOfConnections: ["Direct Consequence", "Collateral Consequence", "Projection"] } },
     ];
 
@@ -192,7 +204,7 @@ const DiagramBoard = () => {
                 translateExtent={extent}
                 onNodeClick={(event, node) => {
                     setClickedNode((clickedNode === node.id || node.id == "1") ? null : node.id);
-                    if (node.type==="groupNode") setIsOpen((clickedNode === node.id || node.id == "1" || zoom<=1.1) ? null : node.id)
+                    if (node.type === "groupNode") setIsOpen((clickedNode === node.id || node.id == "1" || zoom <= 1.1) ? null : node.id)
                 }}
                 onNodeMouseEnter={(event, node) => {
                     event.preventDefault();

@@ -1,5 +1,5 @@
 import { useTheme } from "../../contexts/ThemeContext.jsx";
-import { Controls, MiniMap, ReactFlow, Background, type ColorMode } from "@xyflow/react";
+import { Controls, MiniMap, ReactFlow, Background, type ColorMode, Edge } from "@xyflow/react";
 import { useNodesState } from "@xyflow/react";
 import '@xyflow/react/dist/style.css';
 import { useState, useEffect } from "react";
@@ -45,7 +45,7 @@ const DiagramBoard = () => {
     const [hoveredNode, setHoveredNode] = useState<string | null>(null);
     const [clickedNode, setClickedNode] = useState<string | null>(null);
     const [documents, setDocuments] = useState<DiagramItem[] | []>([])
-    const [links, setLinks] = useState([])
+    const [links, setLinks] = useState<Edge[]>([])
     const [yearsRange, setYearsRange] = useState<number[]>([])
     const [isOpen, setIsOpen] = useState<string | null>(null)
 
@@ -112,8 +112,6 @@ const DiagramBoard = () => {
 
                 setDocuments(docItems)
 
-                console.log(docItems)
-
             } catch (err) {
                 console.log(err)
             }
@@ -138,7 +136,7 @@ const DiagramBoard = () => {
 
     const initialNodes = [
         {
-            id: '1',
+            id: '0',
             type: 'background',
             position: { x: 0, y: 0 },
             data: { years: yearsRange, zoom: zoom, distanceBetweenYears: distanceBetweenYears },
@@ -151,10 +149,10 @@ const DiagramBoard = () => {
         ...documents.flatMap((e, index: number) => {
             const nodetype = e.items.length === 1 ? 'singleNode' : 'groupNode';
 
-            if (isOpen === `${index + 2}` && nodetype === 'groupNode') {
+            if (isOpen === `${e.items[0].docid}` && nodetype === 'groupNode') {
                 const positions = getEquidistantPoints(e.x, e.y, 5 + e.items.length * 7, e.items.length);
                 return e.items.map((item: Item, index1: number) => ({
-                    id: `${index + 2}-${index1}`,
+                    id: `${item.docid}-${index1}`,
                     type: 'singleNode',
                     position: { x: positions[index1].x, y: positions[index1].y },
                     data: { clickedNode: clickedNode, group: [item], zoom: zoom },
@@ -162,7 +160,7 @@ const DiagramBoard = () => {
                 }));
             } else {
                 return {
-                    id: `${index + 2}`,
+                    id: `${e.items[0].docid}`,
                     type: nodetype,
                     position: { x: e.x, y: e.y },
                     data: { clickedNode: clickedNode, group: e.items, zoom: zoom },
@@ -172,33 +170,54 @@ const DiagramBoard = () => {
         }),
     ];
 
-    const edges = [
-        ...initialNodes.flatMap(async (node, index: number) => {
-            if(node.id=="1") return;
+    useEffect(()=>{
+        const getLinks = async () =>{
+            const allLinks =  initialNodes.flatMap(async (node, index: number) => {
+                if(node.id=="0") return [];
+    
+                const nodetype = node.data.group.length === 1 ? 'singleNode' : 'groupNode';
+                const docid = node.data.group[0].docid
+                const docLinks = await API.getDocuemntLinks(docid)
+                if (docLinks.length===0) return [];
+                
+                const groupedLinks = docLinks.reduce((acc,linkitem)=>{
+                    if (!acc[linkitem.id]) {
+                        acc[linkitem.id] = [];
+                    }
+                    acc[linkitem.id].push(`${linkitem.connection}`);
+                    return acc;
+                }, {} as Record<string, Item[]>);
+    
+                console.log(Object.entries(groupedLinks))
+    
+                return Object.entries(groupedLinks).map((dl)=>(
+                    {
+                    id: `l${docid}-${dl[0]}`,
+                    source: `${docid}`,
+                    target: `${dl[0]}`,
+                    type: "custom",
+                    data: {typesOfConnections: dl[1] }
+                }
+            ))
+    
+            })
+            const resolvedEdges = (await Promise.all(allLinks)).flat();
+            setLinks(resolvedEdges)
+        }
+        getLinks()
+    },[documents])
 
-            const nodetype = node.data.group.length === 1 ? 'singleNode' : 'groupNode';
-            const docid = node.data.group[0].docid
-            console.log(docid)
-            const docLinks = await API.getDocuemntLinks(docid)
-            console.log(docLinks)
-            /*
-            return docLinks.map((dl)=>({
-            id: 'e2-4', 
-            source: '4', 
-            target: '2', 
-            type: 'custom', 
-            data: { typesOfConnections: ["Direct Consequence", "Collateral Consequence", "Projection"] }
-            }))*/
-
-        })
-    ]
+    useEffect(()=>{
+        console.log(links)
+    },[links])
 
     const initialEdges = [
-   
+
         { id: 'e2-4', source: '4', target: '2', type: 'custom', data: { typesOfConnections: ["Direct Consequence", "Collateral Consequence", "Projection"] } },
     ];
 
-    const filteredEdges = initialEdges.filter(edge => edge.source === clickedNode || edge.target === clickedNode || edge.source === hoveredNode || edge.target === hoveredNode);
+
+    const filteredEdges = links.filter(edge => edge.source === clickedNode || edge.target === clickedNode || edge.source === hoveredNode || edge.target === hoveredNode);
 
     //boundaries
     const extent: [[number, number], [number, number]] = [
@@ -217,8 +236,8 @@ const DiagramBoard = () => {
                 nodeExtent={extent}
                 translateExtent={extent}
                 onNodeClick={(event, node) => {
-                    setClickedNode((clickedNode === node.id || node.id == "1") ? null : node.id);
-                    if (node.type === "groupNode") setIsOpen((clickedNode === node.id || node.id == "1" || zoom <= 1.1) ? null : node.id)
+                    setClickedNode((clickedNode === node.id || node.id == "0") ? null : node.id);
+                    if (node.type === "groupNode") setIsOpen((clickedNode === node.id || node.id == "0" || zoom <= 1.1) ? null : node.id)
                 }}
                 onNodeMouseEnter={(event, node) => {
                     event.preventDefault();

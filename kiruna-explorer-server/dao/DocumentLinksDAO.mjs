@@ -41,65 +41,60 @@ export default function DocumentLinksDAO() {
 
     this.deleteLinks = async (links) => {
         if (links.length === 0) return;
-
+    
         const originalDocId = links[0].originalDocId;
-
+    
         // Creiamo l'elenco dei link da mantenere
-        const linksToKeep = links.map(link => `('${link.originalDocId}', '${link.selectedDocId}', '${link.connectionType}')`)
-            .concat(links.map(link => `('${link.selectedDocId}', '${link.originalDocId}', '${link.connectionType}')`)); // aggiungi l'inverso
-
-        // Verifica che linksToKeep non sia vuoto
-        if (linksToKeep.length === 0) {
-            return;
-        }
-
-        // Log per verificare i valori
-        //console.log("Links to keep:", linksToKeep);
-
+        const linksToKeep = links.map(link => ({
+            doc1Id: link.originalDocId,
+            doc2Id: link.selectedDocId,
+            connection: link.connectionType
+        }));
+    
         return new Promise((resolve, reject) => {
-            // Trova i link attualmente presenti nel database con lo stesso doc1Id o doc2Id invertiti
+            // Trova i link attualmente presenti nel database associati al documento originale
             const querySelect = `
-                SELECT id FROM document_link
-                WHERE (doc1Id, doc2Id, connection) NOT IN (${linksToKeep.join(", ")});
+                SELECT id, doc1Id, doc2Id, connection 
+                FROM document_link
+                WHERE doc1Id = ? OR doc2Id = ?;
             `;
-
-            db.all(querySelect,
-                (err, rows) => {
-                    if (err) {
-                        console.error("Errore durante il recupero dei link:", err);
-                        return reject(new Error("Unable to retrieve links for deletion."));
-                    }
-
-                    //console.log(rows);
-
-                    if (rows.length === 0) {
-                        // Non ci sono link da eliminare
-                        return resolve();
-                    }
-
-                    // Ottieni gli ID dei link da eliminare
-                    const idsToDelete = rows.map(row => row.id);
-
-                    // Log per verificare gli ID da eliminare
-                    //console.log("IDs to delete:", idsToDelete);
-
-                    // Query per eliminare i link
-                    const queryDelete = `
+    
+            db.all(querySelect, [originalDocId, originalDocId], (err, rows) => {
+                if (err) {
+                    console.error("Errore durante il recupero dei link:", err);
+                    return reject(new Error("Unable to retrieve links for deletion."));
+                }
+    
+                // Filtra i link da eliminare: quelli associati al documento che non sono più nei linksToKeep
+                const idsToDelete = rows
+                    .filter(row => !linksToKeep.some(link =>
+                        (link.doc1Id === row.doc1Id && link.doc2Id === row.doc2Id && link.connection === row.connection) ||
+                        (link.doc1Id === row.doc2Id && link.doc2Id === row.doc1Id && link.connection === row.connection)
+                    ))
+                    .map(row => row.id);
+    
+                if (idsToDelete.length === 0) {
+                    // Non ci sono link da eliminare
+                    return resolve();
+                }
+    
+                // Query per eliminare i link
+                const queryDelete = `
                     DELETE FROM document_link
                     WHERE id IN (${idsToDelete.join(", ")});
                 `;
-
-                    db.run(queryDelete, function (err) {
-                        if (err) {
-                            console.error("Errore durante l'eliminazione dei link:", err);
-                            return reject(new Error("Unable to delete the links."));
-                        }
-
-                        resolve();
-                    });
+    
+                db.run(queryDelete, function (err) {
+                    if (err) {
+                        console.error("Errore durante l'eliminazione dei link:", err);
+                        return reject(new Error("Unable to delete the links."));
+                    }
+    
+                    resolve();
                 });
+            });
         });
-    }
+    };
 
 
     this.getLinksByDocumentId = (id) => {

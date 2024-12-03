@@ -145,25 +145,13 @@ function DocumentsPage(props) {
               filterValues={filterValues}
               setFilterValues={setFilterValues}
             />
-            {/* Page selection */}
-            <div className="flex flex-row items-center justify-between py-2 text-black_text dark:text-white_text bg-box_white_color dark:bg-box_color mt-28 rounded-lg">
-              <i
-                className="ml-3 bi bi-arrow-left cursor-pointer text-3xl"
-                onClick={previousPage}
-              />
-              <div className="text-xl">
-                <span className="bg-slate-400 rounded-md px-2">
-                  {currentPage}
-                </span>
-                <span className="mx-2 px-2">of</span>
-                <span className="px-2">{totalNumberOfPages}</span>
-              </div>
-
-              <i
-                className="mr-3 bi bi-arrow-right cursor-pointer  text-3xl"
-                onClick={nextPage}
-              />
-            </div>
+            {/* Pagination Controls */}
+            <PaginationControls
+              previousPage={previousPage}
+              currentPage={currentPage}
+              totalNumberOfPages={totalNumberOfPages}
+              nextPage={nextPage}
+            />
           </div>
           <div className="flex flex-col gap-3 w-3/4 overflow-y-scroll mr-7 pt-3">
             {/* Filter Labels */}
@@ -214,3 +202,31 @@ function DocumentsPage(props) {
 }
 
 export default DocumentsPage;
+
+function PaginationControls({
+  previousPage,
+  currentPage,
+  totalNumberOfPages,
+  nextPage,
+}) {
+  return (
+    <div className="flex flex-row items-center justify-between py-2 text-black_text dark:text-white_text bg-box_white_color dark:bg-box_color mt-28 rounded-lg">
+      <i
+        className="ml-3 bi bi-arrow-left cursor-pointer text-3xl"
+        onClick={previousPage}
+      />
+      <div className="text-xl">
+        <span className="bg-primary_color_light dark:bg-customBlue rounded-md px-2">
+          {currentPage}
+        </span>
+        <span className="mx-2 px-2">of</span>
+        <span className="px-2">{totalNumberOfPages}</span>
+      </div>
+
+      <i
+        className="mr-3 bi bi-arrow-right cursor-pointer  text-3xl"
+        onClick={nextPage}
+      />
+    </div>
+  );
+}

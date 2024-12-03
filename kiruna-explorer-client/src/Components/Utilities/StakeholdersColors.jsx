@@ -13,7 +13,7 @@ function getStakeholderColor({stakeholder}) {
         case "others":
             return "bg-[#3C8F4D]";
         default:
-            return "bg-white";
+            return "bg-sky-700";
     }
 }
 

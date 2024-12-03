@@ -284,7 +284,7 @@ const LinkDocuments = ({
 
             {/* Conditional Filter Menu */}
             {isFilterMenuOpen && (
-              <div className="absolute top-full left-0 mt-2 z-50">
+              <div className="absolute top-full min-w-80 left-0 mt-2 z-50">
                 <FilterMenu
                   filterValues={filterValues}
                   setFilterValues={setFilterValues}

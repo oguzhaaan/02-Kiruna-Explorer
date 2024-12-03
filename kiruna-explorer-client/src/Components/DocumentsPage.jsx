@@ -11,7 +11,7 @@ import AddDocumentForm from "./AddDocumentForm.jsx";
 import DocumentItem from "./DocumentItem.jsx";
 
 function DocumentsPage(props) {
-  const { isDarkMode, toggleTheme } = useTheme();
+  const { isDarkMode } = useTheme();
   const [documents, setDocuments] = useState([]);
 
   // --- Search ---
@@ -70,7 +70,7 @@ function DocumentsPage(props) {
 
   return (
     <div className={isDarkMode ? "dark" : "light"}>
-      <div className="bg-background_color_white dark:bg-background_color min-h-screen flex flex-col items-center">
+      <div className="bg-background_color_white dark:bg-background_color min-h-screen flex flex-col">
         <SingleDocument
           updateAreaId={props.updateAreaId}
           setUpdateAreaId={props.setUpdateAreaId}
@@ -116,24 +116,7 @@ function DocumentsPage(props) {
                 </p>
               </button>
 
-              {/* Change Theme Button */}
-              <button
-                className="text-black_text dark:text-white_text grid justify-items-center transition-transform transform hover:scale-105 active:scale-95"
-                onClick={() => {
-                  toggleTheme();
-                }}
-              >
-                <div className="flex justify-center items-center gap-2 relative">
-                  <i
-                    className="bi bi-sun-fill transition-opacity duration-300 ease-in-out text-2xl"
-                    style={{ opacity: isDarkMode ? 0.2 : 1 }}
-                  ></i>
-                  <i
-                    className="bi bi-moon-fill transition-opacity duration-300 ease-in-out text-2xl"
-                    style={{ opacity: isDarkMode ? 1 : 0.2 }}
-                  ></i>
-                </div>
-              </button>
+            
             </div>
           </div>
         </div>

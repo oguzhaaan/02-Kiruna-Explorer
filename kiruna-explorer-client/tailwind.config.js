@@ -1,4 +1,5 @@
 /** @type {import('tailwindcss').Config} */
+import tailwindAnimated from 'tailwindcss-animated';
 export default {
   darkMode: 'selector',
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
@@ -35,7 +36,9 @@ export default {
         my_green: 'var(--my-green)',
         my_red: 'var(--my-red)',
         my_orange: 'var(--my-orange)',
-        box_high_opacity: 'var(--box-high-opacity)'
+        box_high_opacity: 'var(--box-high-opacity)',
+        dark_node: "#494949",
+        light_node: "#e7e7e7"
       },
       backgroundImage: {
         document_item_radient_grey: 'var(--document-item-gradient-grey)',
@@ -49,6 +52,8 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    tailwindAnimated
+  ],
   important: true
 }

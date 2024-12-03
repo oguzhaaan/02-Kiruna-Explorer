@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useTheme } from "../contexts/ThemeContext.jsx";
 
 function NavHeader(props) {
-    const { isDarkMode } = useTheme();
+    const { isDarkMode, toggleTheme } = useTheme();
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -63,7 +63,7 @@ function NavHeader(props) {
                                         </Col>
                                     </Row>
                                     <div className={`separator ${isDarkMode ? 'bg-white_text' : 'bg-black_text'} opacity-20`}></div>
-                                    { user.role === "urban_planner" && (<Row
+                                    {user.role === "urban_planner" && (<Row
                                         className={`offcanvas-item w-100 p-1 ${currentRoute.includes("documents") ? (isDarkMode ? 'bg-customBlue' : 'bg-blue-200') : ''}`}
                                         onClick={() => { navigate("/documents") }}
                                     >
@@ -76,7 +76,7 @@ function NavHeader(props) {
                                     </Row>)}
                                     <Row
                                         className={`offcanvas-item w-100 p-1 ${currentRoute.includes("map") ? (isDarkMode ? 'bg-customBlue' : 'bg-blue-200') : ''}`}
-                                        onClick={() => { navigate("/mapDocuments")}}
+                                        onClick={() => { navigate("/mapDocuments") }}
                                     >
                                         <Col xs="auto">
                                             <i className={`bi bi-globe-americas fs-3 align-middle ${isDarkMode ? 'text-white_text' : 'text-black_text'}`}></i>
@@ -87,7 +87,7 @@ function NavHeader(props) {
                                     </Row>
                                     <Row
                                         className={`offcanvas-item w-100 p-1 ${currentRoute.includes("diagram") ? (isDarkMode ? 'bg-customBlue' : 'bg-blue-200') : ''}`}
-                                        onClick={() => { }}
+                                        onClick={() => { navigate("/diagram") }}
                                     >
                                         <Col xs="auto">
                                             <i className={`bi bi-diagram-3 fs-3 align-middle ${isDarkMode ? 'text-white_text' : 'text-black_text'}`}></i>
@@ -96,6 +96,24 @@ function NavHeader(props) {
                                             Diagram
                                         </Col>
                                     </Row>
+                                </div>
+                                {/* Theme Toggle Button */}
+                                <div className="absolute top-0 right-0 mt-3 mr-4 ">
+                                    <button
+                                        className={`${isDarkMode ? 'text-white_text' : 'text-black_text'} grid justify-items-center transition-transform transform hover:scale-105 active:scale-95`}
+                                        onClick={toggleTheme}
+                                    >
+                                        <div className="flex justify-center items-center gap-2 relative">
+                                            <i
+                                                className="bi bi-sun-fill transition-opacity duration-300 ease-in-out text-2xl"
+                                                style={{ opacity: isDarkMode ? 0.2 : 1 }}
+                                            ></i>
+                                            <i
+                                                className="bi bi-moon-fill transition-opacity duration-300 ease-in-out text-2xl"
+                                                style={{ opacity: isDarkMode ? 1 : 0.2 }}
+                                            ></i>
+                                        </div>
+                                    </button>
                                 </div>
                                 <div className="offcanvas-content" onClick={() => { logOut(); props.setNavShow(true); }}>
                                     <Row className="offcanvas-item w-100 p-1">

@@ -13,6 +13,7 @@ import { GeoreferenceMapDoc } from "./Components/MapDocuments.jsx";
 import { ThemeProvider } from "./contexts/ThemeContext.jsx";
 import API from "./API/API.mjs";
 import DocumentsPage from "./Components/DocumentsPage.jsx";
+import DiagramBoard from "./Components/Diagram/DiagramBoard.tsx";
 
 function App() {
   const { user, isLoggedIn, checkAuth } = useUserContext();
@@ -79,6 +80,8 @@ function App() {
             <Route path="/mapDocuments" element={isLoggedIn ? <GeoreferenceMapDoc showArea={showArea} setShowArea={setShowArea} setNavShow={setNavShow} municipalGeoJson={municipalGeoJson} /> : <Navigate replace to="/" />} />
 
             <Route path="/linkDocuments" element={(isLoggedIn && user.role === "urban_planner") ? <LinkDocuments setOriginalDocId={setoriginalDocId} originalDocId={docId} mode={mode} setConnectionsInForm={setConnections} /> : <Navigate replace to="/" />} />
+
+            <Route path="/diagram" element={(isLoggedIn && user.role === "urban_planner") ? <DiagramBoard /> : <Navigate replace to="/" />} />
 
             <Route path="*" element={isLoggedIn ? (user.role === "urban_planner" ? <Navigate replace to="/documents" /> : user.role === "resident" ? <Navigate replace to="/mapDocuments" /> : <HomePage />) : <HomePage />} />
 

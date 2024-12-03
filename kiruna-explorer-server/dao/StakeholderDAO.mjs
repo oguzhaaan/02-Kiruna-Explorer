@@ -1,6 +1,6 @@
 import db from "../db.mjs";
 
-export default function StakeholderDAO(){
+export default function StakeholderDAO() {
 
     this.getStakeholders = async () => {
         const query = `SELECT * FROM stakeholder`;
@@ -44,13 +44,13 @@ export default function StakeholderDAO(){
     this.addStakeholder = async (name) => {
         const query = `INSERT INTO stakeholder (name) VALUES (?)`;
         return new Promise((resolve, reject) => {
-            db.run(query, [name], (err) => {
+            db.run(query, [name], function (err) {
                 if (err) {
                     return reject(err);
                 }
                 resolve(this.lastID);
-            }
-            )
+            });
+
         })
     };
 
@@ -70,7 +70,7 @@ export default function StakeholderDAO(){
     this.addDocumentStakeholder = async (stakeholderId, docId) => {
         const query = `INSERT INTO document_stakeholder (documentId, stakeholderId) VALUES (?, ?)`;
         return new Promise((resolve, reject) => {
-            db.run(query, [docId, stakeholderId], (err) => {
+            db.run(query, [docId, stakeholderId], function (err) {
                 if (err) {
                     return reject(err);
                 }

@@ -14,3 +14,17 @@ export function getXDatePosition(firstyear, year, month){
 
     return parseInt(offset+ (yearindex*400) + ((400/13) * parseInt(month)))
 }
+  
+export function getEquidistantPoints(x, y, r, N) {
+    const points = [];
+  
+    for (let i = 0; i < N; i++) {
+      const angle = (2 * Math.PI * i) / N; // Angolo in radianti
+      const px = x + r * Math.cos(angle); // Calcolo della coordinata x
+      const py = y + r * Math.sin(angle); // Calcolo della coordinata y
+  
+      points.push({ x: px, y: py });
+    }
+  
+    return points;
+  }

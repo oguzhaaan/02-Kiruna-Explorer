@@ -13,7 +13,8 @@ interface GroupNodeProps extends NodeProps {
         years: string[];
         distanceBetweenYears: number;
         clickedNode: string | null;
-        group: Item[]
+        group: Item[],
+        zoom: number;
     };
 }
 
@@ -29,22 +30,44 @@ function GroupNode({
 
     const [isDropDownOpen, setIsDropDownOpen] = useState(false);
 
+    const zoom = data.zoom <= 0.9 ? 0.9 : data.zoom >= 2? 2 : data.zoom
+
     return (
         <>
-            <div className={`w-16 h-16 p-1 ${isClicked ? "" : "opacity-35"}`}
+            <div className={` ${isClicked ? "" : "opacity-35"}` }
+            style={{
+                width: `${64 / zoom}px`,
+                height: `${64 / zoom}px`,
+                padding: `${1 / zoom}px`
+            }}
                  title={selectedDocument.title}>
                 <div
-                    className={`flex flex-row justify-content-center align-content-center w-100 h-100 text-black_text dark:text-white_text rounded-full bg-light_node dark:bg-dark_node`}>
+                    className={`flex flex-row w-100 h-100 justify-content-center align-content-center text-black_text dark:text-white_text rounded-full bg-light_node dark:bg-dark_node`}
+                    >
                     <img src={getIcon({type: selectedDocument.type.toLowerCase()}, {darkMode: isDarkMode})}
-                         alt="document icon" className="p-[0.75rem]"/>
+                         alt="document icon" style={{
+                            padding: `${0.75 / zoom}em`
+                        }}/>
                 </div>
 
                 <div
-                    className={`absolute w-14 h-14 text-black_text dark:text-white_text rounded-full z-[-1] top-0.5 left-1.5 bg-[#999999] dark:bg-[#797979]`}>
+                    className={`absolute text-black_text dark:text-white_text rounded-full z-[-1] bg-[#999999] dark:bg-[#797979]`}
+                    style={{
+                        width: `${64 / zoom}px`,
+                        height: `${64 / zoom}px`,
+                        bottom: `${2 * 1.5 *zoom}px`,
+                        left: `${4 * 1.5 *zoom}px`,
+                    }}>
                 </div>
 
                 <div
-                    className={`absolute w-14 h-14 text-black_text dark:text-white_text rounded-full z-[-2] top-0 left-2 bg-[#555555] dark:bg-[#C8C8C8]`}>
+                    className={`absolute text-black_text dark:text-white_text rounded-full z-[-2] bg-[#555555] dark:bg-[#C8C8C8]`}
+                    style={{
+                        width: `${64 / zoom}px`,
+                        height: `${64 / zoom}px`,
+                        bottom: `${4 * 1.5 * zoom}px`,
+                        right: `${1 * 1.5 * zoom}px`,
+                    }}>
                 </div>
 
                 <CustomHandle type="target" position={Position.Right}></CustomHandle>
@@ -53,7 +76,13 @@ function GroupNode({
             {
                 !isDropDownOpen ?
                     <div
-                        className={`fixed w-5 h-5 text-black_text dark:text-white_text rounded-full z-[1] bottom-0 right-0 bg-primary_color_light dark:bg-primary_color_dark hover:shadow-lg hover:shadow-primary_color_light/70 dark:hover:shadow-primary_color_dark/70 transition`}
+                        className={`fixed text-black_text dark:text-white_text rounded-full z-[1] bg-primary_color_light dark:bg-primary_color_dark hover:shadow-lg hover:shadow-primary_color_light/70 dark:hover:shadow-primary_color_dark/70 transition`}
+                        style={{
+                            width: `${20 / zoom}px`,
+                            height: `${20 / zoom}px`,
+                            bottom: 0,
+                            right: 0
+                        }}
                         onClick={() => {
                             setIsDropDownOpen(!isDropDownOpen);
                         }}>

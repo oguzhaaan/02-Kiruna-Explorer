@@ -1,5 +1,6 @@
 import { useTheme } from "../../contexts/ThemeContext.jsx";
 import { Controls, MiniMap, ReactFlow, Background, type ColorMode } from "@xyflow/react";
+import { useNodesState } from "@xyflow/react";
 import '@xyflow/react/dist/style.css';
 import { useState, useEffect } from "react";
 import CustomBackgroundNode from './CustomBackgroundNode';
@@ -8,8 +9,18 @@ import GroupNode from "./GroupNode";
 import CustomEdge from "./CustomEdge";
 import React from "react";
 import API from "../../API/API.mjs"
-import { YScalePosition, getXDatePosition } from "../Utilities/DiagramReferencePositions.js";
+import { YScalePosition, getXDatePosition, getEquidistantPoints } from "../Utilities/DiagramReferencePositions.js";
 
+type Node<Data = any> = {
+    id: string;
+    type?: string;
+    data: Data;
+    position: { x: number; y: number };
+    draggable?: boolean;
+    selectable?: boolean;
+    connectable?: boolean;
+    style?: React.CSSProperties;
+};
 export type Item = {
     docid: number;
     title: string;
@@ -35,6 +46,8 @@ const DiagramBoard = () => {
     const [clickedNode, setClickedNode] = useState<string | null>(null);
     const [documents, setDocuments] = useState<DiagramItem[] | []>([])
     const [yearsRange, setYearsRange] = useState<number[]>([])
+    //const [nodes, setNodes] = useNodesState<Node[]>([])
+    const [isOpen, setIsOpen] = useState<string | null>(null)
 
     const distanceBetweenYears = 400;
 
@@ -44,7 +57,7 @@ const DiagramBoard = () => {
                 const docs = await API.getAllDocuments();
                 console.log(docs)
 
-                const yearsDoc = docs.map((doc)=>{
+                const yearsDoc = docs.map((doc) => {
                     let date = doc.date.split("-")
                     let year = date[0]
                     return parseInt(year)
@@ -53,7 +66,7 @@ const DiagramBoard = () => {
                 const maxYear = Math.max(...yearsDoc)
 
                 const yearsRange: number[] = []
-                for(let y=minYear-1; y<=maxYear+3; y++){
+                for (let y = minYear - 1; y <= maxYear + 3; y++) {
                     yearsRange.push(y)
                 }
                 setYearsRange(yearsRange)
@@ -63,7 +76,7 @@ const DiagramBoard = () => {
                     let date = doc.date.split("-")
                     let year = date[0]
                     let month = date[1]
-                    return { docid: doc.id, title:doc.title, type: doc.type, scale: doc.scale, year: year, month: month, planNumber: doc.planNumber };
+                    return { docid: doc.id, title: doc.title, type: doc.type, scale: doc.scale, year: year, month: month, planNumber: doc.planNumber };
                 }).filter((i: Item) => i.scale !== null)
 
                 //Group items by scale and date
@@ -76,11 +89,11 @@ const DiagramBoard = () => {
                     return acc;
                 }, {} as Record<string, Item[]>);
 
-                const docItems: DiagramItem[] =  Object.entries(groupedByScaleAndDate).map((i:any[])=>{
+                const docItems: DiagramItem[] = Object.entries(groupedByScaleAndDate).map((i: any[]) => {
                     const element = i[1][0]
                     const evenMonth = element.month % 2 == 0
-                    const yoffset = evenMonth? 50 : -50
-                    return {items: i[1], x: getXDatePosition(yearsRange[0],element.year,element.month), y:yoffset+ YScalePosition[element.scale+element.planNumber]}
+                    const yoffset = evenMonth ? 50 : -50
+                    return { items: i[1], x: getXDatePosition(yearsRange[0], element.year, element.month), y: yoffset + YScalePosition[element.scale + element.planNumber] }
                 })
 
                 setDocuments(docItems)
@@ -106,7 +119,6 @@ const DiagramBoard = () => {
         custom: CustomEdge,
     };
 
-    //nodes
     const initialNodes = [
         {
             id: '1',
@@ -117,19 +129,36 @@ const DiagramBoard = () => {
             selectable: false,
             connectable: false,
             clickable: false,
-            style: { zIndex: -1 }
+            style: { zIndex: -1 },
         },
-        ...documents.map((e: DiagramItem, index: number)=>{
-            const nodetype = e.items.length === 1? "singleNode":"groupNode"
-            return {
-                id: `${index+2}`,
-                type: nodetype,
-                position: {x: e.x, y: e.y},
-                data: {clickedNode:clickedNode, group: e.items},
-                draggable:false
+        ...documents.flatMap((e, index: number) => {
+            const nodetype = e.items.length === 1 ? 'singleNode' : 'groupNode';
+
+            if (isOpen === `${index + 2}` && nodetype === 'groupNode') {
+                const positions = getEquidistantPoints(e.x, e.y, 5 + e.items.length * 7, e.items.length);
+                return e.items.map((item: Item, index1: number) => ({
+                    id: `${index + 2}-${index1}`,
+                    type: 'singleNode',
+                    position: { x: positions[index1].x, y: positions[index1].y },
+                    data: { clickedNode: clickedNode, group: [item], zoom: zoom },
+                    draggable: false,
+                }));
+            } else {
+                return {
+                    id: `${index + 2}`,
+                    type: nodetype,
+                    position: { x: e.x, y: e.y },
+                    data: { clickedNode: clickedNode, group: e.items, zoom: zoom },
+                    draggable: false,
+                };
             }
-        })
+        }),
     ];
+
+    useEffect(()=>{
+        if (zoom<=1.1) setIsOpen(null)
+        else if (zoom>1.1 && clickedNode) setIsOpen(clickedNode) 
+    },[zoom])
 
     //edges
     const initialEdges = [
@@ -163,6 +192,7 @@ const DiagramBoard = () => {
                 translateExtent={extent}
                 onNodeClick={(event, node) => {
                     setClickedNode((clickedNode === node.id || node.id == "1") ? null : node.id);
+                    if (node.type==="groupNode") setIsOpen((clickedNode === node.id || node.id == "1" || zoom<=1.1) ? null : node.id)
                 }}
                 onNodeMouseEnter={(event, node) => {
                     event.preventDefault();
@@ -171,6 +201,7 @@ const DiagramBoard = () => {
                 onMoveEnd={(event, viewport) => {
                     setZoom(viewport.zoom);
                     setViewport(viewport);
+
                 }}
             >
                 <Background gap={20} size={1} color={isDarkMode ? "#333" : "#ccc"} />

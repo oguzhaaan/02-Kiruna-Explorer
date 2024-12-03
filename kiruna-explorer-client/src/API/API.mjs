@@ -275,6 +275,49 @@ const getFilteredDocuments = async (filters) => {
   }
 };
 
+const getPaginatedFilteredDocuments = async (filters) => {
+  try {
+    // Build query parameters dynamically from the `filters` object
+    const queryParams = new URLSearchParams();
+
+    // Iterate through the filters object
+    for (const key in filters) {
+      const value = filters[key];
+      if (value !== undefined && value !== null && value !== "" && value.length > 0) {
+        if (Array.isArray(value)) {
+          // Convert arrays to comma-separated strings for stakeholders
+          queryParams.append(key, value.map(item => item.label).join(','));
+        } else {
+          queryParams.append(key, value);
+        }
+      }
+    }
+
+    // Make the fetch call
+    const response = await fetch(`${SERVER_URL}/api/documents/filter/pagination?${queryParams.toString()}`, {
+      method: 'GET',
+      credentials: 'include', // Include cookies for authentication
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    // Check if the response is OK
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData?.error || 'Failed to fetch documents');
+    }
+
+    // Parse and return the response JSON
+    const data = await response.json();
+    //console.log(data)
+    return data;
+  } catch (error) {
+    console.error('Error fetching filtered documents:', error);
+    throw new Error(error.message || 'Failed to fetch documents');
+  }
+};
+
 
 const addLink = async (link) => {
   try {
@@ -617,6 +660,7 @@ const API = {
   getDocuemntLinks,
   getAllDocuments,
   getFilteredDocuments,
+  getPaginatedFilteredDocuments,
   addLinks,
   deleteAll,
   uploadFile,

@@ -23,8 +23,7 @@
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "sinon": "^19.0.2",
-    "sqlite3": "^5.1.7",
-    "vitest": "^2.1.4"
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^2.1.4",
@@ -35,6 +34,7 @@
     "jest-html-reporters": "^3.1.7",
     "jsdom": "^25.0.1",
     "nodemon": "^3.1.7",
-    "supertest": "^6.3.4"
+    "supertest": "^6.3.4",
+    "vitest": "^2.1.6"
   }
 }

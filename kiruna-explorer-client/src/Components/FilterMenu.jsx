@@ -37,6 +37,7 @@ function FilterMenu({ filterValues, setFilterValues }) {
       startDate: "",
       endDate: "",
     };
+    setTempFilterValues(clearedValues);
     setFilterValues(clearedValues);
   };
 

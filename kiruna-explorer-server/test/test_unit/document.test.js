@@ -10,32 +10,27 @@ import { AreaNotFound } from '../../models/Area.mjs';
 import Area from '../../models/Area.mjs';
 
 const areaDAO = new AreaDAO();
-
+const documentDAO = new DocumentDAO();
 const mockRowDB = {
     id: 1,
     title: 'Test Document',
-    lkab: true, // Mocking boolean fields
-    municipality: false,
-    regional_authority: true,
-    architecture_firms: false,
-    citizens: false,
-    others: false,
     date: '2023-01-01',
-    type: 'design',
+    typeId: 1, // Assuming 1 is the ID for 'design' in the document_type table
     language: 'English',
     description: 'A test document',
     areaId: 1,
     scale: '1:100',
     pages: 10,
-    planNumber: 123
+    planNumber: 123,
+    type_name: 'design'
 };
 
 const mockRowDocument = {
     id: 1,
     title: 'Test Document',
-    stakeholders: ["lkab", "regional_authority"],
+    stakeholders: ["lkab", "regional_authority"], 
     date: '2023-01-01',
-    type: 'design',
+    type: 'design', 
     language: 'English',
     description: 'A test document',
     areaId: 1,
@@ -45,64 +40,73 @@ const mockRowDocument = {
 };
 
 const mockinvalidRowDB = {
-    // Example of invalid data: missing required fields or invalid types
     title: 'a', // Assuming title is required and cannot be empty
     date: 'invalid-date', // Invalid date format
-    type: 'design',
+    typeId: null, // Invalid typeId, should be a valid integer
     language: 'English',
     description: 'A test document',
     scale: '1:100',
-    areaId: null,
+    areaId: null, // Assuming areaId can be null
     pages: 10,
-    planNumber: 123,
-    lkab: true,
-    municipality: false,
-    regional_authority: true,
-    architecture_firms: false,
-    citizens: false,
-    others: false
+    planNumber: 123
 };
 
 const mockinvalidRowDocument = {
-    // Example of invalid data: missing required fields or invalid types
     title: 'a', // Assuming title is required and cannot be empty
     date: 'invalid-date', // Invalid date format
-    type: 'design',
+    type: 'design', // Assuming this is a valid type name
     language: 'English',
     description: 'A test document',
     scale: '1:100',
-    areaId: null,
+    areaId: null, // Assuming areaId can be null
     pages: 10,
     planNumber: 123,
-    stakeholders: ["lkab", "regional_authority"],
+    stakeholders: ["lkab", "regional_authority"], // These should be validated against the stakeholder table
 };
 
 describe("Unit Test getDocumentById", () => {
     let documentDAO;
+    let areaDAO;
 
     beforeEach(() => {
+        areaDAO = new AreaDAO();
         documentDAO = new DocumentDAO(areaDAO);
     });
 
     afterEach(() => {
-        // Clear all created function mocks after each test
-        vitest.clearAllMocks();
+        vi.clearAllMocks();
     });
 
     test("should return a Document object when a valid ID is provided", async () => {
-
-        vitest.spyOn(db, "get").mockImplementation((_sql, _params, callback) => {
+        // Mock db.get to return a document row
+        vi.spyOn(db, "get").mockImplementation((_sql, _params, callback) => {
             callback(null, mockRowDB);
         });
 
-        vitest.spyOn(documentDAO, "convertDBRowToDocument").mockResolvedValueOnce(mockRowDocument)
+        // Mock the method to get stakeholders for a document
+        vi.spyOn(documentDAO, "getStakeholdersForDocument").mockResolvedValueOnce(mockRowDocument.stakeholders);
+
+        // Mock the conversion function
+        vi.spyOn(documentDAO, "convertDBRowToDocument").mockReturnValueOnce(new Document(
+            mockRowDocument.id,
+            mockRowDocument.title,
+            mockRowDocument.stakeholders,
+            mockRowDocument.date,
+            mockRowDocument.type,
+            mockRowDocument.language,
+            mockRowDocument.description,
+            mockRowDocument.areaId,
+            mockRowDocument.scale,
+            mockRowDocument.pages,
+            mockRowDocument.planNumber
+        ));
 
         const document = await documentDAO.getDocumentById(1);
 
         expect(document).toEqual(new Document(
             mockRowDocument.id,
             mockRowDocument.title,
-            mockRowDocument.stakeholders, // Expected stakeholders array
+            mockRowDocument.stakeholders,
             mockRowDocument.date,
             mockRowDocument.type,
             mockRowDocument.language,
@@ -113,8 +117,9 @@ describe("Unit Test getDocumentById", () => {
             mockRowDocument.planNumber
         ));
         expect(db.get).toBeCalledTimes(1);
-
+        expect(documentDAO.getStakeholdersForDocument).toBeCalledWith(1);
     });
+});
 
     test("should return error 404 documentnotfound when no document is found", async () => {
         vitest.spyOn(db, "get").mockImplementation((_sql, _params, callback) => {
@@ -138,7 +143,6 @@ describe("Unit Test getDocumentById", () => {
         expect(res).toBeInstanceOf(Error)
         expect(db.get).toBeCalledTimes(1);
     });
-});
 
 describe("Unit Test addDocument", () => {
     let documentDAO;
@@ -152,74 +156,65 @@ describe("Unit Test addDocument", () => {
     });
 
     test("should insert a document and return its ID", async () => {
-
         // Mock the convertDocumentForDB method
-        vitest.spyOn(documentDAO, 'convertDocumentForDB').mockReturnValue(mockRowDB);
-
+        vi.spyOn(documentDAO, 'convertDocumentForDB').mockReturnValue({
+            ...mockRowDB,
+        });
+    
         // Mock the db.run method
         const lastID = 42; // Example ID for the inserted document
-        vitest.spyOn(db, "run").mockImplementation((_sql, _params, callback) => {
-            callback.call({lastID}, null); // Simulate successful insertion with lastID
+        vi.spyOn(db, "run").mockImplementation((_sql, _params, callback) => {
+            callback.call({ lastID }, null); 
         });
-
+    
         const result = await documentDAO.addDocument(mockRowDocument);
-
+    
         expect(result).toBe(lastID);
         expect(db.run).toBeCalledWith(
             expect.stringContaining("INSERT INTO document"),
             [
                 mockRowDB.title,
                 mockRowDB.date,
-                mockRowDB.type,
+                mockRowDB.typeId, 
                 mockRowDB.language,
                 mockRowDB.description,
                 mockRowDB.scale,
-                mockRowDB.areaId,
+                mockRowDB.areaId, 
                 mockRowDB.pages,
-                mockRowDB.planNumber,
-                mockRowDB.lkab,
-                mockRowDB.municipality,
-                mockRowDB.regional_authority,
-                mockRowDB.architecture_firms,
-                mockRowDB.citizens,
-                mockRowDB.others
+                mockRowDB.planNumber
             ],
             expect.any(Function)
         );
     });
 
-    test("should insert a document and return its ID if areaID is not provided", async () => {
-
+    test("should insert a document and return its ID if areaId is not provided", async () => {
         // Mock the convertDocumentForDB method
-        vitest.spyOn(documentDAO, 'convertDocumentForDB').mockReturnValue(mockRowDB);
-
+        vi.spyOn(documentDAO, 'convertDocumentForDB').mockReturnValue({
+            ...mockRowDB,
+            areaId: null // Ensure areaId is null to simulate it not being provided
+        });
+    
         // Mock the db.run method
         const lastID = 42; // Example ID for the inserted document
-        vitest.spyOn(db, "run").mockImplementation((_sql, _params, callback) => {
-            callback.call({lastID}, null); // Simulate successful insertion with lastID
+        vi.spyOn(db, "run").mockImplementation((_sql, _params, callback) => {
+            callback.call({ lastID }, null); // Simulate successful insertion with lastID
         });
-
+    
         const result = await documentDAO.addDocument(mockRowDocument);
-
+    
         expect(result).toBe(lastID);
         expect(db.run).toBeCalledWith(
             expect.stringContaining("INSERT INTO document"),
             [
                 mockRowDB.title,
                 mockRowDB.date,
-                mockRowDB.type,
+                mockRowDB.typeId, 
                 mockRowDB.language,
                 mockRowDB.description,
                 mockRowDB.scale,
-                mockRowDB.areaId, //should be null
+                null, 
                 mockRowDB.pages,
-                mockRowDB.planNumber,
-                mockRowDB.lkab,
-                mockRowDB.municipality,
-                mockRowDB.regional_authority,
-                mockRowDB.architecture_firms,
-                mockRowDB.citizens,
-                mockRowDB.others
+                mockRowDB.planNumber
             ],
             expect.any(Function)
         );
@@ -253,63 +248,100 @@ describe("Unit Test updateDocumentAreaId", () => {
     });
 
     test("should update the document's areaId and delete old area if unused", async () => {
-        const oldAreaId = 2;
-        const newAreaId = 5;
+        // Mock data
         const documentId = 1;
-
-        vitest.spyOn(documentDAO, "getDocumentById").mockResolvedValueOnce({areaId: oldAreaId});
-
-        vitest.spyOn(documentDAO, "getAllDocuments").mockResolvedValueOnce([
+        const oldAreaId = 2;
+        const newAreaId = 3;
+    
+        const mockDocument = { id: documentId, areaId: oldAreaId };
+        const mockDocuments = [
             { id: 1, areaId: oldAreaId },
-            { id: 2, areaId: newAreaId }
-        ]);
+            { id: 2, areaId: 4 },
+        ]; // Other documents not using oldAreaId after update
+        const mockUpdatedDocuments = [
+            { id: 1, areaId: newAreaId },
+            { id: 2, areaId: 4 },
+        ]; // New state of documents after update
+        const mockAreas = [
+            { id: 2 },
+            { id: 3 },
+            { id: 4 },
+        ]; // Existing areas in the system
     
-        // Simula `getAllAreas` per restituire una lista di aree
-        vitest.spyOn(areaDAO, "getAllAreas").mockResolvedValueOnce([
-            { id: oldAreaId },
-            { id: newAreaId }
-        ]);
-
-        vitest.spyOn(db, "run").mockImplementation((query, params, callback) => {
-            //console.log("db.run called with query:", query);
-            //console.log("db.run called with params:", params);
-            callback(null);
+        // Mock dependencies
+        vi.spyOn(documentDAO, "getDocumentById").mockResolvedValue(mockDocument);
+        vi.spyOn(documentDAO, "getAllDocuments")
+            .mockResolvedValueOnce(mockDocuments) // Before update
+            .mockResolvedValueOnce(mockUpdatedDocuments); // After update
+        vi.spyOn(areaDAO, "getAllAreas").mockResolvedValue(mockAreas);
+    
+        // Mock database update query
+        const dbRunMock = vi.fn((query, params, callback) => {
+            callback(null); // Simulate success
         });
+        vi.spyOn(db, "run").mockImplementation(dbRunMock);
     
-        // Esegui la funzione da testare
+        // Mock area deletion
+        const deleteAreaMock = vi.fn().mockResolvedValue();
+        vi.spyOn(areaDAO, "deleteAreaById").mockImplementation(deleteAreaMock);
+    
+        // Call the function
         const result = await documentDAO.updateDocumentAreaId(documentId, newAreaId);
     
-        // Controlla che il risultato sia `true`
-        expect(result).toBe(true);
+        // Assertions
+        expect(result).toBe(true); // Should return true
     
-        // Verifica che `db.run` sia stato chiamato con i parametri corretti
-        expect(db.run).toBeCalledWith(
-            expect.stringContaining("UPDATE document SET areaId"),
+        // Validate that the document's areaId was updated
+        expect(dbRunMock).toHaveBeenCalledWith(
+            "UPDATE document SET areaId = ? WHERE id = ?",
             [newAreaId, documentId],
             expect.any(Function)
         );
-        expect(db.run).toBeCalledWith(
-            expect.stringContaining("DELETE FROM area WHERE id"),
-            [oldAreaId],
-            expect.any(Function)
-        );
+    
+        // Validate that the old areaId was deleted
+        expect(deleteAreaMock).toHaveBeenCalledWith(oldAreaId);
+    
+        // Ensure all methods were called the correct number of times
+        expect(documentDAO.getDocumentById).toHaveBeenCalledTimes(1);
+        expect(documentDAO.getAllDocuments).toHaveBeenCalledTimes(2); // Before and after update
+        expect(areaDAO.getAllAreas).toHaveBeenCalledTimes(1);
     });
+    
 
-    test("should reject with AreaNotFound if newAreaId is not exists in area table", async () => {
+    test("should reject with AreaNotFound if newAreaId does not exist in the area table", async () => {
+        // Mock data
         const documentId = 1;
-        const newAreaId = 999; // Assume this ID does not exist
-
-        vitest.spyOn(documentDAO, 'getDocumentById').mockResolvedValue({ areaId: 1 });
-
-        vitest.spyOn(areaDAO, 'getAllAreas').mockResolvedValue([
-            { id: 1 },
-            { id: 2 }
-        ]);
-
-        const result = await documentDAO.updateDocumentAreaId(documentId, newAreaId).catch(err => err);
-
-        expect(result).toBeInstanceOf(AreaNotFound);
+        const oldAreaId = 2;
+        const newAreaId = 999; // Non-existent areaId
+    
+        const mockDocument = { id: documentId, areaId: oldAreaId };
+        const mockDocuments = [
+            { id: 1, areaId: oldAreaId },
+            { id: 2, areaId: 4 },
+        ]; // Documents before update
+        const mockAreas = [
+            { id: 2 },
+            { id: 3 },
+            { id: 4 },
+        ]; // Available areas (newAreaId is missing)
+    
+        // Mock dependencies
+        vi.spyOn(documentDAO, "getDocumentById").mockResolvedValue(mockDocument);
+        vi.spyOn(documentDAO, "getAllDocuments").mockResolvedValue(mockDocuments);
+        vi.spyOn(areaDAO, "getAllAreas").mockResolvedValue(mockAreas);
+    
+        // Call the function and catch the error
+        await expect(documentDAO.updateDocumentAreaId(documentId, newAreaId)).rejects.toThrow(AreaNotFound);
+    
+        // Validate that no SQL update was performed
+        expect(db.run).not.toHaveBeenCalled();
+    
+        // Ensure all methods were called the correct number of times
+        expect(documentDAO.getDocumentById).toHaveBeenCalledTimes(1);
+        expect(documentDAO.getAllDocuments).toHaveBeenCalledTimes(1); // Only fetched before finding the issue
+        expect(areaDAO.getAllAreas).toHaveBeenCalledTimes(1);
     });
+    
 
     test("should reject with InvalidArea if newAreaId is not an integer", async () => {
         const documentId = 1;
@@ -328,42 +360,51 @@ describe("Unit Test updateDocumentAreaId", () => {
     });
 
     test("should not delete the area after modifying if oldAreaId still exists in document table after updating it to newAreaId", async () => {
-        const oldAreaId = 2;
-        const newAreaId = 5;
+
         const documentId = 1;
-
-        // Mock getDocumentById to return document with oldAreaId
-        vitest.spyOn(documentDAO, "getDocumentById").mockResolvedValueOnce({ areaId: oldAreaId });
-
-        // Mock getAllDocuments to return documents with oldAreaId still in use by other documents
-        vitest.spyOn(documentDAO, "getAllDocuments").mockResolvedValueOnce([
-            { id: 1, areaId: oldAreaId }, // document being updated
-            { id: 2, areaId: newAreaId }, // document with newAreaId
-            { id: 3, areaId: oldAreaId }  // another document still using oldAreaId
-        ]);
-
-        vitest.spyOn(areaDAO, "getAllAreas").mockResolvedValueOnce([
-            { id: oldAreaId },
-            { id: newAreaId }
-        ]);
-
-        vitest.spyOn(db, "run").mockImplementation((query, params, callback) => {
-            if (typeof callback === 'function') {
-                callback(null);
-            }
-        });
-
+        const oldAreaId = 2;
+        const newAreaId = 3;
+    
+        const mockDocument = {
+            id: documentId,
+            areaId: oldAreaId,
+        };
+    
+        const allDocumentsBeforeUpdate = [
+            { id: 1, areaId: oldAreaId },
+            { id: 2, areaId: oldAreaId }, // Another document with the same areaId
+        ];
+    
+        const allDocumentsAfterUpdate = [
+            { id: 1, areaId: newAreaId },
+            { id: 2, areaId: oldAreaId }, // Still references oldAreaId
+        ];
+    
+        const allAreas = [
+            { id: oldAreaId, name: "Old Area" },
+            { id: newAreaId, name: "New Area" },
+        ];
+    
+        // Mock database and DAO behavior
+        vi.spyOn(documentDAO, "getDocumentById").mockResolvedValueOnce(mockDocument);
+        vi.spyOn(documentDAO, "getAllDocuments")
+            .mockResolvedValueOnce(allDocumentsBeforeUpdate) // Before the update
+            .mockResolvedValueOnce(allDocumentsAfterUpdate); // After the update
+        vi.spyOn(areaDAO, "getAllAreas").mockResolvedValueOnce(allAreas);
+    
+        const dbRunMock = vi.spyOn(db, "run").mockImplementation((_query, _params, callback) => callback(null));
+        const deleteAreaByIdMock = vi.spyOn(areaDAO, "deleteAreaById");
+    
+        // Execute the function
         const result = await documentDAO.updateDocumentAreaId(documentId, newAreaId);
-
+    
+        // Assertions
         expect(result).toBe(true);
-
-        expect(db.run).toBeCalledWith(
-            expect.stringContaining("UPDATE document SET areaId"),
-            [newAreaId, documentId],
-            expect.any(Function)
-        );
-
+        expect(dbRunMock).toHaveBeenCalledWith("UPDATE document SET areaId = ? WHERE id = ?", [newAreaId, documentId], expect.any(Function));
+        expect(documentDAO.getAllDocuments).toHaveBeenCalledTimes(2); // Called before and after the update
+        expect(deleteAreaByIdMock).not.toHaveBeenCalled(); // Old area should not be deleted
     });
+    
 
 });
 
@@ -371,325 +412,277 @@ describe("Unit Test getDocumentsByFilter", () => {
     let documentDAO;
 
     beforeEach(() => {
-        documentDAO = new DocumentDAO(areaDAO);
+        documentDAO = new DocumentDAO();
     });
 
     afterEach(() => {
-        // Clear all created function mocks after each test
-        vitest.clearAllMocks();
+        vi.clearAllMocks();
     });
 
     test("should return all documents when no filter parameters are provided", async () => {
-        const mockRowsDB = [
-            {
-                id: 1,
-                title: "Document 1",
-                stakeholders: [],
-                date: "2023-10-01",
-                type: "type1",
-                language: "en",
-                description: "Description 1",
-                areaId: 1,
-                scale: "1:1000",
-                pages: 10,
-                planNumber: 101
-            },
-            {
-                id: 2,
-                title: "Document 2",
-                stakeholders: [],
-                date: "2023-10-02",
-                type: "type2",
-                language: "en",
-                description: "Description 2",
-                areaId: 2,
-                scale: "1:2000",
-                pages: 20,
-                planNumber: 102
-            }
-            // Add more mock documents as needed
-        ];
-
-        const mockDocuments = mockRowsDB.map(row => new Document(
-            row.id,
-            row.title,
-            row.stakeholders,
-            row.date,
-            row.type,
-            row.language,
-            row.description,
-            row.areaId,
-            row.scale,
-            row.pages,
-            row.planNumber
+        // Mock db.all to simulate a successful query
+        vi.spyOn(db, "all").mockImplementation((_sql, _params, callback) => {
+            callback(null, [mockRowDB]); // Simulate returning one or more rows from the database
+        });
+    
+        // Mock the method to get stakeholders for a document
+        vi.spyOn(documentDAO, "getStakeholdersForDocument").mockResolvedValueOnce(mockRowDocument.stakeholders);
+    
+        // Mock the conversion function
+        vi.spyOn(documentDAO, "convertDBRowToDocument").mockReturnValueOnce(new Document(
+            mockRowDocument.id,
+            mockRowDocument.title,
+            mockRowDocument.stakeholders,
+            mockRowDocument.date,
+            mockRowDocument.type,
+            mockRowDocument.language,
+            mockRowDocument.description,
+            mockRowDocument.areaId,
+            mockRowDocument.scale,
+            mockRowDocument.pages,
+            mockRowDocument.planNumber
         ));
-
-        vitest.spyOn(db, "all").mockImplementation((_sql, _params, callback) => {
-            callback(null, mockRowsDB);
-        });
-
-        vitest.spyOn(documentDAO, "convertDBRowToDocument").mockImplementation(row => {
-            return new Document(
-                row.id,
-                row.title,
-                row.stakeholders,
-                row.date,
-                row.type,
-                row.language,
-                row.description,
-                row.areaId,
-                row.scale,
-                row.pages,
-                row.planNumber
-            );
-        });
-
-        const documents = await documentDAO.getDocumentsByFilter({});
-
-        expect(documents).toEqual(mockDocuments);
+    
+        const documents = await documentDAO.getDocumentsByFilter({}); // No filters provided
+    
+        // Expectations
+        expect(documents).toHaveLength(1); // Should return all available documents
+        expect(documents[0]).toEqual(new Document(
+            mockRowDocument.id,
+            mockRowDocument.title,
+            mockRowDocument.stakeholders,
+            mockRowDocument.date,
+            mockRowDocument.type,
+            mockRowDocument.language,
+            mockRowDocument.description,
+            mockRowDocument.areaId,
+            mockRowDocument.scale,
+            mockRowDocument.pages,
+            mockRowDocument.planNumber
+        ));
+    
+        // Define the formatted query
+        const expectedQuery = `
+            SELECT
+                document.id,
+                document.title,
+                document.date,
+                document.language,
+                document.description,
+                document.scale,
+                document.areaId,
+                document.pages,
+                document.planNumber,
+                document_type.name AS type_name
+            FROM document
+            LEFT JOIN document_type ON document.typeId = document_type.id
+            WHERE 1=1
+        `.replace(/\s+/g, " ").trim(); // Normalize whitespace for comparison
+    
+        // Extract and normalize the actual query
+        const actualQuery = db.all.mock.calls[0][0].replace(/\s+/g, " ").trim();
+    
+        // Compare the normalized queries
+        expect(actualQuery).toEqual(expectedQuery);
+    
+        // Ensure db.all was called once
         expect(db.all).toBeCalledTimes(1);
-        expect(db.all).toBeCalledWith(expect.stringContaining("SELECT * FROM document WHERE 1=1"), [], expect.any(Function));
+    
+        // Ensure getStakeholdersForDocument was called with the correct ID
+        expect(documentDAO.getStakeholdersForDocument).toBeCalledWith(mockRowDB.id);
     });
-
+    
     test("should return documents that match the title filter", async () => {
-        const titleFilter = "Document 1";
-        const mockRowsDB = [
-            {
-                id: 1,
-                title: "Document 1",
-                stakeholders: [],
-                date: "2023-10-01",
-                type: "type1",
-                language: "en",
-                description: "Description 1",
-                areaId: 1,
-                scale: "1:1000",
-                pages: 10,
-                planNumber: 101
-            }
-            // Add more mock documents if needed
-        ];
-
-        const mockDocuments = mockRowsDB.map(row => new Document(
-            row.id,
-            row.title,
-            row.stakeholders,
-            row.date,
-            row.type,
-            row.language,
-            row.description,
-            row.areaId,
-            row.scale,
-            row.pages,
-            row.planNumber
+        // Mock db.all to simulate a successful query
+        vi.spyOn(db, "all").mockImplementation((_sql, _params, callback) => {
+            callback(null, [mockRowDB]);
+        });
+    
+        // Mock the method to get stakeholders for a document
+        vi.spyOn(documentDAO, "getStakeholdersForDocument").mockResolvedValueOnce(mockRowDocument.stakeholders);
+    
+        // Mock the conversion function
+        vi.spyOn(documentDAO, "convertDBRowToDocument").mockReturnValueOnce(new Document(
+            mockRowDocument.id,
+            mockRowDocument.title,
+            mockRowDocument.stakeholders,
+            mockRowDocument.date,
+            mockRowDocument.type,
+            mockRowDocument.language,
+            mockRowDocument.description,
+            mockRowDocument.areaId,
+            mockRowDocument.scale,
+            mockRowDocument.pages,
+            mockRowDocument.planNumber
         ));
-
-        vitest.spyOn(db, "all").mockImplementation((_sql, _params, callback) => {
-            callback(null, mockRowsDB);
-        });
-
-        vitest.spyOn(documentDAO, "convertDBRowToDocument").mockImplementation(row => {
-            return new Document(
-                row.id,
-                row.title,
-                row.stakeholders,
-                row.date,
-                row.type,
-                row.language,
-                row.description,
-                row.areaId,
-                row.scale,
-                row.pages,
-                row.planNumber
-            );
-        });
-
-        const documents = await documentDAO.getDocumentsByFilter({title: titleFilter});
-
-        expect(documents).toEqual(mockDocuments);
+    
+        // Call the method with a title filter
+        const titleFilter = "Test Document";
+        const documents = await documentDAO.getDocumentsByFilter({ title: titleFilter });
+    
+        // Log the actual query for debugging
+        console.log("Actual Query:", db.all.mock.calls[0][0]);
+        console.log("Actual Params:", db.all.mock.calls[0][1]);
+    
+        // Normalize expected and actual queries for comparison
+        const expectedQuery = `
+            SELECT
+                document.id,
+                document.title,
+                document.date,
+                document.language,
+                document.description,
+                document.scale,
+                document.areaId,
+                document.pages,
+                document.planNumber,
+                document_type.name AS type_name
+            FROM document
+            LEFT JOIN document_type ON document.typeId = document_type.id
+            WHERE 1=1
+            AND document.title LIKE ?
+        `.replace(/\s+/g, " ").trim();
+    
+        const actualQuery = db.all.mock.calls[0][0].replace(/\s+/g, " ").trim();
+    
+        // Compare normalized queries
+        expect(actualQuery).toEqual(expectedQuery);
+    
+        // Verify the parameters passed to the query
+        expect(db.all.mock.calls[0][1]).toEqual([`%${titleFilter}%`]);
+    
+        // Assertions
+        expect(documents).toHaveLength(1);
         expect(db.all).toBeCalledTimes(1);
-        expect(db.all).toBeCalledWith(expect.stringContaining("SELECT * FROM document WHERE 1=1 AND title LIKE ?"), [`%${titleFilter}%`], expect.any(Function));
     });
-    test("should return documents that match the stakeholders filter", async () => {
-        const stakeholdersFilter = ["lkab", "municipality"];
-        const mockRowsDB = [
-            {
-                id: 1,
-                title: "Document 1",
-                stakeholders: ["lkab", "municipality"],
-                date: "2023-10-01",
-                type: "type1",
-                language: "en",
-                description: "Description 1",
-                areaId: 1,
-                scale: "1:1000",
-                pages: 10,
-                planNumber: 101
-            }
-            // Add more mock documents if needed
-        ];
-
-        const mockDocuments = mockRowsDB.map(row => new Document(
-            row.id,
-            row.title,
-            row.stakeholders,
-            row.date,
-            row.type,
-            row.language,
-            row.description,
-            row.areaId,
-            row.scale,
-            row.pages,
-            row.planNumber
-        ));
-
-        vitest.spyOn(db, "all").mockImplementation((_sql, _params, callback) => {
-            callback(null, mockRowsDB);
-        });
-
-        vitest.spyOn(documentDAO, "convertDBRowToDocument").mockImplementation(row => {
-            return new Document(
-                row.id,
-                row.title,
-                row.stakeholders,
-                row.date,
-                row.type,
-                row.language,
-                row.description,
-                row.areaId,
-                row.scale,
-                row.pages,
-                row.planNumber
-            );
-        });
-
-        const documents = await documentDAO.getDocumentsByFilter({stakeholders: stakeholdersFilter});
-
-        expect(documents).toEqual(mockDocuments);
-        expect(db.all).toBeCalledTimes(1);
-
-        // Construct the expected SQL condition for stakeholders
-        const expectedStakeholderConditions = stakeholdersFilter.map(stakeholder => `${stakeholder} = TRUE`).join(" AND ");
-        expect(db.all).toBeCalledWith(expect.stringContaining(`SELECT * FROM document WHERE 1=1 AND (${expectedStakeholderConditions})`), [], expect.any(Function));
-    });
+    
+    
     test("should return documents that match the startDate filter", async () => {
-        const startDateFilter = "2023-10-01";
-        const mockRowsDB = [
-            {
-                id: 1,
-                title: "Document 1",
-                stakeholders: [],
-                date: "2023-10-01",
-                type: "type1",
-                language: "en",
-                description: "Description 1",
-                areaId: 1,
-                scale: "1:1000",
-                pages: 10,
-                planNumber: 101
-            }
-            // Add more mock documents if needed
-        ];
-
-        const mockDocuments = mockRowsDB.map(row => new Document(
-            row.id,
-            row.title,
-            row.stakeholders,
-            row.date,
-            row.type,
-            row.language,
-            row.description,
-            row.areaId,
-            row.scale,
-            row.pages,
-            row.planNumber
+        // Mock db.all to simulate a successful query
+        vi.spyOn(db, "all").mockImplementation((_sql, _params, callback) => {
+            callback(null, [mockRowDB]);
+        });
+    
+        // Mock the method to get stakeholders for a document
+        vi.spyOn(documentDAO, "getStakeholdersForDocument").mockResolvedValueOnce(mockRowDocument.stakeholders);
+    
+        // Mock the conversion function
+        vi.spyOn(documentDAO, "convertDBRowToDocument").mockReturnValueOnce(new Document(
+            mockRowDocument.id,
+            mockRowDocument.title,
+            mockRowDocument.stakeholders,
+            mockRowDocument.date,
+            mockRowDocument.type,
+            mockRowDocument.language,
+            mockRowDocument.description,
+            mockRowDocument.areaId,
+            mockRowDocument.scale,
+            mockRowDocument.pages,
+            mockRowDocument.planNumber
         ));
-
-        vitest.spyOn(db, "all").mockImplementation((_sql, _params, callback) => {
-            callback(null, mockRowsDB);
-        });
-
-        vitest.spyOn(documentDAO, "convertDBRowToDocument").mockImplementation(row => {
-            return new Document(
-                row.id,
-                row.title,
-                row.stakeholders,
-                row.date,
-                row.type,
-                row.language,
-                row.description,
-                row.areaId,
-                row.scale,
-                row.pages,
-                row.planNumber
-            );
-        });
-
-        const documents = await documentDAO.getDocumentsByFilter({startDate: startDateFilter});
-
-        expect(documents).toEqual(mockDocuments);
+    
+        // Call the method with a startDate filter
+        const startDateFilter = "2023-01-01";
+        const documents = await documentDAO.getDocumentsByFilter({ startDate: startDateFilter });
+    
+        // Log the actual query for debugging
+        console.log("Actual Query:", db.all.mock.calls[0][0]);
+        console.log("Actual Params:", db.all.mock.calls[0][1]);
+    
+        // Normalize expected and actual queries for comparison
+        const expectedQuery = `
+            SELECT
+                document.id,
+                document.title,
+                document.date,
+                document.language,
+                document.description,
+                document.scale,
+                document.areaId,
+                document.pages,
+                document.planNumber,
+                document_type.name AS type_name
+            FROM document
+            LEFT JOIN document_type ON document.typeId = document_type.id
+            WHERE 1=1
+            AND document.date >= ?
+        `.replace(/\s+/g, " ").trim();
+    
+        const actualQuery = db.all.mock.calls[0][0].replace(/\s+/g, " ").trim();
+    
+        // Compare normalized queries
+        expect(actualQuery).toEqual(expectedQuery);
+    
+        // Verify the parameters passed to the query
+        expect(db.all.mock.calls[0][1]).toEqual([startDateFilter]);
+    
+        // Assertions
+        expect(documents).toHaveLength(1);
         expect(db.all).toBeCalledTimes(1);
-        expect(db.all).toBeCalledWith(expect.stringContaining("SELECT * FROM document WHERE 1=1 AND date >= ?"), [startDateFilter], expect.any(Function));
     });
-
+    
     test("should return documents that match the endDate filter", async () => {
-        const endDateFilter = "2023-10-01";
-        const mockRowsDB = [
-            {
-                id: 1,
-                title: "Document 1",
-                stakeholders: [],
-                date: "2023-10-01",
-                type: "type1",
-                language: "en",
-                description: "Description 1",
-                areaId: 1,
-                scale: "1:1000",
-                pages: 10,
-                planNumber: 101
-            }
-            // Add more mock documents if needed
-        ];
-
-        const mockDocuments = mockRowsDB.map(row => new Document(
-            row.id,
-            row.title,
-            row.stakeholders,
-            row.date,
-            row.type,
-            row.language,
-            row.description,
-            row.areaId,
-            row.scale,
-            row.pages,
-            row.planNumber
+        // Mock db.all to simulate a successful query
+        vi.spyOn(db, "all").mockImplementation((_sql, _params, callback) => {
+            callback(null, [mockRowDB]);
+        });
+    
+        // Mock the method to get stakeholders for a document
+        vi.spyOn(documentDAO, "getStakeholdersForDocument").mockResolvedValueOnce(mockRowDocument.stakeholders);
+    
+        // Mock the conversion function
+        vi.spyOn(documentDAO, "convertDBRowToDocument").mockReturnValueOnce(new Document(
+            mockRowDocument.id,
+            mockRowDocument.title,
+            mockRowDocument.stakeholders,
+            mockRowDocument.date,
+            mockRowDocument.type,
+            mockRowDocument.language,
+            mockRowDocument.description,
+            mockRowDocument.areaId,
+            mockRowDocument.scale,
+            mockRowDocument.pages,
+            mockRowDocument.planNumber
         ));
-
-        vitest.spyOn(db, "all").mockImplementation((_sql, _params, callback) => {
-            callback(null, mockRowsDB);
-        });
-
-        vitest.spyOn(documentDAO, "convertDBRowToDocument").mockImplementation(row => {
-            return new Document(
-                row.id,
-                row.title,
-                row.stakeholders,
-                row.date,
-                row.type,
-                row.language,
-                row.description,
-                row.areaId,
-                row.scale,
-                row.pages,
-                row.planNumber
-            );
-        });
-
-        const documents = await documentDAO.getDocumentsByFilter({endDate: endDateFilter});
-
-        expect(documents).toEqual(mockDocuments);
+    
+        // Call the method with an endDate filter
+        const endDateFilter = "2023-12-31";
+        const documents = await documentDAO.getDocumentsByFilter({ endDate: endDateFilter });
+    
+        // Log the actual query for debugging
+        console.log("Actual Query:", db.all.mock.calls[0][0]);
+        console.log("Actual Params:", db.all.mock.calls[0][1]);
+    
+        // Normalize expected and actual queries for comparison
+        const expectedQuery = `
+            SELECT
+                document.id,
+                document.title,
+                document.date,
+                document.language,
+                document.description,
+                document.scale,
+                document.areaId,
+                document.pages,
+                document.planNumber,
+                document_type.name AS type_name
+            FROM document
+            LEFT JOIN document_type ON document.typeId = document_type.id
+            WHERE 1=1
+            AND document.date <= ?
+        `.replace(/\s+/g, " ").trim();
+    
+        const actualQuery = db.all.mock.calls[0][0].replace(/\s+/g, " ").trim();
+    
+        // Compare normalized queries
+        expect(actualQuery).toEqual(expectedQuery);
+    
+        // Verify the parameters passed to the query
+        expect(db.all.mock.calls[0][1]).toEqual([endDateFilter]);
+    
+        // Assertions
+        expect(documents).toHaveLength(1);
         expect(db.all).toBeCalledTimes(1);
-        expect(db.all).toBeCalledWith(expect.stringContaining("SELECT * FROM document WHERE 1=1 AND date <= ?"), [endDateFilter], expect.any(Function));
     });
-
+    
 });

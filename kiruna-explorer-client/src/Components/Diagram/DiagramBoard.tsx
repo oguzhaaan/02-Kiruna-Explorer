@@ -40,7 +40,7 @@ export type DiagramItem = {
 
 const DiagramBoard = () => {
     const { isDarkMode } = useTheme();
-    const [colorMode] = useState<ColorMode>(isDarkMode ? "dark" : "light");
+    const [colorMode, setColorMode] = useState<ColorMode>(isDarkMode ? "dark" : "light");
     const [zoom, setZoom] = useState(1); // Add zoom state
     const [viewport, setViewport] = useState({ x: 0, y: 0, zoom: 1 }); // Add viewport state
     const [hoveredNode, setHoveredNode] = useState<string | null>(null);
@@ -52,6 +52,10 @@ const DiagramBoard = () => {
 
     const [nodeStates, setNodeStates] = useState<Record<number, string>>({});
     const [nodeisOpen, setNodeIsOpen] = useState<Record<string, boolean | string>>({});
+
+    useEffect(() => {
+            setColorMode(isDarkMode? "dark" : "light")
+    }, [isDarkMode])
 
 
     const setNodeSelected = (nodeindex: number, docselected: string) => {

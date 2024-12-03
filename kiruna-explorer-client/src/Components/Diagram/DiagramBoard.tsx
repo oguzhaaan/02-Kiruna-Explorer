@@ -9,7 +9,7 @@ import GroupNode from "./GroupNode";
 import CustomEdge from "./CustomEdge";
 import React from "react";
 import API from "../../API/API.mjs"
-import { YScalePosition, getXDatePosition, getEquidistantPoints } from "../Utilities/DiagramReferencePositions.js";
+import { YScalePosition, getXDatePosition, getEquidistantPoints, getYPlanScale } from "../Utilities/DiagramReferencePositions.js";
 
 type Node<Data = any> = {
     id: string;
@@ -91,9 +91,23 @@ const DiagramBoard = () => {
 
                 const docItems: DiagramItem[] = Object.entries(groupedByScaleAndDate).map((i: any[]) => {
                     const element = i[1][0]
-                    const evenMonth = element.month % 2 == 0
-                    const yoffset = evenMonth ? 50 : -50
-                    return { items: i[1], x: getXDatePosition(yearsRange[0], element.year, element.month), y: yoffset + YScalePosition[element.scale + element.planNumber] }
+                    let yoffset
+                    if(element.month){
+                        const evenMonth = element.month % 2 == 0
+                        yoffset = evenMonth ? 50 : -50
+                    }
+                    else{
+                        yoffset = -100
+                    }
+                    let ypos
+                    if (element.scale==="plan"){
+                        ypos = getYPlanScale(element.planNumber)
+                    }
+                    else{
+                        ypos = YScalePosition[element.scale]
+                    }
+                
+                    return { items: i[1], x: getXDatePosition(yearsRange[0], element.year, element.month), y: yoffset + ypos }
                 })
 
                 setDocuments(docItems)

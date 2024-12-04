@@ -8,8 +8,8 @@ function FilterMenu({ filterValues, setFilterValues }) {
   const { isDarkMode } = useTheme();
   const [isFilterDateRange, setIsFilterDateRange] = useState(
     filterValues.startDate !== "" &&
-      filterValues.endDate !== "" &&
-      filterValues.startDate !== filterValues.endDate
+    filterValues.endDate !== "" &&
+    filterValues.startDate !== filterValues.endDate
   );
   // Temporary state for inputs
   const [tempFilterValues, setTempFilterValues] = useState({ ...filterValues });
@@ -71,11 +71,14 @@ function FilterMenu({ filterValues, setFilterValues }) {
           className={`w-full px-3 text-base py-2 text-black_text dark:text-white_text bg-input_color_light dark:bg-input_color_dark rounded-md focus:outline-none dark:[&>option]:bg-[#333333]`}
         >
           <option value="">None</option>
-          {documentTypes.map((type) => (
-            <option key={type.id} value={type.name}>
-              {type.name}
-            </option>
-          ))}
+          {documentTypes
+            .filter((type) => type.name !== "Add a new one...") // Supponendo che l'id sia "add_new"
+            .map((type) => (
+              <option key={type.id} value={type.name}>
+                {type.name}
+              </option>
+            ))
+          }
         </select>
       </div>
       {/* Stakeholders */}
@@ -85,10 +88,13 @@ function FilterMenu({ filterValues, setFilterValues }) {
         </label>
         <Select
           isMulti
-          options={stakeholders.map((stakeholder) => ({
-            value: stakeholder.id,
-            label: stakeholder.name,
-          }))}
+          options={stakeholders
+            .filter((stakeholder) => stakeholder.name !== "Add a new one...")
+            .map((stakeholder) => ({
+              value: stakeholder.id,
+              label: stakeholder.name,
+            }))
+          }
           value={tempFilterValues.stakeholders}
           onChange={(e) => handleTempChange("stakeholders", e)}
           styles={customDropdownStyles(isDarkMode, true)}
@@ -112,9 +118,8 @@ function FilterMenu({ filterValues, setFilterValues }) {
               handleTempChange("startDate", e.target.value);
               handleTempChange("endDate", e.target.value);
             }}
-            className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md ${
-              isDarkMode ? "dark-mode" : "light-mode"
-            }  focus:outline-none`}
+            className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md ${isDarkMode ? "dark-mode" : "light-mode"
+              }  focus:outline-none`}
           />
         </div>
       )}
@@ -129,9 +134,8 @@ function FilterMenu({ filterValues, setFilterValues }) {
             type="date"
             value={tempFilterValues.startDate}
             onChange={(e) => handleTempChange("startDate", e.target.value)}
-            className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md ${
-              isDarkMode ? "dark-mode" : "light-mode"
-            }  focus:outline-none`}
+            className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md ${isDarkMode ? "dark-mode" : "light-mode"
+              }  focus:outline-none`}
           />
           <label className="text-black_text dark:text-white_text mb-1 text-base w-full ml-2 text-left">
             To:
@@ -141,9 +145,8 @@ function FilterMenu({ filterValues, setFilterValues }) {
             type="date"
             value={tempFilterValues.endDate}
             onChange={(e) => handleTempChange("endDate", e.target.value)}
-            className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md ${
-              isDarkMode ? "dark-mode" : "light-mode"
-            }  focus:outline-none`}
+            className={`w-full px-3 text-base py-2 text-text-black_text dark:text-white_text placeholder:text-placeholder_color bg-input_color_light dark:bg-input_color_dark rounded-md ${isDarkMode ? "dark-mode" : "light-mode"
+              }  focus:outline-none`}
           />
         </div>
       )}

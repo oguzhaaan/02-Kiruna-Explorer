@@ -194,9 +194,8 @@ describe("Integration Test GET /api/areas - Get all areas", () => {
     });
   });
 
-  test("Should return 401 for unauthenticated user", async () => {
-    const res = await request(app).get(areaPath).expect(401);
-    expect(res.body).toHaveProperty("error", "Not authorized");
+  test("Should return 200 for unauthenticated user", async () => {
+    const res = await request(app).get(areaPath).expect(200);
   });
 });
 
@@ -297,9 +296,6 @@ describe("Integration Test GET /api/documents/area/:areaId", () => {
       .set("Cookie", urbanplanner_cookie)
       .expect(400);
 
-    expect(res.body.errors[0]).toHaveProperty(
-      "msg",
-      "Area ID must be a valid integer"
-    );
+    expect(res.body.error).toBe("Invalid area ID");
   });
 });

@@ -85,6 +85,23 @@ const createDocument = async (usercookie) => {
     })
 }
 
+// Helper function to create a document different form default mock 
+const createDocumentWithParams = async (usercookie, document) => {
+    return new Promise((resolve, reject) => {
+        request(app)
+            .post(`${basePath}`)
+            .send(document)
+            .set("Cookie", usercookie)
+            .expect(201)
+            .end((err, res) => {
+                if (err) {
+                    reject(err)
+                }
+                resolve(res.body.lastId)
+            })
+    })
+}
+
 // Helper function to create a type
 const createtype = async (usercookie, typeName) => {
     return new Promise((resolve, reject) => {
@@ -134,129 +151,129 @@ const matchDocumentToStakeholders = async (usercookie, docId, stakeholders) => {
     })
 }
 
-// describe("Integration Test GET /:DocId - Get Document by ID", () => {
-//     beforeEach(async () => {
-//         try {
-//             await cleanup();
-//             urbanplanner_cookie = await login(urbanPlannerUser);
+describe("Integration Test GET /:DocId - Get Document by ID", () => {
+    beforeEach(async () => {
+        try {
+            await cleanup();
+            urbanplanner_cookie = await login(urbanPlannerUser);
 
-//             mockTypeId = await createtype(urbanplanner_cookie, "testType");
-//             mockDocumentbodyToAdd.typeId = mockTypeId;
+            mockTypeId = await createtype(urbanplanner_cookie, "testType");
+            mockDocumentbodyToAdd.typeId = mockTypeId;
 
-//             mockStakeholdersIds = await createStakeholders(urbanplanner_cookie, mockStakeholdersNames);
+            mockStakeholdersIds = await createStakeholders(urbanplanner_cookie, mockStakeholdersNames);
 
-//             mockDocId = await createDocument(urbanplanner_cookie);
+            mockDocId = await createDocument(urbanplanner_cookie);
 
-//             await matchDocumentToStakeholders(urbanplanner_cookie, mockDocId, mockStakeholdersNames);
-//             expect(mockDocId).toBeDefined(); // Assert document creation
-//         } catch (error) {
-//             console.error("Setup error:", error);
-//             throw error; // Fail the test if setup fails
-//         }
-//     });
+            await matchDocumentToStakeholders(urbanplanner_cookie, mockDocId, mockStakeholdersNames);
+            expect(mockDocId).toBeDefined(); // Assert document creation
+        } catch (error) {
+            console.error("Setup error:", error);
+            throw error; // Fail the test if setup fails
+        }
+    });
 
-//     test("should return a document for a valid document ID", async () => {
-//         // Mock the getDocumentById method
-//         const result = await request(app)
-//             .get(`${basePath}/${mockDocId}`)
-//             .set("Cookie", urbanplanner_cookie)
-//             .expect('Content-Type', /json/)
-//             .expect(200);
-
-
-//         const stakeholders = mockStakeholdersIds.map((id, index) => ({
-//             id,
-//             name: mockStakeholdersNames[index]
-//         }));
-
-//         const exp_result = {
-//             id: mockDocId,
-//             areaId: null,
-//             stakeholders: stakeholders,
-//             ...mockDocumentbodyToGet
-//         };
-//         expect(result.body).toEqual(exp_result);
-//     });
-
-//     test("should return 404 if the document does not exist", async () => {
-//         const nonExistentDocId = 9999; // Assuming this ID does not exist
-
-//         const result = await request(app)
-//             .get(`${basePath}/${nonExistentDocId}`)
-//             .set("Cookie", urbanplanner_cookie)
-//             .expect('Content-Type', /json/)
-//             .expect(404)
-//             .catch(err => err)
-
-//         //console.log(result.text.error)
-
-//         expect(result.body.error.customMessage).toEqual("Document Not Found");
-//     });
-
-//     test("should return 400 for an invalid document ID", async () => {
-//         const invalidDocId = "invalid-id";
-
-//         await request(app)
-//             .get(`${basePath}/${invalidDocId}`)
-//             .set("Cookie", urbanplanner_cookie)
-//             .expect('Content-Type', /json/)
-//             .expect(400);
-//     });
+    test("should return a document for a valid document ID", async () => {
+        // Mock the getDocumentById method
+        const result = await request(app)
+            .get(`${basePath}/${mockDocId}`)
+            .set("Cookie", urbanplanner_cookie)
+            .expect('Content-Type', /json/)
+            .expect(200);
 
 
-// });
+        const stakeholders = mockStakeholdersIds.map((id, index) => ({
+            id,
+            name: mockStakeholdersNames[index]
+        }));
 
-// describe("Integration Test GET / - Get All documents", () => {
-//     beforeEach(async () => {
-//         await cleanup();
-//         urbanplanner_cookie = await login(urbanPlannerUser);
-//     });
+        const exp_result = {
+            id: mockDocId,
+            areaId: null,
+            stakeholders: stakeholders,
+            ...mockDocumentbodyToGet
+        };
+        expect(result.body).toEqual(exp_result);
+    });
 
-//     test("should return a document for a valid document ID", async () => {
-//         // Mock the getDocumentById method
+    test("should return 404 if the document does not exist", async () => {
+        const nonExistentDocId = 9999; // Assuming this ID does not exist
 
-//         mockTypeId = await createtype(urbanplanner_cookie, "testType");
-//         mockDocumentbodyToAdd.typeId = mockTypeId;
+        const result = await request(app)
+            .get(`${basePath}/${nonExistentDocId}`)
+            .set("Cookie", urbanplanner_cookie)
+            .expect('Content-Type', /json/)
+            .expect(404)
+            .catch(err => err)
 
-//         mockStakeholdersIds = await createStakeholders(urbanplanner_cookie, mockStakeholdersNames);
+        //console.log(result.text.error)
 
-//         mockDocId = await createDocument(urbanplanner_cookie);
+        expect(result.body.error.customMessage).toEqual("Document Not Found");
+    });
 
-//         await matchDocumentToStakeholders(urbanplanner_cookie, mockDocId, mockStakeholdersNames);
+    test("should return 400 for an invalid document ID", async () => {
+        const invalidDocId = "invalid-id";
+
+        await request(app)
+            .get(`${basePath}/${invalidDocId}`)
+            .set("Cookie", urbanplanner_cookie)
+            .expect('Content-Type', /json/)
+            .expect(400);
+    });
 
 
-//         const result = await request(app)
-//             .get(`${basePath}`)
-//             .set("Cookie", urbanplanner_cookie)
-//             .expect('Content-Type', /json/)
-//             .expect(200);
+});
 
-//         const stakeholders = mockStakeholdersIds.map((id, index) => ({
-//             id,
-//             name: mockStakeholdersNames[index]
-//         }));
+describe("Integration Test GET / - Get All documents", () => {
+    beforeEach(async () => {
+        await cleanup();
+        urbanplanner_cookie = await login(urbanPlannerUser);
+    });
 
-//         const exp_result = {
-//             id: mockDocId,
-//             areaId: null,
-//             stakeholders: stakeholders,
-//             ...mockDocumentbodyToGet
-//         };
-//         expect(result.body).toEqual([exp_result]);
-//     });
+    test("should return a document for a valid document ID", async () => {
+        // Mock the getDocumentById method
 
-//     test("should return empty array if there are no documents", async () => {
+        mockTypeId = await createtype(urbanplanner_cookie, "testType");
+        mockDocumentbodyToAdd.typeId = mockTypeId;
 
-//         const result = await request(app)
-//             .get(`${basePath}/`)
-//             .set("Cookie", urbanplanner_cookie)
-//             .expect('Content-Type', /json/)
-//             .expect(200)
+        mockStakeholdersIds = await createStakeholders(urbanplanner_cookie, mockStakeholdersNames);
 
-//         expect(result.body).toEqual([]);
-//     });
+        mockDocId = await createDocument(urbanplanner_cookie);
 
-// });
+        await matchDocumentToStakeholders(urbanplanner_cookie, mockDocId, mockStakeholdersNames);
+
+
+        const result = await request(app)
+            .get(`${basePath}`)
+            .set("Cookie", urbanplanner_cookie)
+            .expect('Content-Type', /json/)
+            .expect(200);
+
+        const stakeholders = mockStakeholdersIds.map((id, index) => ({
+            id,
+            name: mockStakeholdersNames[index]
+        }));
+
+        const exp_result = {
+            id: mockDocId,
+            areaId: null,
+            stakeholders: stakeholders,
+            ...mockDocumentbodyToGet
+        };
+        expect(result.body).toEqual([exp_result]);
+    });
+
+    test("should return empty array if there are no documents", async () => {
+
+        const result = await request(app)
+            .get(`${basePath}/`)
+            .set("Cookie", urbanplanner_cookie)
+            .expect('Content-Type', /json/)
+            .expect(200)
+
+        expect(result.body).toEqual([]);
+    });
+
+});
 
 describe("Integration Test POST / - Add Document", () => {
     beforeEach(async () => {
@@ -321,317 +338,357 @@ describe("Integration Test POST / - Add Document", () => {
 
 });
 
-// describe("Integration Test GET /filter - Get Documents by Filter", () => {
-//     beforeEach(async () => {
-//         await cleanup();
-//         urbanplanner_cookie = await login(urbanPlannerUser);
-//         // Create a document to ensure there is data to filter
-//         mockDocId = await createDocument(urbanplanner_cookie);
-//     });
+describe("Integration Test GET /filter - Get Documents by Filter", () => {
+    beforeEach(async () => {
+        await cleanup();
+        urbanplanner_cookie = await login(urbanPlannerUser);
+        // Create a document to ensure there is data to filter
+        mockTypeId = await createtype(urbanplanner_cookie, "testType");
+        mockDocumentbodyToAdd.typeId = mockTypeId;
 
-//     test("should return all documents when no filter parameters are provided", async () => {
-//         const result = await request(app)
-//             .get(`${basePath}/filter`)
-//             .set("Cookie", urbanplanner_cookie)
-//             .expect('Content-Type', /json/)
-//             .expect(200);
+        mockStakeholdersIds = await createStakeholders(urbanplanner_cookie, mockStakeholdersNames);
 
-//         expect(result.body).toEqual([
-//             { id: mockDocId, areaId: null, ...mockDocumentbodyToGet }
-//             // Add more expected documents if needed
-//         ]);
-//     });
-// });
+        mockDocId = await createDocument(urbanplanner_cookie);
 
-// describe("Integration Test GET /filter - Get Documents by Title", () => {
-//     beforeEach(async () => {
-//         await cleanup();
-//         urbanplanner_cookie = await login(urbanPlannerUser);
+        await matchDocumentToStakeholders(urbanplanner_cookie, mockDocId, mockStakeholdersNames);
 
-//         // Create documents with different titles
-//         await createDocument(urbanplanner_cookie); // Uses mockDocumentbody with title 'Test Document'
-//         await request(app)
-//             .post(`${basePath}`)
-//             .send({ ...mockDocumentbody, title: 'Another Document' })
-//             .set("Cookie", urbanplanner_cookie)
-//             .expect(201);
-//     });
+    });
 
-//     test("should return documents that match the title filter", async () => {
-//         const titleFilter = 'Test Document';
-//         const result = await request(app)
-//             .get(`${basePath}/filter`)
-//             .query({ title: titleFilter })
-//             .set("Cookie", urbanplanner_cookie)
-//             .expect('Content-Type', /json/)
-//             .expect(200);
+    test("should return all documents when no filter parameters are provided", async () => {
+        const result = await request(app)
+            .get(`${basePath}/filter`)
+            .set("Cookie", urbanplanner_cookie)
+            .expect('Content-Type', /json/)
+            .expect(200);
 
-//         expect(result.body).toEqual([
-//             { id: expect.any(Number), areaId: null, ...mockDocumentbody }
-//         ]);
-//     });
-// });
+        const stakeholders = mockStakeholdersIds.map((id, index) => ({
+            id,
+            name: mockStakeholdersNames[index]
+        }));
 
-// describe("Integration Test GET /filter - Get Documents by Type", () => {
-//     beforeEach(async () => {
-//         await cleanup();
-//         urbanplanner_cookie = await login(urbanPlannerUser);
+        const exp_result = {
+            id: mockDocId,
+            areaId: null,
+            stakeholders: stakeholders,
+            ...mockDocumentbodyToGet
+        };
 
-//         // Create documents with different types
-//         await createDocument(urbanplanner_cookie); // Uses mockDocumentbody with type 'design'
-//         await request(app)
-//             .post(`${basePath}`)
-//             .send({ ...mockDocumentbody, type: 'informative' })
-//             .set("Cookie", urbanplanner_cookie)
-//             .expect(201);
-//     });
+        expect(result.body).toEqual([
+            exp_result
+            // Add more expected documents if needed
+        ]);
+    });
+});
 
-//     test("should return documents that match the type filter", async () => {
-//         const typeFilter = 'design';
-//         const result = await request(app)
-//             .get(`${basePath}/filter`)
-//             .query({ type: typeFilter })
-//             .set("Cookie", urbanplanner_cookie)
-//             .expect('Content-Type', /json/)
-//             .expect(200);
+describe("Integration Test GET /filter - Get Documents by Title", () => {
+    beforeEach(async () => {
+        await cleanup();
+        urbanplanner_cookie = await login(urbanPlannerUser);
 
-//         expect(result.body).toEqual([
-//             { id: expect.any(Number), areaId: null, ...mockDocumentbody }
-//         ]);
-//     });
-// });
+        mockTypeId = await createtype(urbanplanner_cookie, "testType");
+        mockDocumentbodyToAdd.typeId = mockTypeId;
 
-// describe("Integration Test GET /filter - Get Documents by Stakeholders", () => {
-//     beforeEach(async () => {
-//         await cleanup();
-//         urbanplanner_cookie = await login(urbanPlannerUser);
+        mockStakeholdersIds = await createStakeholders(urbanplanner_cookie, mockStakeholdersNames);
 
-//         // Create documents with different stakeholders
-//         await createDocument(urbanplanner_cookie); // Uses mockDocumentbody with stakeholders ['lkab', 'municipality']
-//         await request(app)
-//             .post(`${basePath}`)
-//             .send({ ...mockDocumentbody, stakeholders: ['citizens'] })
-//             .set("Cookie", urbanplanner_cookie)
-//             .expect(201);
-//     });
+        mockDocId = await createDocument(urbanplanner_cookie);
+        await matchDocumentToStakeholders(urbanplanner_cookie, mockDocId, mockStakeholdersNames);
 
-//     test("should return documents that match the stakeholders filter", async () => {
-//         const stakeholdersFilter = 'lkab,municipality';
-//         const result = await request(app)
-//             .get(`${basePath}/filter`)
-//             .query({ stakeholders: stakeholdersFilter })
-//             .set("Cookie", urbanplanner_cookie)
-//             .expect('Content-Type', /json/)
-//             .expect(200);
+        // Create documents with different titles
+        await request(app)
+            .post(`${basePath}`)
+            .send({ ...mockDocumentbodyToAdd, title: 'Another Document', typeId: mockTypeId })
+            .set("Cookie", urbanplanner_cookie)
+            .expect(201);
+    });
 
-//         expect(result.body).toEqual([
-//             { id: expect.any(Number), areaId: null, ...mockDocumentbody }
-//         ]);
-//     });
-// });
+    test("should return documents that match the title filter", async () => {
+        const titleFilter = 'Test Document';
+        const result = await request(app)
+            .get(`${basePath}/filter`)
+            .query({ title: titleFilter })
+            .set("Cookie", urbanplanner_cookie)
+            .expect('Content-Type', /json/)
+            .expect(200);
 
-// describe("Integration Test GET /filter - Get Documents by Start Date", () => {
-//     beforeEach(async () => {
-//         await cleanup();
-//         urbanplanner_cookie = await login(urbanPlannerUser);
+        const stakeholders = mockStakeholdersIds.map((id, index) => ({
+            id,
+            name: mockStakeholdersNames[index]
+        }));
 
-//         // Create documents with different dates
-//         await createDocument(urbanplanner_cookie); // Uses mockDocumentbody with date '2023-01-01'
-//         await request(app)
-//             .post(`${basePath}`)
-//             .send({ ...mockDocumentbody, date: '2022-12-01' })
-//             .set("Cookie", urbanplanner_cookie)
-//             .expect(201);
-//     });
+        expect(result.body).toEqual([
+            { id: expect.any(Number), areaId: null, stakeholders: stakeholders, ...mockDocumentbodyToGet }
+        ]);
+    });
+});
 
-//     test("should return documents that match the startDate filter", async () => {
-//         const startDateFilter = '2023-01-01';
-//         const result = await request(app)
-//             .get(`${basePath}/filter`)
-//             .query({ startDate: startDateFilter })
-//             .set("Cookie", urbanplanner_cookie)
-//             .expect('Content-Type', /json/)
-//             .expect(200);
 
-//         expect(result.body).toEqual([
-//             { id: expect.any(Number), areaId: null, ...mockDocumentbody }
-//         ]);
-//     });
-// });
 
-// describe("Integration Test GET /filter - Get Documents by End Date", () => {
-//     beforeEach(async () => {
-//         await cleanup();
-//         urbanplanner_cookie = await login(urbanPlannerUser);
+describe("Integration Test GET /filter - Get Documents by Stakeholders", () => {
+    beforeEach(async () => {
+        await cleanup();
+        urbanplanner_cookie = await login(urbanPlannerUser);
 
-//         // Create documents with different dates
-//         await createDocument(urbanplanner_cookie); // Uses mockDocumentbody with date '2023-01-01'
-//         await request(app)
-//             .post(`${basePath}`)
-//             .send({ ...mockDocumentbody, date: '2023-02-01' })
-//             .set("Cookie", urbanplanner_cookie)
-//             .expect(201);
-//     });
+        mockTypeId = await createtype(urbanplanner_cookie, "testType");
+        mockDocumentbodyToAdd.typeId = mockTypeId;
 
-//     test("should return documents that match the endDate filter", async () => {
-//         const endDateFilter = '2023-01-01';
-//         const result = await request(app)
-//             .get(`${basePath}/filter`)
-//             .query({ endDate: endDateFilter })
-//             .set("Cookie", urbanplanner_cookie)
-//             .expect('Content-Type', /json/)
-//             .expect(200);
+        mockStakeholdersIds = await createStakeholders(urbanplanner_cookie, mockStakeholdersNames);
 
-//         expect(result.body).toEqual([
-//             { id: expect.any(Number), areaId: null, ...mockDocumentbody }
-//         ]);
-//     });
-// });
+        mockDocId = await createDocument(urbanplanner_cookie);
+        await matchDocumentToStakeholders(urbanplanner_cookie, mockDocId, mockStakeholdersNames);
 
-// describe("Integration Test PUT /api/documents/:DocId/area", () => {
-//     const areaPath = "/api/areas";
-//     const geoJson = {
-//         geoJson: '{"type":"Feature","geometry":{"type":"Point","coordinates":[125.6, 10.1]}}'
-//     };
-//     const geoJson2 = {
-//         geoJson: '{"type":"Feature","geometry":{"type":"Point","coordinates":[34.7, 6.43]}}'
-//     };
+        // Create documents with different stakeholders
+        const mockDocId2 = await createDocumentWithParams(urbanplanner_cookie, { title: " Test Document 2", typeId: mockTypeId, ...mockDocumentbodyToAdd })
+        await matchDocumentToStakeholders(urbanplanner_cookie, mockDocId2, [mockStakeholdersNames[1]]);
 
-//     beforeEach(async () => {
-//         // Reset data
-//         await cleanup();
-//         urbanplanner_cookie = await login(urbanPlannerUser);
-//     });
 
-//     test("Should move a document to a new area successfully", async () => {
-//         const resArea1 = await request(app)
-//             .post(areaPath)
-//             .set("Cookie", urbanplanner_cookie)
-//             .send(geoJson)
-//             .expect(201);
-//         const firstAreaId = resArea1.body;
+    });
 
-//         const resDocument = await request(app)
-//             .post(`${basePath}`)
-//             .set("Cookie", urbanplanner_cookie)
-//             .send({ ...mockDocumentbody, areaId: firstAreaId })
-//             .expect(201);
-//         const documentId = resDocument.body.lastId;
+    test("should return documents that match the stakeholders filter", async () => {
+        const stakeholdersFilter = mockStakeholdersNames[0];
+        const result = await request(app)
+            .get(`${basePath}/filter`)
+            .query({ stakeholders: stakeholdersFilter })
+            .set("Cookie", urbanplanner_cookie)
+            .expect('Content-Type', /json/)
+            .expect(200);
 
-//         const resArea2 = await request(app)
-//             .post(areaPath)
-//             .set("Cookie", urbanplanner_cookie)
-//             .send(geoJson2)
-//             .expect(201);
-//         const secondAreaId = resArea2.body;
+        const stakeholders = mockStakeholdersIds.map((id, index) => ({
+            id,
+            name: mockStakeholdersNames[index]
+        }));
 
-//         await request(app)
-//             .put(`${basePath}/${documentId}/area`)
-//             .set("Cookie", urbanplanner_cookie)
-//             .send({ newAreaId: secondAreaId })
-//             .expect(200);
-//     });
+        expect(result.body).toEqual([
+            { id: expect.any(Number), areaId: null, stakeholders: stakeholders, ...mockDocumentbodyToGet }
+        ]);
+    });
+});
 
-//     test("Should return 404 if the document does not exist", async () => {
-//         const nonExistentDocId = -9999;
+describe("Integration Test GET /filter - Get Documents by Start Date", () => {
+    beforeEach(async () => {
+        await cleanup();
+        urbanplanner_cookie = await login(urbanPlannerUser);
 
-//         const resArea = await request(app)
-//             .post(areaPath)
-//             .set("Cookie", urbanplanner_cookie)
-//             .send(geoJson)
-//             .expect(201);
-//         const firstAreaId = resArea.body;
+        mockTypeId = await createtype(urbanplanner_cookie, "testType");
+        mockDocumentbodyToAdd.typeId = mockTypeId;
 
-//         const res = await request(app)
-//             .put(`${basePath}/${nonExistentDocId}/area`)
-//             .set("Cookie", urbanplanner_cookie)
-//             .send({ newAreaId: firstAreaId })
-//             .expect(404);
-//         expect(res.body.error).toEqual("Document not found");
-//     });
+        mockStakeholdersIds = await createStakeholders(urbanplanner_cookie, mockStakeholdersNames);
 
-//     test("Should return 404 if the area does not exist", async () => {
-//         const resArea = await request(app)
-//             .post(areaPath)
-//             .set("Cookie", urbanplanner_cookie)
-//             .send(geoJson)
-//             .expect(201);
-//         const firstAreaId = resArea.body;
+        mockDocId = await createDocument(urbanplanner_cookie);
+        await matchDocumentToStakeholders(urbanplanner_cookie, mockDocId, mockStakeholdersNames);
 
-//         const resDocument = await request(app)
-//             .post(`${basePath}`)
-//             .set("Cookie", urbanplanner_cookie)
-//             .send({ ...mockDocumentbody, areaId: firstAreaId })
-//             .expect(201);
-//         const documentId = resDocument.body.lastId;
+        const mockDoc2 = {
+            ...mockDocumentbodyToAdd,
+            title: "Test Document 2",
+            typeId: mockTypeId,
+            date: '2022-01-02',
+        }
+        // Create documents with different dates
+        const mockDocId2 = await createDocumentWithParams(urbanplanner_cookie, mockDoc2)
+        await matchDocumentToStakeholders(urbanplanner_cookie, mockDocId2, mockStakeholdersNames);
 
-//         const res = await request(app)
-//             .put(`${basePath}/${documentId}/area`)
-//             .set("Cookie", urbanplanner_cookie)
-//             .send({ newAreaId: 99999 })
-//             .expect(404);
-//         expect(res.body.error).toEqual("Area not found");
-//     });
+    });
 
-//     test("Should return 400 if areaId is invalid", async () => {
-//         const invalidIds = ["abc", null, 0, -1, 1.5]; // Invalid area IDs to test
+    test("should return documents that match the startDate filter", async () => {
+        const startDateFilter = '2023-01-01';
+        const result = await request(app)
+            .get(`${basePath}/filter`)
+            .query({ startDate: startDateFilter })
+            .set("Cookie", urbanplanner_cookie)
+            .expect('Content-Type', /json/)
+            .expect(200);
 
-//         const resArea = await request(app)
-//             .post(areaPath)
-//             .set("Cookie", urbanplanner_cookie)
-//             .send(geoJson)
-//             .expect(201);
-//         const firstAreaId = resArea.body;
+        const stakeholders = mockStakeholdersIds.map((id, index) => ({
+            id,
+            name: mockStakeholdersNames[index]
+        }));
 
-//         const resDocument = await request(app)
-//             .post(`${basePath}`)
-//             .set("Cookie", urbanplanner_cookie)
-//             .send({ ...mockDocumentbody, areaId: firstAreaId })
-//             .expect(201);
-//         const documentId = resDocument.body.lastId;
+        console.log(result.body)
+        expect(result.body).toEqual([
+            { id: mockDocId, areaId: null, stakeholders: stakeholders, ...mockDocumentbodyToGet }
+        ]);
+    });
+});
 
-//         for (const invalidId of invalidIds) {
-//             const res = await request(app)
-//                 .put(`${basePath}/${documentId}/area`)
-//                 .set("Cookie", urbanplanner_cookie)
-//                 .send({ newAreaId: invalidId })
-//                 .expect(400);
-//             expect(res.body.error).toEqual("Invalid area ID");
-//         }
-//     });
+describe("Integration Test GET /filter - Get Documents by End Date", () => {
+    beforeEach(async () => {
+        await cleanup();
+        urbanplanner_cookie = await login(urbanPlannerUser);
 
-//     test("The previous areaId should not exist after moving the document", async () => {
-//         const resArea1 = await request(app)
-//             .post(areaPath)
-//             .set("Cookie", urbanplanner_cookie)
-//             .send(geoJson)
-//             .expect(201);
-//         const firstAreaId = resArea1.body;
+        mockTypeId = await createtype(urbanplanner_cookie, "testType");
+        mockDocumentbodyToAdd.typeId = mockTypeId;
 
-//         const resDocument = await request(app)
-//             .post(`${basePath}`)
-//             .set("Cookie", urbanplanner_cookie)
-//             .send({ ...mockDocumentbody, areaId: firstAreaId })
-//             .expect(201);
-//         const documentId = resDocument.body.lastId;
+        mockStakeholdersIds = await createStakeholders(urbanplanner_cookie, mockStakeholdersNames);
 
-//         const resArea2 = await request(app)
-//             .post(areaPath)
-//             .set("Cookie", urbanplanner_cookie)
-//             .send(geoJson2)
-//             .expect(201);
-//         const secondAreaId = resArea2.body;
+        mockDocId = await createDocument(urbanplanner_cookie);
+        await matchDocumentToStakeholders(urbanplanner_cookie, mockDocId, mockStakeholdersNames);
 
-//         await request(app)
-//             .put(`${basePath}/${documentId}/area`)
-//             .set("Cookie", urbanplanner_cookie)
-//             .send({ newAreaId: secondAreaId })
-//             .expect(200);
+        const mockDoc2 = {
+            ...mockDocumentbodyToAdd,
+            title: "Test Document 2",
+            typeId: mockTypeId,
+            date: '2023-02-01',
+        }
+        // Create documents with different dates
+        const mockDocId2 = await createDocumentWithParams(urbanplanner_cookie, mockDoc2)
+        await matchDocumentToStakeholders(urbanplanner_cookie, mockDocId2, mockStakeholdersNames);
+    });
 
-//         const res = await request(app)
-//             .get(`${basePath}/area/${firstAreaId}`)
-//             .set("Cookie", urbanplanner_cookie)
-//             .expect(404);
-//         expect(res.body.error).toEqual("No documents found for this area");
-//     });
-// });
+    test("should return documents that match the endDate filter", async () => {
+        const endDateFilter = '2023-01-01';
+        const result = await request(app)
+            .get(`${basePath}/filter`)
+            .query({ endDate: endDateFilter })
+            .set("Cookie", urbanplanner_cookie)
+            .expect('Content-Type', /json/)
+            .expect(200);
+
+        const stakeholders = mockStakeholdersIds.map((id, index) => ({
+            id,
+            name: mockStakeholdersNames[index]
+        }));
+
+        console.log(result.body)
+        expect(result.body).toEqual([
+            { id: mockDocId, areaId: null, stakeholders: stakeholders, ...mockDocumentbodyToGet }
+        ]);
+    });
+});
+
+describe("Integration Test PUT /api/documents/:DocId/area", () => {
+    const areaPath = "/api/areas";
+    const geoJson = {
+        geoJson: '{"type":"Feature","geometry":{"type":"Point","coordinates":[125.6, 10.1]}}'
+    };
+    const geoJson2 = {
+        geoJson: '{"type":"Feature","geometry":{"type":"Point","coordinates":[34.7, 6.43]}}'
+    };
+
+    beforeEach(async () => {
+        // Reset data
+        await cleanup();
+        urbanplanner_cookie = await login(urbanPlannerUser);
+
+        mockTypeId = await createtype(urbanplanner_cookie, "testType");
+        mockDocumentbodyToAdd.typeId = mockTypeId;
+
+        mockStakeholdersIds = await createStakeholders(urbanplanner_cookie, mockStakeholdersNames);
+
+        mockDocId = await createDocument(urbanplanner_cookie);
+        await matchDocumentToStakeholders(urbanplanner_cookie, mockDocId, mockStakeholdersNames);
+        
+    });
+
+    test("Should move a document to a new area successfully", async () => {
+        const resArea1 = await request(app)
+            .post(areaPath)
+            .set("Cookie", urbanplanner_cookie)
+            .send(geoJson)
+            .expect(201);
+        const firstAreaId = resArea1.body;
+
+        const documentId = await createDocumentWithParams(urbanplanner_cookie, { ...mockDocumentbodyToAdd, typeId: mockTypeId, areaId: firstAreaId });
+       
+        const resArea2 = await request(app)
+            .post(areaPath)
+            .set("Cookie", urbanplanner_cookie)
+            .send(geoJson2)
+            .expect(201);
+        const secondAreaId = resArea2.body;
+
+        await request(app)
+            .put(`${basePath}/${documentId}/area`)
+            .set("Cookie", urbanplanner_cookie)
+            .send({ newAreaId: secondAreaId })
+            .expect(200);
+    });
+
+    test("Should return 404 if the document does not exist", async () => {
+        const nonExistentDocId = -9999;
+
+        const resArea = await request(app)
+            .post(areaPath)
+            .set("Cookie", urbanplanner_cookie)
+            .send(geoJson)
+            .expect(201);
+        const firstAreaId = resArea.body;
+
+        const res = await request(app)
+            .put(`${basePath}/${nonExistentDocId}/area`)
+            .set("Cookie", urbanplanner_cookie)
+            .send({ newAreaId: firstAreaId })
+            .expect(404);
+        expect(res.body.error).toEqual("Document not found");
+    });
+
+    test("Should return 404 if the area does not exist", async () => {
+        const resArea = await request(app)
+            .post(areaPath)
+            .set("Cookie", urbanplanner_cookie)
+            .send(geoJson)
+            .expect(201);
+        const firstAreaId = resArea.body;
+        
+        const documentId = await createDocumentWithParams(urbanplanner_cookie, { ...mockDocumentbodyToAdd, typeId: mockTypeId, areaId: firstAreaId });
+        
+        const res = await request(app)
+            .put(`${basePath}/${documentId}/area`)
+            .set("Cookie", urbanplanner_cookie)
+            .send({ newAreaId: 99999 })
+            .expect(404);
+        expect(res.body.error).toEqual("Area not found");
+    });
+
+    test("Should return 400 if areaId is invalid", async () => {
+        const invalidIds = ["abc", null, 0, -1, 1.5]; // Invalid area IDs to test
+
+        const resArea = await request(app)
+            .post(areaPath)
+            .set("Cookie", urbanplanner_cookie)
+            .send(geoJson)
+            .expect(201);
+        const firstAreaId = resArea.body;
+
+     
+        const documentId = await createDocumentWithParams(urbanplanner_cookie, { ...mockDocumentbodyToAdd, typeId: mockTypeId, areaId: firstAreaId });
+
+        for (const invalidId of invalidIds) {
+            const res = await request(app)
+                .put(`${basePath}/${documentId}/area`)
+                .set("Cookie", urbanplanner_cookie)
+                .send({ newAreaId: invalidId })
+                .expect(400);
+            expect(res.body.error).toEqual("Invalid area ID");
+        }
+    });
+
+    test("The previous areaId should not exist after moving the document", async () => {
+        const resArea1 = await request(app)
+            .post(areaPath)
+            .set("Cookie", urbanplanner_cookie)
+            .send(geoJson)
+            .expect(201);
+        const firstAreaId = resArea1.body;
+
+       
+        const documentId = await createDocumentWithParams(urbanplanner_cookie, { ...mockDocumentbodyToAdd, typeId: mockTypeId, areaId: firstAreaId });
+
+        const resArea2 = await request(app)
+            .post(areaPath)
+            .set("Cookie", urbanplanner_cookie)
+            .send(geoJson2)
+            .expect(201);
+        const secondAreaId = resArea2.body;
+
+        await request(app)
+            .put(`${basePath}/${documentId}/area`)
+            .set("Cookie", urbanplanner_cookie)
+            .send({ newAreaId: secondAreaId })
+            .expect(200);
+
+        const res = await request(app)
+            .get(`${basePath}/area/${firstAreaId}`)
+            .set("Cookie", urbanplanner_cookie)
+            .expect(404);
+        expect(res.body.error).toEqual("No documents found for this area");
+    });
+});

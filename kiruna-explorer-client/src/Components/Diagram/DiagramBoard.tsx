@@ -289,6 +289,7 @@ const DiagramBoard = () => {
                 colorMode={colorMode}
                 nodeExtent={extent}
                 translateExtent={extent}
+                zoomOnDoubleClick={false}
                 onNodeClick={(event, node) => {
                     if (node.type === "closeNode") {
                         console.log("chiudi")

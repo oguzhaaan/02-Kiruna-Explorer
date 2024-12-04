@@ -15,7 +15,7 @@ interface GroupNodeProps extends NodeProps {
         clickedNode: string | null;
         group: Item[],
         zoom: number;
-        setNodeSelected: (id:number) => void
+        setNodeSelected: (id: number) => void
     };
 }
 
@@ -25,7 +25,7 @@ function GroupNode({
 }: GroupNodeProps) {
     const { isDarkMode } = useTheme();
 
-    const [selectedDocument, setSelectedDocument] = useState(data.group[data.group.findIndex((e)=>`${e.docid}`=== id)]);
+    const [selectedDocument, setSelectedDocument] = useState(data.group[data.group.findIndex((e) => `${e.docid}` === id)]);
 
     const isClicked = data.clickedNode === id;
 
@@ -68,7 +68,8 @@ function GroupNode({
                         height: `${64 / zoom}px`,
                         bottom: `${4 * 1.5 * zoom}px`,
                         right: `${1 * 1.5 * zoom}px`,
-                    }}>
+                    }}
+                >
                 </div>
 
                 <CustomHandle type="target" position={Position.Right}></CustomHandle>
@@ -86,6 +87,11 @@ function GroupNode({
                         }}
                         onClick={() => {
                             setIsDropDownOpen(!isDropDownOpen);
+                        }}
+                        onKeyUp={(e) => {
+                            if (e.key === 'Enter') {
+                                setIsDropDownOpen(!isDropDownOpen);
+                            }
                         }}>
                         <img src={switchIcon} alt="switch icon" className="p-1" />
                     </div>
@@ -94,7 +100,13 @@ function GroupNode({
                         className="z-[5] absolute top-11 left-11 animate-fade animate-once animate-duration-500 text-black_text dark:text-white_text bg-primary_color_light dark:bg-primary_color_dark rounded-md w-[20rem] max-h-60 min-h-0 p-2 text-md flex flex-col"
                         onClick={() => {
                             setIsDropDownOpen(!isDropDownOpen);
-                        }}>
+                        }}
+                        onKeyUp={(e) => {
+                            if (e.key === 'Enter') {
+                                setIsDropDownOpen(!isDropDownOpen);
+                            }
+                        }}
+                    >
                         <div className="flex flex-row gap-1 align-items-center w-full px-1">
                             <img src={switchIcon} alt="switch icon" className="" />
                             <p className="m-0 p-0">Switch the document to visualize</p>
@@ -107,7 +119,15 @@ function GroupNode({
                                         setSelectedDocument(d);
                                         setIsDropDownOpen(!isDropDownOpen);
                                         data.setNodeSelected(d.docid);
-                                    }}>
+                                    }}
+                                    onKeyUp={(e) => {
+                                        if (e.key === 'Enter') {
+                                            setSelectedDocument(d);
+                                            setIsDropDownOpen(!isDropDownOpen);
+                                            data.setNodeSelected(d.docid);
+                                        }
+                                    }}
+                                >
                                     <img src={getIcon({ type: d.type.toLowerCase() }, { darkMode: isDarkMode })} alt="document icon"
                                         className="w-6" />
                                     <div className="font-normal text-truncate line-clamp-1"

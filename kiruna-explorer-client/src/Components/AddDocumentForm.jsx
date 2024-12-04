@@ -379,7 +379,7 @@ const AddDocumentForm = (props) => {
   return (
     <div
       className={`${isDarkMode ? "dark-select" : "light-select"
-        } py-4 fixed inset-0 bg-red-500 flex items-center justify-center scrollbar-thin scrollbar-webkit z-[1040]`}
+        } py-4 fixed inset-0 flex items-center justify-center scrollbar-thin scrollbar-webkit z-[1040]`}
       onClick={closeForm}
       onKeyUp={(e) => {
         if (e.key === 'Enter') {
@@ -390,6 +390,11 @@ const AddDocumentForm = (props) => {
       <div
         className="bg-box_white_color dark:bg-box_color backdrop-blur-2xl shadow-xl w-1/2 px-10 py-10 h-full overflow-y-auto rounded-lg flex flex-col relative scrollbar-thin scrollbar-webkit"
         onClick={(e) => e.stopPropagation()}
+        onKeyUp={(e) => {
+        if (e.key === 'Enter') {
+          e.stopPropagation();
+        }
+      }}
       >
         <h2 className="text-black_text mb-4 dark:text-white_text text-2xl  ">
           Add New Document

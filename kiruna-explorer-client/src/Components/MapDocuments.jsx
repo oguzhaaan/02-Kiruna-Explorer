@@ -33,11 +33,16 @@ function calculateBounds(coordinates) {
 
 const SwitchMapButton = ({ toggleMap, isSatelliteMap }) => {
   return (
-      <div title={isSatelliteMap?"Street View":"Satellite View"} className="custom-switch-button" onClick={() => {
-          toggleMap()
+    <div title={isSatelliteMap ? "Street View" : "Satellite View"} className="custom-switch-button" onClick={() => {
+      toggleMap();
+    }}
+      onKeyUp={(e) => {
+        if (e.key === 'Enter') {
+          toggleMap();
+        }
       }}>
-          <i className="bi bi-arrow-left-right text-[#464646]"></i>
-      </div>
+      <i className="bi bi-arrow-left-right text-[#464646]"></i>
+    </div>
   );
 };
 
@@ -110,10 +115,10 @@ function GeoreferenceMapDoc(props) {
           minZoom={8}
         >
           <TileLayer
-              key={`${isDarkMode}-${isSatelliteMap}`}
-            attribution={isSatelliteMap? '&copy; <a href="https://www.esri.com/">Esri</a> contributors': "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"}
-            url={isSatelliteMap? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" :"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"}
-            className={isSatelliteMap? " " : `${isDarkMode ? "custom-tile-layer":""}`}
+            key={`${isDarkMode}-${isSatelliteMap}`}
+            attribution={isSatelliteMap ? '&copy; <a href="https://www.esri.com/">Esri</a> contributors' : "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"}
+            url={isSatelliteMap ? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"}
+            className={isSatelliteMap ? " " : `${isDarkMode ? "custom-tile-layer" : ""}`}
           />
           <SwitchMapButton toggleMap={toggleMap} isSatelliteMap={isSatelliteMap}></SwitchMapButton>
           <ZoomControl position="topright" />
@@ -307,7 +312,7 @@ function Markers({ showArea, setShowArea, area, currentDocAreaId, center, bounda
                   setShowArea(area.id)
                   navigate("/mapDocuments")
                 }
-                else{
+                else {
                   map.fitBounds(area.id === 1 ? boundaries : calculateBounds(geometry.coordinates[0]))
                 }
               },

@@ -35,6 +35,11 @@ function FilterLabels({ filterValues, setFilterValues }) {
             onMouseEnter={(e) => (e.currentTarget.src = redCloseIcon)}
             onMouseLeave={(e) => (e.currentTarget.src = isDarkMode ? whiteCloseIcon : blackCloseIcon)}
             onClick={() => handleRemoveFilter("type")}
+            onKeyUp={(e) => {
+              if (e.key === 'Enter') {
+                handleRemoveFilter("type");
+              }
+            }}
             alt="remove"
           />
         </div>
@@ -57,13 +62,18 @@ function FilterLabels({ filterValues, setFilterValues }) {
                 onMouseEnter={(e) => (e.currentTarget.src = redCloseIcon)}
                 onMouseLeave={(e) => (e.currentTarget.src = isDarkMode ? whiteCloseIcon : blackCloseIcon)}
                 onClick={() => handleRemoveFilter("stakeholders", stakeholder)}
+                onKeyUp={(e) => {
+                  if (e.key === 'Enter') {
+                    handleRemoveFilter("stakeholders", stakeholder);
+                  }
+                }}
                 alt="remove"
               />
             </div>
           ))}
         </div>
       )}
-      { filterValues.startDate && filterValues.endDate && filterValues.startDate === filterValues.endDate && (
+      {filterValues.startDate && filterValues.endDate && filterValues.startDate === filterValues.endDate && (
         <div
           className={`flex flex-row gap-1 items-center p-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 rounded-md cursor-default`}
         >
@@ -77,11 +87,16 @@ function FilterLabels({ filterValues, setFilterValues }) {
             onMouseEnter={(e) => (e.currentTarget.src = redCloseIcon)}
             onMouseLeave={(e) => (e.currentTarget.src = isDarkMode ? whiteCloseIcon : blackCloseIcon)}
             onClick={() => handleRemoveFilter("date")}
+            onKeyUp={(e) => {
+              if (e.key === 'Enter') {
+                handleRemoveFilter("date");
+              }
+            }}
             alt="remove"
           />
         </div>
       )}
-      {filterValues.startDate && filterValues.endDate && filterValues.startDate !== filterValues.endDate &&(
+      {filterValues.startDate && filterValues.endDate && filterValues.startDate !== filterValues.endDate && (
         <div
           className={`flex flex-row gap-1 items-center p-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 rounded-md cursor-default`}
         >
@@ -95,6 +110,11 @@ function FilterLabels({ filterValues, setFilterValues }) {
             onMouseEnter={(e) => (e.currentTarget.src = redCloseIcon)}
             onMouseLeave={(e) => (e.currentTarget.src = isDarkMode ? whiteCloseIcon : blackCloseIcon)}
             onClick={() => handleRemoveFilter("date")}
+            onKeyUp={(e) => {
+              if (e.key === 'Enter') {
+                handleRemoveFilter("date")
+              }
+            }}
             alt="remove"
           />
         </div>

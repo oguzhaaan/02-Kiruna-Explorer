@@ -49,7 +49,13 @@ const HomeButton = ({ handleMunicipalAreas }) => {
         <div title="Municipal Area" className="custom-home-button" onClick={() => {
             handleMunicipalAreas();
             map.setView([68.20805, 20.593249999999998], 8);
-        }}>
+        }}
+        onKeyUp={(e) => {
+        if (e.key === 'Enter') {
+            handleMunicipalAreas();
+            map.setView([68.20805, 20.593249999999998], 8);
+        }
+      }}>
             <i className="bi bi-house-door-fill text-[#464646]"></i>
         </div>
     );
@@ -57,7 +63,12 @@ const HomeButton = ({ handleMunicipalAreas }) => {
 
 const SwitchMapButton = ({ toggleMap, isSatelliteMap }) => {
     return (
-        <div title={isSatelliteMap?"Street View":"Satellite View"} className="custom-switch-button" onClick={() =>toggleMap()}>
+        <div title={isSatelliteMap?"Street View":"Satellite View"} className="custom-switch-button" onClick={() =>toggleMap()}
+        onKeyUp={(e) => {
+        if (e.key === 'Enter') {
+            toggleMap();
+        }
+      }}>
             <i className="bi bi-arrow-left-right text-[#464646]"></i>
         </div>
     );

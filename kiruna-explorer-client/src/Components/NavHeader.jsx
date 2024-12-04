@@ -42,9 +42,9 @@ function NavHeader(props) {
                     <Container fluid>
                         <Navbar.Toggle
                             className={`navbar-toggler custom-toggler mt-2.5 
-                                ${(isDarkMode ) ? 'text-white_text' : 'text-black_text'}`}
+                                ${(isDarkMode) ? 'text-white_text' : 'text-black_text'}`}
                             aria-controls="basic-navbar-nav"
-                            onClick={()=>setIsCanvasOpen(prev=>!prev)}
+                            onClick={() => setIsCanvasOpen(prev => !prev)}
                         >
                             <span className={`toggler-bar ${(isDarkMode /*|| (isSatelliteMap && !isCanvasOpen && (currentRoute.includes("map") || currentRoute.includes("mapDocuments")))*/) ? 'bg-white_text' : 'bg-black_text'}`}></span>
                             <span className={`toggler-bar middle-bar ${(isDarkMode /*|| (isSatelliteMap && !isCanvasOpen && (currentRoute.includes("map") || currentRoute.includes("mapDocuments")))*/) ? 'bg-white_text' : 'bg-black_text'}`}></span>
@@ -64,12 +64,12 @@ function NavHeader(props) {
                                         <Col>
                                             <Row>
                                                 <Col className={`${isDarkMode ? 'text-white_text' : 'text-black_text'}`}>
-                                                    {isVisitorLoggedIn? "Visitor": user.username}
+                                                    {isVisitorLoggedIn ? "Visitor" : user.username}
                                                 </Col>
                                             </Row>
                                             <Row className="offcanvas-content-small">
                                                 <Col className={`${isDarkMode ? 'text-gray-400' : 'text-gray-700'}`}>
-                                                    {isVisitorLoggedIn?"guest" :user.role}
+                                                    {isVisitorLoggedIn ? "guest" : user.role}
                                                 </Col>
                                             </Row>
                                         </Col>
@@ -113,7 +113,7 @@ function NavHeader(props) {
                                 <div className="absolute top-0 right-0 mt-3 mr-4 ">
                                     <button
                                         className={`${isDarkMode ? 'text-white_text' : 'text-black_text'} grid justify-items-center transition-transform transform hover:scale-105 active:scale-95`}
-                                        onClick={()=>{toggleTheme(); setIsCanvasOpen(true)}}
+                                        onClick={() => { toggleTheme(); setIsCanvasOpen(true) }}
                                     >
                                         <div className="flex justify-center items-center gap-2 relative">
                                             <i
@@ -127,7 +127,13 @@ function NavHeader(props) {
                                         </div>
                                     </button>
                                 </div>
-                                <div className="offcanvas-content" onClick={() => { (isVisitorLoggedIn) ? handleVisitor() : logOut(); props.setNavShow(true); }}>
+                                <div className="offcanvas-content" onClick={() => { (isVisitorLoggedIn) ? handleVisitor() : logOut(); props.setNavShow(true); }}
+                                    onKeyUp={(e) => {
+                                        if (e.key === 'Enter') {
+                                            (isVisitorLoggedIn) ? handleVisitor() : logOut(); 
+                                            props.setNavShow(true);
+                                        }
+                                    }}>
                                     <Row className="offcanvas-item w-100 p-1">
                                         <Col xs="auto">
                                             <i className={`bi bi-door-open-fill fs-3 align-middle ${isDarkMode ? 'text-white_text' : 'text-black_text'}`}></i>

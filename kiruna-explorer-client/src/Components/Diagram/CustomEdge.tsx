@@ -1,5 +1,6 @@
 import {EdgeProps, getBezierPath} from '@xyflow/react';
 import React, {useState} from 'react';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const CustomEdge = ({
                         id,
@@ -13,6 +14,8 @@ const CustomEdge = ({
                         style = {},
                         markerEnd
                     }: EdgeProps) => {
+    const { isDarkMode } = useTheme();
+
     const [edgePath, labelX, labelY] = getBezierPath({
         sourceX: sourceX || 0,
         sourceY: sourceY || 0,
@@ -25,11 +28,13 @@ const CustomEdge = ({
     const [isHovered, setIsHovered] = useState(false);
 
     const getColor = (typeOfConnection: string) => {
-        return typeOfConnection === "Direct Consequence" ? "#E82929"
-            : typeOfConnection === "Collateral Consequence" ? "#31F518"
-                : typeOfConnection === "Projection" ? "#4F43F1"
-                    : typeOfConnection === "Update" ? "#E79716"
-                        : "#000000";
+        return typeOfConnection === "direct_consequence" ? "#E82929"
+            : typeOfConnection === "collateral_consequence" ? "#31F518"
+                : typeOfConnection === "projection" ? "#4F43F1"
+                    : typeOfConnection === "update" ? "#E79716"
+                    : typeOfConnection === "prevision"? "#26C6DA"
+                        : isDarkMode ? "#FFFFFF"
+                            : "#000000";
     };
 
     const generateGradientStops = (colors: string[]) => {
@@ -43,7 +48,7 @@ const CustomEdge = ({
             ];
         }
 
-        const stops = [];
+        const stops:any[] = [];
         for (let i = 0; i < colors.length; i++) {
             const offset = (i / (colors.length - 1)) * 100;
             stops.push(<stop key={i} offset={`${offset}%`} stopColor={colors[i]} />);
@@ -55,7 +60,7 @@ const CustomEdge = ({
         return stops;
     };
 
-    const gradientColors: string[] = Array.isArray(data.typesOfConnections)
+    const gradientColors: string[] = Array.isArray(data?.typesOfConnections)
         ? data.typesOfConnections.map((typeOfConnection: string) => getColor(typeOfConnection))
         : ["#000000"];
 
@@ -88,7 +93,7 @@ const CustomEdge = ({
                     <div
                         className="bg-white_text dark:bg-black_text text-black_text dark:text-white_text rounded-md shadow-md text-sm">
                         <ul className="m-0 p-2">
-                            {Array.isArray(data.typesOfConnections) ? data.typesOfConnections.map((str: string, index: number) => (
+                            {Array.isArray(data?.typesOfConnections) ? data.typesOfConnections.map((str: string, index: number) => (
                                 <li key={index}>
                                     {"- " + str}
                                 </li>

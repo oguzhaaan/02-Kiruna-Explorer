@@ -14,8 +14,8 @@ export function getXDatePosition(firstyear, year, month){
     const offset = 0
     const yearindex = parseInt(year)-parseInt(firstyear)
 
-    const xoffset = month? month : Math.random() +12
-    return parseInt(offset+ (yearindex*400) + ((400/13) * parseInt(xoffset)))
+    const xoffset = month? month - 1 : 0
+    return parseInt(offset+ (yearindex*400) + ((400/12) * parseInt(xoffset)))
 }
 
 export function getYPlanScale(planNumber){

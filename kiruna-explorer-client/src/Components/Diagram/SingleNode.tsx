@@ -26,7 +26,7 @@ function SingleNode({
     let zoom = data.zoom <= 0.9 ? 0.9 : data.zoom >= 2 ? 2 : data.zoom
 
     return (
-        <div className={`${isClicked ? "" : "opacity-35"}`} title={elem.title}
+        <div className={`${isClicked ? "" : "opacity-35"}`} title={`Title: ${elem.title} \nType: ${elem.type}`}
             style={{
                 width: `${64 / zoom}px`,
                 height: `${64 / zoom}px`,

@@ -124,7 +124,7 @@ function NavHeader(props) {
                                         </div>
                                     </button>
                                 </div>
-                                <div className="offcanvas-content" onClick={() => { logOut(); props.setNavShow(true); }}>
+                                <div className="offcanvas-content" onClick={() => { (isVisitorLoggedIn) ? handleVisitor() : logOut(); props.setNavShow(true); }}>
                                     <Row className="offcanvas-item w-100 p-1">
                                         <Col xs="auto">
                                             <i className={`bi bi-door-open-fill fs-3 align-middle ${isDarkMode ? 'text-white_text' : 'text-black_text'}`}></i>

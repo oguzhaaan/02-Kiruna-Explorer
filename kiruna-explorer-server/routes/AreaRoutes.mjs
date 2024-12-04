@@ -24,7 +24,8 @@ router.get("/",
     }
 });
 
-router.get("/:areaId", isLoggedIn,[
+router.get("/:areaId", //isLoggedIn,
+    [
     param("areaId")
         .isNumeric()
         .withMessage("Area ID must be a valid number")

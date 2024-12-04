@@ -55,7 +55,7 @@ router.post("/", isLoggedIn, authorizeRoles('admin', 'urban_planner'), [
         }
 
         const typeId = await DocumentTypeDao.addDocumentType(name);
-        res.status(201).json({ typeId, message: "Document type added successfully" });
+        res.status(201).json({ typeId: typeId, message: "Document type added successfully" });
     } catch (err) {
         console.error("Error adding document type:", err);
         if (err instanceof DocumentTypeNameAlreadyExists) {

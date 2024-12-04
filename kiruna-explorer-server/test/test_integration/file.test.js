@@ -137,7 +137,8 @@ describe("Integration Test POST /api/documents/:DocId/files - Attach a new file"
        
        console.log("Creating document...");
        mockDocumentbody.typeId = mockTypeId;
-       mockDocumentbody.stakeholders = stakeholders;
+       console.log("Document body:", mockDocumentbody);
+    //   mockDocumentbody.stakeholders = stakeholders;
        
        try {
            mockDocId = await createDocument(urbanplanner_cookie, mockDocumentbody);
@@ -148,124 +149,120 @@ describe("Integration Test POST /api/documents/:DocId/files - Attach a new file"
        
     });
 
-    // test("Should upload a file successfully", async () => {
-    //     const response = await request(app)
-    //         .post(`${basePath}/${mockDocId}/files`)
-    //         .set("Cookie", urbanplanner_cookie)
-    //         .attach("file", filePath)
-    //         .field("fileType", "original");
+    test("Should upload a file successfully", async () => {
+        const response = await request(app)
+            .post(`${basePath}/${mockDocId}/files`)
+            .set("Cookie", urbanplanner_cookie)
+            .attach("file", filePath)
+            .field("fileType", "original");
 
-    //     expect(response.status).toBe(200);
-    //     expect(response.body.message).toBe("File uploaded successfully");
+        expect(response.status).toBe(200);
+        expect(response.body.message).toBe("File uploaded successfully");
 
-    //     // Cleanup
-    //     const fileId = response.body.fileId;
-    //     await deleteFile(urbanplanner_cookie, mockDocId, fileId);
-    // });
+        // Cleanup
+        const fileId = response.body.fileId;
+        await deleteFile(urbanplanner_cookie, mockDocId, fileId);
+    });
 
-    // test("Should return error if no file is attached", async () => {
-    //     const response = await request(app)
-    //         .post(`${basePath}/${mockDocId}/files`)
-    //         .set("Cookie", urbanplanner_cookie)
-    //         .field("fileType", "original");
+    test("Should return error if no file is attached", async () => {
+        const response = await request(app)
+            .post(`${basePath}/${mockDocId}/files`)
+            .set("Cookie", urbanplanner_cookie)
+            .field("fileType", "original");
 
-    //     expect(response.status).toBe(400);
-    //     expect(response.body.error).toBe("File upload failed. No file provided.");
-    // });
+        expect(response.status).toBe(400);
+        expect(response.body.error).toBe("File upload failed. No file provided.");
+    });
 
-    // test("Should return error if file type is invalid", async () => {
-    //     const response = await request(app)
-    //         .post(`${basePath}/${mockDocId}/files`)
-    //         .set("Cookie", urbanplanner_cookie)
-    //         .attach("file", filePath)
-    //         .field("fileType", "invalid");
+    test("Should return error if file type is invalid", async () => {
+        const response = await request(app)
+            .post(`${basePath}/${mockDocId}/files`)
+            .set("Cookie", urbanplanner_cookie)
+            .attach("file", filePath)
+            .field("fileType", "invalid");
 
-    //     expect(response.status).toBe(400);
-    //     expect(response.body.error).toBe("Invalid file type. Allowed types: attachment, original");
-    // });
+        expect(response.status).toBe(400);
+        expect(response.body.error).toBe("Invalid file type. Allowed types: attachment, original");
+    });
 
-    test("void test", async () => {
-        expect(true).toBe(
-            true
-        )
-    })
+   
 });
 
-// describe("Integration Test GET /api/documents/:DocId/files - Get all files", () => {
-//     beforeEach(async () => {
-//         await cleanup();
-//         urbanplanner_cookie = await login(urbanPlannerUser);
+describe("Integration Test GET /api/documents/:DocId/files - Get all files", () => {
+    beforeEach(async () => {
+        await cleanup();
+        urbanplanner_cookie = await login(urbanPlannerUser);
 
-//         const mockTypeId = await createtype(urbanplanner_cookie, "testType");
-//         mockDocumentbody.typeId = mockTypeId;
+        const mockTypeId = await createtype(urbanplanner_cookie, "testType");
+        mockDocumentbody.typeId = mockTypeId;
 
-//         const stakeholders = ["Stakeholder1", "Stakeholder2"];
-//         const stakeholderIds = await createStakeholders(urbanplanner_cookie, stakeholders);
-//         mockDocumentbody.stakeholders = stakeholders;
+        const stakeholders = ["Stakeholder1", "Stakeholder2"];
+        const stakeholderIds = await createStakeholders(urbanplanner_cookie, stakeholders);
+      
 
-//         mockDocId = await createDocument(urbanplanner_cookie, mockDocumentbody);
-//     });
+        mockDocId = await createDocument(urbanplanner_cookie, mockDocumentbody);
+    });
 
-//     test("Should get all files successfully", async () => {
-//         const res = await request(app)
-//             .post(`${basePath}/${mockDocId}/files`)
-//             .set("Cookie", urbanplanner_cookie)
-//             .attach('file', filePath)
-//             .field('fileType', 'original');
+    test("Should get all files successfully", async () => {
+        const res = await request(app)
+            .post(`${basePath}/${mockDocId}/files`)
+            .set("Cookie", urbanplanner_cookie)
+            .attach('file', filePath)
+            .field('fileType', 'original');
 
-//         const response = await request(app)
-//             .get(`${basePath}/${mockDocId}/files`)
-//             .set("Cookie", urbanplanner_cookie);
+        const response = await request(app)
+            .get(`${basePath}/${mockDocId}/files`)
+            .set("Cookie", urbanplanner_cookie);
 
-//         expect(response.status).toBe(200);
-//         expect(response.body).toBeInstanceOf(Array);
+        expect(response.status).toBe(200);
+        expect(response.body).toBeInstanceOf(Array);
 
-//         // Cleanup
-//         const fileId = res.body.fileId;
-//         await deleteFile(urbanplanner_cookie, mockDocId, fileId);
-//     });
-// });
+        // Cleanup
+        const fileId = res.body.fileId;
+        await deleteFile(urbanplanner_cookie, mockDocId, fileId);
+    });
+});
 
-// describe("Integration Test DELETE /api/documents/:DocId/files/:FileId - Delete a file", () => {
-//     beforeEach(async () => {
-//         await cleanup();
-//         urbanplanner_cookie = await login(urbanPlannerUser);
+describe("Integration Test DELETE /api/documents/:DocId/files/:FileId - Delete a file", () => {
+    beforeEach(async () => {
+        await cleanup();
+        urbanplanner_cookie = await login(urbanPlannerUser);
 
-//         const mockTypeId = await createtype(urbanplanner_cookie, "testType");
-//         mockDocumentbody.typeId = mockTypeId;
+        const mockTypeId = await createtype(urbanplanner_cookie, "testType");
+        mockDocumentbody.typeId = mockTypeId;
 
-//         const stakeholders = ["Stakeholder1", "Stakeholder2"];
-//         const stakeholderIds = await createStakeholders(urbanplanner_cookie, stakeholders);
-//         mockDocumentbody.stakeholders = stakeholders;
+        const stakeholders = ["Stakeholder1", "Stakeholder2"];
+        const stakeholderIds = await createStakeholders(urbanplanner_cookie, stakeholders);
+      //  mockDocumentbody.stakeholders = stakeholders;
 
-//         mockDocId = await createDocument(urbanplanner_cookie, mockDocumentbody);
-//     });
+        mockDocId = await createDocument(urbanplanner_cookie, mockDocumentbody);
+    });
 
-//     test("Should delete a file successfully", async () => {
-//         const res = await request(app)
-//             .post(`${basePath}/${mockDocId}/files`)
-//             .set("Cookie", urbanplanner_cookie)
-//             .attach('file', filePath)
-//             .field('fileType', 'original');
+    test("Should delete a file successfully", async () => {
+        const res = await request(app)
+            .post(`${basePath}/${mockDocId}/files`)
+            .set("Cookie", urbanplanner_cookie)
+            .attach('file', filePath)
+            .field('fileType', 'original');
 
-//         const fileId = res.body.fileId;
+        const fileId = res.body.fileId;
 
-//         const response = await request(app)
-//             .delete(`${basePath}/${mockDocId}/files/${fileId}`)
-//             .set("Cookie", urbanplanner_cookie);
+        const response = await request(app)
+            .delete(`${basePath}/${mockDocId}/files/${fileId}`)
+            .set("Cookie", urbanplanner_cookie);
 
-//         expect(response.status).toBe(200);
-//         expect(response.body.message).toBe('File deleted successfully');
-//     });
+        expect(response.status).toBe(200);
+        expect(response.body.message).toBe('File deleted successfully');
+    });
 
-//     test("Should return error if the file does not exist", async () => {
-//         const fileId = -1;
+    test("Should return error if the file does not exist", async () => {
+        const fileId = -1;
 
-//         const response = await request(app)
-//             .delete(`${basePath}/${mockDocId}/files/${fileId}`)
-//             .set("Cookie", urbanplanner_cookie);
+        const response = await request(app)
+            .delete(`${basePath}/${mockDocId}/files/${fileId}`)
+            .set("Cookie", urbanplanner_cookie);
 
-//         expect(response.status).toBe(404);
-//         expect(response.body.error).toBe('File not found');
-//     });
-// });
+        expect(response.status).toBe(404);
+        expect(response.body.error).toBe('File not found');
+    });
+});

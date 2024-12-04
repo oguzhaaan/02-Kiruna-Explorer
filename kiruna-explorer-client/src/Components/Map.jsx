@@ -47,7 +47,8 @@ const HomeButton = ({ handleMunicipalAreas }) => {
     const map = useMap()
     return (
         <div title="Municipal Area" className="custom-home-button" onClick={() => {
-            handleMunicipalAreas(), map.setView([68.20805, 20.593249999999998], 8)
+            handleMunicipalAreas();
+            map.setView([68.20805, 20.593249999999998], 8);
         }}>
             <i className="bi bi-house-door-fill text-[#464646]"></i>
         </div>
@@ -570,9 +571,9 @@ function GeoreferenceMap(props) {
                             </button>
                             <button
                                 onClick={() => {
-                                    setDrawnObject(null),
-                                        props.setUpdateAreaId({ areaId: null, docId: null }),
-                                        navigate(-1)
+                                    setDrawnObject(null);
+                                    props.setUpdateAreaId({ areaId: null, docId: null });
+                                    navigate(-1);
                                 }}
                                 className="bg-primary_color_light dark:bg-customBlue hover:bg-blue-300 dark:hover:bg-[#317199] transition text-black_text dark:text-white_text w-40 h-16 px-4 py-2 rounded-xl text-xl"
                             >

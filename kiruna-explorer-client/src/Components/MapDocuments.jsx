@@ -70,7 +70,7 @@ function GeoreferenceMapDoc(props) {
       if (props.setNavShow) props.setNavShow(true);
       const areas = await API.getAllAreas()
       setPresentAreas(areas)
-      console.log(areas)
+      //console.log(areas)
     }
     handleAreas()
   }, []);
@@ -237,6 +237,7 @@ function Markers({ showArea, setShowArea, area, currentDocAreaId, center, bounda
     const takeDocumentsArea = async () => {
       try {
         const docs = await API.getDocumentsFromArea(area.id)
+        //console.log(docs);
         setAreaDoc(docs)
         const groupedByType = docs.reduce((acc, item) => {
           if (!acc[item.type]) {
@@ -323,7 +324,7 @@ function Markers({ showArea, setShowArea, area, currentDocAreaId, center, bounda
                       <span className="w-full counter-documents text-lg">{areaDoc.length}</span>
                     ) : (
                       <div className=" flex flex-row ">
-                        {
+                        {groupedDocs &&
                           groupedDocs.map(([type, num]) => (
                             <div key={type} style={{ display: 'flex', minWidth: '4em', minHeight: '1.5em', margin: '5px', flexDirection: 'row' }}>
                               <img

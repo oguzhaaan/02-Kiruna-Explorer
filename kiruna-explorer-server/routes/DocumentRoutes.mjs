@@ -140,8 +140,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname("../");
 
 router.get("/",
-    isLoggedIn, 
-    authorizeRoles('admin', 'urban_planner'),
+    //isLoggedIn, 
+    //authorizeRoles('admin', 'urban_planner'),
     async (req, res) => {
         try {
             const documents = await DocumentDao.getAllDocuments();
@@ -756,7 +756,7 @@ router.post(
 
 router.get(
   "/:DocId/files/download/:FileId",
-  isLoggedIn,
+  //isLoggedIn,
   [
     param("DocId")
       .isNumeric()
@@ -853,7 +853,7 @@ router.delete(
 
 router.get(
   "/:DocId/files",
-  isLoggedIn,
+  //isLoggedIn,
   [
     param("DocId")
       .isNumeric()

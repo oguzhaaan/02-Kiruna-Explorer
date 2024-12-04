@@ -46,9 +46,9 @@ function NavHeader(props) {
                             aria-controls="basic-navbar-nav"
                             onClick={()=>setIsCanvasOpen(prev=>!prev)}
                         >
-                            <span className={`toggler-bar ${(isDarkMode || (isSatelliteMap && !isCanvasOpen && (currentRoute.includes("map") || currentRoute.includes("mapDocuments")))) ? 'bg-white_text' : 'bg-black_text'}`}></span>
-                            <span className={`toggler-bar middle-bar ${(isDarkMode || (isSatelliteMap && !isCanvasOpen && (currentRoute.includes("map") || currentRoute.includes("mapDocuments")))) ? 'bg-white_text' : 'bg-black_text'}`}></span>
-                            <span className={`toggler-bar ${(isDarkMode || (isSatelliteMap &&  !isCanvasOpen && (currentRoute.includes("map") || currentRoute.includes("mapDocuments")))) ? 'bg-white_text' : 'bg-black_text'}`}></span>
+                            <span className={`toggler-bar ${(isDarkMode /*|| (isSatelliteMap && !isCanvasOpen && (currentRoute.includes("map") || currentRoute.includes("mapDocuments")))*/) ? 'bg-white_text' : 'bg-black_text'}`}></span>
+                            <span className={`toggler-bar middle-bar ${(isDarkMode /*|| (isSatelliteMap && !isCanvasOpen && (currentRoute.includes("map") || currentRoute.includes("mapDocuments")))*/) ? 'bg-white_text' : 'bg-black_text'}`}></span>
+                            <span className={`toggler-bar ${(isDarkMode /*|| (isSatelliteMap &&  !isCanvasOpen && (currentRoute.includes("map") || currentRoute.includes("mapDocuments")))*/) ? 'bg-white_text' : 'bg-black_text'}`}></span>
                         </Navbar.Toggle>
                         <Navbar.Offcanvas
                             id="basic-navbar-nav"

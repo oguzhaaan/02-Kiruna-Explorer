@@ -3,10 +3,11 @@ import { Link } from "react-router-dom";
 import { useUserContext } from "../contexts/UserContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTheme } from "../contexts/ThemeContext.jsx";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 function NavHeader(props) {
-    const { isDarkMode, toggleTheme } = useTheme();
+    const { isDarkMode, toggleTheme, isSatelliteMap } = useTheme();
+    const [isCanvasOpen, setIsCanvasOpen] = useState(false)
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -40,12 +41,14 @@ function NavHeader(props) {
                 <Navbar expand="false" className="fixed z-[20000]">
                     <Container fluid>
                         <Navbar.Toggle
-                            className={`navbar-toggler custom-toggler mt-2.5 ${isDarkMode ? 'text-white_text' : 'text-black_text'}`}
+                            className={`navbar-toggler custom-toggler mt-2.5 
+                                ${(isDarkMode ) ? 'text-white_text' : 'text-black_text'}`}
                             aria-controls="basic-navbar-nav"
+                            onClick={()=>setIsCanvasOpen(prev=>!prev)}
                         >
-                            <span className={`toggler-bar ${isDarkMode ? 'bg-white_text' : 'bg-black_text'}`}></span>
-                            <span className={`toggler-bar middle-bar ${isDarkMode ? 'bg-white_text' : 'bg-black_text'}`}></span>
-                            <span className={`toggler-bar ${isDarkMode ? 'bg-white_text' : 'bg-black_text'}`}></span>
+                            <span className={`toggler-bar ${(isDarkMode || (isSatelliteMap && !isCanvasOpen && (currentRoute.includes("map") || currentRoute.includes("mapDocuments")))) ? 'bg-white_text' : 'bg-black_text'}`}></span>
+                            <span className={`toggler-bar middle-bar ${(isDarkMode || (isSatelliteMap && !isCanvasOpen && (currentRoute.includes("map") || currentRoute.includes("mapDocuments")))) ? 'bg-white_text' : 'bg-black_text'}`}></span>
+                            <span className={`toggler-bar ${(isDarkMode || (isSatelliteMap &&  !isCanvasOpen && (currentRoute.includes("map") || currentRoute.includes("mapDocuments")))) ? 'bg-white_text' : 'bg-black_text'}`}></span>
                         </Navbar.Toggle>
                         <Navbar.Offcanvas
                             id="basic-navbar-nav"
@@ -61,12 +64,12 @@ function NavHeader(props) {
                                         <Col>
                                             <Row>
                                                 <Col className={`${isDarkMode ? 'text-white_text' : 'text-black_text'}`}>
-                                                    {user.username}
+                                                    {isVisitorLoggedIn? "Visitor": user.username}
                                                 </Col>
                                             </Row>
                                             <Row className="offcanvas-content-small">
                                                 <Col className={`${isDarkMode ? 'text-gray-400' : 'text-gray-700'}`}>
-                                                    {user.role}
+                                                    {isVisitorLoggedIn?"guest" :user.role}
                                                 </Col>
                                             </Row>
                                         </Col>
@@ -110,7 +113,7 @@ function NavHeader(props) {
                                 <div className="absolute top-0 right-0 mt-3 mr-4 ">
                                     <button
                                         className={`${isDarkMode ? 'text-white_text' : 'text-black_text'} grid justify-items-center transition-transform transform hover:scale-105 active:scale-95`}
-                                        onClick={toggleTheme}
+                                        onClick={()=>{toggleTheme(); setIsCanvasOpen(true)}}
                                     >
                                         <div className="flex justify-center items-center gap-2 relative">
                                             <i

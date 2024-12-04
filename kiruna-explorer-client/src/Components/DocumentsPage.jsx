@@ -90,7 +90,7 @@ function DocumentsPage(props) {
 
   return (
     <div className={isDarkMode ? "dark" : "light"}>
-      <div className="bg-background_color_light dark:bg-background_color min-h-screen flex flex-col">
+      <div className="bg-background_color_light dark:bg-background_color min-h-screen flex flex-col h-full">
         <SingleDocument
           updateAreaId={props.updateAreaId}
           setUpdateAreaId={props.setUpdateAreaId}
@@ -106,8 +106,8 @@ function DocumentsPage(props) {
           type={alertMessage[1]}
           clearMessage={() => setAlertMessage(["", ""])}
         ></Alert>
-        <div className="sticky-top w-full bg-[#ffffff55] dark:bg-[#313131ef] rounded-b-md px-20">
-          <div className="flex flex-row justify-content-between align-items-center h-16  w-full">
+        <div className="sticky-top w-full bg-[#ffffff55] dark:bg-[#313131ef] rounded-b-md h-16">
+          <div className="flex flex-row justify-content-between align-items-center h-16 w-full ps-[5.5rem] pe-[3.4rem]">
             <div className="flex flex-row items-center gap-3">
               {/* Search Bar */}
               <div className="z-[0] relative">
@@ -138,8 +138,8 @@ function DocumentsPage(props) {
             </div>
           </div>
         </div>
-        <div className="flex flex-row w-full">
-          <div className="flex flex-col mt-3 mx-7 w-1/4">
+        <div className="flex flex-row w-full h-[calc(100vh-4rem)]">
+          <div className="flex flex-col justify-content-between pb-3 mt-3 mx-7 w-1/4">
             {/* Filter Menu */}
             <FilterMenu
                 homePage={true}

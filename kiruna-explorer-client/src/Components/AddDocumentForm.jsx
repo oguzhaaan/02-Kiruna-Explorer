@@ -1,7 +1,6 @@
 import Select from "react-select";
 import {
   popularLanguages,
-  stakeholders,
 } from "./Utilities/Data";
 import customDropdownStyles from "./Utilities/CustomDropdownStyles";
 import { useTheme } from "../contexts/ThemeContext";

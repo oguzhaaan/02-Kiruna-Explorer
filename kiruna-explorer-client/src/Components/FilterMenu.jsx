@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Select from "react-select";
 import customDropdownStyles from "./Utilities/CustomDropdownStyles";
-import { stakeholders, documentTypes } from "./Utilities/Data.js";
 import { useTheme } from "../contexts/ThemeContext";
+import API from "../API/API.mjs";
 
 function FilterMenu({ filterValues, setFilterValues }) {
   const { isDarkMode } = useTheme();
@@ -13,6 +13,25 @@ function FilterMenu({ filterValues, setFilterValues }) {
   );
   // Temporary state for inputs
   const [tempFilterValues, setTempFilterValues] = useState({ ...filterValues });
+
+  const [stakeholders, setStakeholders] = useState([]);
+  const [documentTypes, setDocumentTypes] = useState([]);
+
+  useEffect(() => {
+    const inizialization = async () => {
+      try {
+        const types = await API.getAllTypes();
+        setDocumentTypes(types);
+        const stakeholders = await API.getAllStakeholders();
+        setStakeholders(stakeholders);
+      } catch (err) {
+        console.log(err.message);
+      }
+    };
+    inizialization();
+
+  }, [])
+
 
   const toggleFilterDateRange = () => {
     if (isFilterDateRange) {

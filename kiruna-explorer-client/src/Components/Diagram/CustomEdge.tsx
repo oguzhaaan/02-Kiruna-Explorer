@@ -3,20 +3,21 @@ import React, {useState} from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 
 const CustomEdge = ({
-                        id,
-                        data,
-                        sourceX,
-                        sourceY,
-                        targetX,
-                        targetY,
-                        sourcePosition,
-                        targetPosition,
-                        style = {},
-                        markerEnd
-                    }: EdgeProps) => {
+    id,
+    data,
+    sourceX,
+    sourceY,
+    targetX,
+    targetY,
+    sourcePosition,
+    targetPosition,
+    style = {},
+    markerEnd
+}: EdgeProps) => {
     const { isDarkMode } = useTheme();
 
-    const [edgePath, labelX, labelY] = getBezierPath({
+    // Otteniamo il path principale (di base) con getBezierPath
+    const [basePath] = getBezierPath({
         sourceX: sourceX || 0,
         sourceY: sourceY || 0,
         targetX: targetX || 0,
@@ -25,71 +26,69 @@ const CustomEdge = ({
         targetPosition
     });
 
-    const [isHovered, setIsHovered] = useState(false);
-
+    // Funzione per associare i colori ai tipi di connessione
     const getColor = (typeOfConnection: string) => {
         return typeOfConnection === "direct_consequence" ? "#E82929"
             : typeOfConnection === "collateral_consequence" ? "#31F518"
                 : typeOfConnection === "projection" ? "#4F43F1"
                     : typeOfConnection === "update" ? "#E79716"
-                    : typeOfConnection === "prevision"? "#26C6DA"
-                        : isDarkMode ? "#FFFFFF"
-                            : "#000000";
+                        : typeOfConnection === "prevision" ? "#26C6DA"
+                            : isDarkMode ? "#FFFFFF"
+                                : "#000000";
     };
 
-    const generateGradientStops = (colors: string[]) => {
-        if (colors.length === 0) {
-            colors = ["#000000"];
-        }
-        if (colors.length === 1) {
-            return [
-                <stop key="start" offset="0%" stopColor={colors[0]} />,
-                <stop key="end" offset="100%" stopColor={colors[0]} />
-            ];
-        }
-
-        const stops:any[] = [];
-        for (let i = 0; i < colors.length; i++) {
-            const offset = (i / (colors.length - 1)) * 100;
-            stops.push(<stop key={i} offset={`${offset}%`} stopColor={colors[i]} />);
-            if (i < colors.length - 1) {
-                const nextOffset = ((i + 0.5) / (colors.length - 1)) * 100;
-                stops.push(<stop key={`${i}-intermediate`} offset={`${nextOffset}%`} stopColor={colors[i]} />);
-            }
-        }
-        return stops;
-    };
-
-    const gradientColors: string[] = Array.isArray(data?.typesOfConnections)
+    // Array di colori dai tipi di connessione
+    const colors: string[] = Array.isArray(data?.typesOfConnections)
         ? data.typesOfConnections.map((typeOfConnection: string) => getColor(typeOfConnection))
         : ["#000000"];
 
+    const [isHovered, setIsHovered] = useState(false);
+
     return (
         <>
-            <defs>
-                <linearGradient id={`gradient-${id}`} gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="100%" y2="0">
-                    {generateGradientStops(gradientColors)}
-                </linearGradient>
-            </defs>
+            {/* Se c'è un solo colore, disegniamo un solo path continuo */}
+            {colors.length === 1 ? (
+                <path
+                    key={`${id}-color-0`}
+                    id={`${id}-color-0`}
+                    style={{
+                        ...style,
+                        stroke: colors[0],
+                        strokeWidth: "0.2em", // Tutti i path hanno la stessa larghezza
+                        pointerEvents: 'none'
+                    }}
+                    className={`react-flow__edge-path`}
+                    d={basePath} // Usa lo stesso percorso
+                    markerEnd={markerEnd} // Aggiungi la freccia se presente
+                />
+            ) : (
+                // Altrimenti, per più colori, creiamo percorsi segmentati
+                colors.map((color, index) => (
+                    <path
+                        key={`${id}-color-${index}`}
+                        id={`${id}-color-${index}`}
+                        style={{
+                            ...style,
+                            stroke: color,
+                            strokeWidth: "0.2em", // Tutti i path hanno la stessa larghezza
+                            pointerEvents: 'none'
+                        }}
+                        className={`react-flow__edge-path`}
+                        d={basePath} // Usa lo stesso percorso
+                        strokeDasharray="10,10" // Lunghezza e spazio dei segmenti
+                        strokeDashoffset={index * 10} // Offset incrementale per separare i colori
+                        markerEnd={index === colors.length - 1 ? markerEnd : undefined} // La freccia sull'ultimo path
+                    />
+                ))
+            )}
             <path
-                id={id}
-                style={{
-                    ...style,
-                    stroke: gradientColors.length > 0 ? `url(#gradient-${id})` : "#000000",
-                    pointerEvents: 'none'
-                }}
-                className={`react-flow__edge-path stroke-[0.2em]`}
-                d={edgePath}
-                markerEnd={markerEnd}
-            />
-            <path
-                d={edgePath}
+                d={basePath}
                 style={{fill: 'none', stroke: 'transparent', strokeWidth: '3em'}}
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
             />
             {isHovered && (
-                <foreignObject x={labelX - 50} y={labelY - 20} className="w-3/4 h-100 p-0 m-0">
+                <foreignObject x={0} y={0} className="w-3/4 h-100 p-0 m-0">
                     <div
                         className="bg-white_text dark:bg-black_text text-black_text dark:text-white_text rounded-md shadow-md text-sm">
                         <ul className="m-0 p-2">

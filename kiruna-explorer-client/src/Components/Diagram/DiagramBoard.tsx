@@ -11,6 +11,7 @@ import CloseNode from "./CustomCloseNode.js";
 import React from "react";
 import API from "../../API/API.mjs"
 import { YScalePosition, getXDatePosition, getEquidistantPoints, getYPlanScale } from "../Utilities/DiagramReferencePositions.js";
+import { SingleDocumentMap } from "../SingleDocumentMap.jsx";
 
 type Node<Data = any> = {
     id: string;
@@ -53,8 +54,11 @@ const DiagramBoard = () => {
     const [nodeStates, setNodeStates] = useState<Record<number, string>>({});
     const [nodeisOpen, setNodeIsOpen] = useState<Record<string, boolean | string>>({});
 
+    const [ShowSingleDocument, setShowSingleDocument] = useState(false);
+    const [documentId, setDocumentId] = useState(String);
+
     useEffect(() => {
-            setColorMode(isDarkMode? "dark" : "light")
+        setColorMode(isDarkMode ? "dark" : "light")
     }, [isDarkMode])
 
 
@@ -190,7 +194,7 @@ const DiagramBoard = () => {
                     const nodetype = e.items.length === 1 ? 'singleNode' : 'groupNode';
 
                     const nodeSelected = nodeStates[index] || e.items[0].docid;
-                    console.log(`${index}:` + nodeisOpen[index])
+                    //console.log(`${index}:` + nodeisOpen[index])
                     if (zoom > 1.1 && nodetype === 'groupNode' && nodeisOpen[index] !== "closed") setNodeOpen(index)
 
                     if (nodeisOpen[index] === true && nodetype === 'groupNode') {
@@ -276,6 +280,7 @@ const DiagramBoard = () => {
 
     return (
         <div className={`${isDarkMode ? "dark" : "light"} w-screen h-screen`}>
+            {ShowSingleDocument && <SingleDocumentMap setDocumentId={setDocumentId} id={documentId} setShowSingleDocument={setShowSingleDocument}></SingleDocumentMap>}
             <ReactFlow
                 nodes={nodes}
                 edges={filteredEdges}
@@ -316,7 +321,13 @@ const DiagramBoard = () => {
                     setViewport(viewport);
 
                 }}
+                onNodeDoubleClick={(event, node) => {
+                    console.log(node);
+                    setShowSingleDocument(true);
+                    setDocumentId(node.id);
+                }}
             >
+
                 <Background gap={20} size={1} color={isDarkMode ? "#333" : "#ccc"} />
                 <MiniMap className="opacity-70" />
             </ReactFlow>

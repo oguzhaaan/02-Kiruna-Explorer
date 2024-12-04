@@ -30,8 +30,9 @@ import svgIconLight from "../../assets/svg-file-light.svg";
 import txtIconLight from "../../assets/txt-file-light.svg";
 
 function getIcon({ type }, { darkMode }) {
+    const type_lower = type ? type.toLowerCase() : type
 
-    switch (type) {
+    switch (type_lower) {
         case "agreement":
             return darkMode ? agreementIcon : agreementIconLight;
         case "conflict":
@@ -49,7 +50,7 @@ function getIcon({ type }, { darkMode }) {
         case "informative":
             return darkMode ? informativeIcon : informativeIconLight;
         default:
-            return darkMode ? informativeIcon : informativeIconLight;
+            return darkMode ? genericIconLight : genericIcon;
     }
 }
 

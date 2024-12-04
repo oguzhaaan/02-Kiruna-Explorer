@@ -43,15 +43,15 @@ function App() {
     try {
       const getMunicipalArea = async () => {
         const muniArea = await API.getAreaById(1)
-        console.log(muniArea)
+        //console.log( muniArea)
         setMunicipalGeoJson(muniArea)
       }
-      if (isLoggedIn && !municipalGeoJson) getMunicipalArea()
+      if ((isLoggedIn || isVisitorLoggedIn) && !municipalGeoJson) getMunicipalArea()
     }
     catch (err) {
       console.log(err)
     }
-  }, [isLoggedIn])
+  }, [isLoggedIn, isVisitorLoggedIn])
 
   return (
     <>
@@ -81,7 +81,7 @@ function App() {
 
             <Route path="/linkDocuments" element={(isLoggedIn && user.role === "urban_planner") ? <LinkDocuments setOriginalDocId={setoriginalDocId} originalDocId={docId} mode={mode} setConnectionsInForm={setConnections} /> : <Navigate replace to="/" />} />
 
-            <Route path="/diagram" element={(isLoggedIn && user.role === "urban_planner") ? <DiagramBoard /> : <Navigate replace to="/" />} />
+            <Route path="/diagram" element={(isLoggedIn || isVisitorLoggedIn) ? <DiagramBoard /> : <Navigate replace to="/" />} />
 
             <Route path="*" element={isLoggedIn ? (user.role === "urban_planner" ? <Navigate replace to="/mapDocuments" /> : user.role === "resident" ? <Navigate replace to="/mapDocuments" /> : <HomePage />) : <HomePage />} />
 

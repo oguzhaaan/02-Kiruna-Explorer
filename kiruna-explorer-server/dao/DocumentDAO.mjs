@@ -250,7 +250,7 @@ export default function DocumentDAO(areaDAO) {
 
 
     this.getDocumentsByAreaId = (areaId) => {
-        const query = "SELECT * FROM document WHERE areaId = ?";
+        const query = "SELECT d.id, d.title, d.date, dt.name as type, d.language, d.description, d.scale, d.areaId, d.pages, d.planNumber FROM document AS d, document_type AS dt WHERE areaId = ? AND d.typeId = dt.id";
         return new Promise((resolve, reject) => {
             db.all(query, [areaId], (err, rows) => {
                 if (err) {

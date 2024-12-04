@@ -57,6 +57,18 @@ const DiagramBoard = () => {
     const [ShowSingleDocument, setShowSingleDocument] = useState(false);
     const [documentId, setDocumentId] = useState(String);
 
+    const months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    const [isLegendVisible, setIsLegendVisible] = useState(false);
+
+    const connections = [
+        { name: "Direct Consequence", color: "#E82929" },
+        { name: "Collateral Consequence", color: "#31F518" },
+        { name: "Projection", color: "#4F43F1" },
+        { name: "Update", color: "#E79716" },
+        { name: "Prevision", color: "#26C6DA" },
+    ];
+
+
     useEffect(() => {
         setColorMode(isDarkMode ? "dark" : "light")
     }, [isDarkMode])
@@ -288,6 +300,7 @@ const DiagramBoard = () => {
                 edgeTypes={edgeTypes}
                 colorMode={colorMode}
                 nodeExtent={extent}
+                minZoom={0.3}
                 translateExtent={extent}
                 zoomOnDoubleClick={false}
                 onNodeClick={(event, node) => {
@@ -334,20 +347,80 @@ const DiagramBoard = () => {
             </ReactFlow>
 
             <div
-                className={`fixed w-full bg-black_text dark:bg-white_text h-[1px] top-3 text-black_text dark:text-white_text transition`}>
+                className={`fixed w-full bg-black_text dark:bg-white_text h-[1px] top-3 text-black_text dark:text-white_text transition`}
+            >
                 {yearsRange.map((year, index) => (
-                    <div
+
+                    index != 0 && <div
                         key={year}
                         className="absolute transform -translate-x-1/2 -translate-y-1/4 pt-2 flex flex-col gap-1 justify-content-center align-items-center transition"
                         style={{ left: `${index * 400 * zoom + (viewport?.x || 0)}px` }}
                     >
-                        <div className="w-2 h-2 bg-black_text dark:bg-white_text rounded-full transition"
-                            style={{ transform: `scale(${zoom})` }}></div>
-                        <div style={{ transform: `scale(${zoom}) ${index == 0 ? "translateX(25px)" : ""}` }}
+                        <div className="w-3 h-3 bg-black_text dark:bg-white_text rounded-full transition"
+                            style={{ transform: `scale(${zoom})` }}>
+                        </div>
+                        <div style={{ transform: `scale(${zoom}) ${index === 0 ? "translateX(25px)" : ""}` }}
                             className="transition">{year}</div>
                     </div>
                 ))}
+
+                {/* Aggiungi le linee per i mesi */}
+                {yearsRange.map((year, yearIndex) => (
+
+                    yearIndex != 0 && months.map((month, monthIndex) => {
+                        // Calcola la posizione proporzionale dei mesi
+                        const monthPosition = yearIndex * 400 * zoom + (viewport?.x || 0) + (monthIndex * (400 / 12)) * zoom;
+
+                        return (
+                            <div key={`${year}-${month}`}
+                                className="absolute h-screen border-l border-gray-400 dark:border-gray-600 transition z-[-1]"
+                                style={{
+                                    left: `${monthPosition}px`,
+                                    borderStyle: 'dashed',
+                                }}
+
+                            >
+                                {/* Numero del mese */}
+                                <div
+                                    className="absolute top-1 text-xs text-gray-500 dark:text-gray-300"
+                                    style={{ transform: `translateX(-50%) scale(${zoom})` }}
+                                >
+                                    {month}
+                                </div>
+                            </div>
+                        );
+                    })
+                ))}
             </div>
+            
+            <button
+                onClick={() => setIsLegendVisible(!isLegendVisible)}
+                className="fixed top-4 right-4 bg-white_text  dark:bg-[#323232] w-12 h-12 border-2 border-dark_node dark:border-white_text rounded-full shadow-lg hover:bg-gray-300 dark:hover:bg-[#696969] transition"
+            >
+                <i className="bi bi-list-task fs-2 dark:text-white_text"></i>
+            </button>
+
+            {isLegendVisible && (
+                <div className="fixed top-16 right-4 bg-white_text dark:bg-dark_node dark:text-white_text shadow-lg rounded-lg p-4 w-60">
+                    <h3 className="text-lg font-semibold mb-2">Legend</h3>
+                    
+                        {connections.map((connection) => (
+                            <li
+                                key={connection.name}
+                                className="flex items-center justify-between text-xs mb-2"
+                            >
+                                <span>{connection.name}</span>
+                                <span
+                                    style={{ backgroundColor: connection.color }}
+                                    className="w-12 h-[2px] rounded-full"
+                                ></span>
+                            </li>
+                        ))}
+                    
+                    
+                </div>
+            )}
+
         </div>
     );
 };

@@ -41,7 +41,7 @@ function GroupNode({
                     height: `${64 / zoom}px`,
                     padding: `${1 / zoom}px`
                 }}
-                title={selectedDocument.title}>
+                title={`Title: ${selectedDocument.title} \nType: ${selectedDocument.type}`}>
                 <div
                     className={`flex flex-row w-100 h-100 justify-content-center align-content-center text-black_text dark:text-white_text rounded-full bg-light_node dark:bg-dark_node`}
                 >

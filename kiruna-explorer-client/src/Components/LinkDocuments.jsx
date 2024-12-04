@@ -67,7 +67,7 @@ const LinkDocuments = ({
   const defaultConnectionOptions = [
     "direct_consequence",
     "collateral_consequence",
-    "prevision",
+    "projection",
     "update",
   ];
 

@@ -32,7 +32,6 @@ const CustomEdge = ({
             : typeOfConnection === "collateral_consequence" ? "#31F518"
                 : typeOfConnection === "projection" ? "#4F43F1"
                     : typeOfConnection === "update" ? "#E79716"
-                        : typeOfConnection === "prevision" ? "#26C6DA"
                             : isDarkMode ? "#FFFFFF"
                                 : "#000000";
     };

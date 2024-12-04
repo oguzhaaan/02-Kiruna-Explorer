@@ -14,7 +14,7 @@ const DocumentItem = ({
     return (
       <div className={isDarkMode ? "dark" : "light"}>
         <div
-          className={`flex flex-wrap drop-shadow-xl rounded-xl bg-document_item_radient_grey_light dark:bg-document_item_radient_grey p-3 cursor-pointer `}
+          className={`flex flex-wrap shadow-[0_5px_15px_-5px_rgba(0,0,0,0.05)] rounded-xl bg-[#ffffffdd] dark:bg-document_item_radient_grey p-3 cursor-pointer `}
           onClick={() => {
             navigate(/documents/ + documentId);
           }}

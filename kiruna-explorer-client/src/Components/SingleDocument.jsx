@@ -242,7 +242,7 @@ function SingleDocument(props) {
                 {showModalDeleteConfirm &&
                     <div className="fixed z-[2000] inset-0 flex items-center justify-center">
                         <div
-                            className="flex flex-col justify-items-center align-items-center bg-box_white_color dark:bg-box_color backdrop-blur-2xl drop-shadow-xl rounded-xl text-black_text dark:text-white_text font-sans p-6">
+                            className="flex flex-col justify-items-center align-items-center bg-box_white_color dark:bg-box_color backdrop-blur-2xl shadow-md rounded-xl text-black_text dark:text-white_text font-sans p-6 outline outline-1 outline-[#000000]">
                             <div className="text-xl text-center w-[26rem] mb-2">Are you really sure to delete the file "{selectedFile.name}"?</div>
                             <div className="flex justify-center space-x-5 mt-10">
                                 <button

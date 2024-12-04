@@ -5,9 +5,9 @@
     --search-dark-color: #f4f4f4ad;
     --search-light-color: rgba(0, 0, 0, 0.65);
     --box-gray-color: #373737a6;
-    --box-white-color: rgba(242, 242, 242, 0.65);
+    --box-white-color: rgba(211, 217, 222, 0.59);
     --background-color: #222222;
-    --background-color-light: #ffffff;
+    --background-color-light: #e8ebed;
     --input-color-dark: #d9d9d93f;
     --input-color-light: rgba(255, 255, 255, 0.89);
     --placeholder-input-color: #A2A2A2;
@@ -21,7 +21,7 @@
     --box-high-opacity: rgba(217, 217, 217, 0.1);
     --document-item-gradient-grey: linear-gradient(90deg, #686868 21%, #313131 100%);
     --document-item-gradient-blue: linear-gradient(90deg, #166595 1%, #092A3E 100%);
-    --document-item-gradient-grey-light: linear-gradient(90deg, #cdcdcd 21%, #eeeeee 100%);
+    --document-item-gradient-grey-light: linear-gradient(90deg, #eeeeee 21%, #eaeaea 100%);
     --document-item-gradient-blue-light: linear-gradient(90deg, #dfe5ea 1%, #b8d5f2 100%);
 }
 

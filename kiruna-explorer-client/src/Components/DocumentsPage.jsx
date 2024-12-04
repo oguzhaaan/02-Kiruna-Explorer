@@ -90,7 +90,7 @@ function DocumentsPage(props) {
 
   return (
     <div className={isDarkMode ? "dark" : "light"}>
-      <div className="bg-background_color_white dark:bg-background_color min-h-screen flex flex-col">
+      <div className="bg-background_color_light dark:bg-background_color min-h-screen flex flex-col">
         <SingleDocument
           updateAreaId={props.updateAreaId}
           setUpdateAreaId={props.setUpdateAreaId}
@@ -106,7 +106,7 @@ function DocumentsPage(props) {
           type={alertMessage[1]}
           clearMessage={() => setAlertMessage(["", ""])}
         ></Alert>
-        <div className="sticky-top w-full bg-[#f3f3f3ef] dark:bg-[#313131ef] rounded-b-md px-20">
+        <div className="sticky-top w-full bg-[#ffffff55] dark:bg-[#313131ef] rounded-b-md px-20">
           <div className="flex flex-row justify-content-between align-items-center h-16  w-full">
             <div className="flex flex-row items-center gap-3">
               {/* Search Bar */}
@@ -124,7 +124,7 @@ function DocumentsPage(props) {
               </div>
             </div>
 
-            <div className="flex flex-row justify-content-end gap-3 align-items-center left-2">
+            <div className="flex flex-row justify-content-end gap-3 align-items-center">
               {/* Add document Button */}
               <button
                 onClick={toggleModal}
@@ -142,6 +142,7 @@ function DocumentsPage(props) {
           <div className="flex flex-col mt-3 mx-7 w-1/4">
             {/* Filter Menu */}
             <FilterMenu
+                homePage={true}
               filterValues={filterValues}
               setFilterValues={setFilterValues}
             />
@@ -153,7 +154,7 @@ function DocumentsPage(props) {
               nextPage={nextPage}
             />
           </div>
-          <div className="flex flex-col gap-3 w-3/4 overflow-y-scroll mr-7 pt-3">
+          <div className="flex flex-col gap-3 w-3/4 overflow-y-scroll mr-7 pt-3 pb-5 px-3">
             {/* Filter Labels */}
             {/*<div className="w-full">
               <FilterLabels
@@ -210,7 +211,7 @@ function PaginationControls({
   nextPage,
 }) {
   return (
-    <div className="flex flex-row items-center justify-between py-2 text-black_text dark:text-white_text bg-box_white_color dark:bg-box_color mt-28 rounded-lg">
+    <div className="flex flex-row items-center justify-between py-2 text-black_text dark:text-white_text bg-[#ffffff55] dark:bg-box_color mt-28 rounded-lg">
       <i
         className="ml-3 bi bi-arrow-left cursor-pointer text-3xl"
         onClick={previousPage}

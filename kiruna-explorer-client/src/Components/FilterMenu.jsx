@@ -4,7 +4,7 @@ import customDropdownStyles from "./Utilities/CustomDropdownStyles";
 import { useTheme } from "../contexts/ThemeContext";
 import API from "../API/API.mjs";
 
-function FilterMenu({ filterValues, setFilterValues }) {
+function FilterMenu({ filterValues, setFilterValues, homePage }) {
   const { isDarkMode } = useTheme();
   const [isFilterDateRange, setIsFilterDateRange] = useState(
     filterValues.startDate !== "" &&
@@ -66,7 +66,7 @@ function FilterMenu({ filterValues, setFilterValues }) {
 
   return (
     <div
-      className={`bg-box_white_color dark:bg-box_color backdrop-blur-2xl drop-shadow-xl rounded-lg
+      className={`${homePage? "bg-[#ffffff55] dark:bg-box_color" : "bg-box_white_color dark:bg-box_color backdrop-blur-2xl shadow-md"} rounded-lg
                     flex flex-col relative w-full h-auto p-3`}
     >
       <div className="flex flex-row mb-5">

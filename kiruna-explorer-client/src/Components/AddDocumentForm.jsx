@@ -383,7 +383,7 @@ const AddDocumentForm = (props) => {
       onClick={closeForm}
     >
       <div
-        className="bg-box_white_color dark:bg-box_color backdrop-blur-2xl drop-shadow-xl w-1/2 px-10 py-10 h-full overflow-y-auto rounded-lg flex flex-col relative scrollbar-thin scrollbar-webkit"
+        className="bg-box_white_color dark:bg-box_color backdrop-blur-2xl shadow-xl w-1/2 px-10 py-10 h-full overflow-y-auto rounded-lg flex flex-col relative scrollbar-thin scrollbar-webkit"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-black_text mb-4 dark:text-white_text text-2xl  ">

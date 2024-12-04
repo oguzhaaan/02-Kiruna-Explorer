@@ -242,7 +242,7 @@ const LinkDocuments = ({
     <div
       className={`${
         isDarkMode ? "dark" : "light"
-      } min-h-screen background_color_light dark:bg-background_color px-3 text-black_text dark:text-white_text`}
+      } min-h-screen bg-background_color_light dark:bg-background_color px-3 text-black_text dark:text-white_text h-100`}
     >
       {/* Navigation Bar */}
       <div className="flex items-center justify-between w-full h-16">
@@ -392,7 +392,7 @@ const DocumentItem = ({
 
   return (
     <div
-      className={`flex flex-wrap lg:gap-0 md:gap-3 sm:gap-3 rounded-xl bg-document_item_radient_grey_light dark:bg-document_item_radient_grey p-3`}
+      className={`flex flex-wrap lg:gap-0 md:gap-3 sm:gap-3 rounded-xl bg-[#ffffff99] dark:bg-document_item_radient_grey p-3`}
     >
       {/* Connection Section */}
       <div className="flex flex-col lg:w-3/12 md:w-[45%] sm:w-[45%]">

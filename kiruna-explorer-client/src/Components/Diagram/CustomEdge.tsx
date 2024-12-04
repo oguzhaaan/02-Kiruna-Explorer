@@ -17,7 +17,7 @@ const CustomEdge = ({
     const { isDarkMode } = useTheme();
 
     // Otteniamo il path principale (di base) con getBezierPath
-    const [basePath] = getBezierPath({
+    const [basePath , labelX, labelY] = getBezierPath({
         sourceX: sourceX || 0,
         sourceY: sourceY || 0,
         targetX: targetX || 0,
@@ -32,7 +32,6 @@ const CustomEdge = ({
             : typeOfConnection === "collateral_consequence" ? "#31F518"
                 : typeOfConnection === "projection" ? "#4F43F1"
                     : typeOfConnection === "update" ? "#E79716"
-                        : typeOfConnection === "prevision" ? "#26C6DA"
                             : isDarkMode ? "#FFFFFF"
                                 : "#000000";
     };
@@ -75,20 +74,20 @@ const CustomEdge = ({
                         }}
                         className={`react-flow__edge-path`}
                         d={basePath} // Usa lo stesso percorso
-                        strokeDasharray="10,10" // Lunghezza e spazio dei segmenti
-                        strokeDashoffset={index * 10} // Offset incrementale per separare i colori
+                        strokeDasharray={`${15},${15*(colors.length-1)}`} // Lunghezza e spazio dei segmenti
+                        strokeDashoffset={index * 15} // Offset incrementale per separare i colori
                         markerEnd={index === colors.length - 1 ? markerEnd : undefined} // La freccia sull'ultimo path
                     />
                 ))
             )}
             <path
                 d={basePath}
-                style={{fill: 'none', stroke: 'transparent', strokeWidth: '3em'}}
+                style={{fill: 'none', stroke: 'transparent', strokeWidth: '4em'}}
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
             />
             {isHovered && (
-                <foreignObject x={0} y={0} className="w-3/4 h-100 p-0 m-0">
+                <foreignObject x={labelX - 50} y={labelY - 20}  className="w-3/4 h-100 p-0 m-0">
                     <div
                         className="bg-white_text dark:bg-black_text text-black_text dark:text-white_text rounded-md shadow-md text-sm">
                         <ul className="m-0 p-2">

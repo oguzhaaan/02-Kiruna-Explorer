@@ -64,8 +64,7 @@ const DiagramBoard = () => {
         { name: "Direct Consequence", color: "#E82929" },
         { name: "Collateral Consequence", color: "#31F518" },
         { name: "Projection", color: "#4F43F1" },
-        { name: "Update", color: "#E79716" },
-        { name: "Prevision", color: "#26C6DA" },
+        { name: "Update", color: "#E79716" }
     ];
 
 

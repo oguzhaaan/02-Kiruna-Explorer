@@ -100,7 +100,7 @@ describe('deleteAll', () => {
         ];
     
         const mockRows = [{ id: 3 }, { id: 4 }];
-        vitest.spyOn(db, "all").mockImplementation((query, callback) => {
+        vitest.spyOn(db, "all").mockImplementation((query, param, callback) => {
           callback(null, mockRows); // Simulate retrieving rows to delete
         });
         vitest.spyOn(db, "run").mockImplementation((query, callback) => {
@@ -126,7 +126,7 @@ describe('deleteAll', () => {
         ];
     
         const mockError = new Error('Database retrieval error');
-        vitest.spyOn(db, "all").mockImplementation((query, callback) => {
+        vitest.spyOn(db, "all").mockImplementation((query, param, callback) => {
           callback(mockError, null); // Simulate a database error during retrieval
         });
     
@@ -141,7 +141,7 @@ describe('deleteAll', () => {
         ];
     
         const mockError = new Error('Database retrieval error');
-        vitest.spyOn(db, "all").mockImplementation((query, callback) => {
+        vitest.spyOn(db, "all").mockImplementation((query, param, callback) => {
           callback(null, mockLinks); // Simulate a database error during retrieval
         });
 

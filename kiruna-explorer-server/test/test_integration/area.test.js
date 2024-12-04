@@ -6,6 +6,8 @@ import { Role } from "../../models/User.mjs";
 
 const docPath = "/api/documents";
 const areaPath = "/api/areas";
+const typePath = "/api/document-types"
+const stakeholderPath = "/api/document-stakeholders"
 
 const login = async (userInfo) => {
   return new Promise((resolve, reject) => {
@@ -40,6 +42,71 @@ const createDocument = async (usercookie,doc) =>{
       })
   })
 }
+
+
+
+
+let mockDocId
+let mockTypeId
+let mockStakeholdersIds
+const mockStakeholdersNames = ["Stakeholder1", "Stakeholder2"]
+
+
+// Helper function to create a document different form default mock 
+const createDocumentWithParams = async (usercookie, document) => {
+    return new Promise((resolve, reject) => {
+        request(app)
+            .post(`${basePath}`)
+            .send(document)
+            .set("Cookie", usercookie)
+            .expect(201)
+            .end((err, res) => {
+                if (err) {
+                    reject(err)
+                }
+                resolve(res.body.lastId)
+            })
+    })
+}
+
+// Helper function to create a type
+const createtype = async (usercookie, typeName) => {
+    return new Promise((resolve, reject) => {
+        request(app)
+            .post(`${typePath}`)
+            .send({ name: typeName })
+            .set("Cookie", usercookie)
+            .expect(201)
+            .end((err, res) => {
+                if (err) {
+                    reject(err)
+                }
+                resolve(res.body.typeId)
+            })
+    })
+}
+const createStakeholders = async (usercookie, stakeholders) => {
+    return new Promise((resolve, reject) => {
+        request(app)
+            .post(`${stakeholderPath}`)
+            .send({ stakeholders: stakeholders })
+            .set("Cookie", usercookie)
+            .expect(201)
+            .end((err, res) => {
+                if (err) {
+                    reject(res.message)
+                }
+                resolve(res.body.ids)
+            })
+    })
+}
+
+
+
+
+
+
+
 //example for a mockdocument
 // Example Parameters for the tests
 const urbanPlannerUser = {
@@ -127,9 +194,8 @@ describe("Integration Test GET /api/areas - Get all areas", () => {
     });
   });
 
-  test("Should return 401 for unauthenticated user", async () => {
-    const res = await request(app).get(areaPath).expect(401);
-    expect(res.body).toHaveProperty("error", "Not authorized");
+  test("Should return 200 for unauthenticated user", async () => {
+    const res = await request(app).get(areaPath).expect(200);
   });
 });
 
@@ -157,14 +223,18 @@ describe("Integration Test GET /api/documents/area/:areaId", () => {
         title: 'Test Document',
         scale: 'plan',
         date: '2023-01-01',
-        type: 'design',
+        typeId: null,
         language: 'English',
         pages: 3,
         description: 'A test document',
-        stakeholders: ['lkab','municipality'],
         planNumber: 10,
         areaId: areaId
     };
+
+    const typeId = await  createtype(urbanplanner_cookie, "testtype");
+   
+    mockDocumentbody.typeId = typeId
+  
     await createDocument(urbanplanner_cookie,mockDocumentbody)
 
     //take documents from area  
@@ -226,9 +296,6 @@ describe("Integration Test GET /api/documents/area/:areaId", () => {
       .set("Cookie", urbanplanner_cookie)
       .expect(400);
 
-    expect(res.body.errors[0]).toHaveProperty(
-      "msg",
-      "Area ID must be a valid integer"
-    );
+    expect(res.body.error).toBe("Invalid area ID");
   });
 });

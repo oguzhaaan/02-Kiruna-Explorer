@@ -9,7 +9,9 @@ import { AreaNotFound } from "../models/Area.mjs";
 import { authorizeRoles } from "../auth/authMiddleware.mjs";
 
 /* GET /api/areas - Get all areas */
-router.get("/", isLoggedIn, async (req, res) => {
+router.get("/",
+    // isLoggedIn,
+     async (req, res) => {
     try {
         const areas = await areaDao.getAllAreas();
         res.status(200).json(areas);

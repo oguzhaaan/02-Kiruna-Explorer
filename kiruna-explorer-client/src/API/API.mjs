@@ -96,7 +96,7 @@ const getDocumentById = async (docid) => {
 const getDocumentsFromArea = async (areaId) => {
   try {
     const response = await fetch(`${SERVER_URL}/api/documents/area/${areaId}`, {
-      credentials: 'include',
+      //credentials: 'include',
     });
 
     if (!response.ok) {
@@ -141,7 +141,7 @@ const updateDocumentArea = async (docId, areaId) => {
 const getAllAreas = async () => {
   try {
     const response = await fetch(`${SERVER_URL}/api/areas`, {
-      credentials: 'include',
+    //  credentials: 'include',
     });
 
     if (!response.ok) {

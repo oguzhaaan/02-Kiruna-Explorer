@@ -139,13 +139,12 @@ router.get(
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname("../");
 
-router.get(
-  "/",
-  isLoggedIn,
-  authorizeRoles("admin", "urban_planner"),
-  async (req, res) => {
-    try {
-      const documents = await DocumentDao.getAllDocuments();
+router.get("/",
+    isLoggedIn, 
+    authorizeRoles('admin', 'urban_planner'),
+    async (req, res) => {
+        try {
+            const documents = await DocumentDao.getAllDocuments();
 
       res.status(200).json(documents);
     } catch (error) {
@@ -156,19 +155,14 @@ router.get(
 );
 
 /* GET /api/documents/:DocId */
-router.get(
-  "/:DocId",
-  isLoggedIn,
-  [
-    param("DocId")
-      .isNumeric()
-      .withMessage("Document ID must be a valid number"),
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+router.get("/:DocId",
+    // isLoggedIn,
+    [
+        param("DocId")
+            .isNumeric()
+            .withMessage("Document ID must be a valid number")
+    ],
+    async (req, res) => {
 
     try {
       const params = req.params;
@@ -184,15 +178,13 @@ router.get(
 );
 
 /* GET /api/documents/area/:areaId */
-router.get(
-  "/area/:areaId",
-  isLoggedIn,
-  [param("areaId").isInt().withMessage("Area ID must be a valid integer")],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+router.get("/area/:areaId",
+   // isLoggedIn, //tODO probably to be removed
+    [
+        param("areaId")
+            .isInt().withMessage("Area ID must be a valid integer")
+    ],
+    async (req, res) => {
 
     try {
       const areaId = parseInt(req.params.areaId, 10);
@@ -347,7 +339,7 @@ router.post(
 
 router.get(
   "/:DocId/links",
-  isLoggedIn,
+  //isLoggedIn,
   [
     param("DocId")
       .isNumeric()

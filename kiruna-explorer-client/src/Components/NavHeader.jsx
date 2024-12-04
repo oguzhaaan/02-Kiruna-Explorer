@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useUserContext } from "../contexts/UserContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTheme } from "../contexts/ThemeContext.jsx";
+import { useEffect } from "react";
 
 function NavHeader(props) {
     const { isDarkMode, toggleTheme } = useTheme();
@@ -10,20 +11,28 @@ function NavHeader(props) {
     const navigate = useNavigate();
     const location = useLocation();
     const currentRoute = location.pathname;
-    const { user, isLoggedIn, logOut } = useUserContext();
+    const { user, isLoggedIn, logOut, handleVisitor, isVisitorLoggedIn } = useUserContext();
+
 
     return (
         <div className={`${isDarkMode ? 'dark' : 'light'}`}>
-            {!isLoggedIn ?
+            {(!isLoggedIn && !isVisitorLoggedIn) ?
                 props.navShow &&
                 <Navbar expand="false" className="fixed z-[2000]">
                     <Container fluid className="text-center w-screen justify-end">
+                        <Navbar.Brand className="text-white_text text-xl flex items-center justify-center mt-4 mr-10">
+                            <Link to="mapDocuments" className="text-inherit no-underline hover:text-slate-300" onClick={() => handleVisitor()}>
+                                <i className="bi bi-map fs-2 align-middle mx-2"></i>
+                                Enter as a visitor
+                            </Link>
+                        </Navbar.Brand>
                         <Navbar.Brand className="text-white_text text-xl flex items-center justify-center mt-4 mr-10">
                             <Link to="login" className="text-inherit no-underline hover:text-slate-300" onClick={() => props.setNavShow(false)}>
                                 <i className="bi bi-person fs-2 align-middle mx-2"></i>
                                 Login
                             </Link>
                         </Navbar.Brand>
+
                     </Container>
                 </Navbar>
                 :

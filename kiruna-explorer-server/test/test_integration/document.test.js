@@ -578,7 +578,7 @@ describe("Integration Test PUT /api/documents/:DocId/area", () => {
 
         mockDocId = await createDocument(urbanplanner_cookie);
         await matchDocumentToStakeholders(urbanplanner_cookie, mockDocId, mockStakeholdersNames);
-        
+
     });
 
     test("Should move a document to a new area successfully", async () => {
@@ -590,7 +590,7 @@ describe("Integration Test PUT /api/documents/:DocId/area", () => {
         const firstAreaId = resArea1.body;
 
         const documentId = await createDocumentWithParams(urbanplanner_cookie, { ...mockDocumentbodyToAdd, typeId: mockTypeId, areaId: firstAreaId });
-       
+
         const resArea2 = await request(app)
             .post(areaPath)
             .set("Cookie", urbanplanner_cookie)
@@ -630,9 +630,9 @@ describe("Integration Test PUT /api/documents/:DocId/area", () => {
             .send(geoJson)
             .expect(201);
         const firstAreaId = resArea.body;
-        
+
         const documentId = await createDocumentWithParams(urbanplanner_cookie, { ...mockDocumentbodyToAdd, typeId: mockTypeId, areaId: firstAreaId });
-        
+
         const res = await request(app)
             .put(`${basePath}/${documentId}/area`)
             .set("Cookie", urbanplanner_cookie)
@@ -651,7 +651,7 @@ describe("Integration Test PUT /api/documents/:DocId/area", () => {
             .expect(201);
         const firstAreaId = resArea.body;
 
-     
+
         const documentId = await createDocumentWithParams(urbanplanner_cookie, { ...mockDocumentbodyToAdd, typeId: mockTypeId, areaId: firstAreaId });
 
         for (const invalidId of invalidIds) {
@@ -672,7 +672,7 @@ describe("Integration Test PUT /api/documents/:DocId/area", () => {
             .expect(201);
         const firstAreaId = resArea1.body;
 
-       
+
         const documentId = await createDocumentWithParams(urbanplanner_cookie, { ...mockDocumentbodyToAdd, typeId: mockTypeId, areaId: firstAreaId });
 
         const resArea2 = await request(app)
@@ -743,28 +743,11 @@ describe("Integration Test GET /filter/pagination - Filter and Pagination", () =
     });
 });
 
-/*describe("Integration Test POST / - Create stakeholders", () => {
+describe("Integration Test POST / - Create stakeholders", () => {
     beforeEach(async () => {
         await cleanup(); // Clean up the database before each test
         urbanplanner_cookie = await login(urbanPlannerUser);
         resident_cookie = await login(residentUser);
-    });
-
-    test("should return 200 and a list of stakeholders for an authorized user (admin)", async () => {
-        // Mock the StakeholderDao.getStakeholders method to return mock data
-        await createStakeholders(urbanplanner_cookie, mockStakeholdersNames);
-
-        const response = await request(app)
-            .get(basePath)
-            .set("Cookie", urbanplanner_cookie)
-            .expect('Content-Type', /json/)
-            .expect(200);
-
-            console.log(response);
-        expect(response.body).toEqual([
-            { id: 1, name: "Stakeholder1" },
-            { id: 2, name: "Stakeholder2" }
-        ]);
     });
 
     test("should return 200 and a list of stakeholders for an authorized user (urban planner)", async () => {
@@ -773,24 +756,25 @@ describe("Integration Test GET /filter/pagination - Filter and Pagination", () =
 
 
         const response = await request(app)
-            .get(basePath)
+            .get(stakeholderPath)
             .set("Cookie", urbanplanner_cookie)
             .expect('Content-Type', /json/)
             .expect(200);
 
-        expect(response.body).toEqual([
-            { id: 1, name: "Stakeholder 1" },
-            { id: 2, name: "Stakeholder 2" }
-        ]);
+            const ids = response.body
+            expect(response.body).toEqual([
+                { id: ids[0].id, name: "Stakeholder1" },
+                { id: ids[1].id, name: "Stakeholder2" }
+            ]);
     });
 
     test("should return 403 if the user is not authorized", async () => {
         const response = await request(app)
-            .get(basePath)
+            .get(stakeholderPath)
             .set("Cookie", resident_cookie)
             .expect('Content-Type', /json/)
             .expect(403);
 
         expect(response.body.error).toBe("Forbidden");
     });
-});*/
+});

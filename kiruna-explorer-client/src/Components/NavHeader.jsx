@@ -75,7 +75,7 @@ function NavHeader(props) {
                                         </Col>
                                     </Row>
                                     <div className={`separator ${isDarkMode ? 'bg-white_text' : 'bg-black_text'} opacity-20`}></div>
-                                    {user.role === "urban_planner" && (<Row
+                                    {user.role === "urban_planner" && !isVisitorLoggedIn && (<Row
                                         className={`offcanvas-item w-100 p-1 ${currentRoute.includes("documents") ? (isDarkMode ? 'bg-customBlue' : 'bg-blue-200') : ''}`}
                                         onClick={() => { navigate("/documents") }}
                                     >

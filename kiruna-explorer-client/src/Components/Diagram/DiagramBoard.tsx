@@ -373,7 +373,7 @@ const DiagramBoard = () => {
 
                         return (
                             <div key={`${year}-${month}`}
-                                className="absolute h-screen border-l border-gray-400 dark:border-gray-600 transition z-[-1]"
+                                className="absolute h-screen border-l border-[#00000015] dark:border-[#ffffff11] transition z-[-1]"
                                 style={{
                                     left: `${monthPosition}px`,
                                     borderStyle: 'dashed',
@@ -395,9 +395,9 @@ const DiagramBoard = () => {
             
             <button
                 onClick={() => setIsLegendVisible(!isLegendVisible)}
-                className="fixed top-4 right-4 bg-white_text  dark:bg-[#323232] w-12 h-12 border-2 border-dark_node dark:border-white_text rounded-full shadow-lg hover:bg-gray-300 dark:hover:bg-[#696969] transition"
+                className="flex justify-content-center align-content-center fixed top-4 right-4 bg-white_text  dark:bg-[#323232] w-12 h-12 border-2 border-dark_node dark:border-white_text rounded-full shadow-lg hover:bg-gray-300 dark:hover:bg-[#696969] transition"
             >
-                <i className="bi bi-list-task fs-2 dark:text-white_text"></i>
+                <i className="bi bi-list-task text-[1.8em] dark:text-white_text"></i>
             </button>
 
             {isLegendVisible && (

@@ -5,13 +5,10 @@ function HomePage(props) {
     return(
         <>
         <Container fluid
-        className="place-content-center text-center w-screen h-screen bg-cover bg-center"
+        className="place-content-center text-center w-screen h-screen bg-cover bg-center overflow-y-auto"
         style={{
           backgroundImage:"url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Kiruna.jpg/2560px-Kiruna.jpg')",
         }}>
-            <div>
-                
-            </div>
             <div className="absolute inset-0 bg-black opacity-50"></div>
 
             <div className="relative text-white_text">

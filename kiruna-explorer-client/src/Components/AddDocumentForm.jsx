@@ -8,12 +8,27 @@ import API from "../API/API.mjs";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DocumentClass from "../classes/Document.mjs";
+import { useNewDocument } from '../contexts/NewDocumentContext';
 
 const AddDocumentForm = (props) => {
   const { isDarkMode } = useTheme();
   const navigate = useNavigate();
 
-  const [stakeholderOptions, setStakeholderOptions] = useState([]);
+  const {
+    stakeholderOptions, setStakeholderOptions,
+    selectedOption, setSelectedOption,
+    isAddingNewStakeholder, setIsAddingNewStakeholder,
+    newStakeholderName, setNewStakeholderName,
+    newStakeholders, setNewStakeholders,
+    oldStakeholders, setOldStakeholders,
+    typeOptions, setTypeOptions,
+    isAddingNewType, setIsAddingNewType,
+    newTypeName, setNewTypeName,
+    selectedType, setSelectedType,
+    oldTypes, setOldTypes
+  } = useNewDocument();
+
+ /* const [stakeholderOptions, setStakeholderOptions] = useState([]);
   const [selectedOption, setSelectedOption] = useState("");
   const [isAddingNewStakeholder, setIsAddingNewStakeholder] = useState(false);
   const [newStakeholderName, setNewStakeholderName] = useState("");
@@ -24,13 +39,13 @@ const AddDocumentForm = (props) => {
   const [isAddingNewType, setIsAddingNewType] = useState(false);
   const [newTypeName, setNewTypeName] = useState("");
   const [selectedType, setSelectedType] = useState("");
-  const [oldTypes, setOldTypes] = useState([]);
+  const [oldTypes, setOldTypes] = useState([]); */
 
-  const [newDocument, setNewDocument] = useState(props.newDocument);
+  const [newDocument, setNewDocument] = [props.newDocument, props.setNewDocument];
 
   const [isValid, setIsValid] = useState(true);
 
-  useEffect(() => {
+  /*useEffect(() => {
     const inizialization = async () => {
       try {
         const types = await API.getAllTypes();
@@ -48,7 +63,7 @@ const AddDocumentForm = (props) => {
     };
     inizialization();
 
-  }, [])
+  }, [])*/
 
   const handleTypeChange = (selectedType) => {
     const typeName = selectedType.target.value;
@@ -243,38 +258,19 @@ const AddDocumentForm = (props) => {
 
   // --- Submit Form ---
   const handleConfirm = async () => {
-
-    props.setNewDocument(newDocument);
-    let documentData = {
-      title: newDocument.title,
-      scale: newDocument.scale,
-      planNumber: newDocument.planNumber, // Optional
-      date: newDocument.date
-        ? newDocument.date
-          .split("-")
-          .map((part, index) => (index === 0 ? part : part.padStart(2, "0")))
-          .join("-")
-        : "",
-      typeId: newDocument.typeId,
-      language: newDocument.language || null, // Set to null if not provided
-      pageNumber: newDocument.pages || null, // Set to null if not provided
-      description: newDocument.description, // Mandatory
-      areaId: props.newAreaId,
-      links: props.connections.length > 0 ? props.connections : null,
-    };
-
-    if (!validateFields()) {
-      props.setAlertMessage(["Please fill all the mandatory fields.", "error"]);
-      return;
+    let area_id;
+    if (props.newAreaId.geoJson){
+      area_id = await API.addArea(props.newAreaId.geoJson)
     }
-
+    else{
+      area_id = props.newAreaId
+    }
     // Refresh the list of the documents
 
     //CAMPI OPZIONALI: PAGE + LANGUAGE + GIORNO DELLA DATA(?) + COORDINATES
     //CAMPI OBBLIGATORI: TITLE + STAKEHOLDER + SCALE(PLANE NUMBER IN CASE) + DATE + DESCRIPTION + TYPE
     if (!oldTypes.some((type) => type.name === selectedType)) {
       try {
-        console.log("AGGIUNGO IL NUOVO TIPO")
         newDocument.typeId = await API.addType(selectedType);
       } catch (error) {
         console.log(error);
@@ -314,7 +310,7 @@ const AddDocumentForm = (props) => {
     const stakeholdersName = newDocument.stakeholders.map((s) => s.label);
 
     props.setNewDocument(newDocument);
-    documentData = {
+    const documentData = {
       title: newDocument.title,
       scale: newDocument.scale,
       planNumber: newDocument.planNumber, // Optional
@@ -328,7 +324,7 @@ const AddDocumentForm = (props) => {
       language: newDocument.language || null, // Set to null if not provided
       pageNumber: newDocument.pages || null, // Set to null if not provided
       description: newDocument.description, // Mandatory
-      areaId: props.newAreaId,
+      areaId: area_id,
       links: props.connections.length > 0 ? props.connections : null,
     };
 

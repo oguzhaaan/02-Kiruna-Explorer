@@ -77,7 +77,7 @@ Definition of Done:
 
   Additionally, addressing the issues identified by SonarCloud should have been prioritized at the beginning of the sprint. Tackling these changes early would have allowed the rest of the sprint to focus on feature implementation, ensuring that no team member was blocked by dependencies. Underestimating the effort required for these adjustments also revealed the need for more accurate planning and prioritization to prevent similar bottlenecks in the future.
 
-  Even if it was a very diffcult sprint with all the changes to be done and the new features to implement, we still managed to achieve our goals.
+  Even if it was a very difficult sprint with all the changes to be done and the new features to implement, we still managed to achieve our goals.
 
 - Which improvement goals set in the previous retrospective were you able to achieve?
 
@@ -91,8 +91,8 @@ Definition of Done:
 
   - Improve the test coverage by adding more tests for the new features.
   - Give more importance to SonarCloud issues, in order to not find out at the end of the sprint that there are many problems to fix all at once.
-  - The priority should first complete the changes related to the previous sprint, remembering that the changes should be emrged as soon as possible so that everyuone can start correctly working on the new ones.
+  - The priority should first complete the changes related to the previous sprint, remembering that the changes should be merged as soon as possible so that everyone can start correctly working on the new ones.
 
 - One thing you are proud of as a Team!!
 
-  Even in difficult times and stressful situations, we managed to overcome all the obstacles and achieve our goals. We also managed to finallt discover the center of Kiruna!
+  Even in difficult times and stressful situations, we managed to overcome all the obstacles and achieve our goals.

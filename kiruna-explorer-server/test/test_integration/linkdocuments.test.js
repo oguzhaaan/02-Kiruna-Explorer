@@ -4,12 +4,14 @@ import request from "supertest";
 import { cleanup } from "../cleanup.js";
 import { Role } from "../../models/User.mjs";
 
+require('dotenv').config();
+
 const basePath = "/api/documents";
 const typePath = "/api/document-types";
 const stakeholderPath = "/api/document-stakeholders";
 
-const urbanplannerUser = { id: 1, username: "Romeo", password: "1111", role: Role.URBAN_PLANNER };
-const residentUser = { id: 2, username: "Juliet", password: "2222", role: Role.RESIDENT };
+const urbanplannerUser = { id: 1, username: "Romeo", password: process.env.URBAN_PLANNER_PASSWORD, role: Role.URBAN_PLANNER };
+const residentUser = { id: 2, username: "Juliet", password: process.env.RESIDENT_PASSWORD, role: Role.RESIDENT };
 
 let urbanplanner_cookie, resident_cookie;
 

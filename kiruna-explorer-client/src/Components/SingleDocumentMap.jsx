@@ -248,77 +248,98 @@ function SingleDocumentMap({ setDocumentId, id, setShowSingleDocument }) {
                         {/* Connections */}
                         {activeTab === "connections" ? (
                             documentLinks.length > 0 ?
-                            Object.entries(documentLinks.reduce((acc, connection) => {
-                                if (!acc[connection.connection]) {
-                                    acc[connection.connection] = [];
-                                }
-                                acc[connection.connection].push(connection);
-                                return acc;
-                            }, {})).map(([connectionType, connections], index) => (
-                                <div key={index} className="flex flex-col gap-3 bg-[#76767655] dark:bg-[#D9D9D90E] p-3 rounded-xl">
-                                    <div className="flex flex-row justify-between items-center cursor-pointer"
-                                        onClick={() => setCollapsedSections(prevState => ({
-                                            ...prevState,
-                                            [connectionType]: !prevState[connectionType]
-                                        }))}>
-                                        <h3 className="p-0 m-0 text-black_text dark:text-white_text text-sm">
-                                            {connectionType ? formatString(connectionType) : ''}
-                                        </h3>
-                                        <div className="text-black_text dark:text-white_text text-base right-4 hover:text-gray-400">
-                                            <i className={`bi ${collapsedSections[connectionType] ? 'bi-caret-down' : 'bi-caret-up'} text-2xl`}></i>
-                                        </div>
-                                    </div>
-                                    {!collapsedSections[connectionType] && connections.map((connection, idx) => (
-                                        <div key={idx} className="flex flex-col gap-1">
-                                            <div
-                                                onClick={() => {
-                                                    setDocumentId(connection.id);
-                                                }}
-                                                className="flex flex-row items-center gap-2 bg-[#FFFFFF77] dark:bg-[#d9d9d947] px-3 py-3 rounded-lg hover:bg-[#d9d9d934] transition cursor-pointer"
-                                            >
-                                                <img src={getIcon({ type: connection.type }, { darkMode: isDarkMode })} className="w-7" alt={"type_icon"} />
-                                                <p className="m-0 p-0 text-black_text dark:text-white_text text-base font-normal line-clamp-1">
-                                                    {connection.title}
-                                                </p>
+                                Object.entries(documentLinks.reduce((acc, connection) => {
+                                    if (!acc[connection.connection]) {
+                                        acc[connection.connection] = [];
+                                    }
+                                    acc[connection.connection].push(connection);
+                                    return acc;
+                                }, {})).map(([connectionType, connections], index) => (
+                                    <div key={index} className="flex flex-col gap-3 bg-[#76767655] dark:bg-[#D9D9D90E] p-3 rounded-xl">
+                                        <div className="flex flex-row justify-between items-center cursor-pointer"
+                                            onClick={() => setCollapsedSections(prevState => ({
+                                                ...prevState,
+                                                [connectionType]: !prevState[connectionType]
+                                            }))}
+                                            onKeyUp={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    setCollapsedSections(prevState => ({
+                                                        ...prevState,
+                                                        [connectionType]: !prevState[connectionType]
+                                                    }));
+                                                }
+                                            }}>
+                                            <h3 className="p-0 m-0 text-black_text dark:text-white_text text-sm">
+                                                {connectionType ? formatString(connectionType) : ''}
+                                            </h3>
+                                            <div className="text-black_text dark:text-white_text text-base right-4 hover:text-gray-400">
+                                                <i className={`bi ${collapsedSections[connectionType] ? 'bi-caret-down' : 'bi-caret-up'} text-2xl`}></i>
                                             </div>
                                         </div>
-                                    ))}
-                                </div>
-                            )) : <div className="flex flex-col justify-content-center align-content-center w-full h-full">
+                                        {!collapsedSections[connectionType] && connections.map((connection, idx) => (
+                                            <div key={idx} className="flex flex-col gap-1">
+                                                <div
+                                                    onClick={() => {
+                                                        setDocumentId(connection.id);
+                                                    }}
+                                                    onKeyUp={(e) => {
+                                                        if (e.key === 'Enter') {
+                                                            setDocumentId(connection.id);
+                                                        }
+                                                    }}
+                                                    className="flex flex-row items-center gap-2 bg-[#FFFFFF77] dark:bg-[#d9d9d947] px-3 py-3 rounded-lg hover:bg-[#d9d9d934] transition cursor-pointer"
+                                                >
+                                                    <img src={getIcon({ type: connection.type }, { darkMode: isDarkMode })} className="w-7" alt={"type_icon"} />
+                                                    <p className="m-0 p-0 text-black_text dark:text-white_text text-base font-normal line-clamp-1">
+                                                        {connection.title}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )) : <div className="flex flex-col justify-content-center align-content-center w-full h-full">
                                     <p className="m-0 p-0 text-center text_black_text dark:text-white_text">No Connections</p>
                                 </div>
                         ) : (
                             <>
                                 {
                                     files.length > 0 ?
-                                    Object.entries(groupedFiles).map(([fileType, fileGroup], index) => (
-                                    <div key={index} className="flex flex-col gap-3 bg-[#76767655] dark:bg-[#D9D9D90E] p-3 rounded-xl">
-                                        <div
-                                            className="flex flex-row justify-between items-center cursor-pointer"
-                                            onClick={() => setCollapsedFileSections(prevState => ({
-                                                ...prevState,
-                                                [fileType]: !prevState[fileType]
-                                            }))}
-                                        >
-                                            <h3 className="p-0 m-0 text-black_text dark:text-white_text text-sm">
-                                                {fileType === "original" ? "Original Document" : "Attachments"}
-                                            </h3>
-                                            <div className="text-black_text dark:text-white_text text-base right-4 hover:text-gray-400">
-                                                <i className={`bi ${collapsedFileSections[fileType] ? 'bi-caret-down' : 'bi-caret-up'} text-2xl`}></i>
+                                        Object.entries(groupedFiles).map(([fileType, fileGroup], index) => (
+                                            <div key={index} className="flex flex-col gap-3 bg-[#76767655] dark:bg-[#D9D9D90E] p-3 rounded-xl">
+                                                <div
+                                                    className="flex flex-row justify-between items-center cursor-pointer"
+                                                    onClick={() => setCollapsedFileSections(prevState => ({
+                                                        ...prevState,
+                                                        [fileType]: !prevState[fileType]
+                                                    }))}
+                                                    onKeyUp={(e) => {
+                                                        if (e.key === 'Enter') {
+                                                            setCollapsedFileSections(prevState => ({
+                                                                ...prevState,
+                                                                [fileType]: !prevState[fileType]
+                                                            }));
+                                                        }
+                                                    }}
+                                                >
+                                                    <h3 className="p-0 m-0 text-black_text dark:text-white_text text-sm">
+                                                        {fileType === "original" ? "Original Document" : "Attachments"}
+                                                    </h3>
+                                                    <div className="text-black_text dark:text-white_text text-base right-4 hover:text-gray-400">
+                                                        <i className={`bi ${collapsedFileSections[fileType] ? 'bi-caret-down' : 'bi-caret-up'} text-2xl`}></i>
+                                                    </div>
+                                                </div>
+                                                {!collapsedFileSections[fileType] && fileGroup.map((file, idx) => (
+                                                    <FileItem
+                                                        key={idx}
+                                                        file={file}
+                                                        isDarkMode={isDarkMode}
+                                                        handleDownload={handleDownload}
+                                                        isDropdownOpen={openDropdown == idx} // Passa lo stato per determinare se il dropdown è aperto
+                                                        onDropdownToggle={() => handleToggleDropdown(idx)} // Passa la funzione per togglare il dropdown
+                                                    />
+                                                ))}
                                             </div>
-                                        </div>
-                                        {!collapsedFileSections[fileType] && fileGroup.map((file, idx) => (
-                                            <FileItem
-                                                key={idx}
-                                                file={file}
-                                                isDarkMode={isDarkMode}
-                                                handleDownload={handleDownload}
-                                                isDropdownOpen={openDropdown == idx} // Passa lo stato per determinare se il dropdown è aperto
-                                                onDropdownToggle={() => handleToggleDropdown(idx)} // Passa la funzione per togglare il dropdown
-                                            />
-                                        ))}
-                                    </div>
-                                ))
+                                        ))
                                         : <div className="flex flex-col justify-content-center align-content-center w-full h-full">
                                             <p className="m-0 p-0 text-center text_black_text dark:text-white_text">No Files</p>
                                         </div>
@@ -377,6 +398,12 @@ const FileItem = ({ file, isDarkMode, handleDownload, isDropdownOpen, onDropdown
                         e.stopPropagation();
                         onDropdownToggle(); // Toggle dropdown when clicked
                     }}
+                    onKeyUp={(e) => {
+                        if (e.key === 'Enter') {
+                            e.stopPropagation();
+                            onDropdownToggle();
+                        }
+                    }}
                 ></i>
             </div>
 
@@ -384,6 +411,11 @@ const FileItem = ({ file, isDarkMode, handleDownload, isDropdownOpen, onDropdown
                 <div
                     className={`absolute right-2 top-8 mt-1 z-10 ${isDarkMode ? "dark:bg-[#4F4F4F]" : "bg-[#76767655]"} rounded-lg shadow-lg w-40 transition-all dropdown`}
                     onClick={(e) => e.stopPropagation()} // Prevents modal close on click
+                    onKeyUp={(e) => {
+                        if (e.key === 'Enter') {
+                            e.stopPropagation();
+                        }
+                    }}
                 >
                     <div className="flex flex-col w-full">
                         <button

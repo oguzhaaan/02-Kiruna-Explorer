@@ -5,6 +5,8 @@ import { cleanup } from "../cleanup.js";
 import { Role } from "../../models/User.mjs";
 import path from "path";
 
+require('dotenv').config();
+
 const filePath = path.resolve(__dirname, '../file/test.pdf'); 
 const videoPath = path.resolve(__dirname, '../file/video.mp4'); 
 const basePath = "/api/documents";
@@ -100,8 +102,8 @@ const matchDocumentToStakeholders = async (usercookie, docId, stakeholders) => {
 }
 
 // Mock Data
-const urbanPlannerUser = { username: "Romeo", password: "1111" };
-const residentUser = { username: "Juliet", password: "2222" };
+const urbanPlannerUser = { username: "Romeo", password: process.env.URBAN_PLANNER_PASSWORD };
+const residentUser = { username: "Juliet", password: process.env.RESIDENT_PASSWORD };
 
 const mockDocumentbody = {
     title: 'Test Document',

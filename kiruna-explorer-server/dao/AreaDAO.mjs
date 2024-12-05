@@ -4,7 +4,7 @@ import { AreaNotFound } from "../models/Area.mjs";
 
 export default function AreaDAO() {
 
-    this.addArea = (geoJson) => {
+    this.addArea = async (geoJson) => {
         if (!geoJson) {
             return Promise.reject(new Error("GeoJson cannot be null or undefined"));
         }
@@ -13,14 +13,15 @@ export default function AreaDAO() {
             INSERT INTO area (geoJson)
             VALUES (?)
         `;
-        return new Promise( async (resolve, reject) => {
 
-            const equalid = await this.compareAreas(geoJson)
-            if(equalid) {
-                return resolve(equalid) 
+        const equalid = await this.compareAreas(geoJson)
+
+        return new Promise((resolve, reject) => {
+            if (equalid) {
+                return resolve(equalid)
             }
             else {
-                db.run(query, [geoJson], function(err) {
+                db.run(query, [geoJson], function (err) {
                     if (err) {
                         reject(err);
                     } else {
@@ -28,7 +29,7 @@ export default function AreaDAO() {
                     }
                 });
             }
-            
+
         });
     }
 
@@ -58,7 +59,7 @@ export default function AreaDAO() {
                 if (err) {
                     reject(err);
                 } else {
-                    const allAreas = rows.map((a)=>new Area(a.id,a.geoJson))
+                    const allAreas = rows.map((a) => new Area(a.id, a.geoJson))
                     resolve(allAreas);
                 }
             });
@@ -67,7 +68,7 @@ export default function AreaDAO() {
 
     this.deleteAreaById = (id) => {
         const query = "DELETE FROM area WHERE id = ?";
-    
+
         return new Promise((resolve, reject) => {
             db.run(query, [id], function (err) {
                 if (err) {
@@ -80,17 +81,17 @@ export default function AreaDAO() {
 
     this.compareAreas = (geoJson) => {
         const query = "SELECT * FROM area";
-        
+
         return new Promise((resolve, reject) => {
-            db.all(query,[], (err, rows) => {
+            db.all(query, [], (err, rows) => {
                 if (err) {
                     return reject(err);
                 }
-                const equal = rows.filter((e)=>e.geoJson == geoJson)
-                if (equal.length > 0) {resolve(equal[0].id)}
-                else {resolve(undefined)}
+                const equal = rows.filter((e) => e.geoJson == geoJson)
+                if (equal.length > 0) { resolve(equal[0].id) }
+                else { resolve(undefined) }
             });
         });
     }
-    
+
 }

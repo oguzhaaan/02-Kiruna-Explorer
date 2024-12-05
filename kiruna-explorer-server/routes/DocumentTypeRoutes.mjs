@@ -21,7 +21,6 @@ router.get("/",
         }
     }
 )
-
 router.post("/", isLoggedIn, authorizeRoles('admin', 'urban_planner'), [
     body("name")
         .trim()
@@ -39,10 +38,8 @@ router.post("/", isLoggedIn, authorizeRoles('admin', 'urban_planner'), [
         return res.status(400).json({ errors: errors.array() });
     }
 
-
-
     try {
-        //chceck if type name already exists
+        // Check if type name already exists
         const types = await DocumentTypeDao.getAllDocumentTypes();
 
         const { name } = req.body;
@@ -50,7 +47,7 @@ router.post("/", isLoggedIn, authorizeRoles('admin', 'urban_planner'), [
 
         for (const type of types) {
             if (type.name.toLowerCase() === nameLowerCase) {
-                res.status(409).json({ error: "Type name already exists" });
+                return res.status(409).json({ error: "Type name already exists" }); // Add return here
             }
         }
 

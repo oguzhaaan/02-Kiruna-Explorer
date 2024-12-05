@@ -38,19 +38,15 @@ function App() {
         }
     }, []);
 
-    // get municipal area
-    useEffect(() => {
-        try {
-            const getMunicipalArea = async () => {
-                const muniArea = await API.getAreaById(1)
-                //console.log( muniArea)
-                setMunicipalGeoJson(muniArea)
-            }
-            if ((isLoggedIn || isVisitorLoggedIn) && !municipalGeoJson) getMunicipalArea()
-        } catch (err) {
-            console.log(err)
-        }
-    }, [isLoggedIn, isVisitorLoggedIn])
+  // get municipal area
+  useEffect(() => {
+      const getMunicipalArea = async () => {
+        const muniArea = await API.getAreaById(1)
+        //console.log( muniArea)
+        setMunicipalGeoJson(muniArea)
+      }
+      if ((isLoggedIn || isVisitorLoggedIn) && !municipalGeoJson) getMunicipalArea().catch(e => console.log("Failed to run promise", e))
+  }, [isLoggedIn, isVisitorLoggedIn])
 
     return (
         <>
@@ -67,10 +63,7 @@ function App() {
                             </>
                         }>
 
-                            <Route path="/"
-                                   element={(isLoggedIn || isVisitorLoggedIn) ? (user.role === "urban_planner" ?
-                                       <Navigate replace to="/mapDocuments"/> :
-                                       <Navigate replace to="/mapDocuments"/>) : <HomePage/>}/>
+            <Route path="/" element={(isLoggedIn || isVisitorLoggedIn) ? (<Navigate replace to="/mapDocuments" />)  : <HomePage /> } />
 
                             <Route path="/login" element={isLoggedIn ? (user.role === "urban_planner" ?
                                     <Navigate replace to="/mapDocuments"/> : user.role === "resident" ?

@@ -215,6 +215,11 @@ function PaginationControls({
       <i
         className="ml-3 bi bi-arrow-left cursor-pointer text-3xl"
         onClick={previousPage}
+        onKeyUp={(e) => {
+          if (e.key === 'Enter') {
+            previousPage();
+          }
+        }}
       />
       <div className="text-xl">
         <span className="bg-primary_color_light dark:bg-customBlue rounded-md px-2">
@@ -227,6 +232,11 @@ function PaginationControls({
       <i
         className="mr-3 bi bi-arrow-right cursor-pointer  text-3xl"
         onClick={nextPage}
+        onKeyUp={(e) => {
+          if (e.key === 'Enter') {
+            nextPage();
+          }
+        }}
       />
     </div>
   );

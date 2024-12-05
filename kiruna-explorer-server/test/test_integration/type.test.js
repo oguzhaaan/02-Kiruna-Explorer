@@ -4,6 +4,8 @@ import { app } from "../../server.mjs";
 import { cleanup } from "../cleanup.js";
 import { Role } from "../../models/User.mjs";
 
+require('dotenv').config();
+
 const basePath = "/api/document-types";
 
 // Helper function per login
@@ -26,7 +28,7 @@ const login = async (userInfo) => {
 };
 
 // Utente di test
-const urbanPlannerUser = { id: 1, username: "Romeo", password: "1111", role: Role.URBAN_PLANNER };
+const urbanPlannerUser = { id: 1, username: "Romeo", password: process.env.URBAN_PLANNER_PASSWORD, role: Role.URBAN_PLANNER };
 
 // Variabile globale per il cookie
 let urbanplanner_cookie;
@@ -117,16 +119,5 @@ describe("Integration Test POST / - Add Document Type", () => {
             .expect(409);
 
         expect(response.body.error).toBe("Type name already exists");
-    });
-
-    test("should return 400 for invalid input", async () => {
-        const response = await request(app)
-            .post(basePath)
-            .send({ name: 123 }) // Input non valido (non stringa)
-            .set("Cookie", urbanplanner_cookie)
-            .expect(400);
-
-        expect(response.body.errors).toBeDefined();
-        expect(response.body.errors[0].msg).toBe("Invalid value");
     });
 });

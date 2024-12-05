@@ -259,10 +259,10 @@ const AddDocumentForm = (props) => {
   // --- Submit Form ---
   const handleConfirm = async () => {
     let area_id;
-    if (props.newAreaId.geoJson){
+    if (props.newAreaId && props.newAreaId.geoJson) {
       area_id = await API.addArea(props.newAreaId.geoJson)
     }
-    else{
+    else if(props.newAreaId) {
       area_id = props.newAreaId
     }
     // Refresh the list of the documents
@@ -324,10 +324,12 @@ const AddDocumentForm = (props) => {
       language: newDocument.language || null, // Set to null if not provided
       pageNumber: newDocument.pages || null, // Set to null if not provided
       description: newDocument.description, // Mandatory
-      areaId: area_id,
       links: props.connections.length > 0 ? props.connections : null,
     };
 
+    if(area_id) {
+      documentData.areaId = area_id;
+    }
 
     try {
       let documentId = await API.addDocument(documentData);

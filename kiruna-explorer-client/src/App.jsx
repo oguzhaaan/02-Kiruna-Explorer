@@ -11,7 +11,7 @@ import {GeoreferenceMap} from "./Components/Map.jsx";
 import DocumentClass from "./classes/Document.mjs";
 import {GeoreferenceMapDoc} from "./Components/MapDocuments.jsx";
 import {ThemeProvider} from "./contexts/ThemeContext.jsx";
-import {NewDocumentProvider, useNewDocument} from "./contexts/NewDocumentContext.jsx";
+import {NewDocumentProvider} from "./contexts/NewDocumentContext.jsx";
 import API from "./API/API.mjs";
 import DocumentsPage from "./Components/DocumentsPage.jsx";
 import DiagramBoard from "./Components/Diagram/DiagramBoard.tsx";
@@ -51,7 +51,6 @@ function App() {
     return (
         <>
             <ThemeProvider>
-                <NewDocumentProvider>
                     <Routes>
 
                         <Route element={
@@ -71,24 +70,26 @@ function App() {
                                 <LoginPage setNavShow={setNavShow}/>}/>
 
                             <Route path="/documents" element={(isLoggedIn && user.role === "urban_planner") ?
-                                <DocumentsPage setShowArea={setShowArea} municipalGeoJson={municipalGeoJson}
+                                <NewDocumentProvider>
+                                    <DocumentsPage setShowArea={setShowArea} municipalGeoJson={municipalGeoJson}
                                                updateAreaId={updateAreaId} setUpdateAreaId={setUpdateAreaId}
                                                setoriginalDocId={setoriginalDocId} setMode={setMode}
                                                connections={connections} setConnections={setConnections}
                                                setNavShow={setNavShow} setIsModalOpen={setIsModalOpen}
                                                isModalOpen={isModalOpen} newAreaId={newAreaId}
                                                setnewAreaId={setnewAreaId} setNewDocument={setNewDocument}
-                                               newDocument={newDocument}/> : <Navigate replace to="/"/>}/>
+                                               newDocument={newDocument}/></NewDocumentProvider> : <Navigate replace to="/"/>}/>
 
                             <Route path="/documents/:id" element={(isLoggedIn && user.role === "urban_planner") ?
-                                <DocumentsPage setShowArea={setShowArea} municipalGeoJson={municipalGeoJson}
+                                <NewDocumentProvider>
+                                    <DocumentsPage setShowArea={setShowArea} municipalGeoJson={municipalGeoJson}
                                                updateAreaId={updateAreaId} setUpdateAreaId={setUpdateAreaId}
                                                setoriginalDocId={setoriginalDocId} setMode={setMode}
                                                connections={connections} setConnections={setConnections}
                                                setNavShow={setNavShow} setIsModalOpen={setIsModalOpen}
                                                isModalOpen={isModalOpen} newAreaId={newAreaId}
                                                setnewAreaId={setnewAreaId} setNewDocument={setNewDocument}
-                                               newDocument={newDocument}/> : <Navigate replace to="/"/>}/>
+                                               newDocument={newDocument}/></NewDocumentProvider> : <Navigate replace to="/"/>}/>
 
                             <Route path="/map" element={(isLoggedIn && user.role === "urban_planner") ?
                                 <GeoreferenceMap municipalGeoJson={municipalGeoJson} setUpdateAreaId={setUpdateAreaId}
@@ -114,7 +115,6 @@ function App() {
 
                         </Route>
                     </Routes>
-                </NewDocumentProvider>
             </ThemeProvider>
         </>
     );

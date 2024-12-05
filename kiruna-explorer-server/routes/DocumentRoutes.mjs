@@ -654,7 +654,7 @@ const storage = multer.diskStorage({
         cb(null, `${uniqueSuffix}-${file.originalname}`);
     },
     limits: {
-        fileSize: 10000000 // Sensitive: 10MB is more than the recommended limit of 8MB
+        fileSize: 7000000 // Sensitive: 10MB is more than the recommended limit of 8MB
     }
 });
 

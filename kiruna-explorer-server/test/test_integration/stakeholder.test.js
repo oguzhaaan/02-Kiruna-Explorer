@@ -9,6 +9,8 @@ const basePath = "/api/document-stakeholders";
 const docPath = "/api/documents"
 const typePath = "/api/document-types";
 
+require('dotenv').config();
+
 const StakeholderDao = new StakeholderDAO();
 
 const mockDocumentbodyToAdd = {
@@ -89,7 +91,7 @@ const login = async (userInfo) => {
 };
 
 // Utenti di test
-const urbanPlannerUser = { id: 1, username: "Romeo", password: "1111", role: Role.URBAN_PLANNER };
+const urbanPlannerUser = { id: 1, username: "Romeo", password: process.env.URBAN_PLANNER_PASSWORD, role: Role.URBAN_PLANNER };
 
 // Mock per stakeholder
 const mockStakeholders = ["Stakeholder1", "Stakeholder2"];

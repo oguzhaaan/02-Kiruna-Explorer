@@ -1,19 +1,19 @@
 import express from "express";
 import multer from "multer"; // Package: multer
-import {fileURLToPath} from "url";
+import { fileURLToPath } from "url";
 import path from "path";
-import {promises as fs} from "fs";
+import { promises as fs } from "fs";
 import DocumentDAO from "../dao/DocumentDAO.mjs";
-import {body, param, validationResult} from "express-validator";
+import { body, param, validationResult } from "express-validator";
 import AreaDAO from "../dao/AreaDAO.mjs";
 import Area from "../models/Area.mjs";
 import DocumentLinksDAO from "../dao/DocumentLinksDAO.mjs";
 import Link from "../models/Link.mjs";
-import {isLoggedIn} from "../auth/authMiddleware.mjs";
-import {InvalidArea, AreaNotFound} from "../models/Area.mjs";
-import {DocumentNotFound} from "../models/Document.mjs";
-import {authorizeRoles} from "../auth/authMiddleware.mjs";
-import {query} from "express-validator";
+import { isLoggedIn } from "../auth/authMiddleware.mjs";
+import { InvalidArea, AreaNotFound } from "../models/Area.mjs";
+import { DocumentNotFound } from "../models/Document.mjs";
+import { authorizeRoles } from "../auth/authMiddleware.mjs";
+import { query } from "express-validator";
 import DocumentTypDAOo from "../dao/DocumentTypDAO.mjs";
 import StakeholderDAO from "../dao/StakeholderDAO.mjs";
 import FileDAO from "../dao/FileDAO.mjs";
@@ -25,6 +25,8 @@ const DocumentLinksDao = new DocumentLinksDAO();
 const FileDao = new FileDAO();
 const DocumentTypeDao = new DocumentTypDAOo();
 const StakeholderDao = new StakeholderDAO();
+const crypto = require('crypto');
+
 
 /* GET /api/documents/filter */
 /*
@@ -57,17 +59,17 @@ router.get(
             .withMessage("End date must be a valid date"),
         query("offset")
             .optional()
-            .isInt({min: 0})
+            .isInt({ min: 0 })
             .withMessage("Offset must be a non-negative integer"),
     ],
     async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({errors: errors.array()});
+            return res.status(400).json({ errors: errors.array() });
         }
 
         try {
-            const {type, title, stakeholders, startDate, endDate, offset} =
+            const { type, title, stakeholders, startDate, endDate, offset } =
                 req.query;
             const stakeholdersArray = stakeholders ? stakeholders.split(",") : [];
 
@@ -85,7 +87,7 @@ router.get(
             console.error("Error fetching documents:", err);
             res
                 .status(500)
-                .json({error: "Internal server error", details: err.message});
+                .json({ error: "Internal server error", details: err.message });
         }
     }
 );
@@ -112,11 +114,11 @@ router.get(
     async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({errors: errors.array()});
+            return res.status(400).json({ errors: errors.array() });
         }
 
         try {
-            const {type, title, stakeholders, startDate, endDate} = req.query;
+            const { type, title, stakeholders, startDate, endDate } = req.query;
             const stakeholdersArray = stakeholders ? stakeholders.split(",") : null;
             const documents = await DocumentDao.getDocumentsByFilter({
                 type,
@@ -131,7 +133,7 @@ router.get(
             console.error("Error fetching documents:", err);
             res
                 .status(500)
-                .json({error: "Internal server error", details: err.message});
+                .json({ error: "Internal server error", details: err.message });
         }
     }
 );
@@ -148,7 +150,7 @@ router.get("/",
             res.status(200).json(documents);
         } catch (error) {
             console.error("Error in getAllDocuments function:", error.message);
-            res.status(500).json({error: err.message});
+            res.status(500).json({ error: err.message });
         }
     }
 );
@@ -164,7 +166,7 @@ router.get("/:DocId",
     async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({errors: errors.array()});
+            return res.status(400).json({ errors: errors.array() });
         }
 
         try {
@@ -175,7 +177,7 @@ router.get("/:DocId",
             res.status(200).json(document);
         } catch (err) {
             console.error("Error fetching document:", err);
-            res.status(err.status).json({error: err});
+            res.status(err.status).json({ error: err });
         }
     }
 );
@@ -197,13 +199,13 @@ router.get("/area/:areaId",
             console.error("Error fetching documents by area:", err);
 
             if (err instanceof InvalidArea) {
-                res.status(400).json({error: "Invalid area ID"});
+                res.status(400).json({ error: "Invalid area ID" });
             } else if (err instanceof DocumentNotFound) {
-                res.status(404).json({error: "No documents found for this area"});
+                res.status(404).json({ error: "No documents found for this area" });
             } else if (err instanceof AreaNotFound) {
-                res.status(404).json({error: "Area not found"});
+                res.status(404).json({ error: "Area not found" });
             } else {
-                res.status(500).json({error: "Internal server error"});
+                res.status(500).json({ error: "Internal server error" });
             }
         }
     }
@@ -238,13 +240,13 @@ router.post(
             .withMessage("Type id must be a number"),
 
         body("language")
-            .optional({nullable: true, checkFalsy: true}) // Ignora se è `null` o stringa vuota
+            .optional({ nullable: true, checkFalsy: true }) // Ignora se è `null` o stringa vuota
             .isString()
             .withMessage("Language must be a string"),
 
         body("pages")
-            .optional({nullable: true, checkFalsy: true})
-            .isInt({min: 1})
+            .optional({ nullable: true, checkFalsy: true })
+            .isInt({ min: 1 })
             .withMessage("Page number must be a positive integer"),
 
         body("description")
@@ -253,12 +255,12 @@ router.post(
             .withMessage("Description is required"),
 
         body("links")
-            .optional({nullable: true, checkFalsy: true})
-            .isArray({min: 1})
+            .optional({ nullable: true, checkFalsy: true })
+            .isArray({ min: 1 })
             .withMessage("Links must be an array"),
 
         body("areaId")
-            .optional({nullable: true, checkFalsy: true})
+            .optional({ nullable: true, checkFalsy: true })
             .isInt()
             .withMessage("Area ID must be a number"),
 
@@ -275,10 +277,10 @@ router.post(
         //     }),
 
         body("planNumber")
-            .if((_, {req}) => req.body.scale === "plan")
+            .if((_, { req }) => req.body.scale === "plan")
             .notEmpty()
             .withMessage("Plan number is required when scale is 'plan'")
-            .isInt({min: 1})
+            .isInt({ min: 1 })
             .withMessage("Plan number must be a positive integer"),
     ],
     async (req, res) => {
@@ -286,7 +288,7 @@ router.post(
         if (!errors.isEmpty()) {
             return res
                 .status(400)
-                .json({message: errors.array().map((e) => e.msg)});
+                .json({ message: errors.array().map((e) => e.msg) });
         }
 
         try {
@@ -298,7 +300,7 @@ router.post(
             if (areaId) {
                 const areaExists = await AreaDao.getAreaById(areaId);
                 if (!areaExists) {
-                    return res.status(404).json({message: "Area not found"});
+                    return res.status(404).json({ message: "Area not found" });
                 }
             } else {
                 // If areaId is not provided, set it to null
@@ -309,7 +311,7 @@ router.post(
             console.log(typeId);
             const typeExists = await DocumentTypeDao.getDocumentTypeById(typeId);
             if (!typeExists) {
-                return res.status(404).json({message: "Type not found"});
+                return res.status(404).json({ message: "Type not found" });
             }
 
             // Add the document with the areaId (which could be null)
@@ -330,10 +332,10 @@ router.post(
 
             res
                 .status(201)
-                .json({lastId: lastId, message: "Document added successfully"});
+                .json({ lastId: lastId, message: "Document added successfully" });
         } catch (err) {
             console.error("Error adding document:", err);
-            res.status(err.status).json({message: err.message});
+            res.status(err.status).json({ message: err.message });
         }
     }
 );
@@ -351,7 +353,7 @@ router.get(
     async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({errors: errors.array()});
+            return res.status(400).json({ errors: errors.array() });
         }
 
         try {
@@ -391,7 +393,7 @@ router.get(
             res.json(linkedDocuemnts);
         } catch (error) {
             console.error("Error in getDocumentById function:", error.message);
-            res.status(500).json({error: error.message});
+            res.status(500).json({ error: error.message });
         }
     }
 );
@@ -408,7 +410,7 @@ router.delete(
     async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({errors: errors.array()});
+            return res.status(400).json({ errors: errors.array() });
         }
 
         try {
@@ -419,12 +421,12 @@ router.delete(
             if (deleteResult.deletedCount === 0) {
                 return res
                     .status(200)
-                    .json({message: "No links found for this document ID"});
+                    .json({ message: "No links found for this document ID" });
             }
-            res.status(200).json({message: "All links deleted successfully"});
+            res.status(200).json({ message: "All links deleted successfully" });
         } catch (error) {
             console.error("Error in deleteAll function:", error.message);
-            res.status(500).json({error: error.message});
+            res.status(500).json({ error: error.message });
         }
     }
 );
@@ -451,7 +453,7 @@ router.post(
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             //console.log(errors.array().map((e) => e.msg));
-            return res.status(400).json({errors: errors.array()});
+            return res.status(400).json({ errors: errors.array() });
         }
         //check if connection type is valid
         const connections = [
@@ -462,7 +464,7 @@ router.post(
         ];
 
         if (!connections.includes(req.body.connection)) {
-            return res.status(402).json({error: "Invalid connection type"});
+            return res.status(402).json({ error: "Invalid connection type" });
         }
         const newLink = new Link(
             null,
@@ -475,7 +477,7 @@ router.post(
         try {
             const linkExists = await DocumentLinksDao.isLink(newLink);
             if (linkExists) {
-                return res.status(403).json({error: "Link already exists"});
+                return res.status(403).json({ error: "Link already exists" });
             }
         } catch (error) {
             console.error("Error in linkExists function:", error.message);
@@ -491,16 +493,16 @@ router.post(
             const doc2Exists = await DocumentDao.getDocumentById(req.body.doc2Id);
         } catch (error) {
             console.error("Error in isLink function:", error.message);
-            return res.status(404).json({error: "Document 1 or 2 not found"});
+            return res.status(404).json({ error: "Document 1 or 2 not found" });
             //  throw new Error("Unable to check if documents exist. Please check your connection and try again.");
         }
 
         try {
             const result = await DocumentLinksDao.addLinktoDocument(newLink);
-            res.status(200).json({message: "Link added successfully"});
+            res.status(200).json({ message: "Link added successfully" });
         } catch (error) {
             console.error("Error in addLinktoDocument function:", error.message);
-            res.status(500).json({error: err.message});
+            res.status(500).json({ error: err.message });
         }
     }
 );
@@ -511,14 +513,14 @@ router.post(
     authorizeRoles("admin", "urban_planner"),
     [
         body("links")
-            .isArray({min: 0})
+            .isArray({ min: 0 })
             .withMessage("Links must be a not empty array"),
     ],
 
     async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({errors: errors.array()});
+            return res.status(400).json({ errors: errors.array() });
         }
         //check if connection type is valid
         const validConnections = [
@@ -600,10 +602,10 @@ router.post(
                 }
             }
 
-            res.json({message: "Links added successfully"});
+            res.json({ message: "Links added successfully" });
         } catch (error) {
             console.error("Error in addLinktoDocument function:", error.message);
-            return res.status(500).json({error: error.message});
+            return res.status(500).json({ error: error.message });
         }
     }
 );
@@ -613,24 +615,24 @@ router.put(
     isLoggedIn,
     authorizeRoles("admin", "urban_planner"),
     (req, res) => {
-        const {DocId} = req.params;
-        const {newAreaId} = req.body;
+        const { DocId } = req.params;
+        const { newAreaId } = req.body;
 
         DocumentDao.updateDocumentAreaId(Number(DocId), Number(newAreaId))
             .then(() => {
                 res
                     .status(200)
-                    .json({message: "Document areaId updated successfully"});
+                    .json({ message: "Document areaId updated successfully" });
             })
             .catch((error) => {
                 if (error instanceof InvalidArea) {
-                    res.status(400).json({error: "Invalid area ID"});
+                    res.status(400).json({ error: "Invalid area ID" });
                 } else if (error instanceof AreaNotFound) {
-                    res.status(404).json({error: "Area not found"});
+                    res.status(404).json({ error: "Area not found" });
                 } else if (error instanceof DocumentNotFound) {
-                    res.status(404).json({error: "Document not found"});
+                    res.status(404).json({ error: "Document not found" });
                 } else {
-                    res.status(500).json({error: "Internal server error"});
+                    res.status(500).json({ error: "Internal server error" });
                 }
             });
     }
@@ -641,25 +643,28 @@ const storage = multer.diskStorage({
     destination: async (req, file, cb) => {
         const uploadPath = path.join(__dirname, "uploads");
         try {
-            await fs.mkdir(uploadPath, {recursive: true});
+            await fs.mkdir(uploadPath, { recursive: true });
         } catch (error) {
             return cb(error);
         }
         cb(null, uploadPath);
     },
     filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+        const uniqueSuffix = crypto.randomBytes(8).toString('hex'); // Generates a random 16-character hex string
         cb(null, `${uniqueSuffix}-${file.originalname}`);
     },
+    limits: {
+        fileSize: 10000000 // Sensitive: 10MB is more than the recommended limit of 8MB
+    }
 });
 
 const multerErrorHandler = (err, req, res, next) => {
     if (err instanceof multer.MulterError) {
         // Errori specifici di Multer (es: dimensione file)
-        return res.status(400).json({error: `Multer error: ${err.message}`});
+        return res.status(400).json({ error: `Multer error: ${err.message}` });
     } else if (err.code === "INVALID_FILE_TYPE") {
         // Errore personalizzato per tipo di file non valido
-        return res.status(400).json({error: err.message});
+        return res.status(400).json({ error: err.message });
     }
     // Errori generici
     next(err);
@@ -704,19 +709,19 @@ router.post(
         // Handle validation errors
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({errors: errors.array()});
+            return res.status(400).json({ errors: errors.array() });
         }
         //check if file was uploaded
         if (!req.file) {
             return res
                 .status(400)
-                .json({error: "File upload failed. No file provided."});
+                .json({ error: "File upload failed. No file provided." });
         }
         // Check file size
         if (req.file.size > MAX_SIZE) {
             return res
                 .status(400)
-                .json({error: "File size exceeds the maximum limit of 20MB."});
+                .json({ error: "File size exceeds the maximum limit of 20MB." });
         }
         //check if file type is allowed
         const allowedTypes = ["attachment", "original"];
@@ -739,7 +744,7 @@ router.post(
             if (!attachmentID) {
                 return res
                     .status(500)
-                    .json({error: "Unable to store file. Please try again later."});
+                    .json({ error: "Unable to store file. Please try again later." });
             }
             res.status(200).json({
                 message: "File uploaded successfully",
@@ -751,7 +756,7 @@ router.post(
             console.error("Error in storeFile function:", error.message);
             return res
                 .status(500)
-                .json({error: "Unable to store file. Please try again later."});
+                .json({ error: "Unable to store file. Please try again later." });
         }
     },
     multerErrorHandler
@@ -770,16 +775,16 @@ router.get(
     async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({errors: errors.array()});
+            return res.status(400).json({ errors: errors.array() });
         }
         try {
-            const {DocId, FileId} = req.params;
+            const { DocId, FileId } = req.params;
 
             //add function to get file path from id
             const FilePath = await FileDao.getFilePathById(FileId);
 
             if (!FilePath) {
-                return res.status(404).json({error: "File not found"});
+                return res.status(404).json({ error: "File not found" });
             }
             //console.log(FilePath);
 
@@ -790,16 +795,16 @@ router.get(
                 await fs.access(filePathToDownload); // Verifica se il file esiste
                 res.download(filePathToDownload, (err) => {
                     if (err) {
-                        res.status(500).json({error: "Failed to download the file"});
+                        res.status(500).json({ error: "Failed to download the file" });
                     }
                 });
             } catch (error) {
                 // Se il file non esiste, invia un errore senza far crashare l'app
-                res.status(404).json({error: "File not found"});
+                res.status(404).json({ error: "File not found" });
             }
         } catch (error) {
             console.error("Error in file download:", error.message);
-            res.status(500).json({error: error.message});
+            res.status(500).json({ error: error.message });
         }
     }
 );
@@ -817,16 +822,16 @@ router.delete(
     async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({errors: errors.array()});
+            return res.status(400).json({ errors: errors.array() });
         }
         try {
-            const {DocId, FileId} = req.params;
+            const { DocId, FileId } = req.params;
 
             //add function to get file path from id
             const FilePath = await FileDao.getFilePathById(FileId);
 
             if (!FilePath) {
-                return res.status(404).json({error: "File not found"});
+                return res.status(404).json({ error: "File not found" });
             }
             //console.log(FilePath);
 
@@ -835,7 +840,7 @@ router.delete(
                     //console.log('Error deleting file:', err);
                     return res
                         .status(500)
-                        .json({error: "Failed to delete the physical file"});
+                        .json({ error: "Failed to delete the physical file" });
                 }
             });
             //console.log("File deleted successfully");
@@ -844,12 +849,12 @@ router.delete(
             const deleteResult = await FileDao.deleteFile(FileId);
 
             if (deleteResult.deletedCount === 0) {
-                return res.status(405).json({error: "File not found in database"});
+                return res.status(405).json({ error: "File not found in database" });
             }
 
-            res.status(200).json({message: "File deleted successfully"});
+            res.status(200).json({ message: "File deleted successfully" });
         } catch (error) {
-            res.status(500).json({error: "Error in the delete function"});
+            res.status(500).json({ error: "Error in the delete function" });
         }
     }
 );
@@ -877,7 +882,7 @@ router.get(
             console.error("Error fetching files:", error);
             res
                 .status(500)
-                .json({error: "An error occurred while fetching files."});
+                .json({ error: "An error occurred while fetching files." });
         }
     }
 );

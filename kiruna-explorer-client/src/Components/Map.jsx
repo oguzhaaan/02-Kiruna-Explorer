@@ -434,7 +434,7 @@ function GeoreferenceMap(props) {
     const handleSave = async () => {
         try {
             let area
-            //If he drows a new area
+            //If he draws a new area
             if (drawnObject) {
                 if (props.updateAreaId.docId) {
                     area = await API.addArea(drawnObject)
@@ -452,7 +452,7 @@ function GeoreferenceMap(props) {
 
             // if update area is not null then update, else set new area id for the form
             props.updateAreaId.docId ? await API.updateDocumentArea(props.updateAreaId.docId, area) : props.setnewAreaId(area)
-            props.setUpdateAreaId({ areaId: "done", docId: "done" })
+            if(props.updateAreaId.docId) { props.setUpdateAreaId({ areaId: "done", docId: "done" }) }
             navigate(-1);
         } catch (err) {
             setAlertCustomMessage(["We encountered some errors, check your connection and retry", 'error'])

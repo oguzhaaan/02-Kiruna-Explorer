@@ -139,7 +139,7 @@ function NavHeader(props) {
                                             <i className={`bi bi-door-open-fill fs-3 align-middle ${isDarkMode ? 'text-white_text' : 'text-black_text'}`}></i>
                                         </Col>
                                         <Col className={`${isDarkMode ? 'text-white_text' : 'text-black_text'} my-auto`}>
-                                            Logout
+                                            {isVisitorLoggedIn ? "Back to Home" : "Logout"}
                                         </Col>
                                     </Row>
                                 </div>

@@ -17,6 +17,7 @@ import { query } from "express-validator";
 import DocumentTypDAOo from "../dao/DocumentTypDAO.mjs";
 import StakeholderDAO from "../dao/StakeholderDAO.mjs";
 import FileDAO from "../dao/FileDAO.mjs";
+import crypto from "node:crypto"
 
 const router = express.Router();
 const AreaDao = new AreaDAO();
@@ -25,7 +26,7 @@ const DocumentLinksDao = new DocumentLinksDAO();
 const FileDao = new FileDAO();
 const DocumentTypeDao = new DocumentTypDAOo();
 const StakeholderDao = new StakeholderDAO();
-const crypto = require('crypto');
+//const crypto = require('crypto');
 
 
 /* GET /api/documents/filter */

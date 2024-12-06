@@ -90,6 +90,7 @@ Definition of Done:
 - Improvement goals for the next sprint and how to achieve them (technical tasks, team coordination, etc.)
 
   - Improve the test coverage by adding more tests for the new features.
+  - Improve  the end-to-end testing. We started learning a new framweork for this  task so would like to increment the usage of it.
   - Give more importance to SonarCloud issues, in order to not find out at the end of the sprint that there are many problems to fix all at once.
   - The priority should first complete the changes related to the previous sprint, remembering that the changes should be merged as soon as possible so that everyone can start correctly working on the new ones.
 

@@ -51,7 +51,6 @@ function GeoreferenceMapDoc(props) {
   const location = useLocation();
   const currentRoute = location.pathname;
 
-  const isSingleDoc = currentRoute.includes("documents")
   //define default  position to "center of Kiruna"
   const center = [68.20805, 20.593249999999998]
 
@@ -66,6 +65,8 @@ function GeoreferenceMapDoc(props) {
   const [OpenTooltipDocs, setOpenTooltipDocs] = useState(null)
   const [ShowSingleDocument, setShowSingleDocument] = useState(false);
   const [documentId, setDocumentId] = useState(null);
+
+  const isSingleDoc = currentRoute.includes("documents") || currentRoute.includes("diagram") 
 
   const mapRef = useRef(null);
 
@@ -83,15 +84,18 @@ function GeoreferenceMapDoc(props) {
   {/* Refresh to show modifications*/ }
   useEffect(() => {
     //refresh
-  }, [presentAreas, ShowSingleDocument, props.municipalGeoJson, props.showArea, isSatelliteMap, isDarkMode])
+  }, [presentAreas, ShowSingleDocument, props.municipalGeoJson, props.showArea, isSatelliteMap, isDarkMode, alertMessage])
 
   // Mouse over the area
   const handleMouseOver = (id, content) => {
-    if (id === 1) {
+    if (id === 1 && content!==0) {
       setAlertMessage(`${content} documents in Municipal Area`)
     }
-    else {
+    else if (content!==0){
       setAlertMessage(`${content} documents in this spot`)
+    }
+    else{
+      setAlertMessage("The document selected is in this spot")
     }
     setClickedArea(id)
   };
@@ -104,7 +108,7 @@ function GeoreferenceMapDoc(props) {
   return (
     <>
       <div className={isDarkMode ? "dark" : "light"}>
-        {ShowSingleDocument && <SingleDocumentMap setDocumentId={setDocumentId} id={documentId} setShowSingleDocument={setShowSingleDocument}></SingleDocumentMap>}
+        {ShowSingleDocument && <SingleDocumentMap setShowArea={props.setShowArea} municipalGeoJson={props.municipalGeoJson} setDocumentId={setDocumentId} id={documentId} setShowSingleDocument={setShowSingleDocument}></SingleDocumentMap>}
         <MapContainer
           center={center}
           zoom={5} ref={mapRef}

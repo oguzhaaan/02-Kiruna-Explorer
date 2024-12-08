@@ -105,7 +105,8 @@ function App() {
                                 <LinkDocuments setOriginalDocId={setoriginalDocId} originalDocId={docId} mode={mode}
                                                setConnectionsInForm={setConnections}/> : <Navigate replace to="/"/>}/>
 
-                            <Route path="/diagram" element={(isLoggedIn || isVisitorLoggedIn) ? <DiagramBoard/> :
+                            <Route path="/diagram" element={(isLoggedIn || isVisitorLoggedIn) ? 
+                            <DiagramBoard setShowArea={setShowArea} municipalGeoJson={municipalGeoJson}/> :
                                 <Navigate replace to="/"/>}/>
 
                             <Route path="*" element={isLoggedIn ? (user.role === "urban_planner" ?

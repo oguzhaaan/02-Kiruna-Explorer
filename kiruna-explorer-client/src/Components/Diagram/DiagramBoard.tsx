@@ -39,7 +39,7 @@ export type DiagramItem = {
     y: number
 }
 
-const DiagramBoard = () => {
+const DiagramBoard = (props) => {
     const { isDarkMode } = useTheme();
     const [colorMode, setColorMode] = useState<ColorMode>(isDarkMode ? "dark" : "light");
     const [zoom, setZoom] = useState(1); // Add zoom state
@@ -59,6 +59,7 @@ const DiagramBoard = () => {
 
     const months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
     const [isLegendVisible, setIsLegendVisible] = useState(false);
+    const [allLinkVisible, setAllLinkVisible] = useState(false)
 
     const connections = [
         { name: "Direct Consequence", color: "#E82929" },
@@ -66,7 +67,6 @@ const DiagramBoard = () => {
         { name: "Projection", color: "#4F43F1" },
         { name: "Update", color: "#E79716" }
     ];
-
 
     useEffect(() => {
         setColorMode(isDarkMode ? "dark" : "light")
@@ -83,7 +83,7 @@ const DiagramBoard = () => {
     };
 
     const setNodeOpen = (nodeindex: number, cancel?: boolean) => {
-        if (nodeindex == 0) {
+        if (nodeindex == -1) {
             setNodeIsOpen({})
         }
         else if (cancel) {
@@ -98,7 +98,6 @@ const DiagramBoard = () => {
                 [nodeindex]: true,
             }));
         }
-
     };
 
     const distanceBetweenYears = 400;
@@ -215,7 +214,7 @@ const DiagramBoard = () => {
                             id: `${item.docid}`,
                             type: 'singleNode',
                             position: { x: positions[index1].x, y: positions[index1].y },
-                            data: { clickedNode: clickedNode, group: [item], zoom: zoom, index: index },
+                            data: { clickedNode: clickedNode, group: [item], zoom: zoom, index: index, showSingleDocument: (id: string) => { setDocumentId(id), setShowSingleDocument(true) } },
                             draggable: false,
                         }));
 
@@ -224,7 +223,7 @@ const DiagramBoard = () => {
                             type: 'closeNode',
                             position: { x: e.x + 10, y: e.y + 10 },
                             data: { zoom: zoom, index: index },
-                            draggable: false,
+                            draggable: true,
                         };
 
                         return [...nodes, closeNode];
@@ -233,15 +232,15 @@ const DiagramBoard = () => {
                             id: `${nodeSelected}`,
                             type: nodetype,
                             position: { x: e.x, y: e.y },
-                            data: { clickedNode: clickedNode, group: e.items, zoom: zoom, index: index, setNodeSelected: (id: number) => setNodeSelected(index, `${id}`) },
-                            draggable: false,
+                            data: { clickedNode: clickedNode, group: e.items, zoom: zoom, index: index, setNodeSelected: (id: number) => setNodeSelected(index, `${id}`), showSingleDocument: (id: string) => { setDocumentId(id), setShowSingleDocument(true) } },
+                            draggable: true,
                         };
                     }
                 }),
             ]
             setNodes(initialNodes)
         }
-        if (zoom <= 1.1) setNodeOpen(0)
+        if (zoom <= 1.1) setNodeOpen(-1)
         getNodes()
     }, [documents, clickedNode, zoom, nodeStates])
 
@@ -270,7 +269,7 @@ const DiagramBoard = () => {
                             source: `${docid}`,
                             target: `${dl[0]}`,
                             type: "custom",
-                            data: { typesOfConnections: dl[1] }
+                            data: { typesOfConnections: dl[1], selectedEdge: `${docid}` === clickedNode || `${docid}` === hoveredNode || allLinkVisible }
                         }
                     ))
                 })
@@ -279,9 +278,9 @@ const DiagramBoard = () => {
             setLinks(resolvedEdges)
         }
         getLinks()
-    }, [nodes, nodeStates])
+    }, [nodes, nodeStates, hoveredNode, allLinkVisible])
 
-    const filteredEdges = links.filter(edge => edge.source === clickedNode || edge.source === hoveredNode);
+    //const filteredEdges = links.filter(edge => edge.source === clickedNode || edge.source === hoveredNode);
 
     //boundaries
     const extent: [[number, number], [number, number]] = [
@@ -291,15 +290,15 @@ const DiagramBoard = () => {
 
     return (
         <div className={`${isDarkMode ? "dark" : "light"} w-screen h-screen`}>
-            {ShowSingleDocument && <SingleDocumentMap setDocumentId={setDocumentId} id={documentId} setShowSingleDocument={setShowSingleDocument}></SingleDocumentMap>}
+            {ShowSingleDocument && <SingleDocumentMap setShowArea={props.setShowArea} municipalGeoJson={props.municipalGeoJson} setDocumentId={setDocumentId} id={documentId} setShowSingleDocument={setShowSingleDocument}></SingleDocumentMap>}
             <ReactFlow
                 nodes={nodes}
-                edges={filteredEdges}
+                edges={links}
                 nodeTypes={nodeTypes}
                 edgeTypes={edgeTypes}
                 colorMode={colorMode}
                 nodeExtent={extent}
-                minZoom={0.3}
+                minZoom={0.4}
                 translateExtent={extent}
                 zoomOnDoubleClick={false}
                 onNodeClick={(event, node) => {
@@ -314,7 +313,7 @@ const DiagramBoard = () => {
                         }
                         if (node.type === "groupNode") {
                             if (zoom <= 1) {
-                                setNodeOpen(0)
+                                setNodeOpen(-1)
                             }
                             else if (clickedNode == node.id) {
                                 setNodeOpen(node.data.index, true)
@@ -335,7 +334,6 @@ const DiagramBoard = () => {
 
                 }}
                 onNodeDoubleClick={(event, node) => {
-                    console.log(node);
                     setShowSingleDocument(true);
                     setDocumentId(node.id);
                 }}
@@ -390,9 +388,30 @@ const DiagramBoard = () => {
                         );
                     })
                 ))}
+                {/* Linea verticale rossa per il giorno corrente */}
+                {(() => {
+                    const currentDate = new Date();
+                    const currentYearIndex = yearsRange.indexOf(currentDate.getFullYear());
+                    const currentMonthIndex = currentDate.getMonth();
+                    const daysInMonth = new Date(currentDate.getFullYear(), currentMonthIndex + 1, 0).getDate();
+                    const dayFraction = currentDate.getDate() / daysInMonth;
+
+                    const currentDayPosition = currentYearIndex * 400 * zoom + (viewport?.x || 0)
+                        + currentMonthIndex * (400 / 12) * zoom
+                        + dayFraction * (400 / 12) * zoom;
+
+                    return (
+                        <div
+                            className="absolute h-screen border-l border-red-500"
+                            style={{ left: `${currentDayPosition}px` }}
+                        />
+                    );
+                })()}
             </div>
-            
+
+            {/* Legend */}
             <button
+                title="legend"
                 onClick={() => setIsLegendVisible(!isLegendVisible)}
                 className="flex justify-content-center align-content-center fixed top-4 right-4 bg-white_text  dark:bg-[#323232] w-12 h-12 border-2 border-dark_node dark:border-white_text rounded-full shadow-lg hover:bg-gray-300 dark:hover:bg-[#696969] transition"
             >
@@ -400,25 +419,34 @@ const DiagramBoard = () => {
             </button>
 
             {isLegendVisible && (
-                <div className="fixed top-16 right-4 bg-white_text dark:bg-dark_node dark:text-white_text shadow-lg rounded-lg p-4 w-60">
+                <div className="z-10 fixed top-16 right-4 bg-white_text dark:bg-dark_node dark:text-white_text shadow-lg rounded-lg p-4 w-60">
                     <h3 className="text-lg font-semibold mb-2">Legend</h3>
-                    
-                        {connections.map((connection) => (
-                            <li
-                                key={connection.name}
-                                className="flex items-center justify-between text-xs mb-2"
-                            >
-                                <span>{connection.name}</span>
-                                <span
-                                    style={{ backgroundColor: connection.color }}
-                                    className="w-12 h-[2px] rounded-full"
-                                ></span>
-                            </li>
-                        ))}
-                    
-                    
+
+                    {connections.map((connection) => (
+                        <li
+                            key={connection.name}
+                            className="flex items-center justify-between text-xs mb-2"
+                        >
+                            <span>{connection.name}</span>
+                            <span
+                                style={{ backgroundColor: connection.color }}
+                                className="w-12 h-[2px] rounded-full"
+                            ></span>
+                        </li>
+                    ))}
+
+
                 </div>
             )}
+
+            {/* Link button */}
+            <button
+                title={allLinkVisible ? "Hide all connections" : "Color all connections"}
+                onClick={() => { setAllLinkVisible(prev => !prev) }}
+                className="flex justify-content-center align-content-center fixed top-20 right-4 bg-white_text  dark:bg-[#323232] w-12 h-12 border-2 border-dark_node dark:border-white_text rounded-full shadow-lg hover:bg-gray-300 dark:hover:bg-[#696969] transition"
+            >
+                <i className={`bi bi-share${allLinkVisible ? "-fill" : ""} text-[1.8em] dark:text-white_text`}></i>
+            </button>
 
         </div>
     );

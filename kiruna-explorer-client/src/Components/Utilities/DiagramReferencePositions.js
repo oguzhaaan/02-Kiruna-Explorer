@@ -37,15 +37,20 @@ export function getYPlanScale(planNumber){
 }
   
 export function getEquidistantPoints(x, y, r, N) {
-    const points = [];
-  
-    for (let i = 0; i < N; i++) {
+  const points = [];
+  const rotationAngle = Math.PI / 4; // 45 gradi in radianti
+
+  for (let i = 0; i < N; i++) {
       const angle = (2 * Math.PI * i) / N; // Angolo in radianti
       const px = x + r * Math.cos(angle); // Calcolo della coordinata x
       const py = y + r * Math.sin(angle); // Calcolo della coordinata y
-  
-      points.push({ x: px, y: py });
-    }
-  
-    return points;
+
+      // Applica la rotazione di 45 gradi
+      const rotatedX = x + (px - x) * Math.cos(rotationAngle) - (py - y) * Math.sin(rotationAngle);
+      const rotatedY = y + (px - x) * Math.sin(rotationAngle) + (py - y) * Math.cos(rotationAngle);
+
+      points.push({ x: rotatedX, y: rotatedY });
   }
+
+  return points;
+}

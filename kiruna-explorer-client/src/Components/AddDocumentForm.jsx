@@ -16,7 +16,7 @@ const AddDocumentForm = (props) => {
 
   const {
     stakeholderOptions, setStakeholderOptions,
-    selectedOption, setSelectedOption,
+    //selectedOption, setSelectedOption,
     isAddingNewStakeholder, setIsAddingNewStakeholder,
     newStakeholderName, setNewStakeholderName,
     newStakeholders, setNewStakeholders,
@@ -25,29 +25,30 @@ const AddDocumentForm = (props) => {
     isAddingNewType, setIsAddingNewType,
     newTypeName, setNewTypeName,
     selectedType, setSelectedType,
-    oldTypes, setOldTypes
+    oldTypes, setOldTypes,
   } = useNewDocument();
 
- /* const [stakeholderOptions, setStakeholderOptions] = useState([]);
-  const [selectedOption, setSelectedOption] = useState("");
-  const [isAddingNewStakeholder, setIsAddingNewStakeholder] = useState(false);
-  const [newStakeholderName, setNewStakeholderName] = useState("");
-  const [newStakeholders, setNewStakeholders] = useState([]);
-  const [oldStakeholders, setOldStakeholders] = useState([]);
-
-  const [typeOptions, setTypeOptions] = useState([]); // 'types' è la lista iniziale di tipi
-  const [isAddingNewType, setIsAddingNewType] = useState(false);
-  const [newTypeName, setNewTypeName] = useState("");
-  const [selectedType, setSelectedType] = useState("");
-  const [oldTypes, setOldTypes] = useState([]); */
+  /* const [stakeholderOptions, setStakeholderOptions] = useState([]);
+   const [selectedOption, setSelectedOption] = useState("");
+   const [isAddingNewStakeholder, setIsAddingNewStakeholder] = useState(false);
+   const [newStakeholderName, setNewStakeholderName] = useState("");
+   const [newStakeholders, setNewStakeholders] = useState([]);
+   const [oldStakeholders, setOldStakeholders] = useState([]);
+ 
+   const [typeOptions, setTypeOptions] = useState([]); // 'types' è la lista iniziale di tipi
+   const [isAddingNewType, setIsAddingNewType] = useState(false);
+   const [newTypeName, setNewTypeName] = useState("");
+   const [selectedType, setSelectedType] = useState("");
+   const [oldTypes, setOldTypes] = useState([]); */
 
   const [newDocument, setNewDocument] = [props.newDocument, props.setNewDocument];
 
   const [isValid, setIsValid] = useState(true);
 
-  /*useEffect(() => {
+  useEffect(() => {
     const inizialization = async () => {
       try {
+        console.log("Inizialization..");
         const types = await API.getAllTypes();
         setOldTypes(types);
         types.push({ id: types.length + 1, name: "Add a new one..." });
@@ -61,9 +62,13 @@ const AddDocumentForm = (props) => {
         props.setAlertMessage([err.message, "error"]);
       }
     };
-    inizialization();
+      inizialization();
+      //addNewTypeName(typeOptions);
 
-  }, [])*/
+  }, [])
+
+
+
 
   const handleTypeChange = (selectedType) => {
     const typeName = selectedType.target.value;
@@ -77,6 +82,7 @@ const AddDocumentForm = (props) => {
       setNewDocument((prevDoc) => ({
         ...prevDoc,
         typeId: typeId || "", // Usa l'ID del tipo selezionato
+        typeName: typeName || ""
       }));
     }
   };
@@ -103,10 +109,13 @@ const AddDocumentForm = (props) => {
         return updatedOptions;
       });
 
+
+      console.log(newTypeName);
       // Aggiorna il documento con il nuovo tipo selezionato (impostando il typeId)
       setNewDocument((prevDoc) => ({
         ...prevDoc,
         typeId: newType.id, // Imposta direttamente l'ID del nuovo tipo
+        typeName: newTypeName
       }));
 
       // Imposta l'opzione selezionata
@@ -121,7 +130,7 @@ const AddDocumentForm = (props) => {
       setIsAddingNewStakeholder(true);
     } else {
       // Imposta il valore selezionato e aggiorna i campi come necessario
-      setSelectedOption(selectedValues[selectedValues.length - 1]?.label || "");
+      //setSelectedOption(selectedValues[selectedValues.length - 1]?.label || "");
       handleFieldChange("stakeholders", selectedValues || []);
     }
   }
@@ -138,6 +147,11 @@ const AddDocumentForm = (props) => {
         name: newStakeholderName,
       };
 
+      const newUpdatedStakeholders = [
+        ...newDocument.newStakeholders,
+        { value: newStakeholder.id, label: newStakeholder.name },
+      ];
+
       // Aggiungi il nuovo stakeholder alla lista delle opzioni  WE WANT TO ADD THE STAKEHOLDER IN THE LIST IMMEDIATLY??
       setStakeholderOptions((prevOptions) => [
         ...prevOptions,
@@ -152,13 +166,14 @@ const AddDocumentForm = (props) => {
       setNewDocument((prevDoc) => ({
         ...prevDoc,
         stakeholders: updatedStakeholders,
+        newStakeholders: newUpdatedStakeholders
       }));
 
-      setSelectedOption(newStakeholderName);
-      setNewStakeholders((prev) => [
+      //setSelectedOption(newStakeholderName);
+     /* setNewStakeholders((prev) => [
         ...prev, // Spread dell'array precedente
         newStakeholderName // Nuovo elemento aggiunto alla fine
-      ]);
+      ]);*/
     }
     setIsAddingNewStakeholder(false);
     setNewStakeholderName("");
@@ -258,18 +273,21 @@ const AddDocumentForm = (props) => {
 
   // --- Submit Form ---
   const handleConfirm = async () => {
+    console.log(newDocument);
+
+
     let area_id;
     if (props.newAreaId && props.newAreaId.geoJson) {
       area_id = await API.addArea(props.newAreaId.geoJson)
     }
-    else if(props.newAreaId) {
+    else if (props.newAreaId) {
       area_id = props.newAreaId
     }
     // Refresh the list of the documents
 
     //CAMPI OPZIONALI: PAGE + LANGUAGE + GIORNO DELLA DATA(?) + COORDINATES
     //CAMPI OBBLIGATORI: TITLE + STAKEHOLDER + SCALE(PLANE NUMBER IN CASE) + DATE + DESCRIPTION + TYPE
-    if (!oldTypes.some((type) => type.name === selectedType)) {
+    if (!oldTypes.some((type) => type.name === newDocument.typeName)) {
       try {
         newDocument.typeId = await API.addType(selectedType);
       } catch (error) {
@@ -282,23 +300,11 @@ const AddDocumentForm = (props) => {
       console.log("TIPO ESISTENTE");
     }
 
-    let oldStakeholdersSelected = oldStakeholders.filter((st) => {
-      return newDocument.stakeholders.some((s) => {
-        return s.label === st
-      });
-    });
-
-    let newStakeholdersSelected = newStakeholders.filter((st) => {
-      return newDocument.stakeholders.some((s) => {
-        return s.label === st
-      });
-    });
-
     let stakeholdersId = [];
-    console.log(newStakeholdersSelected);
-    if (newStakeholdersSelected.length != 0) {
+    let newStakeholderNames = newDocument.newStakeholders.map((e) => e.label);
+    if (newStakeholderNames.length != 0) {
       try {
-        stakeholdersId = await API.addNewStakeholders(newStakeholdersSelected);
+        stakeholdersId = await API.addNewStakeholders(newStakeholderNames);
         console.log(stakeholdersId);
       } catch (error) {
         console.log(error);
@@ -327,10 +333,11 @@ const AddDocumentForm = (props) => {
       links: props.connections.length > 0 ? props.connections : null,
     };
 
-    if(area_id) {
+    if (area_id) {
       documentData.areaId = area_id;
     }
 
+    console.log(stakeholdersName);
     try {
       let documentId = await API.addDocument(documentData);
       props.setAlertMessage(["Document added successfully!", "success"]);
@@ -389,10 +396,10 @@ const AddDocumentForm = (props) => {
         className="bg-box_white_color dark:bg-box_color backdrop-blur-2xl shadow-xl w-1/2 px-10 py-10 h-full overflow-y-auto rounded-lg flex flex-col relative scrollbar-thin scrollbar-webkit"
         onClick={(e) => e.stopPropagation()}
         onKeyUp={(e) => {
-        if (e.key === 'Enter') {
-          e.stopPropagation();
-        }
-      }}
+          if (e.key === 'Enter') {
+            e.stopPropagation();
+          }
+        }}
       >
         <h2 className="text-black_text mb-4 dark:text-white_text text-2xl  ">
           Add New Document
@@ -672,7 +679,7 @@ const AddDocumentForm = (props) => {
           ) : (
             <select
               id="document-type"
-              value={selectedType}
+              value={newDocument.typeName}
               onChange={handleTypeChange}
               className={`w-full px-3 text-base py-2 text-black_text dark:text-white_text bg-input_color_light dark:bg-input_color_dark rounded-md ${errors.type
                 ? "border-red-500 border-1"

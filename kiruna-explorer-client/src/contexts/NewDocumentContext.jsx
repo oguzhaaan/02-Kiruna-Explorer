@@ -16,10 +16,13 @@ export const NewDocumentProvider = ({ children }) => {
     const [newTypeName, setNewTypeName] = useState("");
     const [selectedType, setSelectedType] = useState("");
     const [oldTypes, setOldTypes] = useState([]);
+    const [counter, setCounter] = useState(0);
 
-    useEffect(() => {
+
+ /*  useEffect(() => {
         const initialization = async () => {
             try {
+                console.log("Inizialization..");
                 const types = await API.getAllTypes();
                 setOldTypes(types);
                 types.push({ id: types.length + 1, name: "Add a new one..." });
@@ -33,7 +36,7 @@ export const NewDocumentProvider = ({ children }) => {
             }
         };
         initialization();
-    }, []);
+    }, []);*/
 
     return (
         <NewDocumentContext.Provider value={{
@@ -47,7 +50,8 @@ export const NewDocumentProvider = ({ children }) => {
             isAddingNewType, setIsAddingNewType,
             newTypeName, setNewTypeName,
             selectedType, setSelectedType,
-            oldTypes, setOldTypes
+            oldTypes, setOldTypes,
+            counter, setCounter
         }}>
             {children}
         </NewDocumentContext.Provider>

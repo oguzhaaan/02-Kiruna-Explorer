@@ -63,11 +63,9 @@ const AddDocumentForm = (props) => {
       }
     };
       inizialization();
-      //addNewTypeName(typeOptions);
+      console.log(newDocument);
 
-  }, [])
-
-
+  }, []);
 
 
   const handleTypeChange = (selectedType) => {
@@ -179,7 +177,9 @@ const AddDocumentForm = (props) => {
     setNewStakeholderName("");
   };
 
+
   const moveAddNewOptionToEnd = (options) => {
+    
     // Trova l'opzione "Add a new one..."
     const addNewOption = options.find(option => option.name === "Add a new one...");
     if (!addNewOption) return options; // Se non esiste, ritorna l'elenco invariato
@@ -189,6 +189,29 @@ const AddDocumentForm = (props) => {
 
     // Aggiungi l'opzione "Add a new one..." alla fine
     return [...optionsWithoutAddNew, addNewOption];
+  };
+
+
+  const moveAddNewOptionToEndType = (options) => {
+    // Trova l'opzione "Add a new one..."
+    const addNewOption = options.find(option => option.name === "Add a new one...");
+    const newOptionName = newDocument.typeName;
+  
+    // Se `newDocument.typeName` non esiste tra le opzioni, aggiungilo
+    const isNewTypeIncluded = options.some(option => option.name === newOptionName);
+    const updatedOptions = isNewTypeIncluded
+      ? options
+      : [...options, { id: options.length + 1, name: newOptionName }];
+     // setTypeOptions(updatedOptions);
+
+  
+    // Rimuovi l'opzione "Add a new one..." dalla lista, se esiste
+    const optionsWithoutAddNew = updatedOptions.filter(option => option.name !== "Add a new one...");
+  
+    // Aggiungi l'opzione "Add a new one..." alla fine
+    return addNewOption 
+      ? [...optionsWithoutAddNew, addNewOption] 
+      : optionsWithoutAddNew;
   };
 
 
@@ -688,7 +711,7 @@ const AddDocumentForm = (props) => {
             >
               <option value="none">None</option>
               {
-                moveAddNewOptionToEnd(typeOptions).map((type) => (
+                moveAddNewOptionToEndType(typeOptions).map((type) => (
                   <option key={type.id} value={type.name}>
                     {type.name}
                   </option>

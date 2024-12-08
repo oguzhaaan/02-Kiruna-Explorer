@@ -57,16 +57,59 @@ const AddDocumentForm = (props) => {
         setOldStakeholders(stakeholders);
         stakeholders.push({ id: stakeholders.length + 1, name: "Add a new one..." });
         setStakeholderOptions(stakeholders);
+        updateValues();
+
       } catch (err) {
         console.log(err.message);
         props.setAlertMessage([err.message, "error"]);
       }
     };
-      inizialization();
-      console.log(newDocument);
+    inizialization();
+    console.log(newDocument);
+    updateValues();
 
   }, []);
 
+
+  const updateValues = () => {
+    // Aggiorna i tipi
+    if (newDocument.newTypes && newDocument.newTypes.length > 0) {
+      let newTypes = newDocument.newTypes.map((type, index) => ({
+        id: type.id || typeOptions.length + index + 1, // Assegna un ID unico se non presente
+        name: type.name
+      }));
+
+      setTypeOptions((prevOptions) => {
+        let updatedOptions = [...prevOptions];
+        newTypes.forEach((newType) => {
+          // Aggiungi solo se il tipo non è già presente
+          if (!updatedOptions.some((option) => option.name === newType.name)) {
+            updatedOptions.push(newType);
+          }
+        });
+        return updatedOptions;
+      });
+    }
+
+    // Aggiorna gli stakeholder
+    if (newDocument.newStakeholders && newDocument.newStakeholders.length > 0) {
+      let newStakeholders = newDocument.newStakeholders.map((stakeholder, index) => ({
+        id: stakeholder.id || stakeholderOptions.length + index + 1, // Assegna un ID unico se non presente
+        name: stakeholder.label // Assumendo che l'etichetta sia la proprietà corretta
+      }));
+
+      setStakeholderOptions((prevOptions) => {
+        let updatedOptions = [...prevOptions];
+        newStakeholders.forEach((newStakeholder) => {
+          // Aggiungi solo se lo stakeholder non è già presente
+          if (!updatedOptions.some((option) => option.name === newStakeholder.name)) {
+            updatedOptions.push(newStakeholder);
+          }
+        });
+        return updatedOptions;
+      });
+    }
+  };
 
   const handleTypeChange = (selectedType) => {
     const typeName = selectedType.target.value;
@@ -107,13 +150,14 @@ const AddDocumentForm = (props) => {
         return updatedOptions;
       });
 
-
       console.log(newTypeName);
+
       // Aggiorna il documento con il nuovo tipo selezionato (impostando il typeId)
       setNewDocument((prevDoc) => ({
         ...prevDoc,
         typeId: newType.id, // Imposta direttamente l'ID del nuovo tipo
-        typeName: newTypeName
+        typeName: newTypeName,
+        newTypes: [...prevDoc.newTypes, newType] // Aggiungi il nuovo tipo a newTypes
       }));
 
       // Imposta l'opzione selezionata
@@ -168,10 +212,10 @@ const AddDocumentForm = (props) => {
       }));
 
       //setSelectedOption(newStakeholderName);
-     /* setNewStakeholders((prev) => [
-        ...prev, // Spread dell'array precedente
-        newStakeholderName // Nuovo elemento aggiunto alla fine
-      ]);*/
+      /* setNewStakeholders((prev) => [
+         ...prev, // Spread dell'array precedente
+         newStakeholderName // Nuovo elemento aggiunto alla fine
+       ]);*/
     }
     setIsAddingNewStakeholder(false);
     setNewStakeholderName("");
@@ -179,7 +223,7 @@ const AddDocumentForm = (props) => {
 
 
   const moveAddNewOptionToEnd = (options) => {
-    
+
     // Trova l'opzione "Add a new one..."
     const addNewOption = options.find(option => option.name === "Add a new one...");
     if (!addNewOption) return options; // Se non esiste, ritorna l'elenco invariato
@@ -189,30 +233,39 @@ const AddDocumentForm = (props) => {
 
     // Aggiungi l'opzione "Add a new one..." alla fine
     return [...optionsWithoutAddNew, addNewOption];
+
   };
 
 
   const moveAddNewOptionToEndType = (options) => {
-    // Trova l'opzione "Add a new one..."
-    const addNewOption = options.find(option => option.name === "Add a new one...");
+    const addNewOptionName = "Add a new one...";
+    const addNewOption = options.find(option => option.name === addNewOptionName);
     const newOptionName = newDocument.typeName;
-  
-    // Se `newDocument.typeName` non esiste tra le opzioni, aggiungilo
-    const isNewTypeIncluded = options.some(option => option.name === newOptionName);
-    const updatedOptions = isNewTypeIncluded
-      ? options
-      : [...options, { id: options.length + 1, name: newOptionName }];
-     // setTypeOptions(updatedOptions);
 
-  
+    // Controlla se `newDocument.typeName` è valido e non vuoto
+    if (newOptionName && newOptionName.trim() !== "") {
+      const isNewTypeIncluded = options.some(option => option.name === newOptionName);
+
+      // Aggiungi `newDocument.typeName` se non è già presente
+      if (!isNewTypeIncluded) {
+        options = [...options, { id: options.length + 1, name: newOptionName }];
+      }
+    }
+
     // Rimuovi l'opzione "Add a new one..." dalla lista, se esiste
-    const optionsWithoutAddNew = updatedOptions.filter(option => option.name !== "Add a new one...");
-  
-    // Aggiungi l'opzione "Add a new one..." alla fine
-    return addNewOption 
-      ? [...optionsWithoutAddNew, addNewOption] 
+    const optionsWithoutAddNew = options.filter(option => option.name !== addNewOptionName);
+
+    // Aggiungi "Add a new one..." alla fine
+    const updatedOptions = addNewOption
+      ? [...optionsWithoutAddNew, addNewOption]
       : optionsWithoutAddNew;
+
+    // Aggiorna lo stato di `typeOptions`
+    //setTypeOptions(updatedOptions);
+
+    return updatedOptions;
   };
+
 
 
   const handleFieldChange = (field, value) => {
@@ -299,6 +352,13 @@ const AddDocumentForm = (props) => {
     console.log(newDocument);
 
 
+    const isValid = validateFields();
+    if (!isValid) {
+      // Se ci sono errori, esci dalla funzione e non eseguire nulla
+      console.log("Form validation failed. Please fix the errors before submitting.");
+      return;
+    }
+
     let area_id;
     if (props.newAreaId && props.newAreaId.geoJson) {
       area_id = await API.addArea(props.newAreaId.geoJson)
@@ -312,7 +372,7 @@ const AddDocumentForm = (props) => {
     //CAMPI OBBLIGATORI: TITLE + STAKEHOLDER + SCALE(PLANE NUMBER IN CASE) + DATE + DESCRIPTION + TYPE
     if (!oldTypes.some((type) => type.name === newDocument.typeName)) {
       try {
-        newDocument.typeId = await API.addType(selectedType);
+        newDocument.typeId = await API.addType(newDocument.typeName);
       } catch (error) {
         console.log(error);
         props.setAlertMessage([error.message, "error"]);
@@ -324,7 +384,9 @@ const AddDocumentForm = (props) => {
     }
 
     let stakeholdersId = [];
-    let newStakeholderNames = newDocument.newStakeholders.map((e) => e.label);
+    let newStakeholderNames = newDocument.newStakeholders.map((e) => e.label); //tutti quelli creati anche non più selezionati
+    let stakeholdersToCreate = newDocument.stakeholders.filter((e) => newStakeholderNames.some((name) => e.label.includes(name))).map((e) => e.label);
+    console.log(stakeholdersToCreate);
     if (newStakeholderNames.length != 0) {
       try {
         stakeholdersId = await API.addNewStakeholders(newStakeholderNames);

@@ -39,20 +39,26 @@ router.post("/", isLoggedIn, authorizeRoles('admin', 'urban_planner'), [
     }
 
     try {
-        // Check if type name already exists
-        const types = await DocumentTypeDao.getAllDocumentTypes();
-
         const { name } = req.body;
         const nameLowerCase = name.toLowerCase();
 
-        for (const type of types) {
-            if (type.name.toLowerCase() === nameLowerCase) {
-                return res.status(409).json({ error: "Type name already exists" }); // Add return here
-            }
+        // Recupera tutti i tipi di documenti esistenti dal database
+        const types = await DocumentTypeDao.getAllDocumentTypes();
+        const existingTypes = types.reduce((acc, type) => {
+            acc[type.name.toLowerCase()] = type.id;
+            return acc;
+        }, {});
+
+        let typeId;
+        if (existingTypes[nameLowerCase]) {
+            // Se il tipo esiste già, restituisci il suo ID
+            typeId = existingTypes[nameLowerCase];
+        } else {
+            // Se il tipo non esiste, crealo e ottieni il suo ID
+            typeId = await DocumentTypeDao.addDocumentType(name);
         }
 
-        const typeId = await DocumentTypeDao.addDocumentType(name);
-        res.status(201).json({ typeId: typeId, message: "Document type added successfully" });
+        res.status(201).json({ typeId: typeId, message: "Document type processed successfully" });
     } catch (err) {
         console.error("Error adding document type:", err);
         if (err instanceof DocumentTypeNameAlreadyExists) {

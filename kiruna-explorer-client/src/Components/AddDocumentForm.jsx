@@ -370,7 +370,6 @@ const AddDocumentForm = (props) => {
 
     //CAMPI OPZIONALI: PAGE + LANGUAGE + GIORNO DELLA DATA(?) + COORDINATES
     //CAMPI OBBLIGATORI: TITLE + STAKEHOLDER + SCALE(PLANE NUMBER IN CASE) + DATE + DESCRIPTION + TYPE
-    if (!oldTypes.some((type) => type.name === newDocument.typeName)) {
       try {
         newDocument.typeId = await API.addType(newDocument.typeName);
       } catch (error) {
@@ -378,10 +377,9 @@ const AddDocumentForm = (props) => {
         props.setAlertMessage([error.message, "error"]);
         return;
       }
-    }
-    else {
-      console.log("TIPO ESISTENTE");
-    }
+    
+
+    console.log(newDocument.typeId);
 
     let stakeholdersId = [];
     let newStakeholderNames = newDocument.newStakeholders.map((e) => e.label); //tutti quelli creati anche non più selezionati

@@ -139,6 +139,40 @@ router.get(
     }
 );
 
+router.get(
+    "/search",
+    isLoggedIn,
+    [
+        query("keyword")
+            .notEmpty()
+            .isString()
+            .withMessage("Keyword is required and must be a string"),
+    ],
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        try {
+            const { keyword } = req.query;
+
+            const documents = await DocumentDao.searchDocumentsByKeyword(keyword);
+
+            res.status(200).json(documents);
+        } catch (err) {
+            console.error("Error fetching documents:", err);
+
+            if (err.message.includes("No documents found")) {
+                return res.status(404).json({ error: err.message });
+            }
+
+            res.status(500).json({ error: "Internal server error", details: err.message });
+        }
+    }
+);
+
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname("../");
 

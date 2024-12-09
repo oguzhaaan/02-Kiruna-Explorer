@@ -15,6 +15,7 @@ import { getIcon } from "./Utilities/DocumentIcons.jsx";
 import { formatString } from "./Utilities/StringUtils.js";
 import { SingleDocumentMap } from "./SingleDocumentMap.jsx";
 import { collect } from "@turf/turf";
+import { DocumentsNavMap } from "./DocumentsNavMap.jsx";
 
 function calculateCentroid(coordinates) {
   const polygon = L.polygon(coordinates.map(coord => [coord[1], coord[0]])); // Inverti [lng, lat] -> [lat, lng]
@@ -71,15 +72,13 @@ function GeoreferenceMapDoc(props) {
 
   const mapRef = useRef(null);
 
-  const setAreaSelected = (areaId,hover=null) => {
+  const setAreaSelected = (areaId, hover = null) => {
     let activate
     if (!clickedAreas[areaId]) {
-      console.log("put active")
-      activate=true
+      activate = true
     }
     else {
-      console.log("put not active") 
-      activate=false
+      activate = false
     }
 
     setClickedAreas(prev => ({
@@ -143,6 +142,7 @@ function GeoreferenceMapDoc(props) {
             className={isSatelliteMap ? " " : `${isDarkMode ? "custom-tile-layer" : ""}`}
           />
           <SwitchMapButton toggleMap={toggleMap} isSatelliteMap={isSatelliteMap}></SwitchMapButton>
+          <DocumentsNavMap clickedAreas={clickedAreas} setAreaSelected={setAreaSelected}></DocumentsNavMap>
           <ZoomControl position="topright" />
           {props.municipalGeoJson && <GeoJSON data={props.municipalGeoJson} pathOptions={{ color: `${isDarkMode ? "#CCCCCC" : "grey"}`, weight: 2, dashArray: "5, 5" }} />}
           {/* Visualize All present Areas*/}
@@ -343,7 +343,7 @@ function Markers({ showArea, setShowArea, area, currentDocAreaId, center, bounda
                 }
                 else {
                   map.fitBounds(area.id === 1 ? boundaries : calculateBounds(geometry.coordinates[0]))
-                  setAreaSelected(area.id,true)
+                  setAreaSelected(area.id, true)
                 }
               },
               mouseover: (e) => handleMouseOver(area.id, areaDoc.length),
@@ -388,7 +388,7 @@ function Markers({ showArea, setShowArea, area, currentDocAreaId, center, bounda
             }
           </Marker>
 
-          {(clickedAreas[area.id] || hoveredArea===area.id) && (
+          {(clickedAreas[area.id] || hoveredArea === area.id) && (
             area.id != 1 ?
               <Polygon
                 positions={geometry.coordinates[0].map(coord => [coord[1], coord[0]])} // Inverti le coordinate per Leaflet
@@ -408,7 +408,7 @@ function Markers({ showArea, setShowArea, area, currentDocAreaId, center, bounda
           <Marker
             key={area.id}
             position={[geometry.coordinates[1], geometry.coordinates[0]]} // Inverti lat/lng per Leaflet
-            icon={(clickedAreas[area.id] || hoveredArea===area.id)?PointSelected:GenericPoints} // Puoi scegliere di usare un'icona personalizzata per i punti
+            icon={(clickedAreas[area.id] || hoveredArea === area.id) ? PointSelected : GenericPoints} // Puoi scegliere di usare un'icona personalizzata per i punti
             eventHandlers={{
               click: (e) => {
                 if (isSingleDoc) {
@@ -417,7 +417,7 @@ function Markers({ showArea, setShowArea, area, currentDocAreaId, center, bounda
                 }
                 else {
                   map.setView([geometry.coordinates[1], geometry.coordinates[0]], 14);
-                  setAreaSelected(area.id,true)
+                  setAreaSelected(area.id, true)
                 }
               },
               mouseover: (e) => handleMouseOver(area.id, areaDoc.length),

@@ -38,7 +38,7 @@ function NavHeader(props) {
                 </Navbar>
                 :
                 props.navShow &&
-                <Navbar expand="false" className="fixed z-[20000]">
+                <Navbar expand="false" className="fixed z-[1500]">
                     <Container fluid>
                         <Navbar.Toggle
                             className={`navbar-toggler custom-toggler mt-2.5 

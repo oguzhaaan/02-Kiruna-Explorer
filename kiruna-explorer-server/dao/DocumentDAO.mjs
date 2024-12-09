@@ -191,7 +191,51 @@ export default function DocumentDAO(areaDAO) {
         });
     };
 
+    this.searchDocumentsByKeyword = async (keyword) => {
+        const query = `
+            SELECT 
+                document.id, 
+                document.title, 
+                document.date, 
+                document.language, 
+                document.description, 
+                document.scale, 
+                document.areaId, 
+                document.pages, 
+                document.planNumber,
+                document_type.name AS type_name
+            FROM document
+            LEFT JOIN document_type ON document.typeId = document_type.id
+            WHERE document.title LIKE ? OR document.description LIKE ?
+        `;
+        const params = [`%${keyword}%`, `%${keyword}%`];
     
+        return new Promise((resolve, reject) => {
+            db.all(query, params, async (err, rows) => {
+                if (err) {
+                    return reject(err);
+                }
+                else if (rows.length === 0) {
+                    return reject(new DocumentNotFound());
+                }
+                else {
+                    try {
+                        const documentsPromises = rows.map(async (row) => {
+                            const stakeholdersForDocument = await this.getStakeholdersForDocument(row.id);                   
+                            const document = this.convertDBRowToDocument(row, stakeholdersForDocument);
+                            document.type = row.type_name;  
+                            return document;
+                        });
+    
+                        const documents = await Promise.all(documentsPromises);
+                        resolve(documents);
+                    } catch (error) {
+                        reject(error);
+                    }
+                }
+            });
+        });
+    };    
     
 
     // Fetch stakeholders for a given document (kept as a separate function)

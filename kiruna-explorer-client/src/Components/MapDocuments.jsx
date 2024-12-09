@@ -60,15 +60,33 @@ function GeoreferenceMapDoc(props) {
   );
 
   const [presentAreas, setPresentAreas] = useState(null);
-  const [clickedArea, setClickedArea] = useState(null);
+  const [clickedAreas, setClickedAreas] = useState({});
   const [alertMessage, setAlertMessage] = useState("");
   const [OpenTooltipDocs, setOpenTooltipDocs] = useState(null)
   const [ShowSingleDocument, setShowSingleDocument] = useState(false);
   const [documentId, setDocumentId] = useState(null);
+  const [hoveredArea, setHoveredArea] = useState(null)
 
-  const isSingleDoc = currentRoute.includes("documents") || currentRoute.includes("diagram") 
+  const isSingleDoc = currentRoute.includes("documents") || currentRoute.includes("diagram")
 
   const mapRef = useRef(null);
+
+  const setAreaSelected = (areaId,hover=null) => {
+    let activate
+    if (!clickedAreas[areaId]) {
+      console.log("put active")
+      activate=true
+    }
+    else {
+      console.log("put not active") 
+      activate=false
+    }
+
+    setClickedAreas(prev => ({
+      ...prev,
+      [areaId]: activate,
+    }));
+  };
 
   {/* Hide navbar at start and take all present areas*/ }
   useEffect(() => {
@@ -88,20 +106,20 @@ function GeoreferenceMapDoc(props) {
 
   // Mouse over the area
   const handleMouseOver = (id, content) => {
-    if (id === 1 && content!==0) {
+    if (id === 1 && content !== 0) {
       setAlertMessage(`${content} documents in Municipal Area`)
     }
-    else if (content!==0){
+    else if (content !== 0) {
       setAlertMessage(`${content} documents in this spot`)
     }
-    else{
+    else {
       setAlertMessage("The document selected is in this spot")
     }
-    setClickedArea(id)
+    setHoveredArea(id)
   };
   // Mouse out the area
-  const handleMouseOut = (e) => {
-    setClickedArea(null)
+  const handleMouseOut = (id) => {
+    setHoveredArea(null)
     setAlertMessage(``)
   };
 
@@ -164,7 +182,7 @@ function GeoreferenceMapDoc(props) {
               }}
             >
               {presentAreas.map((area, index) =>
-                <Markers key={index} setShowArea={props.setShowArea} showArea={props.showArea} isSingleDoc={isSingleDoc} currentDocAreaId={props.currentDocAreaId} center={center} area={area} boundaries={boundaries} setDocumentId={setDocumentId} setShowSingleDocument={setShowSingleDocument} handleMouseOver={handleMouseOver} handleMouseOut={handleMouseOut} OpenTooltipDocs={OpenTooltipDocs} setOpenTooltipDocs={setOpenTooltipDocs} clickedArea={clickedArea}></Markers>
+                <Markers key={index} setShowArea={props.setShowArea} showArea={props.showArea} isSingleDoc={isSingleDoc} currentDocAreaId={props.currentDocAreaId} center={center} area={area} boundaries={boundaries} setDocumentId={setDocumentId} setShowSingleDocument={setShowSingleDocument} handleMouseOver={handleMouseOver} handleMouseOut={handleMouseOut} OpenTooltipDocs={OpenTooltipDocs} setOpenTooltipDocs={setOpenTooltipDocs} clickedAreas={clickedAreas} setAreaSelected={setAreaSelected} hoveredArea={hoveredArea}></Markers>
               )
               }
             </MarkerClusterGroup>
@@ -210,7 +228,7 @@ function Message({ alertMessage, setAlertMessage }) {
   )
 }
 
-function Markers({ showArea, setShowArea, area, currentDocAreaId, center, boundaries, isSingleDoc, handleMouseOver, handleMouseOut, clickedArea, setDocumentId, setShowSingleDocument, OpenTooltipDocs, setOpenTooltipDocs }) {
+function Markers({ showArea, setShowArea, area, currentDocAreaId, center, boundaries, isSingleDoc, handleMouseOver, handleMouseOut, clickedAreas, setDocumentId, setShowSingleDocument, OpenTooltipDocs, setOpenTooltipDocs, setAreaSelected, hoveredArea }) {
   const map = useMap()
   const [areaDoc, setAreaDoc] = useState([])
   const geometry = area.geoJson.geometry;
@@ -225,6 +243,13 @@ function Markers({ showArea, setShowArea, area, currentDocAreaId, center, bounda
     iconUrl: markerpin,
     iconSize: [35, 45],
     iconAnchor: [20, 40], // Imposta l'ancoraggio (es. al centro-inferiore dell'icona)
+    shadowSize: [41, 41]
+  });
+
+  const PointSelected = L.icon({
+    iconUrl: markerpin,
+    iconSize: [45, 55],
+    iconAnchor: [20, 50], // Imposta l'ancoraggio (es. al centro-inferiore dell'icona)
     shadowSize: [41, 41]
   });
 
@@ -318,10 +343,11 @@ function Markers({ showArea, setShowArea, area, currentDocAreaId, center, bounda
                 }
                 else {
                   map.fitBounds(area.id === 1 ? boundaries : calculateBounds(geometry.coordinates[0]))
+                  setAreaSelected(area.id,true)
                 }
               },
               mouseover: (e) => handleMouseOver(area.id, areaDoc.length),
-              mouseout: (e) => handleMouseOut(e),
+              mouseout: (e) => handleMouseOut(area.id),
             }}
           >
             {OpenTooltipDocs !== area.id && !isSingleDoc ? (
@@ -362,7 +388,7 @@ function Markers({ showArea, setShowArea, area, currentDocAreaId, center, bounda
             }
           </Marker>
 
-          {clickedArea === area.id && (
+          {(clickedAreas[area.id] || hoveredArea===area.id) && (
             area.id != 1 ?
               <Polygon
                 positions={geometry.coordinates[0].map(coord => [coord[1], coord[0]])} // Inverti le coordinate per Leaflet
@@ -382,7 +408,7 @@ function Markers({ showArea, setShowArea, area, currentDocAreaId, center, bounda
           <Marker
             key={area.id}
             position={[geometry.coordinates[1], geometry.coordinates[0]]} // Inverti lat/lng per Leaflet
-            icon={GenericPoints} // Puoi scegliere di usare un'icona personalizzata per i punti
+            icon={(clickedAreas[area.id] || hoveredArea===area.id)?PointSelected:GenericPoints} // Puoi scegliere di usare un'icona personalizzata per i punti
             eventHandlers={{
               click: (e) => {
                 if (isSingleDoc) {
@@ -391,6 +417,7 @@ function Markers({ showArea, setShowArea, area, currentDocAreaId, center, bounda
                 }
                 else {
                   map.setView([geometry.coordinates[1], geometry.coordinates[0]], 14);
+                  setAreaSelected(area.id,true)
                 }
               },
               mouseover: (e) => handleMouseOver(area.id, areaDoc.length),

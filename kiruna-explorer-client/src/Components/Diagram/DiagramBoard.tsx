@@ -49,7 +49,7 @@ const DiagramBoard = (props) => {
     const [documents, setDocuments] = useState<DiagramItem[] | []>([])
     const [links, setLinks] = useState<Edge[]>([])
     const [yearsRange, setYearsRange] = useState<number[]>([])
-    const [nodes, setNodes] = useState<Node[]>([])
+    const [nodes, setNodes, onNodesChange] = useNodesState<Node>([])
 
     const [nodeStates, setNodeStates] = useState<Record<number, string>>({});
     const [nodeisOpen, setNodeIsOpen] = useState<Record<string, boolean | string>>({});
@@ -74,8 +74,6 @@ const DiagramBoard = (props) => {
 
 
     const setNodeSelected = (nodeindex: number, docselected: string) => {
-        console.log(`setted ${nodeindex} to ${docselected}`)
-        console.log(nodeStates)
         setNodeStates(prev => ({
             ...prev,
             [nodeindex]: docselected,
@@ -153,6 +151,7 @@ const DiagramBoard = (props) => {
                     let ypos
                     if (element.scale === "plan") {
                         ypos = getYPlanScale(element.planNumber)
+                        yoffset=0
                     }
                     else {
                         ypos = YScalePosition[element.scale]
@@ -188,7 +187,7 @@ const DiagramBoard = (props) => {
 
     useEffect(() => {
         const getNodes = () => {
-            const initialNodes = [
+            const initialNodes:Node[] = [
                 {
                     id: '0',
                     type: 'background',
@@ -215,7 +214,7 @@ const DiagramBoard = (props) => {
                             type: 'singleNode',
                             position: { x: positions[index1].x, y: positions[index1].y },
                             data: { clickedNode: clickedNode, group: [item], zoom: zoom, index: index, showSingleDocument: (id: string) => { setDocumentId(id), setShowSingleDocument(true) } },
-                            draggable: false,
+                            draggable: item.month===undefined,
                         }));
 
                         const closeNode = {
@@ -223,7 +222,7 @@ const DiagramBoard = (props) => {
                             type: 'closeNode',
                             position: { x: e.x + 10, y: e.y + 10 },
                             data: { zoom: zoom, index: index },
-                            draggable: true,
+                            draggable: false,
                         };
 
                         return [...nodes, closeNode];
@@ -233,7 +232,7 @@ const DiagramBoard = (props) => {
                             type: nodetype,
                             position: { x: e.x, y: e.y },
                             data: { clickedNode: clickedNode, group: e.items, zoom: zoom, index: index, setNodeSelected: (id: number) => setNodeSelected(index, `${id}`), showSingleDocument: (id: string) => { setDocumentId(id), setShowSingleDocument(true) } },
-                            draggable: true,
+                            draggable: e.items[0].month===undefined,
                         };
                     }
                 }),
@@ -301,6 +300,7 @@ const DiagramBoard = (props) => {
                 minZoom={0.4}
                 translateExtent={extent}
                 zoomOnDoubleClick={false}
+                onNodesChange={onNodesChange}
                 onNodeClick={(event, node) => {
                     if (node.type === "closeNode") {
                         console.log("chiudi")

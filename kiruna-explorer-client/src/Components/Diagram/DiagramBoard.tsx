@@ -1,17 +1,30 @@
-import { useTheme } from "../../contexts/ThemeContext.jsx";
-import { Controls, MiniMap, ReactFlow, Background, type ColorMode, Edge, applyNodeChanges, NodeChange, NodePositionChange, OnNodesChange } from "@xyflow/react";
-import { useNodesState } from "@xyflow/react";
+import {useTheme} from "../../contexts/ThemeContext.jsx";
+import {
+    applyNodeChanges,
+    Background,
+    type ColorMode,
+    Edge,
+    MiniMap,
+    OnNodesChange,
+    ReactFlow,
+    useNodesState
+} from "@xyflow/react";
 import '@xyflow/react/dist/style.css';
-import { useState, useEffect, useCallback } from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import CustomBackgroundNode from './CustomBackgroundNode';
 import SingleNode from "./SingleNode";
 import GroupNode from "./GroupNode";
 import CustomEdge from "./CustomEdge";
 import CloseNode from "./CustomCloseNode.js";
-import React from "react";
 import API from "../../API/API.mjs"
-import { YScalePosition, getXDatePosition, getEquidistantPoints, getYPlanScale } from "../Utilities/DiagramReferencePositions.js";
-import { SingleDocumentMap } from "../SingleDocumentMap.jsx";
+import {
+    getEquidistantPoints,
+    getXDatePosition,
+    getYPlanScale,
+    YScalePosition
+} from "../Utilities/DiagramReferencePositions.js";
+import {SingleDocumentMap} from "../SingleDocumentMap.jsx";
+import {useNodePosition} from "../../contexts/NodePositionContext.tsx";
 
 type Node<Data = any> = {
     id: string;
@@ -41,6 +54,7 @@ export type DiagramItem = {
 
 const DiagramBoard = (props) => {
     const { isDarkMode } = useTheme();
+    const { nodePositions, setNodePosition } = useNodePosition();
     const [colorMode, setColorMode] = useState<ColorMode>(isDarkMode ? "dark" : "light");
     const [zoom, setZoom] = useState(1); // Add zoom state
     const [viewport, setViewport] = useState({ x: 0, y: 0, zoom: 1 }); // Add viewport state
@@ -71,6 +85,10 @@ const DiagramBoard = (props) => {
     useEffect(() => {
         setColorMode(isDarkMode ? "dark" : "light")
     }, [isDarkMode])
+
+    const updatePosition = (id: string, position: {x: number, y:number}) => {
+        setNodePosition(id, position);
+    }
 
 
     const setNodeSelected = (nodeindex: number, docselected: string) => {
@@ -104,7 +122,6 @@ const DiagramBoard = (props) => {
         const getAllDocument = async () => {
             try {
                 const docs = await API.getAllDocuments();
-                console.log(docs)
 
                 const yearsDoc = docs.map((doc) => {
                     let date = doc.date.split("-")
@@ -186,8 +203,8 @@ const DiagramBoard = (props) => {
                             if (yearIndex === -1) return change
     
                             // Determina i confini dell'anno basati sulla scala corrente
-                            const yearStart = (yearIndex * 400 * zoomFactor) + viewportOffsetX;
-                            const yearEnd = yearStart + (12 * (400 / 12)) * zoom
+                            const yearStart = yearIndex * 400
+                            const yearEnd = yearStart + 400
 
                             //console.log("start:"+yearStart)
                             //console.log("end:"+yearEnd)
@@ -196,17 +213,18 @@ const DiagramBoard = (props) => {
                             
                             const scale = node?.data.group?.[0]?.scale
                             
-                            const minY = YScalePosition[scale] - 100 * zoomFactor ;
-                            const maxY = YScalePosition[scale] + 100 * zoomFactor
+                            const minY = YScalePosition[scale] - 100;
+                            const maxY = YScalePosition[scale] + 100
 
                             const limitedY = Math.max(minY, Math.min(change.position.y, maxY));
                             
                             //console.log("x:" +limitedX)
                             //console.log("y:"+limitedY)
                             // Aggiorna la posizione
+                            // Save the new position to local storage
                             return {
                                 ...change,
-                                position: { x: limitedX, y: limitedY },
+                                position: {x: limitedX, y: limitedY},
                             };
                         }
                         return change;
@@ -218,10 +236,30 @@ const DiagramBoard = (props) => {
         [setNodes, viewport]
     );
 
-    useEffect(()=>{
-        console.log(zoom)
-        console.log(viewport.x)
-    },[zoom])
+    const onNodeDragStop = useCallback(
+        (_, node) => {
+
+            const nodeYear = parseInt(node.data.group?.[0]?.year, 10);
+            const yearIndex = yearsRange.indexOf(nodeYear);
+            if (yearIndex === -1) return;
+
+            // Define boundaries
+            const yearStart = (yearIndex * 400);
+            const yearEnd = yearStart + 400;
+
+            const scale = node.data.group?.[0]?.scale;
+            const minY = YScalePosition[scale] - 100;
+            const maxY = YScalePosition[scale] + 100;
+
+            // Limit position within boundaries
+            const limitedX = Math.max(yearStart, Math.min(node.position.x, yearEnd));
+            const limitedY = Math.max(minY, Math.min(node.position.y, maxY));
+
+            // Save the new position to context
+            setNodePosition(node.id, { x: limitedX, y: limitedY });
+        },
+        [setNodePosition, yearsRange]
+    );
 
     const nodeTypes = {
         background: CustomBackgroundNode,
@@ -246,7 +284,7 @@ const DiagramBoard = (props) => {
                     selectable: false,
                     connectable: false,
                     clickable: false,
-                    style: { zIndex: -1 },
+                    style: { zIndex: -1, pointerEvents: 'none' }
                 },
                 ...documents.flatMap((e, index: number) => {
                     const nodetype = e.items.length === 1 ? 'singleNode' : 'groupNode';
@@ -258,13 +296,17 @@ const DiagramBoard = (props) => {
                     if (nodeisOpen[index] === true && nodetype === 'groupNode') {
                         const positions = getEquidistantPoints(e.x, e.y, e.items.length == 2 ? 45 : 5 + e.items.length * 7, e.items.length);
 
-                        const nodes = e.items.map((item: Item, index1: number) => ({
-                            id: `${item.docid}`,
-                            type: 'singleNode',
-                            position: { x: positions[index1].x, y: positions[index1].y },
-                            data: { clickedNode: clickedNode, group: [item], zoom: zoom, index: index, showSingleDocument: (id: string) => { setDocumentId(id), setShowSingleDocument(true) } },
-                            draggable: item.month === undefined,
-                        }));
+                        const nodes = e.items.map((item: Item, index1: number) => {
+
+
+                            return {
+                                id: `${item.docid}`,
+                                type: 'singleNode',
+                                position: nodePositions[item.docid] || { x: positions[index1].x, y: positions[index1].y },
+                                data: { clickedNode: clickedNode, group: [item], zoom: zoom, index: index, showSingleDocument: (id: string) => { setDocumentId(id), setShowSingleDocument(true) } },
+                                draggable: item.month === undefined,
+                            };
+                        });
 
                         const closeNode = {
                             id: `closeNode-${index}`,
@@ -276,10 +318,11 @@ const DiagramBoard = (props) => {
 
                         return [...nodes, closeNode];
                     } else {
+                        const savedPosition = nodePositions[nodeSelected] || { x: e.x, y: e.y };
                         return {
                             id: `${nodeSelected}`,
                             type: nodetype,
-                            position: { x: e.x, y: e.y },
+                            position: savedPosition,
                             data: { clickedNode: clickedNode, group: e.items, zoom: zoom, index: index, setNodeSelected: (id: number) => setNodeSelected(index, `${id}`), showSingleDocument: (id: string) => { setDocumentId(id), setShowSingleDocument(true) } },
                             draggable: e.items[0].month === undefined,
                         };
@@ -352,7 +395,6 @@ const DiagramBoard = (props) => {
                 onNodesChange={onNodesChange}
                 onNodeClick={(event, node) => {
                     if (node.type === "closeNode") {
-                        console.log("chiudi")
                         setNodeOpen(node.data.index, true)
                         setClickedNode((clickedNode === node.id || node.id == "0") ? null : node.id);
                     } else {
@@ -386,6 +428,7 @@ const DiagramBoard = (props) => {
                     setShowSingleDocument(true);
                     setDocumentId(node.id);
                 }}
+                onNodeDragStop={onNodeDragStop}
             >
 
                 <Background gap={20} size={1} color={isDarkMode ? "#333" : "#ccc"} />

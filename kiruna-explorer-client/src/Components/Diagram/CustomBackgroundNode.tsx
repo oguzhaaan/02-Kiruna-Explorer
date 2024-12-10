@@ -19,7 +19,7 @@ function CustomBackgroundNode({
 
     return (
         <div style={{ width: `${barWidth}px`, height: '2160px' }}
-            className={`pointer-events-none text-black_text dark:text-white_text`}>
+            className={`text-black_text dark:text-white_text`}>
 
             {/* Text (0 to 350)px */}
             <div style={{ top: `${YScalePosition["text"]}px` }}

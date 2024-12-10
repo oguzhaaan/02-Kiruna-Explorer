@@ -778,3 +778,79 @@ describe("Integration Test POST / - Create stakeholders", () => {
         expect(response.body.error).toBe("Forbidden");
     });
 });
+
+//test search document by title and description
+describe("Integration Test GET /search - Search documents by title and description", () => {
+    beforeEach(async () => {
+        await cleanup();
+        urbanplanner_cookie = await login(urbanPlannerUser);
+
+        mockTypeId = await createtype(urbanplanner_cookie, "testType");
+        mockDocumentbodyToAdd.typeId = mockTypeId;
+
+        mockStakeholdersIds = await createStakeholders(urbanplanner_cookie, mockStakeholdersNames);
+
+        mockDocId = await createDocument(urbanplanner_cookie);
+        await matchDocumentToStakeholders(urbanplanner_cookie, mockDocId, mockStakeholdersNames);
+
+        const mockDoc2 = {
+            ...mockDocumentbodyToAdd,
+            title: "another one",
+            typeId: mockTypeId,
+            description : "second description"
+        }
+        // Create documents with different title and description
+        const mockDocId2 = await createDocumentWithParams(urbanplanner_cookie, mockDoc2)
+        await matchDocumentToStakeholders(urbanplanner_cookie, mockDocId2, mockStakeholdersNames);
+    });
+
+    test("should return 200 with valid query parameters", async () => {
+        const queryParams = {
+            keyword: "Test",
+        }
+
+        const response = await request(app)
+            .get(`${basePath}/search`)
+            .query(queryParams)
+            .set("Cookie", urbanplanner_cookie)
+            .expect('Content-Type', /json/)
+            .expect(200);
+
+        // Ensure the response is an array and it matches expected output structure
+        expect(Array.isArray(response.body)).toBe(true);
+        expect(response.body).toHaveLength(1);
+
+    })
+
+    test("should return 404 if no document is matched", async () => {
+        const queryParams = {
+            keyword: "no match",
+        }
+
+        const response = await request(app)
+            .get(`${basePath}/search`)
+            .query(queryParams)
+            .set("Cookie", urbanplanner_cookie)
+            .expect('Content-Type', /json/)
+            .expect(404);
+
+        expect(response.status.erorr).toBe(DocumentNotFound.customMessage); 
+
+    })
+
+    test("Should return 400 if invalid query parameters are provided", async () => {
+        const queryParams = {
+            keyword: "",
+        }
+
+        const response = await request(app)
+            .get(`${basePath}/search`)
+            .query(queryParams)
+            .set("Cookie", urbanplanner_cookie)
+            .expect('Content-Type', /json/)
+            .expect(400);
+        
+    })
+
+    
+})

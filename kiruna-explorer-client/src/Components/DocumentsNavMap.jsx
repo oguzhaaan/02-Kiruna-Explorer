@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useTheme } from "../contexts/ThemeContext.jsx";
 import { useEffect, useState } from "react";
 import API from "../API/API.mjs";
+import { getIcon } from "./Utilities/DocumentIcons.jsx";
 
 function DocumentsNavMap({ clickedAreas, setAreaSelected }) {
     const { isDarkMode, toggleTheme, isSatelliteMap } = useTheme();
@@ -21,7 +22,7 @@ function DocumentsNavMap({ clickedAreas, setAreaSelected }) {
 
     // --- Search ---
     const [searchQuery, setSearchQuery] = useState("");
-    
+
     useEffect(() => {
         const fetchDocuments = async () => {
             try {
@@ -108,29 +109,58 @@ function DocumentsNavMap({ clickedAreas, setAreaSelected }) {
                                     .map((document) => (
                                         <div
                                             key={document.id}
-                                            className="w-100 bg-document_item_radient_blue_light dark:bg-document_item_radient_blue rounded-lg p-1 flex justify-between"
+                                            className={`w-100 transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 cursor-pointer rounded-lg p-2 flex justify-start ${isDarkMode
+                                                    ? "bg-document_item_radient_blue"
+                                                    : "bg-document_item_radient_blue_light"
+                                                }`}
                                             onClick={() => handleDocumentClick(document)}
                                         >
+                                            <img
+                                                src={getIcon(
+                                                    { type: document.type.toLowerCase() },
+                                                    { darkMode: isDarkMode }
+                                                )}
+                                                className="w-8 mr-2"
+                                                alt="type_icon"
+                                            />
                                             <span className="font-sans">{document.title}</span>
-                                            <span className="font-sans font-light text-sm">
-                                                {document.type}
-                                            </span>
                                         </div>
                                     ))}
+                                {/* Separator */}
+                                {Object.values(clickedDocs).some((value) => value) &&
+                                    Object.values(clickedDocs).some((value) => !value) && (
+                                        <div
+                                            className={`separator w-full ${isDarkMode ? "bg-white_text" : "bg-black_text"
+                                                } opacity-20`}
+                                        />
+                                    )}
+
                                 {/* Available Documents */}
                                 {documents
                                     .filter((document) => !clickedDocs[document.id])
-                                    .filter((document) => document.title.toLowerCase().includes(searchQuery.toLowerCase()))
+                                    .filter((document) =>
+                                        document.title
+                                            .toLowerCase()
+                                            .includes(searchQuery.toLowerCase())
+                                    )
                                     .map((document) => (
                                         <div
                                             key={document.id}
-                                            className="w-100 bg-[#ffffffdd] dark:bg-document_item_radient_grey rounded-lg p-1 flex justify-between"
+                                            className={`w-100 transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 cursor-pointer rounded-lg p-2 flex justify-start ${isDarkMode
+                                                    ? "bg-document_item_radient_grey"
+                                                    : "bg-[#ffffffdd]"
+                                                }`}
                                             onClick={() => handleDocumentClick(document)}
                                         >
+                                            <img
+                                                src={getIcon(
+                                                    { type: document.type.toLowerCase() },
+                                                    { darkMode: isDarkMode }
+                                                )}
+                                                className="w-8 mr-2"
+                                                alt="type_icon"
+                                            />
                                             <span className="font-sans">{document.title}</span>
-                                            <span className="font-sans font-light text-sm">
-                                                {document.type}
-                                            </span>
                                         </div>
                                     ))}
                             </div>

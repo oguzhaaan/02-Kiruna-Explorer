@@ -184,3 +184,8 @@ body {
     66% {box-shadow: 30px 0 #fff2, -30px 0 #fff; background: #fff2}
     100%{box-shadow: 30px 0 #fff2, -30px 0 #fff; background: #fff }
 }
+
+.glow-effect {
+    box-shadow: 0 0 10px 5px rgba(255, 255, 255, 0.8);
+    transition: box-shadow 0.3s ease-in-out;
+}

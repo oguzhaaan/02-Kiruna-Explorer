@@ -44,7 +44,8 @@ function GroupNode({
                 style={{
                     width: `${64 / zoom}px`,
                     height: `${64 / zoom}px`,
-                    padding: `${1 / zoom}px`
+                    padding: `${1 / zoom}px`,
+                    transition: "all 0.4s"
                 }}
                 title={`Title: ${selectedDocument.title} \nType: ${selectedDocument.type}`}
                 onMouseEnter={() => setIsHovered(true)}
@@ -99,7 +100,7 @@ function GroupNode({
                         data.showSingleDocument(`${selectedDocument.docid}`)  
                     }
                 }}>
-                <img src={GenericDocumentIcon} alt="switch icon" className="p-0.5" />
+                <img src={GenericDocumentIcon} alt="switch icon" className="p-1" />
             </div>
             {
                 !isDropDownOpen ?

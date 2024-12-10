@@ -162,8 +162,8 @@ router.get(
             res.status(200).json(documents);
         } catch (err) {
             console.error("Error fetching documents:", err);
-
-            if (err.message.includes("No documents found")) {
+         
+            if (err instanceof DocumentNotFound) {
                 return res.status(404).json({ error: err.message });
             }
 

@@ -853,7 +853,7 @@ describe("getDocumentStakeholders", () => {
 
     beforeEach(() => {
         documentDAO = new StakeholderDAO(); // Assuming DocumentDAO contains this.getDocumentStakeholders
- 
+
     });
 
     afterEach(() => {
@@ -882,5 +882,161 @@ describe("getDocumentStakeholders", () => {
             [42],
             expect.any(Function)
         );
+    });
+});
+
+
+describe("Unit Test: searchDocumentsByKeyword", () => {
+    let documentDAO;
+
+    beforeEach(() => {
+        documentDAO = new DocumentDAO();
+    });
+
+    afterEach(() => {
+        vitest.clearAllMocks();
+    });
+
+    const mockRowDB = {
+        id: 1,
+        title: "Test Document",
+        date: "2023-01-01",
+        language: "English",
+        description: "This is a test description",
+        scale: "1:100",
+        areaId: 1,
+        pages: 10,
+        planNumber: 123,
+        type_name: "design",
+    };
+
+    const mockDocument = new Document(
+        mockRowDB.id,
+        mockRowDB.title,
+        ["Stakeholder1", "Stakeholder2"],
+        mockRowDB.date,
+        mockRowDB.type_name,
+        mockRowDB.language,
+        mockRowDB.description,
+        mockRowDB.areaId,
+        mockRowDB.scale,
+        mockRowDB.pages,
+        mockRowDB.planNumber
+    );
+
+    test("should return documents matching the keyword in title or description", async () => {
+        const keyword = "test";
+
+        vitest.spyOn(db, "all").mockImplementation((_query, _params, callback) => {
+            callback(null, [mockRowDB]);
+        });
+
+        vitest.spyOn(documentDAO, "getStakeholdersForDocument").mockResolvedValueOnce([
+            "Stakeholder1",
+            "Stakeholder2",
+        ]);
+
+        vitest.spyOn(documentDAO, "convertDBRowToDocument").mockReturnValueOnce(mockDocument);
+
+        const result = await documentDAO.searchDocumentsByKeyword(keyword);
+
+        expect(result).toHaveLength(1);
+        expect(result[0]).toMatchObject(mockDocument);
+
+        expect(db.all).toHaveBeenCalledTimes(1);
+        expect(db.all).toHaveBeenCalledWith(
+            expect.stringContaining("WHERE document.title LIKE ? OR document.description LIKE ?"),
+            [`%${keyword}%`, `%${keyword}%`],
+            expect.any(Function)
+        );
+
+        expect(documentDAO.getStakeholdersForDocument).toHaveBeenCalledWith(mockRowDB.id);
+        expect(documentDAO.convertDBRowToDocument).toHaveBeenCalledWith(
+            mockRowDB,
+            ["Stakeholder1", "Stakeholder2"]
+        );
+    });
+
+    test("should reject with DocumentNotFound if no documents match the keyword", async () => {
+        const keyword = "nonexistent";
+
+        vitest.spyOn(db, "all").mockImplementation((_query, _params, callback) => {
+            callback(null, []);
+        });
+
+        const result = await documentDAO.searchDocumentsByKeyword(keyword).catch((err) => err);
+
+        expect(result).toBeInstanceOf(DocumentNotFound);
+        expect(db.all).toHaveBeenCalledTimes(1);
+        expect(db.all).toHaveBeenCalledWith(
+            expect.stringContaining("WHERE document.title LIKE ? OR document.description LIKE ?"),
+            [`%${keyword}%`, `%${keyword}%`],
+            expect.any(Function)
+        );
+    });
+
+    test("should reject with an error if database query fails", async () => {
+        const keyword = "test";
+        const error = new Error("Database error");
+
+        vitest.spyOn(db, "all").mockImplementation((_query, _params, callback) => {
+            callback(error, null);
+        });
+
+        const result = await documentDAO.searchDocumentsByKeyword(keyword).catch((err) => err);
+
+        expect(result).toBeInstanceOf(Error);
+        expect(result.message).toBe("Database error");
+        expect(db.all).toHaveBeenCalledTimes(1);
+        expect(db.all).toHaveBeenCalledWith(
+            expect.stringContaining("WHERE document.title LIKE ? OR document.description LIKE ?"),
+            [`%${keyword}%`, `%${keyword}%`],
+            expect.any(Function)
+        );
+    });
+
+    test("should reject with an error if stakeholder retrieval fails", async () => {
+        const keyword = "test";
+
+        vitest.spyOn(db, "all").mockImplementation((_query, _params, callback) => {
+            callback(null, [mockRowDB]);
+        });
+
+        const stakeholderError = new Error("Stakeholder retrieval error");
+        vitest.spyOn(documentDAO, "getStakeholdersForDocument").mockRejectedValueOnce(stakeholderError);
+
+        const result = await documentDAO.searchDocumentsByKeyword(keyword).catch((err) => err);
+
+        expect(result).toBeInstanceOf(Error);
+        expect(result.message).toBe("Stakeholder retrieval error");
+
+        expect(db.all).toHaveBeenCalledTimes(1);
+        expect(documentDAO.getStakeholdersForDocument).toHaveBeenCalledWith(mockRowDB.id);
+    });
+
+    test("should reject with an error if document conversion fails", async () => {
+        const keyword = "test";
+
+        vitest.spyOn(db, "all").mockImplementation((_query, _params, callback) => {
+            callback(null, [mockRowDB]);
+        });
+
+        vitest.spyOn(documentDAO, "getStakeholdersForDocument").mockResolvedValueOnce([
+            "Stakeholder1",
+            "Stakeholder2",
+        ]);
+
+        const conversionError = new Error("Document conversion error");
+        vitest.spyOn(documentDAO, "convertDBRowToDocument").mockImplementation(() => {
+            throw conversionError;
+        });
+
+        const result = await documentDAO.searchDocumentsByKeyword(keyword).catch((err) => err);
+
+        expect(result).toBeInstanceOf(Error);
+        expect(result.message).toBe("Document conversion error");
+
+        expect(db.all).toHaveBeenCalledTimes(1);
+        expect(documentDAO.getStakeholdersForDocument).toHaveBeenCalledWith(mockRowDB.id);
     });
 });

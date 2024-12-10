@@ -34,7 +34,8 @@ function SingleNode({
             style={{
                 width: `${64 / zoom}px`,
                 height: `${64 / zoom}px`,
-                padding: `${1 / zoom}px`
+                padding: `${1 / zoom}px`,
+                transition: "all 0.4s"
             }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}>
@@ -66,7 +67,7 @@ function SingleNode({
                         
                     }
                 }}>
-                <img src={GenericDocumentIcon} alt="switch icon" className="p-0.5" />
+                <img src={GenericDocumentIcon} alt="switch icon" className="p-1" />
             </div>
         </>
     );

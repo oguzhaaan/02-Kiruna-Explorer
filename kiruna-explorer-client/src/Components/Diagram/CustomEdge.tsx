@@ -99,7 +99,7 @@ const CustomEdge = ({
         }
             <path
                 d={basePath}
-                style={{fill: 'none', stroke: 'transparent', strokeWidth: '4em'}}
+                style={{fill: 'none', stroke: 'transparent', strokeWidth: '0.3em'}}
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
             />

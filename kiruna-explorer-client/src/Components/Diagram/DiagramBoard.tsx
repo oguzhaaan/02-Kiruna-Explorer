@@ -1,8 +1,8 @@
 import { useTheme } from "../../contexts/ThemeContext.jsx";
-import { Controls, MiniMap, ReactFlow, Background, type ColorMode, Edge } from "@xyflow/react";
+import { Controls, MiniMap, ReactFlow, Background, type ColorMode, Edge, applyNodeChanges, NodeChange, NodePositionChange, OnNodesChange } from "@xyflow/react";
 import { useNodesState } from "@xyflow/react";
 import '@xyflow/react/dist/style.css';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import CustomBackgroundNode from './CustomBackgroundNode';
 import SingleNode from "./SingleNode";
 import GroupNode from "./GroupNode";
@@ -49,7 +49,7 @@ const DiagramBoard = (props) => {
     const [documents, setDocuments] = useState<DiagramItem[] | []>([])
     const [links, setLinks] = useState<Edge[]>([])
     const [yearsRange, setYearsRange] = useState<number[]>([])
-    const [nodes, setNodes, onNodesChange] = useNodesState<Node>([])
+    const [nodes, setNodes] = useNodesState<Node>([])
 
     const [nodeStates, setNodeStates] = useState<Record<number, string>>({});
     const [nodeisOpen, setNodeIsOpen] = useState<Record<string, boolean | string>>({});
@@ -151,7 +151,7 @@ const DiagramBoard = (props) => {
                     let ypos
                     if (element.scale === "plan") {
                         ypos = getYPlanScale(element.planNumber)
-                        yoffset=0
+                        yoffset = 0
                     }
                     else {
                         ypos = YScalePosition[element.scale]
@@ -168,11 +168,60 @@ const DiagramBoard = (props) => {
         }
         getAllDocument()
     }, [])
-    /*
-        useEffect(() => {
-            if (zoom <= 1.1) setIsOpen(null)
-            else if (zoom > 1.1 && clickedNode) setIsOpen(clickedNode)
-        }, [zoom])*/
+
+    const onNodesChange: OnNodesChange = useCallback(
+        (changes) => {
+            setNodes((nds) =>
+                applyNodeChanges(
+                    changes.map((change) => {
+                        if (change.type === 'position' && change.position) {
+                            const zoomFactor = zoom ;
+                            const viewportOffsetX = viewport.x;
+                            //console.log(zoomFactor)
+                            //console.log(viewportOffsetX)
+
+                            const node = nds.find((e)=>e.id==change.id)
+                            const nodeYear = parseInt(node?.data.group?.[0]?.year, 10);
+                            const yearIndex = yearsRange.indexOf(nodeYear);
+                            if (yearIndex === -1) return change
+    
+                            // Determina i confini dell'anno basati sulla scala corrente
+                            const yearStart = (yearIndex * 400 * zoomFactor) + viewportOffsetX;
+                            const yearEnd = yearStart + (12 * (400 / 12)) * zoom
+
+                            //console.log("start:"+yearStart)
+                            //console.log("end:"+yearEnd)
+                            // Limita la posizione entro l'anno
+                            const limitedX = Math.max(yearStart, Math.min(change.position.x, yearEnd));
+                            
+                            const scale = node?.data.group?.[0]?.scale
+                            
+                            const minY = YScalePosition[scale] - 100 * zoomFactor ;
+                            const maxY = YScalePosition[scale] + 100 * zoomFactor
+
+                            const limitedY = Math.max(minY, Math.min(change.position.y, maxY));
+                            
+                            //console.log("x:" +limitedX)
+                            //console.log("y:"+limitedY)
+                            // Aggiorna la posizione
+                            return {
+                                ...change,
+                                position: { x: limitedX, y: limitedY },
+                            };
+                        }
+                        return change;
+                    }),
+                    nds
+                )
+            );
+        },
+        [setNodes, viewport]
+    );
+
+    useEffect(()=>{
+        console.log(zoom)
+        console.log(viewport.x)
+    },[zoom])
 
     const nodeTypes = {
         background: CustomBackgroundNode,
@@ -187,7 +236,7 @@ const DiagramBoard = (props) => {
 
     useEffect(() => {
         const getNodes = () => {
-            const initialNodes:Node[] = [
+            const initialNodes: Node[] = [
                 {
                     id: '0',
                     type: 'background',
@@ -214,7 +263,7 @@ const DiagramBoard = (props) => {
                             type: 'singleNode',
                             position: { x: positions[index1].x, y: positions[index1].y },
                             data: { clickedNode: clickedNode, group: [item], zoom: zoom, index: index, showSingleDocument: (id: string) => { setDocumentId(id), setShowSingleDocument(true) } },
-                            draggable: item.month===undefined,
+                            draggable: item.month === undefined,
                         }));
 
                         const closeNode = {
@@ -232,7 +281,7 @@ const DiagramBoard = (props) => {
                             type: nodetype,
                             position: { x: e.x, y: e.y },
                             data: { clickedNode: clickedNode, group: e.items, zoom: zoom, index: index, setNodeSelected: (id: number) => setNodeSelected(index, `${id}`), showSingleDocument: (id: string) => { setDocumentId(id), setShowSingleDocument(true) } },
-                            draggable: e.items[0].month===undefined,
+                            draggable: e.items[0].month === undefined,
                         };
                     }
                 }),
@@ -453,15 +502,3 @@ const DiagramBoard = (props) => {
 };
 
 export default DiagramBoard;
-
-/*
-onNodeMouseEnter={(event, node) => {
-    event.preventDefault();
-    setHoveredNode(node.id);
-    filterEdges();
-}}
-onNodeMouseLeave={() => setHoveredNode(null)}
-onMoveEnd={(event, viewport) => {
-    setZoom(viewport.zoom);
-    setViewport(viewport);
-}} */

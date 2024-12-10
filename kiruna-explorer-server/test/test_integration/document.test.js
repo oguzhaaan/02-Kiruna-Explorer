@@ -743,7 +743,7 @@ describe("Integration Test GET /filter/pagination - Filter and Pagination", () =
     });
 });
 
-describe("Integration Test POST / - Create stakeholders", () => {
+describe("Integration Test POST /document-stakeholder - Create stakeholders", () => {
     beforeEach(async () => {
         await cleanup(); // Clean up the database before each test
         urbanplanner_cookie = await login(urbanPlannerUser);
@@ -871,4 +871,65 @@ describe("Integration Test GET /search - Search documents by title and descripti
     })
 
 
+})
+
+describe("Integration test GET /docuemtns/area/:areaId", () => {
+    const areaPath = "/api/areas";
+    const geoJson = {
+        geoJson: '{"type":"Feature","geometry":{"type":"Point","coordinates":[125.6, 10.1]}}'
+    };
+    const geoJson2 = {
+        geoJson: '{"type":"Feature","geometry":{"type":"Point","coordinates":[34.7, 6.43]}}'
+    };
+
+    beforeEach(async () => {
+        // Reset data
+        await cleanup();
+        urbanplanner_cookie = await login(urbanPlannerUser);
+
+        mockTypeId = await createtype(urbanplanner_cookie, "testType");
+
+        mockStakeholdersIds = await createStakeholders(urbanplanner_cookie, mockStakeholdersNames);
+    });
+
+    test("Should get all documents in an area", async () => {
+        const resArea1 = await request(app)
+            .post(areaPath)
+            .set("Cookie", urbanplanner_cookie)
+            .send(geoJson)
+            .expect(201);
+        const firstAreaId = resArea1.body;
+
+        const documentId = await createDocumentWithParams(urbanplanner_cookie, { ...mockDocumentbodyToAdd, typeId: mockTypeId, areaId: firstAreaId });
+
+        const response = await request(app)
+            .get(`${basePath}/area/${firstAreaId}`)
+            .set("Cookie", urbanplanner_cookie)
+            .expect(200);
+        
+        expect(response.body).toHaveLength(1);
+        expect(response.body[0].id).toBe(documentId);
+
+        
+    });
+
+    test("Should return 400 if area id is not valid", async () => {
+        const firstAreaId = "invalid_area_id";
+
+        const response = await request(app)
+            .get(`${basePath}/area/${firstAreaId}`)
+            .set("Cookie", urbanplanner_cookie)
+            .expect(400);        
+    });
+
+    test("Should return 404 if area doesn't have documents in it", async () => {
+        const firstAreaId = 2;
+
+        const response = await request(app)
+            .get(`${basePath}/area/${firstAreaId}`)
+            .set("Cookie", urbanplanner_cookie)
+            .expect(404);
+        console.log(response.body);
+        expect(response.body.error).toBe("No documents found for this area");        
+    });
 })

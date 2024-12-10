@@ -821,6 +821,24 @@ describe("Integration Test GET /search - Search documents by title and descripti
         expect(response.body).toHaveLength(1);
 
     })
+    test("should return 200 with valid query parameters", async () => {
+        //search in description
+        const queryParams = {
+            keyword: "description",
+        }
+
+        const response = await request(app)
+            .get(`${basePath}/search`)
+            .query(queryParams)
+            .set("Cookie", urbanplanner_cookie)
+            .expect('Content-Type', /json/)
+            .expect(200);
+
+        // Ensure the response is an array and it matches expected output structure
+        expect(Array.isArray(response.body)).toBe(true);
+        expect(response.body).toHaveLength(1);
+
+    })
 
     test("should return 404 if no document is matched", async () => {
         const queryParams = {
@@ -852,5 +870,5 @@ describe("Integration Test GET /search - Search documents by title and descripti
         
     })
 
-    
+
 })

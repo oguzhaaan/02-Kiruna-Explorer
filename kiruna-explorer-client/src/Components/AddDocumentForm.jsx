@@ -16,7 +16,7 @@ const AddDocumentForm = (props) => {
 
   const {
     stakeholderOptions, setStakeholderOptions,
-    selectedOption, setSelectedOption,
+    //selectedOption, setSelectedOption,
     isAddingNewStakeholder, setIsAddingNewStakeholder,
     newStakeholderName, setNewStakeholderName,
     newStakeholders, setNewStakeholders,
@@ -25,29 +25,30 @@ const AddDocumentForm = (props) => {
     isAddingNewType, setIsAddingNewType,
     newTypeName, setNewTypeName,
     selectedType, setSelectedType,
-    oldTypes, setOldTypes
+    oldTypes, setOldTypes,
   } = useNewDocument();
 
- /* const [stakeholderOptions, setStakeholderOptions] = useState([]);
-  const [selectedOption, setSelectedOption] = useState("");
-  const [isAddingNewStakeholder, setIsAddingNewStakeholder] = useState(false);
-  const [newStakeholderName, setNewStakeholderName] = useState("");
-  const [newStakeholders, setNewStakeholders] = useState([]);
-  const [oldStakeholders, setOldStakeholders] = useState([]);
-
-  const [typeOptions, setTypeOptions] = useState([]); // 'types' è la lista iniziale di tipi
-  const [isAddingNewType, setIsAddingNewType] = useState(false);
-  const [newTypeName, setNewTypeName] = useState("");
-  const [selectedType, setSelectedType] = useState("");
-  const [oldTypes, setOldTypes] = useState([]); */
+  /* const [stakeholderOptions, setStakeholderOptions] = useState([]);
+   const [selectedOption, setSelectedOption] = useState("");
+   const [isAddingNewStakeholder, setIsAddingNewStakeholder] = useState(false);
+   const [newStakeholderName, setNewStakeholderName] = useState("");
+   const [newStakeholders, setNewStakeholders] = useState([]);
+   const [oldStakeholders, setOldStakeholders] = useState([]);
+ 
+   const [typeOptions, setTypeOptions] = useState([]); // 'types' è la lista iniziale di tipi
+   const [isAddingNewType, setIsAddingNewType] = useState(false);
+   const [newTypeName, setNewTypeName] = useState("");
+   const [selectedType, setSelectedType] = useState("");
+   const [oldTypes, setOldTypes] = useState([]); */
 
   const [newDocument, setNewDocument] = [props.newDocument, props.setNewDocument];
 
   const [isValid, setIsValid] = useState(true);
 
-  /*useEffect(() => {
+  useEffect(() => {
     const inizialization = async () => {
       try {
+        console.log("Inizialization..");
         const types = await API.getAllTypes();
         setOldTypes(types);
         types.push({ id: types.length + 1, name: "Add a new one..." });
@@ -56,14 +57,59 @@ const AddDocumentForm = (props) => {
         setOldStakeholders(stakeholders);
         stakeholders.push({ id: stakeholders.length + 1, name: "Add a new one..." });
         setStakeholderOptions(stakeholders);
+        updateValues();
+
       } catch (err) {
         console.log(err.message);
         props.setAlertMessage([err.message, "error"]);
       }
     };
     inizialization();
+    console.log(newDocument);
+    updateValues();
 
-  }, [])*/
+  }, []);
+
+
+  const updateValues = () => {
+    // Aggiorna i tipi
+    if (newDocument.newTypes && newDocument.newTypes.length > 0) {
+      let newTypes = newDocument.newTypes.map((type, index) => ({
+        id: type.id || typeOptions.length + index + 1, // Assegna un ID unico se non presente
+        name: type.name
+      }));
+
+      setTypeOptions((prevOptions) => {
+        let updatedOptions = [...prevOptions];
+        newTypes.forEach((newType) => {
+          // Aggiungi solo se il tipo non è già presente
+          if (!updatedOptions.some((option) => option.name === newType.name)) {
+            updatedOptions.push(newType);
+          }
+        });
+        return updatedOptions;
+      });
+    }
+
+    // Aggiorna gli stakeholder
+    if (newDocument.newStakeholders && newDocument.newStakeholders.length > 0) {
+      let newStakeholders = newDocument.newStakeholders.map((stakeholder, index) => ({
+        id: stakeholder.id || stakeholderOptions.length + index + 1, // Assegna un ID unico se non presente
+        name: stakeholder.label // Assumendo che l'etichetta sia la proprietà corretta
+      }));
+
+      setStakeholderOptions((prevOptions) => {
+        let updatedOptions = [...prevOptions];
+        newStakeholders.forEach((newStakeholder) => {
+          // Aggiungi solo se lo stakeholder non è già presente
+          if (!updatedOptions.some((option) => option.name === newStakeholder.name)) {
+            updatedOptions.push(newStakeholder);
+          }
+        });
+        return updatedOptions;
+      });
+    }
+  };
 
   const handleTypeChange = (selectedType) => {
     const typeName = selectedType.target.value;
@@ -77,6 +123,7 @@ const AddDocumentForm = (props) => {
       setNewDocument((prevDoc) => ({
         ...prevDoc,
         typeId: typeId || "", // Usa l'ID del tipo selezionato
+        typeName: typeName || ""
       }));
     }
   };
@@ -103,10 +150,14 @@ const AddDocumentForm = (props) => {
         return updatedOptions;
       });
 
+      console.log(newTypeName);
+
       // Aggiorna il documento con il nuovo tipo selezionato (impostando il typeId)
       setNewDocument((prevDoc) => ({
         ...prevDoc,
         typeId: newType.id, // Imposta direttamente l'ID del nuovo tipo
+        typeName: newTypeName,
+        newTypes: [...prevDoc.newTypes, newType] // Aggiungi il nuovo tipo a newTypes
       }));
 
       // Imposta l'opzione selezionata
@@ -121,7 +172,7 @@ const AddDocumentForm = (props) => {
       setIsAddingNewStakeholder(true);
     } else {
       // Imposta il valore selezionato e aggiorna i campi come necessario
-      setSelectedOption(selectedValues[selectedValues.length - 1]?.label || "");
+      //setSelectedOption(selectedValues[selectedValues.length - 1]?.label || "");
       handleFieldChange("stakeholders", selectedValues || []);
     }
   }
@@ -138,6 +189,11 @@ const AddDocumentForm = (props) => {
         name: newStakeholderName,
       };
 
+      const newUpdatedStakeholders = [
+        ...newDocument.newStakeholders,
+        { value: newStakeholder.id, label: newStakeholder.name },
+      ];
+
       // Aggiungi il nuovo stakeholder alla lista delle opzioni  WE WANT TO ADD THE STAKEHOLDER IN THE LIST IMMEDIATLY??
       setStakeholderOptions((prevOptions) => [
         ...prevOptions,
@@ -152,19 +208,22 @@ const AddDocumentForm = (props) => {
       setNewDocument((prevDoc) => ({
         ...prevDoc,
         stakeholders: updatedStakeholders,
+        newStakeholders: newUpdatedStakeholders
       }));
 
-      setSelectedOption(newStakeholderName);
-      setNewStakeholders((prev) => [
-        ...prev, // Spread dell'array precedente
-        newStakeholderName // Nuovo elemento aggiunto alla fine
-      ]);
+      //setSelectedOption(newStakeholderName);
+      /* setNewStakeholders((prev) => [
+         ...prev, // Spread dell'array precedente
+         newStakeholderName // Nuovo elemento aggiunto alla fine
+       ]);*/
     }
     setIsAddingNewStakeholder(false);
     setNewStakeholderName("");
   };
 
+
   const moveAddNewOptionToEnd = (options) => {
+
     // Trova l'opzione "Add a new one..."
     const addNewOption = options.find(option => option.name === "Add a new one...");
     if (!addNewOption) return options; // Se non esiste, ritorna l'elenco invariato
@@ -174,7 +233,39 @@ const AddDocumentForm = (props) => {
 
     // Aggiungi l'opzione "Add a new one..." alla fine
     return [...optionsWithoutAddNew, addNewOption];
+
   };
+
+
+  const moveAddNewOptionToEndType = (options) => {
+    const addNewOptionName = "Add a new one...";
+    const addNewOption = options.find(option => option.name === addNewOptionName);
+    const newOptionName = newDocument.typeName;
+
+    // Controlla se `newDocument.typeName` è valido e non vuoto
+    if (newOptionName && newOptionName.trim() !== "") {
+      const isNewTypeIncluded = options.some(option => option.name === newOptionName);
+
+      // Aggiungi `newDocument.typeName` se non è già presente
+      if (!isNewTypeIncluded) {
+        options = [...options, { id: options.length + 1, name: newOptionName }];
+      }
+    }
+
+    // Rimuovi l'opzione "Add a new one..." dalla lista, se esiste
+    const optionsWithoutAddNew = options.filter(option => option.name !== addNewOptionName);
+
+    // Aggiungi "Add a new one..." alla fine
+    const updatedOptions = addNewOption
+      ? [...optionsWithoutAddNew, addNewOption]
+      : optionsWithoutAddNew;
+
+    // Aggiorna lo stato di `typeOptions`
+    //setTypeOptions(updatedOptions);
+
+    return updatedOptions;
+  };
+
 
 
   const handleFieldChange = (field, value) => {
@@ -258,47 +349,45 @@ const AddDocumentForm = (props) => {
 
   // --- Submit Form ---
   const handleConfirm = async () => {
+    console.log(newDocument);
+
+
+    const isValid = validateFields();
+    if (!isValid) {
+      // Se ci sono errori, esci dalla funzione e non eseguire nulla
+      console.log("Form validation failed. Please fix the errors before submitting.");
+      return;
+    }
+
     let area_id;
     if (props.newAreaId && props.newAreaId.geoJson) {
       area_id = await API.addArea(props.newAreaId.geoJson)
     }
-    else if(props.newAreaId) {
+    else if (props.newAreaId) {
       area_id = props.newAreaId
     }
     // Refresh the list of the documents
 
     //CAMPI OPZIONALI: PAGE + LANGUAGE + GIORNO DELLA DATA(?) + COORDINATES
     //CAMPI OBBLIGATORI: TITLE + STAKEHOLDER + SCALE(PLANE NUMBER IN CASE) + DATE + DESCRIPTION + TYPE
-    if (!oldTypes.some((type) => type.name === selectedType)) {
       try {
-        newDocument.typeId = await API.addType(selectedType);
+        newDocument.typeId = await API.addType(newDocument.typeName);
       } catch (error) {
         console.log(error);
         props.setAlertMessage([error.message, "error"]);
         return;
       }
-    }
-    else {
-      console.log("TIPO ESISTENTE");
-    }
+    
 
-    let oldStakeholdersSelected = oldStakeholders.filter((st) => {
-      return newDocument.stakeholders.some((s) => {
-        return s.label === st
-      });
-    });
-
-    let newStakeholdersSelected = newStakeholders.filter((st) => {
-      return newDocument.stakeholders.some((s) => {
-        return s.label === st
-      });
-    });
+    console.log(newDocument.typeId);
 
     let stakeholdersId = [];
-    console.log(newStakeholdersSelected);
-    if (newStakeholdersSelected.length != 0) {
+    let newStakeholderNames = newDocument.newStakeholders.map((e) => e.label); //tutti quelli creati anche non più selezionati
+    let stakeholdersToCreate = newDocument.stakeholders.filter((e) => newStakeholderNames.some((name) => e.label.includes(name))).map((e) => e.label);
+    console.log(stakeholdersToCreate);
+    if (newStakeholderNames.length != 0) {
       try {
-        stakeholdersId = await API.addNewStakeholders(newStakeholdersSelected);
+        stakeholdersId = await API.addNewStakeholders(newStakeholderNames);
         console.log(stakeholdersId);
       } catch (error) {
         console.log(error);
@@ -327,10 +416,11 @@ const AddDocumentForm = (props) => {
       links: props.connections.length > 0 ? props.connections : null,
     };
 
-    if(area_id) {
+    if (area_id) {
       documentData.areaId = area_id;
     }
 
+    console.log(stakeholdersName);
     try {
       let documentId = await API.addDocument(documentData);
       props.setAlertMessage(["Document added successfully!", "success"]);
@@ -389,10 +479,10 @@ const AddDocumentForm = (props) => {
         className="bg-box_white_color dark:bg-box_color backdrop-blur-2xl shadow-xl w-1/2 px-10 py-10 h-full overflow-y-auto rounded-lg flex flex-col relative scrollbar-thin scrollbar-webkit"
         onClick={(e) => e.stopPropagation()}
         onKeyUp={(e) => {
-        if (e.key === 'Enter') {
-          e.stopPropagation();
-        }
-      }}
+          if (e.key === 'Enter') {
+            e.stopPropagation();
+          }
+        }}
       >
         <h2 className="text-black_text mb-4 dark:text-white_text text-2xl  ">
           Add New Document
@@ -672,7 +762,7 @@ const AddDocumentForm = (props) => {
           ) : (
             <select
               id="document-type"
-              value={selectedType}
+              value={newDocument.typeName}
               onChange={handleTypeChange}
               className={`w-full px-3 text-base py-2 text-black_text dark:text-white_text bg-input_color_light dark:bg-input_color_dark rounded-md ${errors.type
                 ? "border-red-500 border-1"
@@ -681,7 +771,7 @@ const AddDocumentForm = (props) => {
             >
               <option value="none">None</option>
               {
-                moveAddNewOptionToEnd(typeOptions).map((type) => (
+                moveAddNewOptionToEndType(typeOptions).map((type) => (
                   <option key={type.id} value={type.name}>
                     {type.name}
                   </option>

@@ -11,10 +11,15 @@
  * @param {number} pages
  * @param {number} planNumber
  * @param {scale} scale
+ * @param {array} newStakeholders
+ * @param {string} typeName
+ * @param {array} newTypes
+
+
  */
 
 export default class DocumentClass {
-    constructor(title="", stakeholders=[], date="", typeId=0, language="", description="", areaId=null, scale="none", pages="", planNumber="", links=[]) {
+    constructor(title = "", stakeholders = [], date = "", typeId = 0, language = "", description = "", areaId = null, scale = "none", pages = "", planNumber = "", links = [], newStakeholders = [], typeName = "", newTypes=[]) {
         this.title = title;
         this.stakeholders = stakeholders;
         this.date = date;
@@ -25,7 +30,10 @@ export default class DocumentClass {
         this.scale = scale;
         this.pages = pages;
         this.planNumber = planNumber;
-        this.links = links
+        this.links = links;
+        this.newStakeholders = newStakeholders;
+        this.typeName = typeName;
+        this.newTypes = newTypes;
     }
 
 }

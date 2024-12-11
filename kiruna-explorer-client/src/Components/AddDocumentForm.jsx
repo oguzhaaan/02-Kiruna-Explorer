@@ -42,6 +42,7 @@ const AddDocumentForm = (props) => {
    const [oldTypes, setOldTypes] = useState([]); */
 
   const [newDocument, setNewDocument] = [props.newDocument, props.setNewDocument];
+  const [refresh, setRefresh] = useState(false);
 
   const [isValid, setIsValid] = useState(true);
 
@@ -68,7 +69,7 @@ const AddDocumentForm = (props) => {
     console.log(newDocument);
     updateValues();
 
-  }, []);
+  }, [refresh]);
 
 
   const updateValues = () => {
@@ -177,15 +178,16 @@ const AddDocumentForm = (props) => {
     }
   }
 
-  const getLastStakeholderId = (stakeholders) => {
-    return stakeholders[stakeholders.length - 1].id;
-  }
-
+  const getLargestStakeholderId = (stakeholders) => {
+    return stakeholders.reduce((maxId, stakeholder) => 
+      stakeholder.id > maxId ? stakeholder.id : maxId, 0);
+  };
+  
   const handleNewStakeholderSubmit = () => {
     setIsValid(true);
     if (newStakeholderName.trim() !== "") {
       const newStakeholder = {
-        id: getLastStakeholderId(stakeholderOptions) + 1,
+        id: getLargestStakeholderId(stakeholderOptions) + 1,
         name: newStakeholderName,
       };
 
@@ -385,9 +387,9 @@ const AddDocumentForm = (props) => {
     let newStakeholderNames = newDocument.newStakeholders.map((e) => e.label); //tutti quelli creati anche non più selezionati
     let stakeholdersToCreate = newDocument.stakeholders.filter((e) => newStakeholderNames.some((name) => e.label.includes(name))).map((e) => e.label);
     console.log(stakeholdersToCreate);
-    if (newStakeholderNames.length != 0) {
+    if (stakeholdersToCreate.length != 0) {
       try {
-        stakeholdersId = await API.addNewStakeholders(newStakeholderNames);
+        stakeholdersId = await API.addNewStakeholders(stakeholdersToCreate);
         console.log(stakeholdersId);
       } catch (error) {
         console.log(error);
@@ -432,6 +434,7 @@ const AddDocumentForm = (props) => {
       console.log(error);
       props.setAlertMessage([error.message, "error"]);
     }
+    setRefresh(true);
   };
 
   useEffect(() => {

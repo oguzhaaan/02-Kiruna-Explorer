@@ -23,8 +23,10 @@ const CustomEdge = ({
         targetX: targetX || 0,
         targetY: targetY || 0,
         sourcePosition,
-        targetPosition
+        targetPosition,
     });
+
+    const isColored = data?.selectedEdge
 
     // Funzione per associare i colori ai tipi di connessione
     const getColor = (typeOfConnection: string) => {
@@ -46,7 +48,7 @@ const CustomEdge = ({
     return (
         <>
             {/* Se c'è un solo colore, disegniamo un solo path continuo */}
-            {colors.length === 1 ? (
+            {colors.length === 1 && isColored ? (
                 <path
                     key={`${id}-color-0`}
                     id={`${id}-color-0`}
@@ -60,7 +62,7 @@ const CustomEdge = ({
                     d={basePath} // Usa lo stesso percorso
                     markerEnd={markerEnd} // Aggiungi la freccia se presente
                 />
-            ) : (
+            ) : colors.length > 1 && isColored? (
                 // Altrimenti, per più colori, creiamo percorsi segmentati
                 colors.map((color, index) => (
                     <path
@@ -79,14 +81,29 @@ const CustomEdge = ({
                         markerEnd={index === colors.length - 1 ? markerEnd : undefined} // La freccia sull'ultimo path
                     />
                 ))
-            )}
+            ) : (
+                <path
+                    key={`${id}-color-0`}
+                    id={`${id}-color-0`}
+                    style={{
+                        ...style,
+                        stroke: "#777777",
+                        strokeWidth: "0.2em", // Tutti i path hanno la stessa larghezza
+                        pointerEvents: 'none'
+                    }}
+                    className={`react-flow__edge-path`}
+                    d={basePath} // Usa lo stesso percorso
+                    markerEnd={markerEnd} // Aggiungi la freccia se presente
+                />
+            )
+        }
             <path
                 d={basePath}
                 style={{fill: 'none', stroke: 'transparent', strokeWidth: '4em'}}
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
             />
-            {isHovered && (
+            {/*isHovered && (
                 <foreignObject x={labelX - 50} y={labelY - 20}  className="w-3/4 h-100 p-0 m-0">
                     <div
                         className="bg-white_text dark:bg-black_text text-black_text dark:text-white_text rounded-md shadow-md text-sm">
@@ -99,7 +116,7 @@ const CustomEdge = ({
                         </ul>
                     </div>
                 </foreignObject>
-            )}
+            )*/}
         </>
     );
 };

@@ -15,7 +15,8 @@ interface CustomBackgroundNodeProps extends NodeProps {
 function CustomBackgroundNode({
     data: { years, distanceBetweenYears }
 }: CustomBackgroundNodeProps) {
-    const barWidth = distanceBetweenYears * years.length < 1920 * 2 ? 1920 * 2 : distanceBetweenYears * years.length;
+    const offsetTimeLine = -400
+    const barWidth = offsetTimeLine + distanceBetweenYears * years.length < 1920 * 2 ? 1920 * 2 : offsetTimeLine + distanceBetweenYears * years.length;
 
     return (
         <div style={{ width: `${barWidth}px`, height: '2160px' }}

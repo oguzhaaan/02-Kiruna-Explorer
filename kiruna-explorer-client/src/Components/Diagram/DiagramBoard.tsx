@@ -110,7 +110,8 @@ const DiagramBoard = (props) => {
         }
     };
 
-    const distanceBetweenYears = 400;
+    const distanceBetweenYears = 800;
+    const offsetTimeLine = -400
 
     useEffect(() => {
         const getAllDocument = async () => {
@@ -203,7 +204,7 @@ const DiagramBoard = (props) => {
                             const yearIndex = yearsRange.indexOf(nodeYear);
                             if (yearIndex === -1) return change
 
-                            const yearStart = yearIndex * distanceBetweenYears
+                            const yearStart = offsetTimeLine + yearIndex * distanceBetweenYears
                             const yearEnd = yearStart + ((distanceBetweenYears / 12) * 11)
 
                             const limitedX = Math.max(yearStart, Math.min(change.position.x, yearEnd));
@@ -245,7 +246,7 @@ const DiagramBoard = (props) => {
                 if (yearIndex === -1) return;
 
                 // Define boundaries
-                const yearStart = (yearIndex * distanceBetweenYears);
+                const yearStart = offsetTimeLine + (yearIndex * distanceBetweenYears);
                 const yearEnd = yearStart + ((distanceBetweenYears / 12) * 11);
 
                 const scale = node.data.group?.[0]?.scale;
@@ -481,7 +482,7 @@ const DiagramBoard = (props) => {
                     index != 0 && <div
                         key={year}
                         className="absolute transform -translate-x-1/2 -translate-y-1/4 pt-2 flex flex-col gap-1 justify-content-center align-items-center transition"
-                        style={{ left: `${index * distanceBetweenYears * zoom + (viewport?.x || 0)}px` }}
+                        style={{ left: `${offsetTimeLine*zoom + index * distanceBetweenYears * zoom + (viewport?.x || 0)}px` }}
                     >
                         <div className="w-3 h-3 bg-black_text dark:bg-white_text rounded-full transition"
                             style={{ transform: `scale(${zoom})` }}>
@@ -496,7 +497,7 @@ const DiagramBoard = (props) => {
 
                     yearIndex != 0 && months.map((month, monthIndex) => {
                         // Calcola la posizione proporzionale dei mesi
-                        const monthPosition = yearIndex * distanceBetweenYears * zoom + (viewport?.x || 0) + (monthIndex * (distanceBetweenYears / 12)) * zoom;
+                        const monthPosition = offsetTimeLine*zoom + yearIndex * distanceBetweenYears * zoom + (viewport?.x || 0) + (monthIndex * (distanceBetweenYears / 12)) * zoom;
 
                         return (
                             <div key={`${year}-${month}`}

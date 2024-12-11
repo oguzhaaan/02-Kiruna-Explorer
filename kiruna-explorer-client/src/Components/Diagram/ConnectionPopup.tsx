@@ -4,6 +4,7 @@ import {Charging} from '../Charging.jsx';
 import {useEffect, useState} from "react";
 import API from "../../API/API.mjs";
 import dayjs from "dayjs";
+import React from 'react';
 
 interface ConnectionPopupProps {
     isEditing: boolean;
@@ -27,7 +28,7 @@ function ConnectionPopup({isEditing, documentFromId, documentToId, closePopup}: 
         "update",
     ];
 
-    const handleConnectionChange = (docId, value) => {
+    const handleConnectionChange = (docId, value) => {                                                                  
         setLink((prevLinks) => {
             const currentConnections = prevLinks[docId] || [];
             const newLinks = currentConnections.includes(value)

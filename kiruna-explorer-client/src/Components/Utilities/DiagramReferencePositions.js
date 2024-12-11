@@ -1,4 +1,4 @@
-const distanceBetweenYears = 400
+const distanceBetweenYears = 800
 
 export const YScalePosition =  {
     text: 165,
@@ -13,7 +13,7 @@ export const YScalePosition =  {
 }
 
 export function getXDatePosition(firstyear, year, month){
-    const offset = 0
+    const offset = -400
     const yearindex = parseInt(year)-parseInt(firstyear)
 
     const xoffset = month? month - 1 : 0

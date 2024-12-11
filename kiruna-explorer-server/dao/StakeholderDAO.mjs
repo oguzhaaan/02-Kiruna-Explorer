@@ -29,7 +29,7 @@ export default function StakeholderDAO() {
     };
 
     this.getStakeholderByName = async (name) => {
-        const query = `SELECT * FROM stakeholder WHERE name = ?`;
+        const query = `SELECT * FROM stakeholder WHERE name = ? COLLATE NOCASE`;
         return new Promise((resolve, reject) => {
             db.get(query, [name], (err, row) => {
                 if (err) {

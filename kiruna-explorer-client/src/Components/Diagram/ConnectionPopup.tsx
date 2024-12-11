@@ -31,7 +31,7 @@ function ConnectionPopup({isEditing, documentFromId, documentToId, closePopup}: 
         "update",
     ];
 
-    const handleConnectionChange = (docId, value) => {
+    const handleConnectionChange = (docId, value) => {                                                                  
         setLink((prevLinks) => {
             const currentConnections = prevLinks[docId] || [];
             const newLinks = currentConnections.includes(value)

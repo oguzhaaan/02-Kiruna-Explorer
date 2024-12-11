@@ -15,6 +15,7 @@ import {NewDocumentProvider} from "./contexts/NewDocumentContext.jsx";
 import API from "./API/API.mjs";
 import DocumentsPage from "./Components/DocumentsPage.jsx";
 import DiagramBoard from "./Components/Diagram/DiagramBoard.tsx";
+import {NodePositionProvider} from "./contexts/NodePositionContext.tsx";
 
 function App() {
     const {user, isLoggedIn, checkAuth, isVisitorLoggedIn} = useUserContext();
@@ -51,6 +52,7 @@ function App() {
     return (
         <>
             <ThemeProvider>
+                <NodePositionProvider>
                     <Routes>
 
                         <Route element={
@@ -116,6 +118,7 @@ function App() {
 
                         </Route>
                     </Routes>
+                    </NodePositionProvider>
             </ThemeProvider>
         </>
     );

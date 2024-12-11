@@ -1,17 +1,31 @@
 import { useTheme } from "../../contexts/ThemeContext.jsx";
-import { Controls, MiniMap, ReactFlow, Background, type ColorMode, Edge } from "@xyflow/react";
-import { useNodesState } from "@xyflow/react";
+import {
+    applyNodeChanges,
+    Background,
+    type ColorMode,
+    Edge,
+    MiniMap,
+    OnNodesChange,
+    ReactFlow,
+    useNodesState,
+} from "@xyflow/react";
 import '@xyflow/react/dist/style.css';
-import { useState, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import CustomBackgroundNode from './CustomBackgroundNode';
 import SingleNode from "./SingleNode";
 import GroupNode from "./GroupNode";
 import CustomEdge from "./CustomEdge";
 import CloseNode from "./CustomCloseNode.js";
-import React from "react";
 import API from "../../API/API.mjs"
-import { YScalePosition, getXDatePosition, getEquidistantPoints, getYPlanScale } from "../Utilities/DiagramReferencePositions.js";
+import {
+    getEquidistantPoints,
+    getXDatePosition,
+    getYPlanScale,
+    YScalePosition
+} from "../Utilities/DiagramReferencePositions.js";
 import { SingleDocumentMap } from "../SingleDocumentMap.jsx";
+import { useNodePosition } from "../../contexts/NodePositionContext.tsx";
+import ConnectionPopup from "./ConnectionPopup";
 
 type Node<Data = any> = {
     id: string;
@@ -41,6 +55,7 @@ export type DiagramItem = {
 
 const DiagramBoard = (props) => {
     const { isDarkMode } = useTheme();
+    const { nodePositions, setNodePosition } = useNodePosition();
     const [colorMode, setColorMode] = useState<ColorMode>(isDarkMode ? "dark" : "light");
     const [zoom, setZoom] = useState(1); // Add zoom state
     const [viewport, setViewport] = useState({ x: 0, y: 0, zoom: 1 }); // Add viewport state
@@ -49,7 +64,8 @@ const DiagramBoard = (props) => {
     const [documents, setDocuments] = useState<DiagramItem[] | []>([])
     const [links, setLinks] = useState<Edge[]>([])
     const [yearsRange, setYearsRange] = useState<number[]>([])
-    const [nodes, setNodes, onNodesChange] = useNodesState<Node>([])
+    const [nodes, setNodes] = useNodesState<Node>([])
+    const [extent, setExtent] = useState<[[number, number], [number, number]] | undefined>(undefined)
 
     const [nodeStates, setNodeStates] = useState<Record<number, string>>({});
     const [nodeisOpen, setNodeIsOpen] = useState<Record<string, boolean | string>>({});
@@ -72,7 +88,6 @@ const DiagramBoard = (props) => {
         setColorMode(isDarkMode ? "dark" : "light")
     }, [isDarkMode])
 
-
     const setNodeSelected = (nodeindex: number, docselected: string) => {
         setNodeStates(prev => ({
             ...prev,
@@ -83,14 +98,12 @@ const DiagramBoard = (props) => {
     const setNodeOpen = (nodeindex: number, cancel?: boolean) => {
         if (nodeindex == -1) {
             setNodeIsOpen({})
-        }
-        else if (cancel) {
+        } else if (cancel) {
             setNodeIsOpen(prev => ({
                 ...prev,
                 [nodeindex]: "closed",
             }));
-        }
-        else {
+        } else {
             setNodeIsOpen(prev => ({
                 ...prev,
                 [nodeindex]: true,
@@ -98,13 +111,13 @@ const DiagramBoard = (props) => {
         }
     };
 
-    const distanceBetweenYears = 400;
+    const distanceBetweenYears = 800;
+    const offsetTimeLine = -400
 
     useEffect(() => {
         const getAllDocument = async () => {
             try {
                 const docs = await API.getAllDocuments();
-                console.log(docs)
 
                 const yearsDoc = docs.map((doc) => {
                     let date = doc.date.split("-")
@@ -125,7 +138,15 @@ const DiagramBoard = (props) => {
                     let date = doc.date.split("-")
                     let year = date[0]
                     let month = date[1]
-                    return { docid: doc.id, title: doc.title, type: doc.type, scale: doc.scale, year: year, month: month, planNumber: doc.planNumber };
+                    return {
+                        docid: doc.id,
+                        title: doc.title,
+                        type: doc.type,
+                        scale: doc.scale === "blueprints/effects" ? "blueprints" : doc.scale,
+                        year: year,
+                        month: month,
+                        planNumber: doc.planNumber
+                    };
                 }).filter((i: Item) => i.scale !== null)
 
                 //Group items by scale and date
@@ -144,20 +165,22 @@ const DiagramBoard = (props) => {
                     if (element.month) {
                         const evenMonth = element.month % 2 == 0
                         yoffset = evenMonth ? 50 : -50
-                    }
-                    else {
+                    } else {
                         yoffset = -100
                     }
                     let ypos
                     if (element.scale === "plan") {
                         ypos = getYPlanScale(element.planNumber)
-                        yoffset=0
-                    }
-                    else {
+                        yoffset = 0
+                    } else {
                         ypos = YScalePosition[element.scale]
                     }
 
-                    return { items: i[1], x: getXDatePosition(yearsRange[0], element.year, element.month), y: yoffset + ypos }
+                    return {
+                        items: i[1],
+                        x: getXDatePosition(yearsRange[0], element.year, element.month),
+                        y: yoffset + ypos
+                    }
                 })
 
                 setDocuments(docItems)
@@ -168,11 +191,88 @@ const DiagramBoard = (props) => {
         }
         getAllDocument()
     }, [])
-    /*
-        useEffect(() => {
-            if (zoom <= 1.1) setIsOpen(null)
-            else if (zoom > 1.1 && clickedNode) setIsOpen(clickedNode)
-        }, [zoom])*/
+
+    const onNodesChange: OnNodesChange = useCallback(
+        (changes) => {
+            setNodes((nds) =>
+                applyNodeChanges(
+                    changes.map((change) => {
+                        if (change.type === 'position' && change.position) {
+
+                            const node = nds.find((e) => e.id == change.id)
+
+                            const nodeYear = parseInt(node?.data.group?.[0]?.year, 10);
+                            const yearIndex = yearsRange.indexOf(nodeYear);
+                            if (yearIndex === -1) return change
+
+                            const yearStart = offsetTimeLine + yearIndex * distanceBetweenYears
+                            const yearEnd = yearStart + ((distanceBetweenYears / 12) * 11)
+
+                            const limitedX = Math.max(yearStart, Math.min(change.position.x, yearEnd));
+
+                            const scale = node?.data.group?.[0]?.scale
+
+                            let minY, maxY
+                            if (scale !== "plan") {
+                                minY = YScalePosition[scale] - 100;
+                                maxY = YScalePosition[scale] + 100;
+                            }
+                            else {
+                                minY = maxY = getYPlanScale(node?.data.group?.[0]?.planNumber)
+                                minY = minY - 30
+                                maxY = maxY + 30
+                            }
+
+                            const limitedY = Math.max(minY, Math.min(change.position.y, maxY));
+
+                            return {
+                                ...change,
+                                position: { x: limitedX, y: limitedY },
+                            };
+                        }
+                        return change;
+                    }),
+                    nds
+                )
+            );
+        },
+        [setNodes, viewport, yearsRange]
+    );
+
+    const onNodeDragStop = useCallback(
+        (_, node) => {
+            if (node.nodetype !== "groupNode") {
+                const nodeYear = parseInt(node.data.group?.[0]?.year, 10);
+                const yearIndex = yearsRange.indexOf(nodeYear);
+                if (yearIndex === -1) return;
+
+                // Define boundaries
+                const yearStart = offsetTimeLine + (yearIndex * distanceBetweenYears);
+                const yearEnd = yearStart + ((distanceBetweenYears / 12) * 11);
+
+                const scale = node.data.group?.[0]?.scale;
+                let minY, maxY
+                if (scale !== "plan") {
+                    minY = YScalePosition[scale] - 100;
+                    maxY = YScalePosition[scale] + 100;
+                }
+                else {
+                    minY = maxY = getYPlanScale(node?.data.group?.[0]?.planNumber)
+                    minY = minY - 30
+                    maxY = maxY + 30
+                }
+
+                // Limit position within boundaries
+                const limitedX = Math.max(yearStart, Math.min(node.position.x, yearEnd));
+                const limitedY = Math.max(minY, Math.min(node.position.y, maxY));
+
+                // Save the new position to context
+                setNodePosition(node.id, { x: limitedX, y: limitedY });
+            }
+
+        },
+        [setNodePosition, yearsRange]
+    );
 
     const nodeTypes = {
         background: CustomBackgroundNode,
@@ -187,7 +287,7 @@ const DiagramBoard = (props) => {
 
     useEffect(() => {
         const getNodes = () => {
-            const initialNodes:Node[] = [
+            const initialNodes: Node[] = [
                 {
                     id: '0',
                     type: 'background',
@@ -197,7 +297,7 @@ const DiagramBoard = (props) => {
                     selectable: false,
                     connectable: false,
                     clickable: false,
-                    style: { zIndex: -1 },
+                    style: { zIndex: -1, pointerEvents: 'none' }
                 },
                 ...documents.flatMap((e, index: number) => {
                     const nodetype = e.items.length === 1 ? 'singleNode' : 'groupNode';
@@ -209,13 +309,27 @@ const DiagramBoard = (props) => {
                     if (nodeisOpen[index] === true && nodetype === 'groupNode') {
                         const positions = getEquidistantPoints(e.x, e.y, e.items.length == 2 ? 45 : 5 + e.items.length * 7, e.items.length);
 
-                        const nodes = e.items.map((item: Item, index1: number) => ({
-                            id: `${item.docid}`,
-                            type: 'singleNode',
-                            position: { x: positions[index1].x, y: positions[index1].y },
-                            data: { clickedNode: clickedNode, group: [item], zoom: zoom, index: index, showSingleDocument: (id: string) => { setDocumentId(id), setShowSingleDocument(true) } },
-                            draggable: item.month===undefined,
-                        }));
+                        const nodes = e.items.map((item: Item, index1: number) => {
+
+
+                            return {
+                                id: `${item.docid}`,
+                                type: 'singleNode',
+                                position: nodePositions[item.docid] || { x: positions[index1].x, y: positions[index1].y },
+                                data: {
+                                    clickedNode: clickedNode,
+                                    group: [item],
+                                    pos: nodePositions[item.docid] || { x: positions[index1].x, y: positions[index1].y },
+                                    zoom: zoom,
+                                    index: index,
+                                    showSingleDocument: (id: string) => {
+                                        setDocumentId(id), setShowSingleDocument(true)
+                                    },
+                                    groupPosition: { x: e.x, y: e.y }
+                                },
+                                draggable: item.month === undefined,
+                            };
+                        });
 
                         const closeNode = {
                             id: `closeNode-${index}`,
@@ -227,12 +341,23 @@ const DiagramBoard = (props) => {
 
                         return [...nodes, closeNode];
                     } else {
+                        const savedPosition = nodePositions[nodeSelected] || { x: e.x, y: e.y };
                         return {
                             id: `${nodeSelected}`,
                             type: nodetype,
-                            position: { x: e.x, y: e.y },
-                            data: { clickedNode: clickedNode, group: e.items, zoom: zoom, index: index, setNodeSelected: (id: number) => setNodeSelected(index, `${id}`), showSingleDocument: (id: string) => { setDocumentId(id), setShowSingleDocument(true) } },
-                            draggable: e.items[0].month===undefined,
+                            position: nodetype === "groupNode" ? { x: e.x, y: e.y } : savedPosition,
+                            data: {
+                                clickedNode: clickedNode,
+                                group: e.items,
+                                pos: nodetype === "groupNode" ? { x: e.x, y: e.y } : savedPosition,
+                                zoom: zoom,
+                                index: index,
+                                setNodeSelected: (id: number) => setNodeSelected(index, `${id}`),
+                                showSingleDocument: (id: string) => {
+                                    setDocumentId(id), setShowSingleDocument(true)
+                                },
+                            },
+                            draggable: e.items[0].month === undefined && nodetype !== "groupNode",
                         };
                     }
                 }),
@@ -247,13 +372,13 @@ const DiagramBoard = (props) => {
         const getLinks = async () => {
             const allLinks = nodes.flatMap((node, index: number) => {
                 if (node.type === "background" || node.type === "closeNode") return [];
-
+    
                 const nodetype = node.data.group.length === 1 ? 'singleNode' : 'groupNode';
                 return node.data.group.flatMap(async (elem: Item) => {
-                    const docid = elem.docid
-                    const docLinks = await API.getDocuemntLinks(docid)
+                    const docid = elem.docid;
+                    const docLinks = await API.getDocuemntLinks(docid);
                     if (docLinks.length === 0) return [];
-
+    
                     const groupedLinks = docLinks.reduce((acc, linkitem) => {
                         if (!acc[linkitem.id]) {
                             acc[linkitem.id] = [];
@@ -261,35 +386,68 @@ const DiagramBoard = (props) => {
                         acc[linkitem.id].push(`${linkitem.connection}`);
                         return acc;
                     }, {} as Record<string, Item[]>);
-
+    
                     return Object.entries(groupedLinks).map((dl) => (
                         {
                             id: `l${docid}-${dl[0]}`,
                             source: `${docid}`,
                             target: `${dl[0]}`,
                             type: "custom",
-                            data: { typesOfConnections: dl[1], selectedEdge: `${docid}` === clickedNode || `${docid}` === hoveredNode || allLinkVisible }
+                            data: {
+                                typesOfConnections: dl[1],
+                                selectedEdge: `${docid}` === clickedNode || `${docid}` === hoveredNode || `${dl[0]}` === clickedNode || `${dl[0]}` === hoveredNode || allLinkVisible
+                            }
                         }
-                    ))
-                })
-            })
+                    ));
+                });
+            });
+    
             const resolvedEdges = (await Promise.all(allLinks)).flat();
-            setLinks(resolvedEdges)
-        }
-        getLinks()
-    }, [nodes, nodeStates, hoveredNode, allLinkVisible])
+    
+            // Filtra le connessioni duplicati con la logica position.x inversa
+            const filteredEdges = resolvedEdges.filter((edge, index, self) => {
+                const sourceNode = nodes.find(node => node.id === edge.source);
+                const targetNode = nodes.find(node => node.id === edge.target);
+    
+                if (!sourceNode || !targetNode) return false;
+    
+                // Determina quale nodo deve essere il source e quale il target
+                const [finalSource, finalTarget] = sourceNode.position.x >= targetNode.position.x
+                    ? [edge.source, edge.target]
+                    : [edge.target, edge.source];
+    
+                // Verifica se una connessione simile esiste già
+                return self.findIndex((e)=>(e.source === finalSource && e.target === finalTarget)) === index 
+            });
+    
+            setLinks(filteredEdges);
+        };
+        getLinks();
+    }, [nodes, nodeStates, hoveredNode, allLinkVisible]);    
 
     //const filteredEdges = links.filter(edge => edge.source === clickedNode || edge.source === hoveredNode);
 
     //boundaries
-    const extent: [[number, number], [number, number]] = [
-        [0, 0],
-        [distanceBetweenYears * yearsRange.length < 1920 * 2 ? 1920 * 2 : distanceBetweenYears * yearsRange.length, 2160]
-    ];
+    
+    useEffect(()=>{
+        const bounds: [[number, number], [number, number]] = [
+            [0, 0],
+            [offsetTimeLine + distanceBetweenYears * yearsRange.length, 2160]
+        ];
+        setExtent(bounds)
+    },[yearsRange])
 
     return (
         <div className={`${isDarkMode ? "dark" : "light"} w-screen h-screen`}>
-            {ShowSingleDocument && <SingleDocumentMap setShowArea={props.setShowArea} municipalGeoJson={props.municipalGeoJson} setDocumentId={setDocumentId} id={documentId} setShowSingleDocument={setShowSingleDocument}></SingleDocumentMap>}
+            {/*<ConnectionPopup
+                isEditing={false}
+                documentFromId={40} documentToId={43}
+                closePopup={() => {}}
+            ></ConnectionPopup>*/}
+            {ShowSingleDocument &&
+                <SingleDocumentMap setShowArea={props.setShowArea} municipalGeoJson={props.municipalGeoJson}
+                    setDocumentId={setDocumentId} id={documentId}
+                    setShowSingleDocument={setShowSingleDocument}></SingleDocumentMap>}
             <ReactFlow
                 nodes={nodes}
                 edges={links}
@@ -303,7 +461,6 @@ const DiagramBoard = (props) => {
                 onNodesChange={onNodesChange}
                 onNodeClick={(event, node) => {
                     if (node.type === "closeNode") {
-                        console.log("chiudi")
                         setNodeOpen(node.data.index, true)
                         setClickedNode((clickedNode === node.id || node.id == "0") ? null : node.id);
                     } else {
@@ -314,19 +471,20 @@ const DiagramBoard = (props) => {
                         if (node.type === "groupNode") {
                             if (zoom <= 1) {
                                 setNodeOpen(-1)
-                            }
-                            else if (clickedNode == node.id) {
+                            } else if (clickedNode == node.id) {
                                 setNodeOpen(node.data.index, true)
-                            }
-                            else {
+                            } else {
                                 setNodeOpen(node.data.index)
                             }
                         }
                     }
                 }}
+                onNodeMouseLeave={() => {
+                    setHoveredNode(null)
+                }}
                 onNodeMouseEnter={(event, node) => {
                     event.preventDefault();
-                    setHoveredNode(node.id != "0" ? node.id : null);
+                    setHoveredNode(node.id !== "0" ? node.id : null);
                 }}
                 onMoveEnd={(event, viewport) => {
                     setZoom(viewport.zoom);
@@ -337,10 +495,11 @@ const DiagramBoard = (props) => {
                     setShowSingleDocument(true);
                     setDocumentId(node.id);
                 }}
+                onNodeDragStop={onNodeDragStop}
             >
 
                 <Background gap={20} size={1} color={isDarkMode ? "#333" : "#ccc"} />
-                <MiniMap className="opacity-70" />
+                {/*<MiniMap className="opacity-50" />*/}
             </ReactFlow>
 
             <div
@@ -351,7 +510,7 @@ const DiagramBoard = (props) => {
                     index != 0 && <div
                         key={year}
                         className="absolute transform -translate-x-1/2 -translate-y-1/4 pt-2 flex flex-col gap-1 justify-content-center align-items-center transition"
-                        style={{ left: `${index * 400 * zoom + (viewport?.x || 0)}px` }}
+                        style={{ left: `${offsetTimeLine * zoom + index * distanceBetweenYears * zoom + (viewport?.x || 0)}px` }}
                     >
                         <div className="w-3 h-3 bg-black_text dark:bg-white_text rounded-full transition"
                             style={{ transform: `scale(${zoom})` }}>
@@ -366,7 +525,7 @@ const DiagramBoard = (props) => {
 
                     yearIndex != 0 && months.map((month, monthIndex) => {
                         // Calcola la posizione proporzionale dei mesi
-                        const monthPosition = yearIndex * 400 * zoom + (viewport?.x || 0) + (monthIndex * (400 / 12)) * zoom;
+                        const monthPosition = offsetTimeLine * zoom + yearIndex * distanceBetweenYears * zoom + (viewport?.x || 0) + (monthIndex * (distanceBetweenYears / 12)) * zoom;
 
                         return (
                             <div key={`${year}-${month}`}
@@ -388,7 +547,7 @@ const DiagramBoard = (props) => {
                         );
                     })
                 ))}
-                {/* Linea verticale rossa per il giorno corrente */}
+                {/* red line for today */}
                 {(() => {
                     const currentDate = new Date();
                     const currentYearIndex = yearsRange.indexOf(currentDate.getFullYear());
@@ -396,15 +555,24 @@ const DiagramBoard = (props) => {
                     const daysInMonth = new Date(currentDate.getFullYear(), currentMonthIndex + 1, 0).getDate();
                     const dayFraction = currentDate.getDate() / daysInMonth;
 
-                    const currentDayPosition = currentYearIndex * 400 * zoom + (viewport?.x || 0)
-                        + currentMonthIndex * (400 / 12) * zoom
-                        + dayFraction * (400 / 12) * zoom;
+                    const currentDayPosition = offsetTimeLine * zoom + currentYearIndex * distanceBetweenYears * zoom + (viewport?.x || 0)
+                        + currentMonthIndex * (distanceBetweenYears / 12) * zoom
+                        + dayFraction * (distanceBetweenYears / 12) * zoom;
 
                     return (
-                        <div
-                            className="absolute h-screen border-l border-red-500"
-                            style={{ left: `${currentDayPosition}px` }}
-                        />
+                        <>
+                            <div
+                                className="absolute h-screen border-l border-my_red"
+                                style={{ left: `${currentDayPosition}px` }}
+                            />
+                            {/* Numero del mese */}
+                            <div
+                                className="absolute top-10 text-xs text-my_red"
+                                style={{ transform: `translateX(-50%) scale(${zoom})`, left: `${currentDayPosition + 20 * zoom}px` }}
+                            >
+                                Today
+                            </div>
+                        </>
                     );
                 })()}
             </div>
@@ -419,7 +587,8 @@ const DiagramBoard = (props) => {
             </button>
 
             {isLegendVisible && (
-                <div className="z-10 fixed top-16 right-4 bg-white_text dark:bg-dark_node dark:text-white_text shadow-lg rounded-lg p-4 w-60">
+                <div
+                    className="z-10 fixed top-16 right-4 bg-white_text dark:bg-dark_node dark:text-white_text shadow-lg rounded-lg p-4 w-60">
                     <h3 className="text-lg font-semibold mb-2">Legend</h3>
 
                     {connections.map((connection) => (
@@ -442,26 +611,26 @@ const DiagramBoard = (props) => {
             {/* Link button */}
             <button
                 title={allLinkVisible ? "Hide all connections" : "Color all connections"}
-                onClick={() => { setAllLinkVisible(prev => !prev) }}
+                onClick={() => {
+                    setAllLinkVisible(prev => !prev)
+                }}
                 className="flex justify-content-center align-content-center fixed top-20 right-4 bg-white_text  dark:bg-[#323232] w-12 h-12 border-2 border-dark_node dark:border-white_text rounded-full shadow-lg hover:bg-gray-300 dark:hover:bg-[#696969] transition"
             >
                 <i className={`bi bi-share${allLinkVisible ? "-fill" : ""} text-[1.8em] dark:text-white_text`}></i>
             </button>
+
+            {/*TODO add Filter here with modal*/}
+            <button
+                title="filter"
+                onClick={() => {/*Open modal*/ }}
+                className="flex justify-content-center align-content-center fixed top-36 right-4 bg-white_text  dark:bg-[#323232] w-12 h-12 border-2 border-dark_node dark:border-white_text rounded-full shadow-lg hover:bg-gray-300 dark:hover:bg-[#696969] transition"
+            >
+                <i className="bi bi-filter text-[1.8em] dark:text-white_text"></i>
+            </button>
+
 
         </div>
     );
 };
 
 export default DiagramBoard;
-
-/*
-onNodeMouseEnter={(event, node) => {
-    event.preventDefault();
-    setHoveredNode(node.id);
-    filterEdges();
-}}
-onNodeMouseLeave={() => setHoveredNode(null)}
-onMoveEnd={(event, viewport) => {
-    setZoom(viewport.zoom);
-    setViewport(viewport);
-}} */

@@ -151,7 +151,7 @@ function SingleDocumentMap({setShowArea,municipalGeoJson,  setDocumentId, id, se
                 <div className="w-100 flex flex-row justify-content-end">
                     <button onClick={() => {
                         setShowSingleDocument(false);
-                    }} className="text-black_text dark:text-white_text text-base right-4 hover:text-gray-600">
+                    }} className="text-black_text dark:text-white_text text-base right-4 hover:opacity-50 transition">
                         <i className="bi bi-x-lg text-2xl"></i>
                     </button>
                 </div>

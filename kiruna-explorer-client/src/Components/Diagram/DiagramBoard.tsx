@@ -395,6 +395,8 @@ const DiagramBoard = (props) => {
         getLinks()
     }, [nodes, nodeStates, hoveredNode, allLinkVisible])
 
+    console.log(nodes)
+
     //const filteredEdges = links.filter(edge => edge.source === clickedNode || edge.source === hoveredNode);
 
     //boundaries
@@ -405,11 +407,6 @@ const DiagramBoard = (props) => {
 
     return (
         <div className={`${isDarkMode ? "dark" : "light"} w-screen h-screen`}>
-            {/*<ConnectionPopup
-                isEditing={false}
-                documentFromId={40} documentToId={43}
-                closePopup={() => {}}
-            ></ConnectionPopup>*/}
             {ShowSingleDocument &&
                 <SingleDocumentMap setShowArea={props.setShowArea} municipalGeoJson={props.municipalGeoJson}
                                    setDocumentId={setDocumentId} id={documentId}

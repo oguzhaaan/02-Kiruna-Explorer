@@ -69,7 +69,7 @@ export default function DocumentDAO(areaDAO) {
         const limit = 5; // Fixed limit
         query += " LIMIT ? OFFSET ?";
         params.push(limit, offset);
-        console.log(query)
+        
     
         // Execute the query to fetch documents
         return new Promise((resolve, reject) => {

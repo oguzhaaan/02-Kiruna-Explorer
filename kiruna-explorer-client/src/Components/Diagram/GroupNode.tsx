@@ -1,4 +1,4 @@
-import { NodeProps, Position } from '@xyflow/react';
+import { NodeProps, Position, useReactFlow } from '@xyflow/react';
 import CustomHandle from "./CustomHandle";
 import { getIcon } from "../Utilities/DocumentIcons.jsx";
 import { useTheme } from "../../contexts/ThemeContext.jsx";
@@ -17,6 +17,7 @@ interface GroupNodeProps extends NodeProps {
         distanceBetweenYears: number;
         clickedNode: string | null;
         group: Item[],
+        pos:{x:number,y:number},
         zoom: number;
         setNodeSelected: (id: number) => void
         showSingleDocument: (id:string) => void
@@ -38,6 +39,8 @@ function GroupNode({
     let zoom = data.zoom <= 0.9 ? 0.9 : data.zoom >= 2 ? 2 : data.zoom
     zoom = isClicked || isHovered? zoom /1.2 : zoom
 
+    const {setCenter} = useReactFlow()
+
     return (
         <>
             <div className={` ${isClicked ? "" : "opacity-35"}`}
@@ -49,7 +52,11 @@ function GroupNode({
                 }}
                 title={`Title: ${selectedDocument.title} \nType: ${selectedDocument.type}`}
                 onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}>
+                onMouseLeave={() => setIsHovered(false)}
+                onClick={()=>{
+                    //setCenter(data.pos.x,data.pos.y, {zoom:1.2, duration:1000})
+                }}
+                >
                 <div
                     className={`flex flex-row w-100 h-100 justify-content-center align-content-center text-black_text dark:text-white_text rounded-full bg-light_node dark:bg-dark_node`}
                 >

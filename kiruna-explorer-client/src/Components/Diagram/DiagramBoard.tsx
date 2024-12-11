@@ -7,7 +7,7 @@ import {
     MiniMap,
     OnNodesChange,
     ReactFlow,
-    useNodesState
+    useNodesState,
 } from "@xyflow/react";
 import '@xyflow/react/dist/style.css';
 import React, { useCallback, useEffect, useState } from "react";
@@ -318,6 +318,7 @@ const DiagramBoard = (props) => {
                                 data: {
                                     clickedNode: clickedNode,
                                     group: [item],
+                                    pos: nodePositions[item.docid] || { x: positions[index1].x, y: positions[index1].y}, 
                                     zoom: zoom,
                                     index: index,
                                     showSingleDocument: (id: string) => {
@@ -347,12 +348,13 @@ const DiagramBoard = (props) => {
                             data: {
                                 clickedNode: clickedNode,
                                 group: e.items,
+                                pos: nodetype === "groupNode" ? { x: e.x, y: e.y } : savedPosition, 
                                 zoom: zoom,
                                 index: index,
                                 setNodeSelected: (id: number) => setNodeSelected(index, `${id}`),
                                 showSingleDocument: (id: string) => {
                                     setDocumentId(id), setShowSingleDocument(true)
-                                }
+                                },
                             },
                             draggable: e.items[0].month === undefined && nodetype !== "groupNode",
                         };
@@ -409,7 +411,7 @@ const DiagramBoard = (props) => {
     //boundaries
     const extent: [[number, number], [number, number]] = [
         [0, 0],
-        [distanceBetweenYears * yearsRange.length < 1920 * 2 ? 1920 * 2 : distanceBetweenYears * yearsRange.length, 2160]
+        [offsetTimeLine + distanceBetweenYears * yearsRange.length < 1920 * 2 ? 1920 * 2 : offsetTimeLine + distanceBetweenYears * yearsRange.length, 2160]
     ];
 
     return (
@@ -522,7 +524,7 @@ const DiagramBoard = (props) => {
                         );
                     })
                 ))}
-                {/* Linea verticale rossa per il giorno corrente */}
+                {/* red line for today */}
                 {(() => {
                     const currentDate = new Date();
                     const currentYearIndex = yearsRange.indexOf(currentDate.getFullYear());
@@ -530,15 +532,24 @@ const DiagramBoard = (props) => {
                     const daysInMonth = new Date(currentDate.getFullYear(), currentMonthIndex + 1, 0).getDate();
                     const dayFraction = currentDate.getDate() / daysInMonth;
 
-                    const currentDayPosition = currentYearIndex * distanceBetweenYears * zoom + (viewport?.x || 0)
+                    const currentDayPosition = offsetTimeLine*zoom + currentYearIndex * distanceBetweenYears * zoom + (viewport?.x || 0)
                         + currentMonthIndex * (distanceBetweenYears / 12) * zoom
                         + dayFraction * (distanceBetweenYears / 12) * zoom;
 
                     return (
+                        <>
                         <div
-                            className="absolute h-screen border-l border-red-500"
+                            className="absolute h-screen border-l border-my_red"
                             style={{ left: `${currentDayPosition}px` }}
                         />
+                        {/* Numero del mese */}
+                        <div
+                        className="absolute top-10 text-xs text-my_red"
+                        style={{ transform: `translateX(-50%) scale(${zoom})`, left: `${currentDayPosition +20 *zoom}px`}}
+                    >
+                        Today
+                    </div>
+                    </>
                     );
                 })()}
             </div>

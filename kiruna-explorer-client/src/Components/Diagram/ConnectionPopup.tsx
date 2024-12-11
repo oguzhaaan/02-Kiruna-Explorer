@@ -18,13 +18,13 @@ function ConnectionPopup({isEditing, documentFromId, documentToId, closePopup}: 
     const {isDarkMode} = useTheme();
 
     const [link, setLink] = useState([]);
-    const [documentFrom, setDocumentFrom] = useState(null);
-    const [documentTo, setDocumentTo] = useState(null);
+    const [documentFrom, setDocumentFrom] = useState<any>(null);
+    const [documentTo, setDocumentTo] = useState<any>(null);
 
     const [showConfirm, setShowConfirm] = useState(false);
     const [alertMessage, setAlertMessage] = useState(['', '']);
 
-    const defaultConnectionOptions = [
+    const defaultConnectionOptions:any = [
         "direct_consequence",
         "collateral_consequence",
         "projection",
@@ -32,7 +32,7 @@ function ConnectionPopup({isEditing, documentFromId, documentToId, closePopup}: 
     ];
 
     const handleConnectionChange = (docId, value) => {                                                                  
-        setLink((prevLinks) => {
+        setLink((prevLinks:any) => {
             const currentConnections = prevLinks[docId] || [];
             const newLinks = currentConnections.includes(value)
                 ? currentConnections.filter((conn) => conn !== value)
@@ -46,14 +46,14 @@ function ConnectionPopup({isEditing, documentFromId, documentToId, closePopup}: 
     };
 
     const getFilteredOptions = (docId) => {
-        const currentConnections = link[docId];
+        const currentConnections:any = link[docId];
         return defaultConnectionOptions.filter(
             (option) => !currentConnections.includes(option)
         );
     };
 
     const generateLinkArray = () => {
-        return Object.entries(link).reduce((acc, [docId, connectionTypes]) => {
+        return Object.entries(link).reduce((acc:any, [docId, connectionTypes]:[any,any]) => {
             connectionTypes.forEach((connectionType) => {
                 if (connectionType !== "None") {
                     const linkObject =
@@ -93,7 +93,7 @@ function ConnectionPopup({isEditing, documentFromId, documentToId, closePopup}: 
                     const linkedDocument = await API.getDocuemntLinks(documentFromId);
                     setDocumentTo(documentToTemp);
                     setDocumentFrom(documentFromTemp);
-                    setLink((prevLinks) => ({
+                    setLink((prevLinks:any) => ({
                         ...prevLinks,
                         [documentToId]: linkedDocument.filter((link) => link.id === documentToId).map((link) => link.type)
                     }));

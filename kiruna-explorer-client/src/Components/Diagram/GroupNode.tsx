@@ -54,7 +54,7 @@ function GroupNode({
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
                 onClick={()=>{
-                    //setCenter(data.pos.x,data.pos.y, {zoom:1.2, duration:1000})
+                    setCenter(data.pos.x,data.pos.y, {zoom:1.2, duration:1000})
                 }}
                 >
                 <div

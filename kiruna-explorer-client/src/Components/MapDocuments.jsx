@@ -142,7 +142,7 @@ function GeoreferenceMapDoc(props) {
             className={isSatelliteMap ? " " : `${isDarkMode ? "custom-tile-layer" : ""}`}
           />
           <SwitchMapButton toggleMap={toggleMap} isSatelliteMap={isSatelliteMap}></SwitchMapButton>
-          <DocumentsNavMap clickedAreas={clickedAreas} setAreaSelected={setAreaSelected}></DocumentsNavMap>
+          {!isSingleDoc && <DocumentsNavMap clickedAreas={clickedAreas} setAreaSelected={setAreaSelected}></DocumentsNavMap>}
           <ZoomControl position="topright" />
           {props.municipalGeoJson && <GeoJSON data={props.municipalGeoJson} pathOptions={{ color: `${isDarkMode ? "#CCCCCC" : "grey"}`, weight: 2, dashArray: "5, 5" }} />}
           {/* Visualize All present Areas*/}

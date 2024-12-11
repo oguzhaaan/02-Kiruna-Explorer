@@ -45,7 +45,7 @@ function SingleNode({
             onMouseLeave={() => setIsHovered(false)}
 
             onClick={()=>{
-                    //setCenter(data.pos.x,data.pos.y, {zoom:1.2, duration:1000})
+                    setCenter(data.pos.x,data.pos.y, {zoom:1.2, duration:1000})
                 }}>
             <div
                 className={`flex flex-row justify-content-center align-content-center w-100 h-100 text-black_text dark:text-white_text rounded-full bg-light_node dark:bg-dark_node`}>

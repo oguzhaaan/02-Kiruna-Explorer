@@ -21,15 +21,13 @@ export function getXDatePosition(firstyear, year, month){
 }
 
 export function getYPlanScale(planNumber){
-  console.log(planNumber)
   if( planNumber < 1000){
       return YScalePosition["planmin"] + ((YScalePosition["plan1000"] - YScalePosition["planmin"]) / 1000) *planNumber
   }
   else if( planNumber < 5000){
-    return YScalePosition["plan1000"] + ((YScalePosition["plan5000"] - YScalePosition["plan1000"]) / distanceBetweenYears0) *(planNumber-1000)
+    return YScalePosition["plan1000"] + ((YScalePosition["plan5000"] - YScalePosition["plan1000"]) / 4000) *(planNumber-1000)
   }
   else if( planNumber < 10000){
-    console.log(YScalePosition["plan5000"] + ((YScalePosition["plan10000"] - YScalePosition["plan5000"]) / 5000) *(planNumber-5000))
     return YScalePosition["plan5000"] + ((YScalePosition["plan10000"] - YScalePosition["plan5000"]) / 5000) *(planNumber-5000)
   }
   else if( planNumber < 100000){

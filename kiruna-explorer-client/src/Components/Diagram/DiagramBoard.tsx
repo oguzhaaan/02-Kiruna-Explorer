@@ -23,8 +23,8 @@ import {
     getYPlanScale,
     YScalePosition
 } from "../Utilities/DiagramReferencePositions.js";
-import {SingleDocumentMap} from "../SingleDocumentMap.jsx";
-import {useNodePosition} from "../../contexts/NodePositionContext.tsx";
+import { SingleDocumentMap } from "../SingleDocumentMap.jsx";
+import { useNodePosition } from "../../contexts/NodePositionContext.tsx";
 import ConnectionPopup from "./ConnectionPopup";
 
 type Node<Data = any> = {
@@ -65,6 +65,7 @@ const DiagramBoard = (props) => {
     const [links, setLinks] = useState<Edge[]>([])
     const [yearsRange, setYearsRange] = useState<number[]>([])
     const [nodes, setNodes] = useNodesState<Node>([])
+    const [extent, setExtent] = useState<[[number, number], [number, number]] | undefined>(undefined)
 
     const [nodeStates, setNodeStates] = useState<Record<number, string>>({});
     const [nodeisOpen, setNodeIsOpen] = useState<Record<string, boolean | string>>({});
@@ -141,7 +142,7 @@ const DiagramBoard = (props) => {
                         docid: doc.id,
                         title: doc.title,
                         type: doc.type,
-                        scale: doc.scale,
+                        scale: doc.scale === "blueprints/effects" ? "blueprints" : doc.scale,
                         year: year,
                         month: month,
                         planNumber: doc.planNumber
@@ -318,7 +319,7 @@ const DiagramBoard = (props) => {
                                 data: {
                                     clickedNode: clickedNode,
                                     group: [item],
-                                    pos: nodePositions[item.docid] || { x: positions[index1].x, y: positions[index1].y}, 
+                                    pos: nodePositions[item.docid] || { x: positions[index1].x, y: positions[index1].y },
                                     zoom: zoom,
                                     index: index,
                                     showSingleDocument: (id: string) => {
@@ -348,7 +349,7 @@ const DiagramBoard = (props) => {
                             data: {
                                 clickedNode: clickedNode,
                                 group: e.items,
-                                pos: nodetype === "groupNode" ? { x: e.x, y: e.y } : savedPosition, 
+                                pos: nodetype === "groupNode" ? { x: e.x, y: e.y } : savedPosition,
                                 zoom: zoom,
                                 index: index,
                                 setNodeSelected: (id: number) => setNodeSelected(index, `${id}`),
@@ -371,13 +372,13 @@ const DiagramBoard = (props) => {
         const getLinks = async () => {
             const allLinks = nodes.flatMap((node, index: number) => {
                 if (node.type === "background" || node.type === "closeNode") return [];
-
+    
                 const nodetype = node.data.group.length === 1 ? 'singleNode' : 'groupNode';
                 return node.data.group.flatMap(async (elem: Item) => {
-                    const docid = elem.docid
-                    const docLinks = await API.getDocuemntLinks(docid)
+                    const docid = elem.docid;
+                    const docLinks = await API.getDocuemntLinks(docid);
                     if (docLinks.length === 0) return [];
-
+    
                     const groupedLinks = docLinks.reduce((acc, linkitem) => {
                         if (!acc[linkitem.id]) {
                             acc[linkitem.id] = [];
@@ -385,7 +386,7 @@ const DiagramBoard = (props) => {
                         acc[linkitem.id].push(`${linkitem.connection}`);
                         return acc;
                     }, {} as Record<string, Item[]>);
-
+    
                     return Object.entries(groupedLinks).map((dl) => (
                         {
                             id: `l${docid}-${dl[0]}`,
@@ -394,25 +395,47 @@ const DiagramBoard = (props) => {
                             type: "custom",
                             data: {
                                 typesOfConnections: dl[1],
-                                selectedEdge: `${docid}` === clickedNode || `${docid}` === hoveredNode || allLinkVisible
+                                selectedEdge: `${docid}` === clickedNode || `${docid}` === hoveredNode || `${dl[0]}` === clickedNode || `${dl[0]}` === hoveredNode || allLinkVisible
                             }
                         }
-                    ))
-                })
-            })
+                    ));
+                });
+            });
+    
             const resolvedEdges = (await Promise.all(allLinks)).flat();
-            setLinks(resolvedEdges)
-        }
-        getLinks()
-    }, [nodes, nodeStates, hoveredNode, allLinkVisible])
+    
+            // Filtra le connessioni duplicati con la logica position.x inversa
+            const filteredEdges = resolvedEdges.filter((edge, index, self) => {
+                const sourceNode = nodes.find(node => node.id === edge.source);
+                const targetNode = nodes.find(node => node.id === edge.target);
+    
+                if (!sourceNode || !targetNode) return false;
+    
+                // Determina quale nodo deve essere il source e quale il target
+                const [finalSource, finalTarget] = sourceNode.position.x >= targetNode.position.x
+                    ? [edge.source, edge.target]
+                    : [edge.target, edge.source];
+    
+                // Verifica se una connessione simile esiste già
+                return self.findIndex((e)=>(e.source === finalSource && e.target === finalTarget)) === index 
+            });
+    
+            setLinks(filteredEdges);
+        };
+        getLinks();
+    }, [nodes, nodeStates, hoveredNode, allLinkVisible]);    
 
     //const filteredEdges = links.filter(edge => edge.source === clickedNode || edge.source === hoveredNode);
 
     //boundaries
-    const extent: [[number, number], [number, number]] = [
-        [0, 0],
-        [offsetTimeLine + distanceBetweenYears * yearsRange.length < 1920 * 2 ? 1920 * 2 : offsetTimeLine + distanceBetweenYears * yearsRange.length, 2160]
-    ];
+    
+    useEffect(()=>{
+        const bounds: [[number, number], [number, number]] = [
+            [0, 0],
+            [offsetTimeLine + distanceBetweenYears * yearsRange.length, 2160]
+        ];
+        setExtent(bounds)
+    },[yearsRange])
 
     return (
         <div className={`${isDarkMode ? "dark" : "light"} w-screen h-screen`}>
@@ -476,7 +499,7 @@ const DiagramBoard = (props) => {
             >
 
                 <Background gap={20} size={1} color={isDarkMode ? "#333" : "#ccc"} />
-                <MiniMap className="opacity-70" />
+                {/*<MiniMap className="opacity-50" />*/}
             </ReactFlow>
 
             <div
@@ -487,7 +510,7 @@ const DiagramBoard = (props) => {
                     index != 0 && <div
                         key={year}
                         className="absolute transform -translate-x-1/2 -translate-y-1/4 pt-2 flex flex-col gap-1 justify-content-center align-items-center transition"
-                        style={{ left: `${offsetTimeLine*zoom + index * distanceBetweenYears * zoom + (viewport?.x || 0)}px` }}
+                        style={{ left: `${offsetTimeLine * zoom + index * distanceBetweenYears * zoom + (viewport?.x || 0)}px` }}
                     >
                         <div className="w-3 h-3 bg-black_text dark:bg-white_text rounded-full transition"
                             style={{ transform: `scale(${zoom})` }}>
@@ -502,7 +525,7 @@ const DiagramBoard = (props) => {
 
                     yearIndex != 0 && months.map((month, monthIndex) => {
                         // Calcola la posizione proporzionale dei mesi
-                        const monthPosition = offsetTimeLine*zoom + yearIndex * distanceBetweenYears * zoom + (viewport?.x || 0) + (monthIndex * (distanceBetweenYears / 12)) * zoom;
+                        const monthPosition = offsetTimeLine * zoom + yearIndex * distanceBetweenYears * zoom + (viewport?.x || 0) + (monthIndex * (distanceBetweenYears / 12)) * zoom;
 
                         return (
                             <div key={`${year}-${month}`}
@@ -532,24 +555,24 @@ const DiagramBoard = (props) => {
                     const daysInMonth = new Date(currentDate.getFullYear(), currentMonthIndex + 1, 0).getDate();
                     const dayFraction = currentDate.getDate() / daysInMonth;
 
-                    const currentDayPosition = offsetTimeLine*zoom + currentYearIndex * distanceBetweenYears * zoom + (viewport?.x || 0)
+                    const currentDayPosition = offsetTimeLine * zoom + currentYearIndex * distanceBetweenYears * zoom + (viewport?.x || 0)
                         + currentMonthIndex * (distanceBetweenYears / 12) * zoom
                         + dayFraction * (distanceBetweenYears / 12) * zoom;
 
                     return (
                         <>
-                        <div
-                            className="absolute h-screen border-l border-my_red"
-                            style={{ left: `${currentDayPosition}px` }}
-                        />
-                        {/* Numero del mese */}
-                        <div
-                        className="absolute top-10 text-xs text-my_red"
-                        style={{ transform: `translateX(-50%) scale(${zoom})`, left: `${currentDayPosition +20 *zoom}px`}}
-                    >
-                        Today
-                    </div>
-                    </>
+                            <div
+                                className="absolute h-screen border-l border-my_red"
+                                style={{ left: `${currentDayPosition}px` }}
+                            />
+                            {/* Numero del mese */}
+                            <div
+                                className="absolute top-10 text-xs text-my_red"
+                                style={{ transform: `translateX(-50%) scale(${zoom})`, left: `${currentDayPosition + 20 * zoom}px` }}
+                            >
+                                Today
+                            </div>
+                        </>
                     );
                 })()}
             </div>
@@ -595,6 +618,16 @@ const DiagramBoard = (props) => {
             >
                 <i className={`bi bi-share${allLinkVisible ? "-fill" : ""} text-[1.8em] dark:text-white_text`}></i>
             </button>
+
+            {/*TODO add Filter here with modal*/}
+            <button
+                title="filter"
+                onClick={() => {/*Open modal*/ }}
+                className="flex justify-content-center align-content-center fixed top-36 right-4 bg-white_text  dark:bg-[#323232] w-12 h-12 border-2 border-dark_node dark:border-white_text rounded-full shadow-lg hover:bg-gray-300 dark:hover:bg-[#696969] transition"
+            >
+                <i className="bi bi-filter text-[1.8em] dark:text-white_text"></i>
+            </button>
+
 
         </div>
     );

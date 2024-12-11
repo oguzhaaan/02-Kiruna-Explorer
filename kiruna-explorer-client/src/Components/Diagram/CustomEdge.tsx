@@ -24,6 +24,7 @@ const CustomEdge = ({
         targetY: targetY || 0,
         sourcePosition,
         targetPosition,
+        curvature: 2
     });
 
     const isColored = data?.selectedEdge

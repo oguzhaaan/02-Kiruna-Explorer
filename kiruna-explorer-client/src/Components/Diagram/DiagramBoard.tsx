@@ -23,8 +23,9 @@ import {
     getYPlanScale,
     YScalePosition
 } from "../Utilities/DiagramReferencePositions.js";
-import { SingleDocumentMap } from "../SingleDocumentMap.jsx";
-import { useNodePosition } from "../../contexts/NodePositionContext.tsx";
+import {SingleDocumentMap} from "../SingleDocumentMap.jsx";
+import {useNodePosition} from "../../contexts/NodePositionContext.tsx";
+import ConnectionPopup from "./ConnectionPopup";
 
 type Node<Data = any> = {
     id: string;

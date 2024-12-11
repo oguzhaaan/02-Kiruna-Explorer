@@ -489,7 +489,7 @@ const DocumentItem = ({
   );
 };
 
-const SelectedDocument = ({
+export const SelectedDocument = ({
   docId,
   title,
   type,

@@ -460,10 +460,10 @@ router.post(
         const connections = [
             "direct_consequence",
             "collateral_consequence",
-            "prevision",
+            "projection", //TO BE CHANGED TO PROJECTION
             "update",
         ];
-
+        
         if (!connections.includes(req.body.connection)) {
             return res.status(402).json({ error: "Invalid connection type" });
         }
@@ -527,7 +527,7 @@ router.post(
         const validConnections = [
             "direct_consequence",
             "collateral_consequence",
-            "prevision",
+            "projection",
             "update",
         ];
 

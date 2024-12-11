@@ -1,3 +1,5 @@
+const distanceBetweenYears = 400
+
 export const YScalePosition =  {
     text: 165,
     concept: 515,
@@ -15,7 +17,7 @@ export function getXDatePosition(firstyear, year, month){
     const yearindex = parseInt(year)-parseInt(firstyear)
 
     const xoffset = month? month - 1 : 0
-    return parseInt(offset+ (yearindex*400) + ((400/12) * parseInt(xoffset)))
+    return parseInt(offset+ (yearindex*distanceBetweenYears) + ((distanceBetweenYears/12) * parseInt(xoffset)))
 }
 
 export function getYPlanScale(planNumber){
@@ -24,7 +26,7 @@ export function getYPlanScale(planNumber){
       return YScalePosition["planmin"] + ((YScalePosition["plan1000"] - YScalePosition["planmin"]) / 1000) *planNumber
   }
   else if( planNumber < 5000){
-    return YScalePosition["plan1000"] + ((YScalePosition["plan5000"] - YScalePosition["plan1000"]) / 4000) *(planNumber-1000)
+    return YScalePosition["plan1000"] + ((YScalePosition["plan5000"] - YScalePosition["plan1000"]) / distanceBetweenYears0) *(planNumber-1000)
   }
   else if( planNumber < 10000){
     console.log(YScalePosition["plan5000"] + ((YScalePosition["plan10000"] - YScalePosition["plan5000"]) / 5000) *(planNumber-5000))

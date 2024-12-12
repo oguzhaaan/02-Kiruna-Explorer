@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import API from "../API/API.mjs";
 import { getIcon } from "./Utilities/DocumentIcons.jsx";
 
-function DocumentsNavMap({ clickedAreas, setAreaSelected }) {
+function DocumentsNavMap({ clickedAreas, setAreaSelected, clickedDocs, setClickedDocs, handleDocumentClick, setAreaCounts }) {
     const { isDarkMode, toggleTheme, isSatelliteMap } = useTheme();
     const [isCanvasOpen, setIsCanvasOpen] = useState(false);
 
@@ -17,8 +17,7 @@ function DocumentsNavMap({ clickedAreas, setAreaSelected }) {
     const { user, isLoggedIn, logOut, handleVisitor, isVisitorLoggedIn } = useUserContext();
 
     const [documents, setDocuments] = useState([]);
-    const [clickedDocs, setClickedDocs] = useState({});
-    const [areaCounts, setAreaCounts] = useState({});
+
 
     // --- Search ---
     const [searchQuery, setSearchQuery] = useState("");
@@ -36,36 +35,9 @@ function DocumentsNavMap({ clickedAreas, setAreaSelected }) {
             }
         };
         fetchDocuments();
-    }, []);
+    }, [clickedDocs]);
 
-    const handleDocumentClick = (doc) => {
-        const { id, areaId } = doc;
-        const wasClicked = clickedDocs[id];
-        const newClickedState = !wasClicked;
-
-        setClickedDocs((prev) => ({
-            ...prev,
-            [id]: newClickedState,
-        }));
-
-        setAreaCounts((prev) => {
-            const currentCount = prev[areaId] || 0;
-            const newCount = newClickedState ? currentCount + 1 : currentCount - 1;
-
-            // Toggle area if a 0 <-> 1 transition occurs
-            if (
-                (currentCount === 0 && newCount === 1) ||
-                (currentCount === 1 && newCount === 0)
-            ) {
-                setAreaSelected(areaId);
-            }
-
-            return {
-                ...prev,
-                [areaId]: Math.max(newCount, 0),
-            };
-        });
-    };
+    
 
     return (
         <div className={isDarkMode ? "dark" : "light"}>

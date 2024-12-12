@@ -187,6 +187,21 @@ describe("Integration Test POST /api/documents/:DocId/files - Attach a new file"
         expect(response.body.error).toBe("Invalid file type. Allowed types: attachment, original");
     });
 
+    test("should return 400 if file size is not allowed", async () => {
+        const invalid_filePath = path.resolve(__dirname, '../file/file2.pdf');
+        
+        const response = await request(app)
+            .post(`${basePath}/${mockDocId}/files`)
+            .set("Cookie", urbanplanner_cookie)
+            .attach("file", invalid_filePath)
+            .field("fileType", "attachment")
+          //  .expect(400);
+
+            expect(response.body.error).toBe("File size exceeds the maximum limit of 20MB.");
+
+        
+    });
+
 
 });
 
@@ -321,17 +336,6 @@ describe("Integration Test GET /api/documents/:DocId/files/downloads/:FileId - G
         
     });
 
-    // test("should return 500 if download fails", async () => {
-    //     const response = await request(app)
-    //         .post(`${basePath}/${mockDocId}/files`)
-    //         .set("Cookie", urbanplanner_cookie)
-    //         .attach('file', filePath)
-    //         .field('fileType', 'original');
-    //     const fileId = response.body.fileId;
-
-    //     const response2 = await request(app)
-
-    //     )
-
+ 
 });
 

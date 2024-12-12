@@ -3,11 +3,13 @@ import { app } from "../../server.mjs";
 import request from "supertest";
 import { cleanup } from "../cleanup.js";
 import { Role } from "../../models/User.mjs";
+import AreaDAO  from "../../dao/AreaDAO.mjs";
 
 const docPath = "/api/documents";
 const areaPath = "/api/areas";
 const typePath = "/api/document-types"
 const stakeholderPath = "/api/document-stakeholders"
+const AreaDao = new AreaDAO();
 
 const login = async (userInfo) => {
   return new Promise((resolve, reject) => {
@@ -171,6 +173,20 @@ describe("Integration Test POST /api/areas - Create a new area", () => {
 
     expect(res.body).toHaveProperty("error", "Forbidden");
   });
+  // test("should return 500 for internal server error", async () => {
+  //   // Mock an error in the areaDao.addArea function
+  //   app.post("/api/areas",(req,res)=>{
+  //     res.status(500).json({ error: "Internal server error" });
+  //   })
+    
+  //   const res = await request(app)
+  //     .post("/api/areas")
+  //     .set("Cookie", urbanplanner_cookie)
+  //     .send({ geoJson: '{"type": "Polygon", "coordinates": [[...]]}' })
+  //     .expect(500);
+  
+  //   expect(res.body).toHaveProperty("error");
+  // });
 });
 
 // GET /api/areas - Get all areas
@@ -196,7 +212,11 @@ describe("Integration Test GET /api/areas - Get all areas", () => {
 
   test("Should return 200 for unauthenticated user", async () => {
     const res = await request(app).get(areaPath).expect(200);
+
+    expect(res.body).toBeInstanceOf(Array);
   });
+
+ 
 });
 
 // GET /api/documents/area/:areaId
@@ -298,4 +318,6 @@ describe("Integration Test GET /api/documents/area/:areaId", () => {
 
     expect(res.body.error).toBe("Invalid area ID");
   });
+
+ 
 });

@@ -45,15 +45,18 @@ router.post("/", isLoggedIn, authorizeRoles('admin', 'urban_planner'), [
         // Recupera tutti i tipi di documenti esistenti dal database
         const types = await DocumentTypeDao.getAllDocumentTypes();
         const existingTypes = types.reduce((acc, type) => {
-            acc[type.name.toLowerCase()] = type.id;
+            acc[type.name.toLowerCase()] = type.id; 
             return acc;
         }, {});
 
         let typeId;
         if (existingTypes[nameLowerCase]) {
             // Se il tipo esiste già, restituisci il suo ID
+            console.log("Type already exists");
             typeId = existingTypes[nameLowerCase];
+            throw new DocumentTypeNameAlreadyExists();
         } else {
+            console.log("Type doesn't exists");
             // Se il tipo non esiste, crealo e ottieni il suo ID
             typeId = await DocumentTypeDao.addDocumentType(name);
         }

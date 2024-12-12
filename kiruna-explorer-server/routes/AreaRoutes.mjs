@@ -16,10 +16,10 @@ router.get("/",
         const areas = await areaDao.getAllAreas();
         res.status(200).json(areas);
     } catch (err) {
-        if (err instanceof AreaNotFound) {
-            res.status(404).json({ error: "Area not found" });
-        }
-        console.error("Error fetching areas:", err);
+        // if (err instanceof AreaNotFound) {
+        //     res.status(404).json({ error: "Areas not found" });
+        // }
+     //   console.error("Error fetching areas:", err);
         res.status(500).json({ error: "Internal server error" });
     }
 });

@@ -447,6 +447,16 @@ const DiagramBoard = (props) => {
         setExtent(bounds)
     }, [yearsRange])
 
+    const onConnect = (params) => {
+        console.log(params);
+        setPopupData({
+            fromId: parseInt(params.source, 10), 
+            toId: parseInt(params.target, 10),
+        });        
+        setEditMode(false);
+        setPopupVisible(true);
+    }
+
     return (
         <div className={`${isDarkMode ? "dark" : "light"} w-screen h-screen`}>
             {popupVisible && <ConnectionPopup
@@ -468,6 +478,7 @@ const DiagramBoard = (props) => {
                 minZoom={0.4}
                 translateExtent={extent}
                 zoomOnDoubleClick={false}
+                onConnect={onConnect}
                 onNodesChange={onNodesChange}
                 onNodeClick={(event, node) => {
                     if (node.type === "closeNode") {

@@ -71,22 +71,24 @@ function ConnectionPopup({isEditing, documentFromId, documentToId, closePopup}: 
     };
 
     const handleConfirm = async () => {
-        console.log("" + documentFromId
-             + documentToId)
         const linkArray = generateLinkArray();
+
+        console.log(linkArray)
         try {
             if (linkArray.length == 0) {
                 await API.deleteAll(documentFromId);
             } else {
                 await API.addLinks(linkArray);
             }
-            setAlertMessage([isEditing? "Connection updated correctly!" : "Connection created correctly!!", "success"]);
+            setAlertMessage([isEditing? "Connection updated correctly!" : "Connection created correctly!", "success"]);
         } catch (error) {
             setAlertMessage(["Error while saving the connection, please retry!", "error"]);
         }
     }
 
     useEffect(() => {
+        console.log("documentFromId: " + documentFromId);
+        console.log("documentToId: " + documentToId);
         if (documentFromId != undefined && documentToId != undefined) {
             const getDocumentLinks = async () => {
                 try {
@@ -97,7 +99,7 @@ function ConnectionPopup({isEditing, documentFromId, documentToId, closePopup}: 
                     setDocumentFrom(documentFromTemp);
                     setLink((prevLinks:any) => ({
                         ...prevLinks,
-                        [documentToId]: linkedDocument.filter((link) => link.id === documentToId).map((link) => link.type)
+                        [documentToId]: linkedDocument.filter((link) => link.id == documentToId).map((link) => link.connection)
                     }));
                 } catch (error) {
                     console.error(error)
@@ -114,7 +116,7 @@ function ConnectionPopup({isEditing, documentFromId, documentToId, closePopup}: 
             <div className={`fixed z-[1000] inset-0 flex items-center justify-center ${isDarkMode ? "dark" : "light"}`}>
                 {!showConfirm ?
                     <div
-                        className="w-[50em] flex flex-col bg-background_color_light dark:bg-background_color shadow-md rounded-md text-black_text dark:text-white_text font-sans p-4 overflow-y-auto">
+                        className="w-[50em] h-[30em] flex flex-col bg-background_color_light dark:bg-background_color shadow-md rounded-md text-black_text dark:text-white_text font-sans p-4 overflow-y-auto">
                         <div className="w-full pb-3 flex flex-row justify-content-between">
                             <p className="m-0 p-0 font-normal text-xl">{isEditing ? "Edit Connection" : "Add Connection"}</p>
                             <button onClick={() => {

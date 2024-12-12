@@ -144,7 +144,7 @@ describe("Unit Tests for StakeholderDAO", () => {
         });
     });
 
-    describe("getDpcumentStakeholders", () => {
+    describe("getDocumentStakeholders", () => {
         test("should return an array of stakeholders for a document", async () => {
             const mockRows = [
                 { id: 1, name: "Stakeholder 1" },
@@ -155,7 +155,7 @@ describe("Unit Tests for StakeholderDAO", () => {
                 callback(null, mockRows);
             });
 
-            const result = await stakeholderDAO.getDpcumentStakeholders(1);
+            const result = await stakeholderDAO.getDocumentStakeholders(1);
 
             expect(result).toEqual(mockRows);
             expect(db.all).toBeCalledTimes(1);
@@ -167,7 +167,7 @@ describe("Unit Tests for StakeholderDAO", () => {
                 callback(error, null);
             });
 
-            const result = await stakeholderDAO.getDpcumentStakeholders(1).catch(err => err);
+            const result = await stakeholderDAO.getDocumentStakeholders(1).catch(err => err);
 
             expect(result).toBeInstanceOf(Error);
             expect(result.message).toBe("Database error");

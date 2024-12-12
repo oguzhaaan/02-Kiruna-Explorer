@@ -98,7 +98,7 @@ describe("Integration Test POST / - Add Document Type", () => {
             .expect(201);
 
         expect(response.body).toHaveProperty("typeId");
-        expect(response.body.message).toBe("Document type added successfully");
+        expect(response.body.message).toBe("Document type processed successfully");
     });
 
     test("should return 409 if type name already exists", async () => {

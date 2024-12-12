@@ -183,7 +183,7 @@ function GeoreferenceMapDoc(props) {
           />
           <SwitchMapButton toggleMap={toggleMap} isSatelliteMap={isSatelliteMap}></SwitchMapButton>
 
-          {!isSingleDoc && <DocumentsNavMap clickedAreas={clickedAreas} setAreaSelected={setAreaSelected} clickedDocs={clickedDocs} setClickedDocs={setClickedDocs} handleDocumentClick={handleDocumentClick} setAreaCounts={setAreaCounts}></DocumentsNavMap>}
+          {!isSingleDoc && <DocumentsNavMap clickedDocs={clickedDocs} handleDocumentClick={handleDocumentClick} setShowDiagramDoc={props.setShowDiagramDoc}></DocumentsNavMap>}
 
           <ZoomControl position="topright" />
           {props.municipalGeoJson && <GeoJSON data={props.municipalGeoJson} pathOptions={{ color: `${isDarkMode ? "#CCCCCC" : "grey"}`, weight: 2, dashArray: "5, 5" }} />}

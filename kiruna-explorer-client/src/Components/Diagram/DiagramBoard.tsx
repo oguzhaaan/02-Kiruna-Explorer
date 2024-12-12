@@ -296,13 +296,26 @@ const DiagramBoard = (props) => {
                     draggable: false,
                     selectable: false,
                     connectable: false,
-                    clickable: false,
+                    //clickable: false,
                     style: { zIndex: -1, pointerEvents: 'none' }
                 },
-                ...documents.flatMap((e, index: number) => {
+                ...documents.flatMap((e: DiagramItem, index: number) => {
                     const nodetype = e.items.length === 1 ? 'singleNode' : 'groupNode';
 
-                    const nodeSelected = nodeStates[index] || e.items[0].docid;
+                    const docfrommap = e.items.findIndex(e => e.docid === props.showDiagramDoc)
+
+                    let nodeSelected: string
+                    if (docfrommap === -1) {
+                        nodeSelected = nodeStates[index] || e.items[0].docid.toString();
+                    }
+                    else {
+                        nodeSelected = e.items[docfrommap].docid.toString();
+                        setClickedNode(nodeSelected)
+                        setNodeSelected(index,nodeSelected)
+                        props.setShowDiagramDoc(null);
+                    }
+                    console.log("setted"+ nodeSelected)
+
                     //console.log(`${index}:` + nodeisOpen[index])
                     if (zoom > 1.1 && nodetype === 'groupNode' && nodeisOpen[index] !== "closed") setNodeOpen(index)
 
@@ -310,7 +323,6 @@ const DiagramBoard = (props) => {
                         const positions = getEquidistantPoints(e.x, e.y, e.items.length == 2 ? 45 : 5 + e.items.length * 7, e.items.length);
 
                         const nodes = e.items.map((item: Item, index1: number) => {
-
 
                             return {
                                 id: `${item.docid}`,
@@ -325,7 +337,8 @@ const DiagramBoard = (props) => {
                                     showSingleDocument: (id: string) => {
                                         setDocumentId(id), setShowSingleDocument(true)
                                     },
-                                    groupPosition: { x: e.x, y: e.y }
+                                    groupPosition: { x: e.x, y: e.y },
+                                    showDiagramDoc: props.showDiagramDoc
                                 },
                                 draggable: item.month === undefined,
                             };
@@ -356,6 +369,7 @@ const DiagramBoard = (props) => {
                                 showSingleDocument: (id: string) => {
                                     setDocumentId(id), setShowSingleDocument(true)
                                 },
+                                showDiagramDoc: props.showDiagramDoc
                             },
                             draggable: e.items[0].month === undefined && nodetype !== "groupNode",
                         };
@@ -365,6 +379,7 @@ const DiagramBoard = (props) => {
             setNodes(initialNodes)
         }
         if (zoom <= 1.1) setNodeOpen(-1)
+        console.log(zoom)
         getNodes()
     }, [documents, clickedNode, zoom, nodeStates])
 
@@ -372,13 +387,13 @@ const DiagramBoard = (props) => {
         const getLinks = async () => {
             const allLinks = nodes.flatMap((node, index: number) => {
                 if (node.type === "background" || node.type === "closeNode") return [];
-    
+
                 const nodetype = node.data.group.length === 1 ? 'singleNode' : 'groupNode';
                 return node.data.group.flatMap(async (elem: Item) => {
                     const docid = elem.docid;
                     const docLinks = await API.getDocuemntLinks(docid);
                     if (docLinks.length === 0) return [];
-    
+
                     const groupedLinks = docLinks.reduce((acc, linkitem) => {
                         if (!acc[linkitem.id]) {
                             acc[linkitem.id] = [];
@@ -386,7 +401,7 @@ const DiagramBoard = (props) => {
                         acc[linkitem.id].push(`${linkitem.connection}`);
                         return acc;
                     }, {} as Record<string, Item[]>);
-    
+
                     return Object.entries(groupedLinks).map((dl) => (
                         {
                             id: `l${docid}-${dl[0]}`,
@@ -401,41 +416,41 @@ const DiagramBoard = (props) => {
                     ));
                 });
             });
-    
+
             const resolvedEdges = (await Promise.all(allLinks)).flat();
-    
+
             // Filtra le connessioni duplicati con la logica position.x inversa
             const filteredEdges = resolvedEdges.filter((edge, index, self) => {
                 const sourceNode = nodes.find(node => node.id === edge.source);
                 const targetNode = nodes.find(node => node.id === edge.target);
-    
+
                 if (!sourceNode || !targetNode) return false;
-    
+
                 // Determina quale nodo deve essere il source e quale il target
                 const [finalSource, finalTarget] = sourceNode.position.x >= targetNode.position.x
                     ? [edge.source, edge.target]
                     : [edge.target, edge.source];
-    
+
                 // Verifica se una connessione simile esiste già
-                return self.findIndex((e)=>(e.source === finalSource && e.target === finalTarget)) === index 
+                return self.findIndex((e) => (e.source === finalSource && e.target === finalTarget)) === index
             });
-    
+
             setLinks(filteredEdges);
         };
         getLinks();
-    }, [nodes, nodeStates, hoveredNode, allLinkVisible]);    
+    }, [nodes, nodeStates, hoveredNode, allLinkVisible]);
 
     //const filteredEdges = links.filter(edge => edge.source === clickedNode || edge.source === hoveredNode);
 
     //boundaries
-    
-    useEffect(()=>{
+
+    useEffect(() => {
         const bounds: [[number, number], [number, number]] = [
             [0, 0],
             [offsetTimeLine + distanceBetweenYears * yearsRange.length, 2160]
         ];
         setExtent(bounds)
-    },[yearsRange])
+    }, [yearsRange])
 
     return (
         <div className={`${isDarkMode ? "dark" : "light"} w-screen h-screen`}>
@@ -487,9 +502,10 @@ const DiagramBoard = (props) => {
                     setHoveredNode(node.id !== "0" ? node.id : null);
                 }}
                 onMoveEnd={(event, viewport) => {
+                    if(!props.showDiagramDoc){
                     setZoom(viewport.zoom);
                     setViewport(viewport);
-
+                    }
                 }}
                 onNodeDoubleClick={(event, node) => {
                     setShowSingleDocument(true);

@@ -30,6 +30,7 @@ function App() {
     const [updateAreaId, setUpdateAreaId] = useState({areaId: null, docId: null})
     const [municipalGeoJson, setMunicipalGeoJson] = useState(null)
     const [showArea, setShowArea] = useState(null)
+    const [showDiagramDoc, setShowDiagramDoc] = useState(null)
 
     useEffect(() => {
         try {
@@ -100,7 +101,9 @@ function App() {
 
                             <Route path="/mapDocuments" element={(isLoggedIn || isVisitorLoggedIn) ?
                                 <GeoreferenceMapDoc showArea={showArea} setShowArea={setShowArea}
-                                                    setNavShow={setNavShow} municipalGeoJson={municipalGeoJson}/> :
+                                                    setNavShow={setNavShow} municipalGeoJson={municipalGeoJson}
+                                                    setShowDiagramDoc={setShowDiagramDoc}
+                                                    /> :
                                 <Navigate replace to="/"/>}/>
 
                             <Route path="/linkDocuments" element={(isLoggedIn && user.role === "urban_planner") ?
@@ -108,7 +111,8 @@ function App() {
                                                setConnectionsInForm={setConnections}/> : <Navigate replace to="/"/>}/>
 
                             <Route path="/diagram" element={(isLoggedIn || isVisitorLoggedIn) ? 
-                            <DiagramBoard setShowArea={setShowArea} municipalGeoJson={municipalGeoJson}/> :
+                            <DiagramBoard setShowArea={setShowArea} municipalGeoJson={municipalGeoJson}
+                            showDiagramDoc={showDiagramDoc} setShowDiagramDoc={setShowDiagramDoc}/> :
                                 <Navigate replace to="/"/>}/>
 
                             <Route path="*" element={isLoggedIn ? (user.role === "urban_planner" ?

@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import API from "../API/API.mjs";
 import { getIcon } from "./Utilities/DocumentIcons.jsx";
 
-function DocumentsNavMap({ clickedAreas, setAreaSelected, clickedDocs, setClickedDocs, handleDocumentClick, setAreaCounts }) {
+function DocumentsNavMap({ clickedDocs, handleDocumentClick, setShowDiagramDoc }) {
     const { isDarkMode, toggleTheme, isSatelliteMap } = useTheme();
     const [isCanvasOpen, setIsCanvasOpen] = useState(false);
 
@@ -17,7 +17,6 @@ function DocumentsNavMap({ clickedAreas, setAreaSelected, clickedDocs, setClicke
     const { user, isLoggedIn, logOut, handleVisitor, isVisitorLoggedIn } = useUserContext();
 
     const [documents, setDocuments] = useState([]);
-
 
     // --- Search ---
     const [searchQuery, setSearchQuery] = useState("");
@@ -37,7 +36,7 @@ function DocumentsNavMap({ clickedAreas, setAreaSelected, clickedDocs, setClicke
         fetchDocuments();
     }, [clickedDocs]);
 
-    
+
 
     return (
         <div className={isDarkMode ? "dark" : "light"}>
@@ -53,8 +52,8 @@ function DocumentsNavMap({ clickedAreas, setAreaSelected, clickedDocs, setClicke
                         show={isCanvasOpen}
                         id="basic-navbar-nav"
                         className={`drop-shadow-xl ${isDarkMode
-                                ? "bg-background_color text-white_text"
-                                : "bg-[#f6f6f6] text-black_text"
+                            ? "bg-background_color text-white_text"
+                            : "bg-[#f6f6f6] text-black_text"
                             } z-[20000] overflow-hidden`}
                         backdropClassName={`${isDarkMode ? "bg-black_text" : "bg-white_text"
                             }`}
@@ -81,21 +80,38 @@ function DocumentsNavMap({ clickedAreas, setAreaSelected, clickedDocs, setClicke
                                     .map((document) => (
                                         <div
                                             key={document.id}
-                                            className={`w-100 transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 cursor-pointer rounded-lg p-2 flex justify-start ${isDarkMode
+                                            className={`w-full h-16 transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 cursor-pointer rounded-lg p-2 flex justify-start ${isDarkMode
+                                                ? "bg-document_item_radient_blue"
+                                                : "bg-document_item_radient_blue_light"
+                                                }`}
+                                        >
+                                            <div className="w-5/6 flex flex-row" onClick={() => handleDocumentClick(document)} title="deselect document area">
+                                                <img
+                                                    src={getIcon(
+                                                        { type: document.type.toLowerCase() },
+                                                        { darkMode: isDarkMode }
+                                                    )}
+                                                    className="w-8 mr-2"
+                                                    alt="type_icon"
+                                                />
+                                                <span className="font-sans text-lg">{document.title}</span>
+                                            </div>
+
+                                            <div
+                                                key={document.id}
+                                                className={`w-1/6 transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 cursor-pointer rounded-lg p-2 flex justify-start ${isDarkMode
                                                     ? "bg-document_item_radient_blue"
                                                     : "bg-document_item_radient_blue_light"
-                                                }`}
-                                            onClick={() => handleDocumentClick(document)}
-                                        >
-                                            <img
-                                                src={getIcon(
-                                                    { type: document.type.toLowerCase() },
-                                                    { darkMode: isDarkMode }
-                                                )}
-                                                className="w-8 mr-2"
-                                                alt="type_icon"
-                                            />
-                                            <span className="font-sans">{document.title}</span>
+                                                    }`}
+                                                onClick={() => {
+                                                    setShowDiagramDoc(document.id)
+                                                    navigate("/diagram")
+                                                }}
+                                                title="see document in the diagram"
+                                            >
+                                                <button><i className="bi bi-diagram-3"></i></button>
+                                            </div>
+
                                         </div>
                                     ))}
                                 {/* Separator */}
@@ -118,21 +134,38 @@ function DocumentsNavMap({ clickedAreas, setAreaSelected, clickedDocs, setClicke
                                     .map((document) => (
                                         <div
                                             key={document.id}
-                                            className={`w-100 transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 cursor-pointer rounded-lg p-2 flex justify-start ${isDarkMode
+                                            className={`flex-row w-full h-16 transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 cursor-pointer rounded-lg p-2 flex justify-start ${isDarkMode
+                                                ? "bg-document_item_radient_grey"
+                                                : "bg-[#ffffffdd]"
+                                                }`}
+                                        >
+                                            <div className="w-5/6 flex flex-row" onClick={() => handleDocumentClick(document)} title="highlight document area">
+                                                <img
+                                                    src={getIcon(
+                                                        { type: document.type.toLowerCase() },
+                                                        { darkMode: isDarkMode }
+                                                    )}
+                                                    className="w-8 mr-2"
+                                                    alt="type_icon"
+                                                />
+                                                <span className="font-sans text-lg">{document.title}</span>
+                                            </div>
+
+                                            <div
+                                                key={document.id}
+                                                className={`w-1/6 transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 cursor-pointer rounded-lg p-2 flex justify-start ${isDarkMode
                                                     ? "bg-document_item_radient_grey"
                                                     : "bg-[#ffffffdd]"
-                                                }`}
-                                            onClick={() => handleDocumentClick(document)}
-                                        >
-                                            <img
-                                                src={getIcon(
-                                                    { type: document.type.toLowerCase() },
-                                                    { darkMode: isDarkMode }
-                                                )}
-                                                className="w-8 mr-2"
-                                                alt="type_icon"
-                                            />
-                                            <span className="font-sans">{document.title}</span>
+                                                    }`}
+                                                onClick={() => {
+                                                    setShowDiagramDoc(document.id)
+                                                    navigate("/diagram")
+                                                }}
+                                                title="see document in the diagram"
+                                            >
+                                                <button><i className="bi bi-diagram-3"></i></button>
+                                            </div>
+
                                         </div>
                                     ))}
                             </div>

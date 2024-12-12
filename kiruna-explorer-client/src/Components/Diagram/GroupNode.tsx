@@ -21,6 +21,7 @@ interface GroupNodeProps extends NodeProps {
         zoom: number;
         setNodeSelected: (id: number) => void
         showSingleDocument: (id:string) => void
+        showDiagramDoc:number | null
     };
 }
 
@@ -32,7 +33,7 @@ function GroupNode({
     const [isHovered, setIsHovered] = useState(false);
     const [selectedDocument, setSelectedDocument] = useState(data.group[data.group.findIndex((e) => `${e.docid}` === id)]);
 
-    const isClicked = data.clickedNode === id;
+    const isClicked = data.clickedNode === id || id === `${data.showDiagramDoc}`;
 
     const [isDropDownOpen, setIsDropDownOpen] = useState(false);
 
@@ -40,6 +41,10 @@ function GroupNode({
     zoom = isClicked || isHovered? zoom /1.2 : zoom
 
     const {setCenter} = useReactFlow()
+
+    if (data.showDiagramDoc  && id === `${data.showDiagramDoc}`){
+        setCenter(data.pos.x,data.pos.y, {zoom:1.2, duration:1000})
+    }
 
     return (
         <>

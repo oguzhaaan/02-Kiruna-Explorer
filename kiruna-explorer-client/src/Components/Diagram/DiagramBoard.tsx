@@ -503,7 +503,7 @@ const DiagramBoard = (props) => {
             </ReactFlow>
 
             <div
-                className={`fixed w-full bg-black_text dark:bg-white_text h-[1px] top-3 text-black_text dark:text-white_text transition`}
+                className={`fixed w-full bg-black_text dark:bg-white_text h-[1px] top-3 text-black_text dark:text-white_text transition pointer-events-none`}
             >
                 {yearsRange.map((year, index) => (
 

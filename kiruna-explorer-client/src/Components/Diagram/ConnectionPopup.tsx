@@ -71,6 +71,8 @@ function ConnectionPopup({isEditing, documentFromId, documentToId, closePopup}: 
     };
 
     const handleConfirm = async () => {
+        console.log("" + documentFromId
+             + documentToId)
         const linkArray = generateLinkArray();
         try {
             if (linkArray.length == 0) {

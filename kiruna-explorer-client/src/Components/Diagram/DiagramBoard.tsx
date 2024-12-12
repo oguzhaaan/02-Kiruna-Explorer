@@ -75,7 +75,8 @@ const DiagramBoard = (props) => {
 
     const months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
     const [isLegendVisible, setIsLegendVisible] = useState(false);
-    const [allLinkVisible, setAllLinkVisible] = useState(false)
+    const [allLinkVisible, setAllLinkVisible] = useState(false);
+    const [editMode, setEditMode] = useState(false);
 
     const connections = [
         { name: "Direct Consequence", color: "#E82929" },
@@ -297,7 +298,7 @@ const DiagramBoard = (props) => {
                     selectable: false,
                     connectable: false,
                     clickable: false,
-                    style: { zIndex: -1, pointerEvents: 'none' }
+                    style: { zIndex: -1, pointerEvents: 'none' },
                 },
                 ...documents.flatMap((e, index: number) => {
                     const nodetype = e.items.length === 1 ? 'singleNode' : 'groupNode';
@@ -368,25 +369,28 @@ const DiagramBoard = (props) => {
         getNodes()
     }, [documents, clickedNode, zoom, nodeStates])
 
+    const [popupVisible, setPopupVisible] = useState(false);
+    const [popupData, setPopupData] = useState<{ fromId: number, toId: number } | null>(null);
+
+
     useEffect(() => {
         const getLinks = async () => {
             const allLinks = nodes.flatMap((node, index: number) => {
                 if (node.type === "background" || node.type === "closeNode") return [];
-    
-                const nodetype = node.data.group.length === 1 ? 'singleNode' : 'groupNode';
+
                 return node.data.group.flatMap(async (elem: Item) => {
                     const docid = elem.docid;
                     const docLinks = await API.getDocuemntLinks(docid);
                     if (docLinks.length === 0) return [];
-    
+
                     const groupedLinks = docLinks.reduce((acc, linkitem) => {
                         if (!acc[linkitem.id]) {
                             acc[linkitem.id] = [];
                         }
-                        acc[linkitem.id].push(`${linkitem.connection}`);
+                        acc[linkitem.id].push(linkitem.connection);
                         return acc;
                     }, {} as Record<string, Item[]>);
-    
+
                     return Object.entries(groupedLinks).map((dl) => (
                         {
                             id: `l${docid}-${dl[0]}`,
@@ -395,55 +399,61 @@ const DiagramBoard = (props) => {
                             type: "custom",
                             data: {
                                 typesOfConnections: dl[1],
-                                selectedEdge: `${docid}` === clickedNode || `${docid}` === hoveredNode || `${dl[0]}` === clickedNode || `${dl[0]}` === hoveredNode || allLinkVisible
+                                selectedEdge: `${docid}` === clickedNode || `${docid}` === hoveredNode || `${dl[0]}` === clickedNode || `${dl[0]}` === hoveredNode || allLinkVisible,
+                                editMode: editMode,
+                                setPopupVisible: (fromId: number, toId: number) => {
+                                    setPopupData({ fromId, toId });
+                                    setPopupVisible(true);  // Mostra il popup
+                                },
+                                source: `${docid}`,
+                                target: `${dl[0]}`
                             }
                         }
                     ));
                 });
             });
-    
+
             const resolvedEdges = (await Promise.all(allLinks)).flat();
-    
+
             // Filtra le connessioni duplicati con la logica position.x inversa
             const filteredEdges = resolvedEdges.filter((edge, index, self) => {
                 const sourceNode = nodes.find(node => node.id === edge.source);
                 const targetNode = nodes.find(node => node.id === edge.target);
-    
+
                 if (!sourceNode || !targetNode) return false;
-    
-                // Determina quale nodo deve essere il source e quale il target
+
                 const [finalSource, finalTarget] = sourceNode.position.x >= targetNode.position.x
                     ? [edge.source, edge.target]
                     : [edge.target, edge.source];
-    
-                // Verifica se una connessione simile esiste già
-                return self.findIndex((e)=>(e.source === finalSource && e.target === finalTarget)) === index 
+
+                return self.findIndex((e) => (e.source === finalSource && e.target === finalTarget)) === index;
             });
-    
+
             setLinks(filteredEdges);
         };
+
         getLinks();
-    }, [nodes, nodeStates, hoveredNode, allLinkVisible]);    
+    }, [nodes, nodeStates, hoveredNode, allLinkVisible, editMode, popupVisible]);
 
     //const filteredEdges = links.filter(edge => edge.source === clickedNode || edge.source === hoveredNode);
 
     //boundaries
-    
-    useEffect(()=>{
+
+    useEffect(() => {
         const bounds: [[number, number], [number, number]] = [
             [0, 0],
             [offsetTimeLine + distanceBetweenYears * yearsRange.length, 2160]
         ];
         setExtent(bounds)
-    },[yearsRange])
+    }, [yearsRange])
 
     return (
         <div className={`${isDarkMode ? "dark" : "light"} w-screen h-screen`}>
-            {/*<ConnectionPopup
-                isEditing={false}
-                documentFromId={40} documentToId={43}
-                closePopup={() => {}}
-            ></ConnectionPopup>*/}
+            {popupVisible && <ConnectionPopup
+                isEditing={editMode}
+                documentFromId={popupData ? popupData.fromId : 55} documentToId={popupData ? popupData.toId : 56}
+                closePopup={() => { setPopupVisible(false) }}
+            ></ConnectionPopup>}
             {ShowSingleDocument &&
                 <SingleDocumentMap setShowArea={props.setShowArea} municipalGeoJson={props.municipalGeoJson}
                     setDocumentId={setDocumentId} id={documentId}
@@ -578,15 +588,17 @@ const DiagramBoard = (props) => {
             </div>
 
             {/* Legend */}
-            <button
-                title="legend"
-                onClick={() => setIsLegendVisible(!isLegendVisible)}
-                className="flex justify-content-center align-content-center fixed top-4 right-4 bg-white_text  dark:bg-[#323232] w-12 h-12 border-2 border-dark_node dark:border-white_text rounded-full shadow-lg hover:bg-gray-300 dark:hover:bg-[#696969] transition"
-            >
-                <i className="bi bi-list-task text-[1.8em] dark:text-white_text"></i>
-            </button>
+            {!editMode && (
+                <button
+                    title="legend"
+                    onClick={() => setIsLegendVisible(!isLegendVisible)}
+                    className="flex justify-content-center align-content-center fixed top-4 right-4 bg-white_text  dark:bg-[#323232] w-12 h-12 border-2 border-dark_node dark:border-white_text rounded-full shadow-lg hover:bg-gray-300 dark:hover:bg-[#696969] transition"
+                >
+                    <i className="bi bi-list-task text-[1.8em] dark:text-white_text"></i>
+                </button>
+            )}
 
-            {isLegendVisible && (
+            {!editMode && isLegendVisible && (
                 <div
                     className="z-10 fixed top-16 right-4 bg-white_text dark:bg-dark_node dark:text-white_text shadow-lg rounded-lg p-4 w-60">
                     <h3 className="text-lg font-semibold mb-2">Legend</h3>
@@ -603,31 +615,43 @@ const DiagramBoard = (props) => {
                             ></span>
                         </li>
                     ))}
-
-
                 </div>
             )}
 
             {/* Link button */}
+            {!editMode && (
+                <button
+                    title={allLinkVisible ? "Hide all connections" : "Color all connections"}
+                    onClick={() => {
+                        setAllLinkVisible(prev => !prev);
+                    }}
+                    className="flex justify-content-center align-content-center fixed top-20 right-4 bg-white_text  dark:bg-[#323232] w-12 h-12 border-2 border-dark_node dark:border-white_text rounded-full shadow-lg hover:bg-gray-300 dark:hover:bg-[#696969] transition"
+                >
+                    <i className={`bi bi-share${allLinkVisible ? "-fill" : ""} text-[1.8em] dark:text-white_text`}></i>
+                </button>
+            )}
+
+            {/* Filter button */}
+            {!editMode && (
+                <button
+                    title="filter"
+                    onClick={() => {/* Open modal */ }}
+                    className="flex justify-content-center align-content-center fixed top-36 right-4 bg-white_text  dark:bg-[#323232] w-12 h-12 border-2 border-dark_node dark:border-white_text rounded-full shadow-lg hover:bg-gray-300 dark:hover:bg-[#696969] transition"
+                >
+                    <i className="bi bi-filter text-[1.8em] dark:text-white_text"></i>
+                </button>
+            )}
+
+            {/* Edit button */}
             <button
-                title={allLinkVisible ? "Hide all connections" : "Color all connections"}
+                title={editMode ? "exit" : "edit mode"}
                 onClick={() => {
-                    setAllLinkVisible(prev => !prev)
+                    setEditMode(prev => !prev);
                 }}
-                className="flex justify-content-center align-content-center fixed top-20 right-4 bg-white_text  dark:bg-[#323232] w-12 h-12 border-2 border-dark_node dark:border-white_text rounded-full shadow-lg hover:bg-gray-300 dark:hover:bg-[#696969] transition"
+                className={`flex justify-content-center align-content-center fixed ${editMode ? "top-4" : "top-52"} right-4 bg-white_text  dark:bg-[#323232] w-12 h-12 border-2 border-dark_node dark:border-white_text rounded-full shadow-lg hover:bg-gray-300 dark:hover:bg-[#696969] transition`}
             >
-                <i className={`bi bi-share${allLinkVisible ? "-fill" : ""} text-[1.8em] dark:text-white_text`}></i>
+                <i className={`bi ${editMode ? "bi-x-lg" : "bi-pencil-square "} text-[1.7em] dark:text-white_text`}></i>
             </button>
-
-            {/*TODO add Filter here with modal*/}
-            <button
-                title="filter"
-                onClick={() => {/*Open modal*/ }}
-                className="flex justify-content-center align-content-center fixed top-36 right-4 bg-white_text  dark:bg-[#323232] w-12 h-12 border-2 border-dark_node dark:border-white_text rounded-full shadow-lg hover:bg-gray-300 dark:hover:bg-[#696969] transition"
-            >
-                <i className="bi bi-filter text-[1.8em] dark:text-white_text"></i>
-            </button>
-
 
         </div>
     );

@@ -5,7 +5,6 @@ import { DocumentNotFound } from "../models/Document.mjs";
 import { AreaNotFound } from "../models/Area.mjs";
 import { InvalidArea } from "../models/Area.mjs";
 import { InvalidDocumentPosition } from "../models/DocumentPosition.mjs";
-import { PositionAlreadyExists } from "../models/DocumentPosition.mjs";
 
 
 export default function DocumentDAO(areaDAO) {

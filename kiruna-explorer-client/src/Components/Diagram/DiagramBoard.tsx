@@ -26,6 +26,7 @@ import {
 import { SingleDocumentMap } from "../SingleDocumentMap.jsx";
 import { useNodePosition } from "../../contexts/NodePositionContext.tsx";
 import ConnectionPopup from "./ConnectionPopup";
+import Alert from "../Alert.jsx";
 
 type Node<Data = any> = {
     id: string;
@@ -77,6 +78,9 @@ const DiagramBoard = (props) => {
     const [isLegendVisible, setIsLegendVisible] = useState(false);
     const [allLinkVisible, setAllLinkVisible] = useState(false);
     const [editMode, setEditMode] = useState(false);
+
+    const [alertMessage, setAlertMessage] = useState(['', '']);
+
 
     const connections = [
         { name: "Direct Consequence", color: "#E82929" },
@@ -459,10 +463,13 @@ const DiagramBoard = (props) => {
 
     return (
         <div className={`${isDarkMode ? "dark" : "light"} w-screen h-screen`}>
+            <Alert message={alertMessage[0]} type={alertMessage[1]}
+                   clearMessage={() => setAlertMessage(['', ''])}></Alert>
             {popupVisible && <ConnectionPopup
                 isEditing={editMode}
                 documentFromId={popupData ? popupData.fromId : 55} documentToId={popupData ? popupData.toId : 56}
                 closePopup={() => { setPopupVisible(false) }}
+                setAlertMessage={(message: [string, string]) => setAlertMessage(message)}
             ></ConnectionPopup>}
             {ShowSingleDocument &&
                 <SingleDocumentMap setShowArea={props.setShowArea} municipalGeoJson={props.municipalGeoJson}

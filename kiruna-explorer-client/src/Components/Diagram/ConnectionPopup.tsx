@@ -4,16 +4,16 @@ import {Charging} from '../Charging.jsx';
 import React, {useEffect, useState} from "react";
 import API from "../../API/API.mjs";
 import dayjs from "dayjs";
-import Alert from "../Alert.jsx";
 
 interface ConnectionPopupProps {
     isEditing: boolean;
     documentFromId: number;
     documentToId: number;
     closePopup: () => void;
+    setAlertMessage: (message: [string, string]) => void;
 }
 
-function ConnectionPopup({isEditing, documentFromId, documentToId, closePopup}: ConnectionPopupProps) {
+function ConnectionPopup({isEditing, documentFromId, documentToId, closePopup, setAlertMessage}: ConnectionPopupProps) {
 
     const {isDarkMode} = useTheme();
 
@@ -22,7 +22,6 @@ function ConnectionPopup({isEditing, documentFromId, documentToId, closePopup}: 
     const [documentTo, setDocumentTo] = useState<any>(null);
 
     const [showConfirm, setShowConfirm] = useState(false);
-    const [alertMessage, setAlertMessage] = useState(['', '']);
 
     const defaultConnectionOptions:any = [
         "direct_consequence",
@@ -72,8 +71,6 @@ function ConnectionPopup({isEditing, documentFromId, documentToId, closePopup}: 
 
     const handleConfirm = async () => {
         const linkArray = generateLinkArray();
-
-        console.log(linkArray)
         try {
             if (linkArray.length == 0) {
                 await API.deleteAll(documentFromId);
@@ -87,8 +84,6 @@ function ConnectionPopup({isEditing, documentFromId, documentToId, closePopup}: 
     }
 
     useEffect(() => {
-        console.log("documentFromId: " + documentFromId);
-        console.log("documentToId: " + documentToId);
         if (documentFromId != undefined && documentToId != undefined) {
             const getDocumentLinks = async () => {
                 try {
@@ -111,8 +106,6 @@ function ConnectionPopup({isEditing, documentFromId, documentToId, closePopup}: 
 
     return (
         <>
-            <Alert message={alertMessage[0]} type={alertMessage[1]}
-                   clearMessage={() => setAlertMessage(['', ''])}></Alert>
             <div className={`fixed z-[1000] inset-0 flex items-center justify-center ${isDarkMode ? "dark" : "light"}`}>
                 {!showConfirm ?
                     <div
@@ -177,7 +170,7 @@ function ConnectionPopup({isEditing, documentFromId, documentToId, closePopup}: 
                                 Cancel
                             </button>
                             <button
-                                onClick={() => {
+                                onClick={ () => {
                                     handleConfirm();
                                     closePopup();
                                 }}

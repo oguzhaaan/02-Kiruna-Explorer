@@ -536,7 +536,7 @@ router.post(
         );
 
         if (invalidLinks.length > 0) {
-            return res.status(402).json({
+            return res.status(400).json({
                 error: "Invalid connection type for the following links",
                 invalidLinks,
             });

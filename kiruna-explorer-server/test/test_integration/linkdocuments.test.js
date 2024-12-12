@@ -217,7 +217,7 @@ describe("Integration Test POST /links", () => {
 
     test("should return 200 if links array is valid", async () => {
         const validLinks = [
-            { originalDocId: doc1Id, selectedDocId: doc2Id, connectionType: "prevision", date: "2023-01-01" },
+            { originalDocId: doc1Id, selectedDocId: doc2Id, connectionType: "projection", date: "2023-01-01" },
             { originalDocId: doc3Id, selectedDocId: doc4Id, connectionType: "direct_consequence", date: "2023-01-02" },
         ];
 
@@ -240,7 +240,7 @@ describe("Integration Test POST /links", () => {
             .post(`${basePath}/links`)
             .send({ links: invalidLinks })
             .set("Cookie", urbanplanner_cookie)
-            .expect(402);
+            .expect(400);
 
         expect(result.body.error).toBe("Invalid connection type for the following links");
         expect(result.body.invalidLinks).toEqual([

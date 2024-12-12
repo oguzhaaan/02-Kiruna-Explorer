@@ -45,7 +45,7 @@ export default function AreaDAO() {
                         const area = new Area(row.id, row.geoJson);
                         resolve(area);
                     } else {
-                        resolve(null);
+                        reject(new AreaNotFound(id));
                     }
                 }
             });

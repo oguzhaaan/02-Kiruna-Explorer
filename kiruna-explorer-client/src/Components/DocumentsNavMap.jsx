@@ -64,12 +64,12 @@ function DocumentsNavMap({ clickedDocs, handleDocumentClick, setShowDiagramDoc }
                                 {/* Search Bar */}
                                 <div className="z-[0] relative">
                                     <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-black_text">
-                                        <i className="bi bi-search"></i>
+                                        <i className="bi bi-search fs-5"></i>
                                     </span>
                                     <input
                                         type="text"
                                         placeholder="Search"
-                                        className="outline outline-1 outline-customGray1 dark:outline-none bg-search_dark_color lg:md:w-72 sm:w-48 py-2 pl-10 pr-4 text-black_text rounded-[50px] placeholder-black_text"
+                                        className="text-xl outline outline-1 outline-customGray1 dark:outline-none bg-search_dark_color lg:md:w-72 sm:w-48 py-0.5 pl-10 pr-4 text-black_text rounded-[50px] placeholder-black_text"
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                     />

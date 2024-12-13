@@ -549,8 +549,8 @@ function ListDocuments({ docs, setOpenTooltipDocs, setDocumentId, setShowSingleD
             <i className="bi bi-x-lg text-2xl"></i>
           </button>
         </div>
-        <div className="z-[0] relative mb-1">
-          <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-black_text">
+        <div className="z-[0] relative w-full mb-1">
+          <span className="absolute inset-y-0 flex items-center pl-3 text-black_text">
             <i className="bi bi-search"></i>
           </span>
           <input
@@ -558,7 +558,7 @@ function ListDocuments({ docs, setOpenTooltipDocs, setDocumentId, setShowSingleD
             placeholder="Search"
             input={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="outline outline-1 outline-customGray1 dark:outline-none bg-search_dark_color w-auto py-2 pl-10 pr-4 text-black_text rounded-[50px] placeholder-black_text"
+            className="outline outline-1 outline-customGray1 dark:outline-none bg-search_dark_color w-full py-2 pl-10 pr-4 text-black_text rounded-[50px] placeholder-black_text"
           />
         </div>
         {/* Lista di documenti */}

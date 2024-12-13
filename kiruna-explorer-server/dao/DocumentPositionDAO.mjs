@@ -15,4 +15,17 @@ export default function DocumentPositionDAO() {
             });
         });
     }
+
+    this.getDocumentsPosition =  () => {
+        const query = `SELECT * FROM document_position`;
+        return new Promise((resolve, reject) => {
+            db.all(query, (err, rows) => {
+                if (err) {
+                    return reject(err);
+                }
+                const documentPositions = rows.map(row => new DocumentPosition(row.id, row.docId, row.x, row.y));
+                resolve(documentPositions);
+            });
+        });
+    }
 }

@@ -452,19 +452,24 @@ const DiagramBoard = (props) => {
     }, [yearsRange])
 
     const onConnect = (params) => {
-        console.log(params);
-        setPopupData({
-            fromId: parseInt(params.source, 10), 
-            toId: parseInt(params.target, 10),
-        });        
-        setEditMode(false);
-        setPopupVisible(true);
+        if (editMode) {
+            console.log(params);
+            setPopupData({
+                fromId: parseInt(params.source, 10),
+                toId: parseInt(params.target, 10),
+            });
+            setEditMode(false);
+            setPopupVisible(true);
+        }
+        else {
+            setAlertMessage(["You need to be in edit mode to creat a new connection", "error"]);
+        }
     }
 
     return (
         <div className={`${isDarkMode ? "dark" : "light"} w-screen h-screen`}>
             <Alert message={alertMessage[0]} type={alertMessage[1]}
-                   clearMessage={() => setAlertMessage(['', ''])}></Alert>
+                clearMessage={() => setAlertMessage(['', ''])}></Alert>
             {popupVisible && <ConnectionPopup
                 isEditing={editMode}
                 documentFromId={popupData ? popupData.fromId : 55} documentToId={popupData ? popupData.toId : 56}

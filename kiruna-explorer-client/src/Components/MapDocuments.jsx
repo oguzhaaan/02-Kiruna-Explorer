@@ -91,7 +91,7 @@ function GeoreferenceMapDoc(props) {
         [id]: newClickedState,
     }));
 
-    setHoveredArea(null)
+    if(!isSingleDoc)setHoveredArea(null)
 
     setAreaCounts((prev) => {
         const currentCount = prev[areaId] || 0;
@@ -377,6 +377,8 @@ function Markers({ showArea, setShowArea, area, currentDocAreaId, center, bounda
         map.setView([geometry.coordinates[1], geometry.coordinates[0]], 14)
       }
       handleMouseOver(area.id, areaDoc.length)
+      setAreaSelected(area.id)
+      handleAreaDocuments(area.id)
       setShowArea(null)
     }
     if (currentDocAreaId == area.id || showArea == area.id) setCurrentView()

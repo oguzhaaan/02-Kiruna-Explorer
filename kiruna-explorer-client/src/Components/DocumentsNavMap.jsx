@@ -80,7 +80,7 @@ function DocumentsNavMap({ clickedDocs, handleDocumentClick, setShowDiagramDoc }
                                     .map((document) => (
                                         <div
                                             key={document.id}
-                                            className={`w-full h-16 transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 cursor-pointer rounded-lg p-2 flex justify-start ${isDarkMode
+                                            className={`w-full h-fit transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 cursor-pointer rounded-lg p-2 flex justify-start items-center ${isDarkMode
                                                 ? "bg-document_item_radient_blue"
                                                 : "bg-document_item_radient_blue_light"
                                                 }`}
@@ -94,12 +94,12 @@ function DocumentsNavMap({ clickedDocs, handleDocumentClick, setShowDiagramDoc }
                                                     className="w-8 mr-2"
                                                     alt="type_icon"
                                                 />
-                                                <span className="font-sans text-lg">{document.title}</span>
+                                                <span className="font-sans text-base">{document.title}</span>
                                             </div>
 
                                             <div
                                                 key={document.id}
-                                                className={`w-1/6 transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 cursor-pointer rounded-lg p-2 flex justify-start ${isDarkMode
+                                                className={`w-1/6 h-fit transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 cursor-pointer rounded-2xl p-2 flex justify-center ${isDarkMode
                                                     ? "bg-document_item_radient_blue"
                                                     : "bg-document_item_radient_blue_light"
                                                     }`}
@@ -115,8 +115,7 @@ function DocumentsNavMap({ clickedDocs, handleDocumentClick, setShowDiagramDoc }
                                         </div>
                                     ))}
                                 {/* Separator */}
-                                {Object.values(clickedDocs).some((value) => value) &&
-                                    Object.values(clickedDocs).some((value) => !value) && (
+                                {Object.values(clickedDocs).some((value) => value) && (
                                         <div
                                             className={`separator w-full ${isDarkMode ? "bg-white_text" : "bg-black_text"
                                                 } opacity-20`}
@@ -134,7 +133,7 @@ function DocumentsNavMap({ clickedDocs, handleDocumentClick, setShowDiagramDoc }
                                     .map((document) => (
                                         <div
                                             key={document.id}
-                                            className={`flex-row w-full h-16 transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 cursor-pointer rounded-lg p-2 flex justify-start ${isDarkMode
+                                            className={`flex-row w-full h-fit transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 cursor-pointer rounded-lg p-2 flex justify-start items-center ${isDarkMode
                                                 ? "bg-document_item_radient_grey"
                                                 : "bg-[#ffffffdd]"
                                                 }`}
@@ -148,12 +147,12 @@ function DocumentsNavMap({ clickedDocs, handleDocumentClick, setShowDiagramDoc }
                                                     className="w-8 mr-2"
                                                     alt="type_icon"
                                                 />
-                                                <span className="font-sans text-lg">{document.title}</span>
+                                                <span className="font-sans text-base">{document.title}</span>
                                             </div>
 
                                             <div
                                                 key={document.id}
-                                                className={`w-1/6 transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 cursor-pointer rounded-lg p-2 flex justify-start ${isDarkMode
+                                                className={`w-1/6 h-fit transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 cursor-pointer rounded-2xl p-2 flex justify-center ${isDarkMode
                                                     ? "bg-document_item_radient_grey"
                                                     : "bg-[#ffffffdd]"
                                                     }`}

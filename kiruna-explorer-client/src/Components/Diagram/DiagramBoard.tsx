@@ -26,6 +26,8 @@ import {
 import { SingleDocumentMap } from "../SingleDocumentMap.jsx";
 import { useNodePosition } from "../../contexts/NodePositionContext.tsx";
 import ConnectionPopup from "./ConnectionPopup";
+import FilterMenu from "../FilterMenu.jsx";
+import FilterLabels from "../FilterLabels.jsx";
 
 type Node<Data = any> = {
     id: string;
@@ -114,10 +116,19 @@ const DiagramBoard = (props) => {
     const distanceBetweenYears = 800;
     const offsetTimeLine = -400
 
+    // Filter Documents
+    const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
+    const [filterValues, setFilterValues] = useState({
+        type: "",
+        stakeholders: [],
+        startDate: "",
+        endDate: "",
+    });
+
     useEffect(() => {
         const getAllDocument = async () => {
             try {
-                const docs = await API.getAllDocuments();
+                const docs = await API.getFilteredDocuments(filterValues);
 
                 const yearsDoc = docs.map((doc) => {
                     let date = doc.date.split("-")
@@ -190,7 +201,7 @@ const DiagramBoard = (props) => {
             }
         }
         getAllDocument()
-    }, [])
+    }, [filterValues])
 
     const onNodesChange: OnNodesChange = useCallback(
         (changes) => {
@@ -459,6 +470,16 @@ const DiagramBoard = (props) => {
                 documentFromId={40} documentToId={43}
                 closePopup={() => {}}
             ></ConnectionPopup>*/}
+            {/* Filter Menu */}
+            {isFilterMenuOpen && 
+                <div className="z-10 top-36 right-20 flex justify-content-center align-content-center fixed ">
+                    <FilterMenu filterValues={filterValues} setFilterValues={setFilterValues} homePage={false} />
+                </div>           
+            }
+            {/* Filter Labels */}
+            <div className="z-10 bottom-5 left-20 px-2 flex items-start fixed">
+                    <FilterLabels filterValues={filterValues} setFilterValues={setFilterValues}/>
+            </div>
             {ShowSingleDocument &&
                 <SingleDocumentMap setShowArea={props.setShowArea} municipalGeoJson={props.municipalGeoJson}
                     setDocumentId={setDocumentId} id={documentId}
@@ -638,7 +659,7 @@ const DiagramBoard = (props) => {
             {/*TODO add Filter here with modal*/}
             <button
                 title="filter"
-                onClick={() => {/*Open modal*/ }}
+                onClick={() => {setIsFilterMenuOpen(prev => !prev)}}
                 className="flex justify-content-center align-content-center fixed top-36 right-4 bg-white_text  dark:bg-[#323232] w-12 h-12 border-2 border-dark_node dark:border-white_text rounded-full shadow-lg hover:bg-gray-300 dark:hover:bg-[#696969] transition"
             >
                 <i className="bi bi-filter text-[1.8em] dark:text-white_text"></i>

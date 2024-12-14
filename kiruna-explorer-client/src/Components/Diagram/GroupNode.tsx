@@ -21,7 +21,8 @@ interface GroupNodeProps extends NodeProps {
         zoom: number;
         setNodeSelected: (id: number) => void
         showSingleDocument: (id:string) => void
-        showDiagramDoc:number | null
+        showDiagramDoc:number | null;
+        currentFilteredDoc: number
     };
 }
 
@@ -42,7 +43,7 @@ function GroupNode({
 
     const {setCenter} = useReactFlow()
 
-    if (data.showDiagramDoc  && id === `${data.showDiagramDoc}`){
+    if (id === data.showDiagramDoc?.toString() || id===`${data.currentFilteredDoc}`){
         setCenter(data.pos.x,data.pos.y, {zoom:1.2, duration:1000})
     }
 

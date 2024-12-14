@@ -671,7 +671,7 @@ function GeoreferenceMap(props) {
     )
 }
 
-function Message({ alertMessage, setAlertMessage }) {
+export function Message({ alertMessage, setAlertMessage }) {
     {/* Clear Alert message after 5 sec*/ }
     useEffect(() => {
         if (alertMessage != "") {

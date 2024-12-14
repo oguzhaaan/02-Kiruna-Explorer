@@ -1,4 +1,4 @@
-import { useTheme } from "../../contexts/ThemeContext.jsx";
+import {useTheme} from "../../contexts/ThemeContext.jsx";
 import {
     applyNodeChanges,
     Background,
@@ -10,7 +10,7 @@ import {
     useNodesState,
 } from "@xyflow/react";
 import '@xyflow/react/dist/style.css';
-import React, { useCallback, useEffect, useState } from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import CustomBackgroundNode from './CustomBackgroundNode';
 import SingleNode from "./SingleNode";
 import GroupNode from "./GroupNode";
@@ -23,8 +23,8 @@ import {
     getYPlanScale,
     YScalePosition
 } from "../Utilities/DiagramReferencePositions.js";
-import { SingleDocumentMap } from "../SingleDocumentMap.jsx";
-import { useNodePosition } from "../../contexts/NodePositionContext.tsx";
+import {SingleDocumentMap} from "../SingleDocumentMap.jsx";
+import {useNodePosition} from "../../contexts/NodePositionContext";
 import ConnectionPopup from "./ConnectionPopup";
 import Alert from "../Alert.jsx";
 
@@ -55,11 +55,11 @@ export type DiagramItem = {
 }
 
 const DiagramBoard = (props) => {
-    const { isDarkMode } = useTheme();
-    const { nodePositions, setNodePosition } = useNodePosition();
+    const {isDarkMode} = useTheme();
+    const {nodePositions, saveNodePosition} = useNodePosition();
     const [colorMode, setColorMode] = useState<ColorMode>(isDarkMode ? "dark" : "light");
     const [zoom, setZoom] = useState(1); // Add zoom state
-    const [viewport, setViewport] = useState({ x: 0, y: 0, zoom: 1 }); // Add viewport state
+    const [viewport, setViewport] = useState({x: 0, y: 0, zoom: 1}); // Add viewport state
     const [hoveredNode, setHoveredNode] = useState<string | null>(null);
     const [clickedNode, setClickedNode] = useState<string | null>(null);
     const [documents, setDocuments] = useState<DiagramItem[] | []>([])
@@ -83,10 +83,10 @@ const DiagramBoard = (props) => {
 
 
     const connections = [
-        { name: "Direct Consequence", color: "#E82929" },
-        { name: "Collateral Consequence", color: "#31F518" },
-        { name: "Projection", color: "#4F43F1" },
-        { name: "Update", color: "#E79716" }
+        {name: "Direct Consequence", color: "#E82929"},
+        {name: "Collateral Consequence", color: "#31F518"},
+        {name: "Projection", color: "#4F43F1"},
+        {name: "Update", color: "#E79716"}
     ];
 
     useEffect(() => {
@@ -221,8 +221,7 @@ const DiagramBoard = (props) => {
                             if (scale !== "plan") {
                                 minY = YScalePosition[scale] - 100;
                                 maxY = YScalePosition[scale] + 100;
-                            }
-                            else {
+                            } else {
                                 minY = maxY = getYPlanScale(node?.data.group?.[0]?.planNumber)
                                 minY = minY - 30
                                 maxY = maxY + 30
@@ -232,7 +231,7 @@ const DiagramBoard = (props) => {
 
                             return {
                                 ...change,
-                                position: { x: limitedX, y: limitedY },
+                                position: {x: limitedX, y: limitedY},
                             };
                         }
                         return change;
@@ -260,8 +259,7 @@ const DiagramBoard = (props) => {
                 if (scale !== "plan") {
                     minY = YScalePosition[scale] - 100;
                     maxY = YScalePosition[scale] + 100;
-                }
-                else {
+                } else {
                     minY = maxY = getYPlanScale(node?.data.group?.[0]?.planNumber)
                     minY = minY - 30
                     maxY = maxY + 30
@@ -272,11 +270,15 @@ const DiagramBoard = (props) => {
                 const limitedY = Math.max(minY, Math.min(node.position.y, maxY));
 
                 // Save the new position to context
-                setNodePosition(node.id, { x: limitedX, y: limitedY });
+                saveNodePosition({
+                    docId: node.id,
+                    x: limitedX,
+                    y: limitedY
+                })
             }
 
         },
-        [setNodePosition, yearsRange]
+        [saveNodePosition, yearsRange]
     );
 
     const nodeTypes = {
@@ -296,13 +298,13 @@ const DiagramBoard = (props) => {
                 {
                     id: '0',
                     type: 'background',
-                    position: { x: 0, y: 0 },
-                    data: { years: yearsRange, zoom: zoom, distanceBetweenYears: distanceBetweenYears },
+                    position: {x: 0, y: 0},
+                    data: {years: yearsRange, zoom: zoom, distanceBetweenYears: distanceBetweenYears},
                     draggable: false,
                     selectable: false,
                     connectable: false,
                     clickable: false,
-                    style: { zIndex: -1, pointerEvents: 'none' },
+                    style: {zIndex: -1, pointerEvents: 'none'},
                 },
                 ...documents.flatMap((e, index: number) => {
                     const nodetype = e.items.length === 1 ? 'singleNode' : 'groupNode';
@@ -320,17 +322,17 @@ const DiagramBoard = (props) => {
                             return {
                                 id: `${item.docid}`,
                                 type: 'singleNode',
-                                position: nodePositions[item.docid] || { x: positions[index1].x, y: positions[index1].y },
+                                position: nodePositions[item.docid] || {x: positions[index1].x, y: positions[index1].y},
                                 data: {
                                     clickedNode: clickedNode,
                                     group: [item],
-                                    pos: nodePositions[item.docid] || { x: positions[index1].x, y: positions[index1].y },
+                                    pos: nodePositions[item.docid] || {x: positions[index1].x, y: positions[index1].y},
                                     zoom: zoom,
                                     index: index,
                                     showSingleDocument: (id: string) => {
                                         setDocumentId(id), setShowSingleDocument(true)
                                     },
-                                    groupPosition: { x: e.x, y: e.y }
+                                    groupPosition: {x: e.x, y: e.y}
                                 },
                                 draggable: item.month === undefined,
                             };
@@ -339,22 +341,22 @@ const DiagramBoard = (props) => {
                         const closeNode = {
                             id: `closeNode-${index}`,
                             type: 'closeNode',
-                            position: { x: e.x + 10, y: e.y + 10 },
-                            data: { zoom: zoom, index: index },
+                            position: {x: e.x + 10, y: e.y + 10},
+                            data: {zoom: zoom, index: index},
                             draggable: false,
                         };
 
                         return [...nodes, closeNode];
                     } else {
-                        const savedPosition = nodePositions[nodeSelected] || { x: e.x, y: e.y };
+                        const savedPosition = nodePositions[nodeSelected] || {x: e.x, y: e.y};
                         return {
                             id: `${nodeSelected}`,
                             type: nodetype,
-                            position: nodetype === "groupNode" ? { x: e.x, y: e.y } : savedPosition,
+                            position: nodetype === "groupNode" ? {x: e.x, y: e.y} : savedPosition,
                             data: {
                                 clickedNode: clickedNode,
                                 group: e.items,
-                                pos: nodetype === "groupNode" ? { x: e.x, y: e.y } : savedPosition,
+                                pos: nodetype === "groupNode" ? {x: e.x, y: e.y} : savedPosition,
                                 zoom: zoom,
                                 index: index,
                                 setNodeSelected: (id: number) => setNodeSelected(index, `${id}`),
@@ -406,7 +408,7 @@ const DiagramBoard = (props) => {
                                 selectedEdge: `${docid}` === clickedNode || `${docid}` === hoveredNode || `${dl[0]}` === clickedNode || `${dl[0]}` === hoveredNode || allLinkVisible,
                                 editMode: editMode,
                                 setPopupVisible: (fromId: number, toId: number) => {
-                                    setPopupData({ fromId, toId });
+                                    setPopupData({fromId, toId});
                                     setPopupVisible(true);  // Mostra il popup
                                 },
                                 source: `${docid}`,
@@ -453,15 +455,14 @@ const DiagramBoard = (props) => {
 
     const onConnect = (params) => {
         if (editMode) {
-            console.log(params);
+            //console.log(params);
             setPopupData({
                 fromId: parseInt(params.source, 10),
                 toId: parseInt(params.target, 10),
             });
             setEditMode(false);
             setPopupVisible(true);
-        }
-        else {
+        } else {
             setAlertMessage(["You need to be in edit mode to creat a new connection", "error"]);
         }
     }
@@ -469,17 +470,19 @@ const DiagramBoard = (props) => {
     return (
         <div className={`${isDarkMode ? "dark" : "light"} w-screen h-screen`}>
             <Alert message={alertMessage[0]} type={alertMessage[1]}
-                clearMessage={() => setAlertMessage(['', ''])}></Alert>
+                   clearMessage={() => setAlertMessage(['', ''])}></Alert>
             {popupVisible && <ConnectionPopup
                 isEditing={editMode}
                 documentFromId={popupData ? popupData.fromId : 55} documentToId={popupData ? popupData.toId : 56}
-                closePopup={() => { setPopupVisible(false) }}
+                closePopup={() => {
+                    setPopupVisible(false)
+                }}
                 setAlertMessage={(message: [string, string]) => setAlertMessage(message)}
             ></ConnectionPopup>}
             {ShowSingleDocument &&
                 <SingleDocumentMap setShowArea={props.setShowArea} municipalGeoJson={props.municipalGeoJson}
-                    setDocumentId={setDocumentId} id={documentId}
-                    setShowSingleDocument={setShowSingleDocument}></SingleDocumentMap>}
+                                   setDocumentId={setDocumentId} id={documentId}
+                                   setShowSingleDocument={setShowSingleDocument}></SingleDocumentMap>}
             <ReactFlow
                 nodes={nodes}
                 edges={links}
@@ -531,7 +534,7 @@ const DiagramBoard = (props) => {
                 onNodeDragStop={onNodeDragStop}
             >
 
-                <Background gap={20} size={1} color={isDarkMode ? "#333" : "#ccc"} />
+                <Background gap={20} size={1} color={isDarkMode ? "#333" : "#ccc"}/>
                 {/*<MiniMap className="opacity-50" />*/}
             </ReactFlow>
 
@@ -543,13 +546,13 @@ const DiagramBoard = (props) => {
                     index != 0 && <div
                         key={year}
                         className="absolute transform -translate-x-1/2 -translate-y-1/4 pt-2 flex flex-col gap-1 justify-content-center align-items-center transition"
-                        style={{ left: `${offsetTimeLine * zoom + index * distanceBetweenYears * zoom + (viewport?.x || 0)}px` }}
+                        style={{left: `${offsetTimeLine * zoom + index * distanceBetweenYears * zoom + (viewport?.x || 0)}px`}}
                     >
                         <div className="w-3 h-3 bg-black_text dark:bg-white_text rounded-full transition"
-                            style={{ transform: `scale(${zoom})` }}>
+                             style={{transform: `scale(${zoom})`}}>
                         </div>
-                        <div style={{ transform: `scale(${zoom}) ${index === 0 ? "translateX(25px)" : ""}` }}
-                            className="transition">{year}</div>
+                        <div style={{transform: `scale(${zoom}) ${index === 0 ? "translateX(25px)" : ""}`}}
+                             className="transition">{year}</div>
                     </div>
                 ))}
 
@@ -562,17 +565,17 @@ const DiagramBoard = (props) => {
 
                         return (
                             <div key={`${year}-${month}`}
-                                className="absolute h-screen border-l border-[#00000015] dark:border-[#ffffff11] transition z-[-1]"
-                                style={{
-                                    left: `${monthPosition}px`,
-                                    borderStyle: 'dashed',
-                                }}
+                                 className="absolute h-screen border-l border-[#00000015] dark:border-[#ffffff11] transition z-[-1]"
+                                 style={{
+                                     left: `${monthPosition}px`,
+                                     borderStyle: 'dashed',
+                                 }}
 
                             >
                                 {/* Numero del mese */}
                                 <div
                                     className="absolute top-1 text-xs text-gray-500 dark:text-gray-300"
-                                    style={{ transform: `translateX(-50%) scale(${zoom})` }}
+                                    style={{transform: `translateX(-50%) scale(${zoom})`}}
                                 >
                                     {month}
                                 </div>
@@ -596,12 +599,15 @@ const DiagramBoard = (props) => {
                         <>
                             <div
                                 className="absolute h-screen border-l border-my_red"
-                                style={{ left: `${currentDayPosition}px` }}
+                                style={{left: `${currentDayPosition}px`}}
                             />
                             {/* Numero del mese */}
                             <div
                                 className="absolute top-10 text-xs text-my_red"
-                                style={{ transform: `translateX(-50%) scale(${zoom})`, left: `${currentDayPosition + 20 * zoom}px` }}
+                                style={{
+                                    transform: `translateX(-50%) scale(${zoom})`,
+                                    left: `${currentDayPosition + 20 * zoom}px`
+                                }}
                             >
                                 Today
                             </div>
@@ -633,7 +639,7 @@ const DiagramBoard = (props) => {
                         >
                             <span>{connection.name}</span>
                             <span
-                                style={{ backgroundColor: connection.color }}
+                                style={{backgroundColor: connection.color}}
                                 className="w-12 h-[2px] rounded-full"
                             ></span>
                         </li>
@@ -658,7 +664,8 @@ const DiagramBoard = (props) => {
             {!editMode && (
                 <button
                     title="filter"
-                    onClick={() => {/* Open modal */ }}
+                    onClick={() => {/* Open modal */
+                    }}
                     className="flex justify-content-center align-content-center fixed top-36 right-4 bg-white_text  dark:bg-[#323232] w-12 h-12 border-2 border-dark_node dark:border-white_text rounded-full shadow-lg hover:bg-gray-300 dark:hover:bg-[#696969] transition"
                 >
                     <i className="bi bi-filter text-[1.8em] dark:text-white_text"></i>

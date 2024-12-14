@@ -17,6 +17,7 @@ import { query } from "express-validator";
 import DocumentTypDAOo from "../dao/DocumentTypDAO.mjs";
 import StakeholderDAO from "../dao/StakeholderDAO.mjs";
 import FileDAO from "../dao/FileDAO.mjs";
+import DocumentPositionDAO from "../dao/DocumentPositionDAO.mjs";
 import crypto from "node:crypto"
 
 const router = express.Router();
@@ -26,6 +27,7 @@ const DocumentLinksDao = new DocumentLinksDAO();
 const FileDao = new FileDAO();
 const DocumentTypeDao = new DocumentTypDAOo();
 const StakeholderDao = new StakeholderDAO();
+const documentPositionDao = new DocumentPositionDAO();
 //const crypto = require('crypto');
 
 
@@ -138,6 +140,18 @@ router.get(
         }
     }
 );
+// GET /api/documents/diagramPositions
+router.get('/diagramPositions/',
+    async (req, res) => {
+        try {
+            const result = await documentPositionDao.getDocumentsPosition();
+            res.status(200).json(result);
+        } catch (error) {
+            console.error('Error in /api/documents/diagramPositions:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+) 
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname("../");
@@ -460,10 +474,10 @@ router.post(
         const connections = [
             "direct_consequence",
             "collateral_consequence",
-            "prevision",
+            "projection", //TO BE CHANGED TO PROJECTION
             "update",
         ];
-
+        
         if (!connections.includes(req.body.connection)) {
             return res.status(402).json({ error: "Invalid connection type" });
         }
@@ -527,7 +541,7 @@ router.post(
         const validConnections = [
             "direct_consequence",
             "collateral_consequence",
-            "prevision",
+            "projection",
             "update",
         ];
 
@@ -886,6 +900,49 @@ router.get(
                 .json({ error: "An error occurred while fetching files." });
         }
     }
+    
 );
+
+//POST /api/documents/:DocId/diagramPosition
+router.post(
+    '/:DocId/diagramPosition',
+    isLoggedIn, 
+    authorizeRoles('admin', 'urban_planner'), 
+    [
+        body('x').isNumeric().withMessage('x must be a valid number'),
+        body('y').isNumeric().withMessage('y must be a valid number'),
+    ],
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        const { DocId } = req.params; 
+        const { x, y } = req.body; 
+
+        const docId = parseInt(DocId, 10);
+        if (isNaN(docId)) {
+            return res.status(400).json({ error: 'Invalid DocId. It must be a number.' });
+        }
+
+        try {
+            const result = await DocumentDao.upsertDocumentPosition({ docId, x, y });
+            res.status(201).json(result);
+        } catch (error) {
+            console.error('Error in /api/documents/:DocId/diagramPosition:', error);
+
+            if (error.message === '400 Not Found') {
+                return res.status(404).json({ error: 'Document not found' });
+            } else if (error.message === '400 Bad Request') {
+                return res.status(400).json({ error: 'Invalid position boundaries' });
+            }
+
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+);
+
+
 
 export default router;

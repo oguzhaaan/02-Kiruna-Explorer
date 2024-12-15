@@ -1,10 +1,96 @@
 import db from "../db.mjs";
 import Document from "../models/Document.mjs";
+import DocumentPositionDAO from "./DocumentPositionDAO.mjs";
 import { DocumentNotFound } from "../models/Document.mjs";
 import { AreaNotFound } from "../models/Area.mjs";
 import { InvalidArea } from "../models/Area.mjs";
+import { InvalidDocumentPosition } from "../models/DocumentPosition.mjs";
+import { YScalePosition, getXDatePosition, getYPlanScale } from "../Components/Utilities/DiagramReferencePositions.js";
+
 
 export default function DocumentDAO(areaDAO) {
+    const documentPositionDAO = new DocumentPositionDAO();
+
+    const executeQuery = (query, params) => {
+        return new Promise((resolve, reject) => {
+            db.run(query, params, function (err) {
+                if (err) return reject(err);
+                    resolve(this);
+                });
+            });
+        };
+    
+        this.upsertDocumentPosition = async ({ docId, x, y }) => {
+            try {
+                const document = await this.getDocumentById(docId);
+                if (!document) {
+                    throw new DocumentNotFound("Document not found");
+                }
+        
+                const { date, scale, planNumber } = document;
+        
+                const year = parseInt(date.split('-')[0], 10); // extract year from the date (assumes format "YYYY-MM-DD")
+                if (!year || year < 0) {
+                    throw new InvalidDocumentPosition("Invalid year or date for position boundaries");
+                }
+                // boundary calculations for X
+                const yearStartX = getXDatePosition(yearsRange[0], year, 1); // start of the year (month=1)
+                const yearEndX = getXDatePosition(yearsRange[0], year, 12); // end of the year (month=12)
+                const limitedX = Math.max(yearStartX, Math.min(x, yearEndX));
+        
+                // boundary calculations for Y
+                let minY, maxY;
+                if (scale.startsWith("plan")) {
+                    const planY = getYPlanScale(planNumber);
+                    minY = planY - 30;
+                    maxY = planY + 30;
+                } else {
+                    minY = YScalePosition[scale] - 100;
+                    maxY = YScalePosition[scale] + 100;
+                }
+                const limitedY = Math.max(minY, Math.min(y, maxY));
+        
+                if (x !== limitedX || y !== limitedY) {
+                    throw new InvalidDocumentPosition("Position exceeds boundaries");
+                }
+        
+                const existingPositions = await documentPositionDAO.getDocumentPosition(docId);
+                if (existingPositions.length > 0) {
+                    const existingPosition = existingPositions[0];
+        
+                    if (existingPosition.x === limitedX && existingPosition.y === limitedY) {
+                        return {
+                            lastId: docId,
+                            message: "Position is already up-to-date",
+                        };
+                    }
+        
+                    const updateQuery =
+                        "UPDATE document_position SET x = ?, y = ? WHERE docId = ?";
+                    await executeQuery(updateQuery, [limitedX, limitedY, docId]);
+                } else {
+                    const insertQuery =
+                        "INSERT INTO document_position (docId, x, y) VALUES (?, ?, ?)";
+                    await executeQuery(insertQuery, [docId, limitedX, limitedY]);
+                }
+        
+                return {
+                    lastId: docId,
+                    message: "Document moved successfully in the diagram",
+                };
+            } catch (error) {
+                if (error instanceof DocumentNotFound) {
+                    throw new Error("400 Not Found");
+                } else if (error instanceof InvalidDocumentPosition) {
+                    throw new Error("400 Bad Request");
+                } else {
+                    console.error("Unexpected error:", error);
+                    throw new Error("500 Internal Server Error");
+                }
+            }
+        };
+
+
 
     this.getDocumentsWithPagination = ({ type, title, stakeholders, startDate, endDate, offset = 0 } = {}) => {
         // Build the base query with WHERE 1=1
@@ -461,5 +547,4 @@ export default function DocumentDAO(areaDAO) {
             row.planNumber
         );
     };
-    
 }

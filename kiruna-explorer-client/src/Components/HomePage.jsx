@@ -1,6 +1,24 @@
+import { useEffect } from "react";
 import {Row, Col, Container, Button} from "react-bootstrap";
+import { useUserContext } from "../contexts/UserContext";
+import { useNavigate } from "react-router-dom";
 
 function HomePage(props) {
+
+    const { user, isLoggedIn} = useUserContext();
+
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        // Code to run when the component mounts
+        props.setIsHomePage(true);
+
+        return () => {
+            // Code to run when the component unmounts
+            props.setIsHomePage(false);
+        };
+    }, []); // Empty dependency array ensures this runs only on mount and unmount
+
     return (
         <div className="h-full w-full min-h-screen flex flex-col justify-content-between bg-black">
             {/* Header Content */}
@@ -38,7 +56,8 @@ function HomePage(props) {
                 <div className="bottoni flex flex-row justify-content-between mt-10 w-full gap-10">
                     <div className="w-1/3">
                         <div
-                            className="h-52 text-center items-center justify-center flex flex-col bg-[#2E2E2E] rounded-md">
+                            onClick={() => { navigate("/diagram") }}
+                            className="h-52 text-center items-center justify-center flex flex-col bg-[#2E2E2E] rounded-md cursor-pointer">
                             <i className="bi bi-diagram-3 text-6xl"></i>
                             <div className="text-2xl">Diagram</div>
                             <div className="text-sm m-2 text-[#989898]">
@@ -48,7 +67,8 @@ function HomePage(props) {
                     </div>
                     <div className="w-1/3">
                         <div
-                            className="h-52 text-center items-center justify-center flex flex-col bg-[#2E2E2E] rounded-md">
+                            onClick={() => { navigate("/mapDocuments") }}
+                            className="h-52 text-center items-center justify-center flex flex-col bg-[#2E2E2E] rounded-md cursor-pointer">
                             <i className="bi bi-globe-europe-africa text-6xl"></i>
                             <div className="text-2xl">Map</div>
                             <div className="text-sm m-2 text-[#989898]">
@@ -56,9 +76,11 @@ function HomePage(props) {
                             </div>
                         </div>
                     </div>
+                    {(isLoggedIn && user.role === "urban_planner") ?
                     <div className="w-1/3">
                         <div
-                            className="h-52 text-center items-center justify-center flex flex-col bg-[#2E2E2E] rounded-md">
+                            onClick={() => { navigate("/documents") }}
+                            className="h-52 text-center items-center justify-center flex flex-col bg-[#2E2E2E] rounded-md cursor-pointer">
                             <i className="bi bi-journals text-6xl"></i>
                             <div className="text-2xl">Documents</div>
                             <div className="text-sm m-2 text-[#989898]">
@@ -66,6 +88,17 @@ function HomePage(props) {
                             </div>
                         </div>
                     </div>
+                    : 
+                    <div className="w-1/3">
+                        <div
+                            className="h-52 text-center items-center justify-center flex flex-col bg-[#2E2E2E] opacity-50 rounded-md">
+                            <i className="bi bi-journals text-6xl"></i>
+                            <div className="text-2xl">Documents</div>
+                            <div className="text-sm m-2 text-[#989898]">
+                                Browse and filter documents. Add New.
+                            </div>
+                        </div>
+                    </div>}
                 </div>
             </div>
 

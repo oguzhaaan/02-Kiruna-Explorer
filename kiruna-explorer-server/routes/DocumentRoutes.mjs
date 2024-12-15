@@ -17,6 +17,7 @@ import { query } from "express-validator";
 import DocumentTypDAOo from "../dao/DocumentTypDAO.mjs";
 import StakeholderDAO from "../dao/StakeholderDAO.mjs";
 import FileDAO from "../dao/FileDAO.mjs";
+import DocumentPositionDAO from "../dao/DocumentPositionDAO.mjs";
 import crypto from "node:crypto"
 
 const router = express.Router();
@@ -26,6 +27,7 @@ const DocumentLinksDao = new DocumentLinksDAO();
 const FileDao = new FileDAO();
 const DocumentTypeDao = new DocumentTypDAOo();
 const StakeholderDao = new StakeholderDAO();
+const documentPositionDao = new DocumentPositionDAO();
 //const crypto = require('crypto');
 
 
@@ -138,6 +140,18 @@ router.get(
         }
     }
 );
+// GET /api/documents/diagramPositions
+router.get('/diagramPositions/',
+    async (req, res) => {
+        try {
+            const result = await documentPositionDao.getDocumentsPosition();
+            res.status(200).json(result);
+        } catch (error) {
+            console.error('Error in /api/documents/diagramPositions:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+) 
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname("../");
@@ -928,5 +942,7 @@ router.post(
         }
     }
 );
+
+
 
 export default router;

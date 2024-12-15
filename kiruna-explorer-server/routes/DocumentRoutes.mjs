@@ -903,7 +903,7 @@ router.get(
     
 );
 
-//POST /api/documents/:DocId/diagramPosition
+// POST /api/documents/:DocId/diagramPosition
 router.post(
     '/:DocId/diagramPosition',
     isLoggedIn, 
@@ -919,7 +919,7 @@ router.post(
         }
 
         const { DocId } = req.params; 
-        const { x, y } = req.body; 
+        const { x, y } = req.body;
 
         const docId = parseInt(DocId, 10);
         if (isNaN(docId)) {
@@ -928,7 +928,7 @@ router.post(
 
         try {
             const result = await DocumentDao.upsertDocumentPosition({ docId, x, y });
-            res.status(201).json(result);
+            res.status(201).json(result); 
         } catch (error) {
             console.error('Error in /api/documents/:DocId/diagramPosition:', error);
 
@@ -942,6 +942,7 @@ router.post(
         }
     }
 );
+
 
 
 

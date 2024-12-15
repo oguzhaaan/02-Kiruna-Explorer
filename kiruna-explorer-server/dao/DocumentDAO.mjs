@@ -5,6 +5,7 @@ import { DocumentNotFound } from "../models/Document.mjs";
 import { AreaNotFound } from "../models/Area.mjs";
 import { InvalidArea } from "../models/Area.mjs";
 import { InvalidDocumentPosition } from "../models/DocumentPosition.mjs";
+import { YScalePosition, getXDatePosition, getYPlanScale } from "../Components/Utilities/DiagramReferencePositions.js";
 
 
 export default function DocumentDAO(areaDAO) {
@@ -19,44 +20,63 @@ export default function DocumentDAO(areaDAO) {
             });
         };
     
-    this.upsertDocumentPosition = async ({ docId, x, y }) => {
-        try {
-            // Check if the document exists
-            const document = await this.getDocumentById(docId);
-            if (!document) {
+        this.upsertDocumentPosition = async ({ docId, x, y }) => {
+            try {
+                const document = await this.getDocumentById(docId);
+                if (!document) {
                     throw new DocumentNotFound("Document not found");
                 }
-    
-                // Validate the position (example validation, adjust as needed)
-                if (x < 0 || y < 0) {
-                    throw new InvalidDocumentPosition("Invalid position boundaries");
+        
+                const { date, scale, planNumber } = document;
+        
+                const year = parseInt(date.split('-')[0], 10); // extract year from the date (assumes format "YYYY-MM-DD")
+                if (!year || year < 0) {
+                    throw new InvalidDocumentPosition("Invalid year or date for position boundaries");
                 }
-    
-                // Check if a position already exists
+                // boundary calculations for X
+                const yearStartX = getXDatePosition(yearsRange[0], year, 1); // start of the year (month=1)
+                const yearEndX = getXDatePosition(yearsRange[0], year, 12); // end of the year (month=12)
+                const limitedX = Math.max(yearStartX, Math.min(x, yearEndX));
+        
+                // boundary calculations for Y
+                let minY, maxY;
+                if (scale.startsWith("plan")) {
+                    const planY = getYPlanScale(planNumber);
+                    minY = planY - 30;
+                    maxY = planY + 30;
+                } else {
+                    minY = YScalePosition[scale] - 100;
+                    maxY = YScalePosition[scale] + 100;
+                }
+                const limitedY = Math.max(minY, Math.min(y, maxY));
+        
+                if (x !== limitedX || y !== limitedY) {
+                    throw new InvalidDocumentPosition("Position exceeds boundaries");
+                }
+        
                 const existingPositions = await documentPositionDAO.getDocumentPosition(docId);
                 if (existingPositions.length > 0) {
                     const existingPosition = existingPositions[0];
-    
-                    // Check if the new position is the same as the existing one
-                    if (existingPosition.x === x && existingPosition.y === y) {
+        
+                    if (existingPosition.x === limitedX && existingPosition.y === limitedY) {
                         return {
                             lastId: docId,
-                            message: "Position is already up-to-date"
+                            message: "Position is already up-to-date",
                         };
                     }
-    
-                    // Update the existing position
-                    const updateQuery = "UPDATE document_position SET x = ?, y = ? WHERE docId = ?";
-                    await executeQuery(updateQuery, [x, y, docId]);
+        
+                    const updateQuery =
+                        "UPDATE document_position SET x = ?, y = ? WHERE docId = ?";
+                    await executeQuery(updateQuery, [limitedX, limitedY, docId]);
                 } else {
-                    // Insert a new position
-                    const insertQuery = "INSERT INTO document_position (docId, x, y) VALUES (?, ?, ?)";
-                    await executeQuery(insertQuery, [docId, x, y]);
+                    const insertQuery =
+                        "INSERT INTO document_position (docId, x, y) VALUES (?, ?, ?)";
+                    await executeQuery(insertQuery, [docId, limitedX, limitedY]);
                 }
-    
+        
                 return {
                     lastId: docId,
-                    message: "Document moved successfully in the diagram"
+                    message: "Document moved successfully in the diagram",
                 };
             } catch (error) {
                 if (error instanceof DocumentNotFound) {
@@ -68,7 +88,8 @@ export default function DocumentDAO(areaDAO) {
                     throw new Error("500 Internal Server Error");
                 }
             }
-    };
+        };
+
 
 
     this.getDocumentsWithPagination = ({ type, title, stakeholders, startDate, endDate, offset = 0 } = {}) => {

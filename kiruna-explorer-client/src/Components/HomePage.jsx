@@ -104,7 +104,7 @@ function HomePage(props) {
             </div>
 
             {/* Footer Section*/}
-            <div className="flex flex-col text-[#777777] text-center bg-[#181818] h-[10rem] py-5 px-3">
+            <div className="flex flex-col text-[#777777] text-center bg-[#181818] h-full py-5 px-3">
                 <p className="m-0 p-0">
                     Kiruna Explorer
                     <br/>

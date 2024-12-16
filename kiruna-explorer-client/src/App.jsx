@@ -69,8 +69,8 @@ function App() {
                             {/* <Route path="/" element={(isLoggedIn || isVisitorLoggedIn) ? (<Navigate replace to="/mapDocuments" />)  : <HomePage /> } /> */}
                             <Route path="/" element={<HomePage setIsHomePage={setIsHomePage} />} />
                             <Route path="/login" element={isLoggedIn ? (user.role === "urban_planner" ?
-                                <Navigate replace to="/mapDocuments" /> : user.role === "resident" ?
-                                    <Navigate replace to="/mapDocuments" /> : <LoginPage setNavShow={setNavShow} />) :
+                                <Navigate replace to="/" /> : user.role === "resident" ?
+                                    <Navigate replace to="/" /> : <LoginPage setNavShow={setNavShow} />) :
                                 <LoginPage setNavShow={setNavShow} />} />
 
                             <Route path="/documents" element={(isLoggedIn && user.role === "urban_planner") ?

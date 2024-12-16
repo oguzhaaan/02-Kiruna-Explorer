@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {useUserContext} from "../contexts/UserContext.jsx";
 import Alert from "./Alert.jsx";
@@ -39,6 +39,10 @@ function LoginPage(props) {
         props.setNavShow(true);
         navigate("/");
     };
+
+    useEffect(() => {
+        props.setNavShow(false);
+    }, []);
 
     return (
         <div

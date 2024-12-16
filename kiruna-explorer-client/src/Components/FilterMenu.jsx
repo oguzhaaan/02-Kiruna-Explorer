@@ -4,7 +4,7 @@ import customDropdownStyles from "./Utilities/CustomDropdownStyles";
 import { useTheme } from "../contexts/ThemeContext";
 import API from "../API/API.mjs";
 
-function FilterMenu({ filterValues, setFilterValues, homePage }) {
+function FilterMenu({ filterValues, setFilterValues, homePage, setCurrentFilteredDoc, setFilteredDocs, setNodeStates }) {
   const { isDarkMode } = useTheme();
   const [isFilterDateRange, setIsFilterDateRange] = useState(
     filterValues.startDate !== "" &&
@@ -58,6 +58,9 @@ function FilterMenu({ filterValues, setFilterValues, homePage }) {
     };
     setTempFilterValues(clearedValues);
     setFilterValues(clearedValues);
+    setCurrentFilteredDoc && setCurrentFilteredDoc(null)
+    setFilteredDocs && setFilteredDocs(null)
+    setFilteredDocs && setNodeStates({})
   };
 
   const handleApply = () => {

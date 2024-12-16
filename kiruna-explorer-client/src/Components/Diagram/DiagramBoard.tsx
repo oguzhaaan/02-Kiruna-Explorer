@@ -26,6 +26,10 @@ import {
 import { SingleDocumentMap } from "../SingleDocumentMap.jsx";
 import { useNodePosition } from "../../contexts/NodePositionContext.tsx";
 import ConnectionPopup from "./ConnectionPopup";
+import Alert from "../Alert.jsx";
+import FilterMenu from "../FilterMenu.jsx";
+import FilterLabels from "../FilterLabels.jsx";
+import { Message } from "../Map.jsx";
 
 type Node<Data = any> = {
     id: string;
@@ -66,6 +70,7 @@ const DiagramBoard = (props) => {
     const [yearsRange, setYearsRange] = useState<number[]>([])
     const [nodes, setNodes] = useNodesState<Node>([])
     const [extent, setExtent] = useState<[[number, number], [number, number]] | undefined>(undefined)
+    const [alertMessage, setAlertMessage] = useState("");
 
     const [nodeStates, setNodeStates] = useState<Record<number, string>>({});
     const [nodeisOpen, setNodeIsOpen] = useState<Record<string, boolean | string>>({});
@@ -75,7 +80,13 @@ const DiagramBoard = (props) => {
 
     const months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
     const [isLegendVisible, setIsLegendVisible] = useState(false);
+    const [editMode, setEditMode] = useState(false);
     const [allLinkVisible, setAllLinkVisible] = useState(false)
+    const [currentFilteredDoc, setCurrentFilteredDoc] = useState(null)
+    const [filteredDocs, setFilteredDocs] = useState<[] | null>(null)
+
+    const [alertMessageArray, setAlertMessageArray] = useState(['', '']);
+
 
     const connections = [
         { name: "Direct Consequence", color: "#E82929" },
@@ -114,10 +125,36 @@ const DiagramBoard = (props) => {
     const distanceBetweenYears = 800;
     const offsetTimeLine = -400
 
+    // Filter Documents
+    const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
+    const [filterValues, setFilterValues] = useState({
+        type: "",
+        stakeholders: [],
+        startDate: "",
+        endDate: "",
+    });
+
     useEffect(() => {
         const getAllDocument = async () => {
             try {
-                const docs = await API.getAllDocuments();
+                let docs = await API.getFilteredDocuments(filterValues);
+                setAlertMessage("")
+                setFilteredDocs(docs)
+
+
+                if (docs.length === 0) {
+                    setAlertMessage("No documents found")
+                    docs = await API.getAllDocuments()
+                    setCurrentFilteredDoc(null)
+                }
+                else {
+                    if (filteredDocs && (filterValues.type !== "" ||
+                        filterValues.stakeholders.length !== 0 ||
+                        filterValues.startDate !== "" ||
+                        filterValues.endDate !== "") && currentFilteredDoc === null) {
+                        setCurrentFilteredDoc(docs[0].id)
+                    }
+                }
 
                 const yearsDoc = docs.map((doc) => {
                     let date = doc.date.split("-")
@@ -190,7 +227,7 @@ const DiagramBoard = (props) => {
             }
         }
         getAllDocument()
-    }, [])
+    }, [filterValues])
 
     const onNodesChange: OnNodesChange = useCallback(
         (changes) => {
@@ -285,6 +322,8 @@ const DiagramBoard = (props) => {
         custom: CustomEdge,
     };
 
+    const [popupVisible, setPopupVisible] = useState(false);
+
     useEffect(() => {
         const getNodes = () => {
             const initialNodes: Node[] = [
@@ -296,27 +335,25 @@ const DiagramBoard = (props) => {
                     draggable: false,
                     selectable: false,
                     connectable: false,
-                    //clickable: false,
-                    style: { zIndex: -1, pointerEvents: 'none' }
+                    style: { zIndex: -1, pointerEvents: 'none' },
                 },
                 ...documents.flatMap((e: DiagramItem, index: number) => {
                     const nodetype = e.items.length === 1 ? 'singleNode' : 'groupNode';
 
-                    const docfrommap = e.items.findIndex(e => e.docid === props.showDiagramDoc)
+                    const doc_to_center = e.items.findIndex(e => e.docid === props.showDiagramDoc || e.docid === currentFilteredDoc)
 
                     let nodeSelected: string
-                    if (docfrommap === -1) {
+                    if (doc_to_center === -1) {
                         nodeSelected = nodeStates[index] || e.items[0].docid.toString();
                     }
                     else {
-                        nodeSelected = e.items[docfrommap].docid.toString();
+                        nodeSelected = e.items[doc_to_center].docid.toString();
                         setClickedNode(nodeSelected)
-                        setNodeSelected(index,nodeSelected)
+                        setNodeSelected(index, nodeSelected)
                         props.setShowDiagramDoc(null);
+                        setCurrentFilteredDoc(null)
                     }
-                    console.log("setted"+ nodeSelected)
 
-                    //console.log(`${index}:` + nodeisOpen[index])
                     if (zoom > 1.1 && nodetype === 'groupNode' && nodeisOpen[index] !== "closed") setNodeOpen(index)
 
                     if (nodeisOpen[index] === true && nodetype === 'groupNode') {
@@ -338,7 +375,8 @@ const DiagramBoard = (props) => {
                                         setDocumentId(id), setShowSingleDocument(true)
                                     },
                                     groupPosition: { x: e.x, y: e.y },
-                                    showDiagramDoc: props.showDiagramDoc
+                                    showDiagramDoc: props.showDiagramDoc,
+                                    currentFilteredDoc: currentFilteredDoc
                                 },
                                 draggable: item.month === undefined,
                             };
@@ -369,7 +407,8 @@ const DiagramBoard = (props) => {
                                 showSingleDocument: (id: string) => {
                                     setDocumentId(id), setShowSingleDocument(true)
                                 },
-                                showDiagramDoc: props.showDiagramDoc
+                                showDiagramDoc: props.showDiagramDoc,
+                                currentFilteredDoc: currentFilteredDoc
                             },
                             draggable: e.items[0].month === undefined && nodetype !== "groupNode",
                         };
@@ -379,9 +418,11 @@ const DiagramBoard = (props) => {
             setNodes(initialNodes)
         }
         if (zoom <= 1.1) setNodeOpen(-1)
-        console.log(zoom)
         getNodes()
-    }, [documents, clickedNode, zoom, nodeStates])
+    }, [documents, clickedNode, zoom, nodeStates, currentFilteredDoc, filterValues, editMode, popupVisible])
+
+    const [popupData, setPopupData] = useState<{ fromId: number, toId: number } | null>(null);
+
 
     useEffect(() => {
         const getLinks = async () => {
@@ -410,7 +451,14 @@ const DiagramBoard = (props) => {
                             type: "custom",
                             data: {
                                 typesOfConnections: dl[1],
-                                selectedEdge: `${docid}` === clickedNode || `${docid}` === hoveredNode || `${dl[0]}` === clickedNode || `${dl[0]}` === hoveredNode || allLinkVisible
+                                selectedEdge: `${docid}` === clickedNode || `${docid}` === hoveredNode || `${dl[0]}` === clickedNode || `${dl[0]}` === hoveredNode || allLinkVisible,
+                                editMode: editMode,
+                                setPopupVisible: (fromId: number, toId: number) => {
+                                    setPopupData({ fromId, toId });
+                                    setPopupVisible(true);  // Mostra il popup
+                                },
+                                source: `${docid}`,
+                                target: `${dl[0]}`
                             }
                         }
                     ));
@@ -432,13 +480,14 @@ const DiagramBoard = (props) => {
                     : [edge.target, edge.source];
 
                 // Verifica se una connessione simile esiste già
-                return self.findIndex((e) => (e.source === finalSource && e.target === finalTarget)) === index
+                return self.findIndex((e) => (e.source === finalSource && e.target === finalTarget)) === index;
             });
 
             setLinks(filteredEdges);
         };
+
         getLinks();
-    }, [nodes, nodeStates, hoveredNode, allLinkVisible]);
+    }, [nodes, nodeStates, hoveredNode, allLinkVisible, editMode, popupVisible]);
 
     //const filteredEdges = links.filter(edge => edge.source === clickedNode || edge.source === hoveredNode);
 
@@ -452,13 +501,55 @@ const DiagramBoard = (props) => {
         setExtent(bounds)
     }, [yearsRange])
 
+    const onConnect = (params) => {
+        if (params.source === params.target) {
+            setAlertMessageArray(["You can't connect a document to itself", "error"]);
+        }
+        else {
+            if (editMode) {
+                console.log(params);
+                setPopupData({
+                    fromId: parseInt(params.source, 10),
+                    toId: parseInt(params.target, 10),
+                });
+                //setEditMode(false);
+                setPopupVisible(true);
+            }
+            else {
+                setAlertMessageArray(["You need to be in edit mode to creat a new connection", "error"]);
+            }
+        }
+    }
+
     return (
         <div className={`${isDarkMode ? "dark" : "light"} w-screen h-screen`}>
-            {/*<ConnectionPopup
-                isEditing={false}
-                documentFromId={40} documentToId={43}
-                closePopup={() => {}}
-            ></ConnectionPopup>*/}
+            <Alert message={alertMessageArray[0]} type={alertMessageArray[1]}
+                clearMessage={() => setAlertMessageArray(['', ''])}></Alert>
+            {popupVisible && <ConnectionPopup
+                isEditing={editMode}
+                documentFromId={popupData ? popupData.fromId : 55} documentToId={popupData ? popupData.toId : 56}
+                closePopup={() => { setPopupVisible(false) }}
+                setAlertMessage={(message: [string, string]) => setAlertMessageArray(message)}
+            ></ConnectionPopup>}
+            {/* Filter Document Control*/}
+            {filteredDocs?.length !== 0 &&
+                (filterValues.type !== "" ||
+                    filterValues.stakeholders.length !== 0 ||
+                    filterValues.startDate !== "" ||
+                    filterValues.endDate !== "") &&
+                <FilterDocumentsControl currentFilteredDoc={currentFilteredDoc} setCurrentFilteredDoc={setCurrentFilteredDoc} filteredDocs={filteredDocs}></FilterDocumentsControl>}
+            {/* Alert message */}
+            {alertMessage && (<Message alertMessage={alertMessage} setAlertMessage={setAlertMessage}></Message>)}
+            {/* Filter Menu */}
+            {isFilterMenuOpen &&
+                <div className="z-10 top-36 right-20 flex justify-content-center align-content-center fixed ">
+                    <FilterMenu filterValues={filterValues} setFilterValues={setFilterValues} homePage={false} setCurrentFilteredDoc={setCurrentFilteredDoc} setFilteredDocs={setFilteredDocs} setNodeStates={setNodeStates} />
+                </div>
+            }
+            {/* Filter Labels */}
+            <div className="z-10 bottom-5 left-20 px-2 flex items-start fixed">
+                <FilterLabels filterValues={filterValues} setFilterValues={setFilterValues} setNodeStates={setNodeStates} />
+            </div>
             {ShowSingleDocument &&
                 <SingleDocumentMap setShowArea={props.setShowArea} municipalGeoJson={props.municipalGeoJson}
                     setDocumentId={setDocumentId} id={documentId}
@@ -473,6 +564,7 @@ const DiagramBoard = (props) => {
                 minZoom={0.4}
                 translateExtent={extent}
                 zoomOnDoubleClick={false}
+                onConnect={onConnect}
                 onNodesChange={onNodesChange}
                 onNodeClick={(event, node) => {
                     if (node.type === "closeNode") {
@@ -502,9 +594,9 @@ const DiagramBoard = (props) => {
                     setHoveredNode(node.id !== "0" ? node.id : null);
                 }}
                 onMoveEnd={(event, viewport) => {
-                    if(!props.showDiagramDoc){
-                    setZoom(viewport.zoom);
-                    setViewport(viewport);
+                    if (!props.showDiagramDoc && currentFilteredDoc === null) {
+                        setZoom(viewport.zoom);
+                        setViewport(viewport);
                     }
                 }}
                 onNodeDoubleClick={(event, node) => {
@@ -594,15 +686,17 @@ const DiagramBoard = (props) => {
             </div>
 
             {/* Legend */}
-            <button
-                title="legend"
-                onClick={() => setIsLegendVisible(!isLegendVisible)}
-                className="flex justify-content-center align-content-center fixed top-4 right-4 bg-white_text  dark:bg-[#323232] w-12 h-12 border-2 border-dark_node dark:border-white_text rounded-full shadow-lg hover:bg-gray-300 dark:hover:bg-[#696969] transition"
-            >
-                <i className="bi bi-list-task text-[1.8em] dark:text-white_text"></i>
-            </button>
+            {!editMode && (
+                <button
+                    title="legend"
+                    onClick={() => setIsLegendVisible(!isLegendVisible)}
+                    className="flex justify-content-center align-content-center fixed top-4 right-4 bg-white_text  dark:bg-[#323232] w-12 h-12 border-2 border-dark_node dark:border-white_text rounded-full shadow-lg hover:bg-gray-300 dark:hover:bg-[#696969] transition"
+                >
+                    <i className="bi bi-list-task text-[1.8em] dark:text-white_text"></i>
+                </button>
+            )}
 
-            {isLegendVisible && (
+            {!editMode && isLegendVisible && (
                 <div
                     className="z-10 fixed top-16 right-4 bg-white_text dark:bg-dark_node dark:text-white_text shadow-lg rounded-lg p-4 w-60">
                     <h3 className="text-lg font-semibold mb-2">Legend</h3>
@@ -619,34 +713,92 @@ const DiagramBoard = (props) => {
                             ></span>
                         </li>
                     ))}
-
-
                 </div>
             )}
 
             {/* Link button */}
+            {!editMode && (
+                <button
+                    title={allLinkVisible ? "Hide all connections" : "Color all connections"}
+                    onClick={() => {
+                        setAllLinkVisible(prev => !prev);
+                    }}
+                    className="flex justify-content-center align-content-center fixed top-20 right-4 bg-white_text  dark:bg-[#323232] w-12 h-12 border-2 border-dark_node dark:border-white_text rounded-full shadow-lg hover:bg-gray-300 dark:hover:bg-[#696969] transition"
+                >
+                    <i className={`bi bi-share${allLinkVisible ? "-fill" : ""} text-[1.8em] dark:text-white_text`}></i>
+                </button>
+            )}
+
+            {/* Filter button */}
+            {!editMode && (
+                <button
+                    title="filter"
+                    onClick={() => { setIsFilterMenuOpen(prev => !prev) }}
+                    className="flex justify-content-center align-content-center fixed top-36 right-4 bg-white_text  dark:bg-[#323232] w-12 h-12 border-2 border-dark_node dark:border-white_text rounded-full shadow-lg hover:bg-gray-300 dark:hover:bg-[#696969] transition"
+                >
+                    <i className="bi bi-filter text-[1.8em] dark:text-white_text"></i>
+                </button>
+            )}
+
+            {/* Edit button */}
             <button
-                title={allLinkVisible ? "Hide all connections" : "Color all connections"}
+                title={editMode ? "exit" : "edit mode"}
                 onClick={() => {
-                    setAllLinkVisible(prev => !prev)
+                    setEditMode(prev => !prev);
                 }}
-                className="flex justify-content-center align-content-center fixed top-20 right-4 bg-white_text  dark:bg-[#323232] w-12 h-12 border-2 border-dark_node dark:border-white_text rounded-full shadow-lg hover:bg-gray-300 dark:hover:bg-[#696969] transition"
+                className={`flex justify-content-center align-content-center fixed ${editMode ? "top-4" : "top-52"} right-4 bg-white_text  dark:bg-[#323232] w-12 h-12 border-2 border-dark_node dark:border-white_text rounded-full shadow-lg hover:bg-gray-300 dark:hover:bg-[#696969] transition`}
             >
-                <i className={`bi bi-share${allLinkVisible ? "-fill" : ""} text-[1.8em] dark:text-white_text`}></i>
+                <i className={`bi ${editMode ? "bi-x-lg" : "bi-pencil-square "} text-[1.7em] dark:text-white_text`}></i>
             </button>
-
-            {/*TODO add Filter here with modal*/}
-            <button
-                title="filter"
-                onClick={() => {/*Open modal*/ }}
-                className="flex justify-content-center align-content-center fixed top-36 right-4 bg-white_text  dark:bg-[#323232] w-12 h-12 border-2 border-dark_node dark:border-white_text rounded-full shadow-lg hover:bg-gray-300 dark:hover:bg-[#696969] transition"
-            >
-                <i className="bi bi-filter text-[1.8em] dark:text-white_text"></i>
-            </button>
-
 
         </div>
     );
 };
 
 export default DiagramBoard;
+
+function FilterDocumentsControl({
+    currentFilteredDoc,
+    setCurrentFilteredDoc,
+    filteredDocs
+}) {
+    const [currentCount, setCurrentCount] = useState(0)
+    useEffect(() => {
+        setCurrentCount(0);
+    }, [filteredDocs])
+    return (
+        <div className="fixed z-[1000] top-[40px] left-[50%] translate-x-[-50%] translate-y-[20%] flex flex-row items-center justify-between py-2 text-black_text dark:text-white_text bg-[#ffffff55] dark:bg-box_color rounded-lg">
+            <i
+                className={`ml-3 bi bi-arrow-left cursor-pointer text-3xl ${ currentCount === 0 ? "opacity-10 pointer-events-none" : "" }`}
+                onClick={() => {
+                    const prevdoc = currentCount - 1
+                    if (prevdoc >= 0) {
+                        setCurrentCount(prev => prev - 1)
+                        setCurrentFilteredDoc(filteredDocs[prevdoc].id)
+                    }
+                }}
+
+            />
+            <div className="text-xl">
+                <span className="bg-primary_color_light dark:bg-customBlue rounded-md px-2">
+                    {currentCount + 1}
+                </span>
+                <span className="mx-2 px-2">of</span>
+                <span className="px-2">{filteredDocs.length}</span>
+            </div>
+
+            
+            <i
+                className={`mr-3 bi bi-arrow-right cursor-pointer ${ currentCount+1 === filteredDocs.length ? "opacity-10 pointer-events-none" : "" } text-3xl`}
+                onClick={() => {
+                    const nextdoc = currentCount + 1
+                    if (nextdoc < filteredDocs.length) {
+                        setCurrentCount(prev => prev + 1)
+                        setCurrentFilteredDoc(filteredDocs[nextdoc].id)
+                    }
+                }}
+
+            />
+        </div>
+    );
+}

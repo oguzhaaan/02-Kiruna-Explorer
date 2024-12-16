@@ -16,7 +16,8 @@ interface SingleNodeProps extends NodeProps {
         pos:{x:number,y:number},
         zoom: number,
         showSingleDocument: (id:string) => void,
-        showDiagramDoc:number | null
+        showDiagramDoc:number | null,
+        currentFilteredDoc: number
     };
 }
 
@@ -33,7 +34,7 @@ function SingleNode({
 
     const {setCenter} = useReactFlow()
 
-    if (id === data.showDiagramDoc?.toString()){
+    if (id === data.showDiagramDoc?.toString() || id===`${data.currentFilteredDoc}`){
         setCenter(data.pos.x,data.pos.y, {zoom:1.2, duration:1000})
     }
     

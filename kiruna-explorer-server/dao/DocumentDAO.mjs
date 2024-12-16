@@ -36,8 +36,14 @@ export default function DocumentDAO(areaDAO) {
     
         // Filter by document title
         if (title) {
-            query += " AND document.title LIKE ?";
-            params.push(`%${title}%`);
+            // Normalizzare accapi nel database durante la query
+            query += `
+                AND (
+                    document.title LIKE ? 
+                    OR REPLACE(REPLACE(document.description, CHAR(13), ' '), CHAR(10), ' ') LIKE ?
+                )
+            `;
+            params.push(`%${title}%`, `%${title}%`);
         }
     
         // Filter by stakeholders if provided
@@ -132,8 +138,14 @@ export default function DocumentDAO(areaDAO) {
 
         // Filter by document title
         if (title) {
-            query += " AND document.title LIKE ?";
-            params.push(`%${title}%`);
+            // Normalizzare accapi nel database durante la query
+            query += `
+                AND (
+                    document.title LIKE ? 
+                    OR REPLACE(REPLACE(document.description, CHAR(13), ' '), CHAR(10), ' ') LIKE ?
+                )
+            `;
+            params.push(`%${title}%`, `%${title}%`);
         }
 
         // Filter by stakeholders if provided

@@ -5,8 +5,7 @@ import { DocumentNotFound } from "../models/Document.mjs";
 import { AreaNotFound } from "../models/Area.mjs";
 import { InvalidArea } from "../models/Area.mjs";
 import { InvalidDocumentPosition } from "../models/DocumentPosition.mjs";
-import { YScalePosition, getXDatePosition, getYPlanScale } from "../Components/Utilities/DiagramReferencePositions.js";
-
+import { YScalePosition, getXDatePosition, getYPlanScale } from "../Utilities/DiagramReferencePositions.js";
 
 export default function DocumentDAO(areaDAO) {
     const documentPositionDAO = new DocumentPositionDAO();
@@ -15,80 +14,88 @@ export default function DocumentDAO(areaDAO) {
         return new Promise((resolve, reject) => {
             db.run(query, params, function (err) {
                 if (err) return reject(err);
-                    resolve(this);
-                });
+                resolve(this);
             });
-        };
-    
-        this.upsertDocumentPosition = async ({ docId, x, y }) => {
-            try {
-                const document = await this.getDocumentById(docId);
-                if (!document) {
-                    throw new DocumentNotFound("Document not found");
-                }
-        
-                const { date, scale, planNumber } = document;
-        
-                const year = parseInt(date.split('-')[0], 10); // extract year from the date (assumes format "YYYY-MM-DD")
-                if (!year || year < 0) {
-                    throw new InvalidDocumentPosition("Invalid year or date for position boundaries");
-                }
-                // boundary calculations for X
-                const yearStartX = getXDatePosition(yearsRange[0], year, 1); // start of the year (month=1)
-                const yearEndX = getXDatePosition(yearsRange[0], year, 12); // end of the year (month=12)
-                const limitedX = Math.max(yearStartX, Math.min(x, yearEndX));
-        
-                // boundary calculations for Y
-                let minY, maxY;
-                if (scale.startsWith("plan")) {
-                    const planY = getYPlanScale(planNumber);
-                    minY = planY - 30;
-                    maxY = planY + 30;
-                } else {
-                    minY = YScalePosition[scale] - 100;
-                    maxY = YScalePosition[scale] + 100;
-                }
-                const limitedY = Math.max(minY, Math.min(y, maxY));
-        
-                if (x !== limitedX || y !== limitedY) {
-                    throw new InvalidDocumentPosition("Position exceeds boundaries");
-                }
-        
-                const existingPositions = await documentPositionDAO.getDocumentPosition(docId);
-                if (existingPositions.length > 0) {
-                    const existingPosition = existingPositions[0];
-        
-                    if (existingPosition.x === limitedX && existingPosition.y === limitedY) {
-                        return {
-                            lastId: docId,
-                            message: "Position is already up-to-date",
-                        };
-                    }
-        
-                    const updateQuery =
-                        "UPDATE document_position SET x = ?, y = ? WHERE docId = ?";
-                    await executeQuery(updateQuery, [limitedX, limitedY, docId]);
-                } else {
-                    const insertQuery =
-                        "INSERT INTO document_position (docId, x, y) VALUES (?, ?, ?)";
-                    await executeQuery(insertQuery, [docId, limitedX, limitedY]);
-                }
-        
-                return {
-                    lastId: docId,
-                    message: "Document moved successfully in the diagram",
-                };
-            } catch (error) {
-                if (error instanceof DocumentNotFound) {
-                    throw new Error("400 Not Found");
-                } else if (error instanceof InvalidDocumentPosition) {
-                    throw new Error("400 Bad Request");
-                } else {
-                    console.error("Unexpected error:", error);
-                    throw new Error("500 Internal Server Error");
-                }
+        });
+    };
+
+    this.upsertDocumentPosition = async ({ docId, x, y }) => {
+        try {
+            const allDocs = await this.getAllDocuments();
+
+            const years = allDocs.map(doc => parseInt(doc.date.split("-")[0], 10));
+            console.log(years);
+
+            const minYear = Math.min(...years);
+
+            const document = await this.getDocumentById(docId);
+            if (!document) {
+                throw new DocumentNotFound("Document not found");
             }
-        };
+
+            const { date, scale, planNumber } = document;
+
+            const year = parseInt(date.split('-')[0], 10); // extract year from the date (assumes format "YYYY-MM-DD")
+            if (!year || year < 0) {
+                throw new InvalidDocumentPosition("Invalid year or date for position boundaries");
+            }
+            // boundary calculations for X
+            const yearStartX = getXDatePosition(minYear-1, year, 1); // start of the year (month=1)
+            const yearEndX = getXDatePosition(minYear-1, year, 12); // end of the year (month=12)
+            const limitedX = Math.max(yearStartX, Math.min(x, yearEndX));
+
+            // boundary calculations for Y
+            let minY, maxY;
+            if (scale.startsWith("plan")) {
+                const planY = getYPlanScale(planNumber);
+                minY = planY - 30;
+                maxY = planY + 30;
+            } else {
+                minY = YScalePosition[scale] - 100;
+                maxY = YScalePosition[scale] + 100;
+            }
+         
+            const limitedY = Math.max(minY, Math.min(y, maxY));
+            console.log(limitedY);
+            if (x !== limitedX || y !== limitedY) {
+                throw new InvalidDocumentPosition("Position exceeds boundaries");
+            }
+
+            const existingPositions = await documentPositionDAO.getDocumentPosition(docId);
+            if (existingPositions.length > 0) {
+                const existingPosition = existingPositions[0];
+
+                if (existingPosition.x === limitedX && existingPosition.y === limitedY) {
+                    return {
+                        lastId: docId,
+                        message: "Position is already up-to-date",
+                    };
+                }
+
+                const updateQuery =
+                    "UPDATE document_position SET x = ?, y = ? WHERE docId = ?";
+                await executeQuery(updateQuery, [limitedX, limitedY, docId]);
+            } else {
+                const insertQuery =
+                    "INSERT INTO document_position (docId, x, y) VALUES (?, ?, ?)";
+                await executeQuery(insertQuery, [docId, limitedX, limitedY]);
+            }
+
+            return {
+                lastId: docId,
+                message: "Document moved successfully in the diagram",
+            };
+        } catch (error) {
+            if (error instanceof DocumentNotFound) {
+                throw new Error("400 Not Found");
+            } else if (error instanceof InvalidDocumentPosition) {
+                throw new Error("400 Bad Request");
+            } else {
+                console.error("Unexpected error:", error);
+                throw new Error("500 Internal Server Error");
+            }
+        }
+    };
 
 
 
@@ -111,21 +118,21 @@ export default function DocumentDAO(areaDAO) {
             WHERE 1=1
         `;
         const params = [];
-    
+
         // Apply filters if provided
-    
+
         // Filter by document type
         if (type) {
             query += " AND document_type.name = ?";
             params.push(type);
         }
-    
+
         // Filter by document title
         if (title) {
             query += " AND document.title LIKE ?";
             params.push(`%${title}%`);
         }
-    
+
         // Filter by stakeholders if provided
         if (stakeholders && stakeholders.length > 0) {
             query += `
@@ -138,25 +145,25 @@ export default function DocumentDAO(areaDAO) {
             `;
             params.push(...stakeholders);
         }
-    
+
         // Filter by start date if provided
         if (startDate) {
             query += " AND document.date >= ?";
             params.push(startDate);
         }
-    
+
         // Filter by end date if provided
         if (endDate) {
             query += " AND document.date <= ?";
             params.push(endDate);
         }
-    
+
         // Add pagination
         const limit = 5; // Fixed limit
         query += " LIMIT ? OFFSET ?";
         params.push(limit, offset);
-        
-    
+
+
         // Execute the query to fetch documents
         return new Promise((resolve, reject) => {
             db.all(query, params, async (err, rows) => {
@@ -168,14 +175,14 @@ export default function DocumentDAO(areaDAO) {
                         const documentsPromises = rows.map(async (row) => {
                             // Fetch stakeholders for the current document
                             const stakeholdersForDocument = await this.getStakeholdersForDocument(row.id);
-                            
+
                             // Convert DB row to Document with stakeholders
                             const document = this.convertDBRowToDocument(row, stakeholdersForDocument);
                             document.type = row.type_name;  // Add document type
-    
+
                             return document;
                         });
-    
+
                         // Wait for all documents with stakeholders to be resolved
                         const documents = await Promise.all(documentsPromises);
                         resolve(documents);
@@ -258,7 +265,7 @@ export default function DocumentDAO(areaDAO) {
                         const documentsPromises = rows.map(async (row) => {
                             // Fetch stakeholders for the current document
                             const stakeholdersForDocument = await this.getStakeholdersForDocument(row.id);
-                            
+
                             // Convert DB row to Document with stakeholders
                             const document = this.convertDBRowToDocument(row, stakeholdersForDocument);
                             document.type = row.type_name;  // Add document type
@@ -277,8 +284,8 @@ export default function DocumentDAO(areaDAO) {
         });
     };
 
-    
-    
+
+
 
     // Fetch stakeholders for a given document (kept as a separate function)
     this.getStakeholdersForDocument = (documentId) => {
@@ -288,7 +295,7 @@ export default function DocumentDAO(areaDAO) {
             JOIN document_stakeholder ON stakeholder.id = document_stakeholder.stakeholderId
             WHERE document_stakeholder.documentId = ?
         `;
-        
+
         return new Promise((resolve, reject) => {
             db.all(stakeholdersQuery, [documentId], (err, stakeholdersRows) => {
                 if (err) {
@@ -308,12 +315,12 @@ export default function DocumentDAO(areaDAO) {
             LEFT JOIN document_type ON document.typeId = document_type.id 
             WHERE document.id = ?
         `;
-    
+
         return new Promise((resolve, reject) => {
             db.get(query, [id], async (err, row) => {
                 if (err) return reject(err);
                 if (!row) return reject(new DocumentNotFound());
-    
+
                 try {
                     const stakeholders = await this.getStakeholdersForDocument(row.id);
                     const document = this.convertDBRowToDocument(row, stakeholders);
@@ -325,13 +332,13 @@ export default function DocumentDAO(areaDAO) {
             });
         });
     };
-    
+
 
     // Refactored function to filter documents by criteria
     this.getDocumentsByFilter = ({ type, title, stakeholders, startDate, endDate }) => {
         return this.getAllDocuments({ type, title, stakeholders, startDate, endDate });
     };
-    
+
 
 
 
@@ -399,7 +406,7 @@ export default function DocumentDAO(areaDAO) {
             const updatedAreaIdsInDoc = updatedDocuments.map(doc => doc.areaId);
 
             // If oldAreaId is no longer in use, delete it
-            if (!updatedAreaIdsInDoc.includes(oldAreaId) && oldAreaId!=1) {
+            if (!updatedAreaIdsInDoc.includes(oldAreaId) && oldAreaId != 1) {
                 await areaDAO.deleteAreaById(oldAreaId);
             }
 
@@ -413,16 +420,16 @@ export default function DocumentDAO(areaDAO) {
     this.addDocument = async (documentData) => {
         try {
             console.log("Received document data:", documentData);
-    
+
             // Convert input data into a format suitable for the database
             const dbDocument = this.convertDocumentForDB(documentData);
-    
+
             // SQL query to insert a new document
             const insertDocumentQuery = `
                 INSERT INTO document (title, date, typeId, language, description, scale, areaId, pages, planNumber)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
-    
+
             // Insert the document and retrieve the new document ID
             const documentId = await new Promise((resolve, reject) => {
                 db.run(insertDocumentQuery, [
@@ -443,15 +450,15 @@ export default function DocumentDAO(areaDAO) {
                     resolve(this.lastID); // Fetch document ID using proper context
                 });
             });
-    
+
             // Check if documentId is valid
             if (!documentId) {
                 throw new Error("Failed to retrieve the documentId after insertion");
             }
-    
+
             // Add stakeholders to the document
             await this.addStakeholders(documentId, dbDocument.stakeholders);
-    
+
             console.log(`Document with ID ${documentId} added successfully`);
             return documentId; // Return the newly created document ID
         } catch (error) {
@@ -459,18 +466,18 @@ export default function DocumentDAO(areaDAO) {
             throw error; // Re-throw the error to the caller
         }
     };
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
     this.convertDocumentForDB = (documentData) => {
         // Map stakeholders to their IDs. Handle both array of IDs and array of objects with 'value'
-        const stakeholders = documentData.stakeholders?.map(stakeholder => 
+        const stakeholders = documentData.stakeholders?.map(stakeholder =>
             typeof stakeholder === "object" ? stakeholder.value : stakeholder
         ) || [];
-    
+
         return {
             title: documentData.title,
             date: documentData.date,
@@ -484,15 +491,15 @@ export default function DocumentDAO(areaDAO) {
             stakeholders: stakeholders  // Array of stakeholder IDs
         };
     };
-    
-    
+
+
     // Method to associate the document with stakeholders
     this.addStakeholders = (documentId, stakeholderIds) => {
         // Return immediately if there are no stakeholders
         if (!stakeholderIds || stakeholderIds.length === 0) {
             return Promise.resolve();
         }
-    
+
         const values = stakeholderIds.map(stakeholderId => [documentId, stakeholderId]);
         const placeholders = values.map(() => "(?, ?)").join(", ");
         const query = `
@@ -500,11 +507,11 @@ export default function DocumentDAO(areaDAO) {
             VALUES ${placeholders}
         `;
         const flattenedValues = values.flat();
-    
+
         return new Promise((resolve, reject) => {
             db.run("BEGIN TRANSACTION", (err) => {
                 if (err) return reject(err); // Handle transaction start error
-    
+
                 db.run(query, flattenedValues, (err) => {
                     if (err) {
                         return db.run("ROLLBACK", (rollbackErr) => {
@@ -514,7 +521,7 @@ export default function DocumentDAO(areaDAO) {
                             reject(err); // Reject with the original error
                         });
                     }
-    
+
                     db.run("COMMIT", (commitErr) => {
                         if (commitErr) {
                             console.error("Commit failed:", commitErr.message);
@@ -526,10 +533,10 @@ export default function DocumentDAO(areaDAO) {
             });
         });
     };
-    
-    
-    
-    
+
+
+
+
 
     this.convertDBRowToDocument = (row, stakeholders) => {
         // Create a new Document instance with the fetched stakeholders

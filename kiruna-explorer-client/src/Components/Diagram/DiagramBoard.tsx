@@ -30,6 +30,7 @@ import Alert from "../Alert.jsx";
 import FilterMenu from "../FilterMenu.jsx";
 import FilterLabels from "../FilterLabels.jsx";
 import { Message } from "../Map.jsx";
+import { useUserContext } from "../../contexts/UserContext.jsx";
 
 type Node<Data = any> = {
     id: string;
@@ -86,6 +87,8 @@ const DiagramBoard = (props) => {
     const [filteredDocs, setFilteredDocs] = useState<[] | null>(null)
 
     const [alertMessageArray, setAlertMessageArray] = useState(['', '']);
+
+    const { user, isLoggedIn } = useUserContext();
 
 
     const connections = [
@@ -741,6 +744,8 @@ const DiagramBoard = (props) => {
             )}
 
             {/* Edit button */}
+            {
+                (isLoggedIn && user.role === "urban_planner") &&
             <button
                 title={editMode ? "exit" : "edit mode"}
                 onClick={() => {
@@ -750,6 +755,7 @@ const DiagramBoard = (props) => {
             >
                 <i className={`bi ${editMode ? "bi-x-lg" : "bi-pencil-square "} text-[1.7em] dark:text-white_text`}></i>
             </button>
+            }
 
         </div>
     );

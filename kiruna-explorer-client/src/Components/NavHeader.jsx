@@ -159,17 +159,28 @@ function NavHeader(props) {
                                         </div>
                                     </button>
                                 </div>
-                                <div className="offcanvas-content" onClick={() => { if(isLoggedIn) logOut(); props.setNavShow(true); navigate("/"); }}
-                                    onKeyUp={(e) => {
-                                        if (e.key === 'Enter') {
-                                            if(isLoggedIn) logOut();
-                                            props.setNavShow(true);
-                                            navigate("/");
-                                        }
-                                    }}>
-                                    <Row className="offcanvas-item w-100 p-1">
+                                <div className="offcanvas-content">
+                                    {
+                                        isLoggedIn &&
+                                        <Row className="offcanvas-item w-100 p-1" onClick={() => {props.setNavShow(true); navigate("/");}}>
+                                            <Col xs="auto">
+                                                <i className={`bi bi-house-fill fs-3 align-middle ${isDarkMode ? 'text-white_text' : 'text-black_text'}`}></i>
+                                            </Col>
+                                            <Col className={`${isDarkMode ? 'text-white_text' : 'text-black_text'} my-auto`}>
+                                                Back to Home
+                                            </Col>
+                                        </Row>
+                                    }
+                                    <Row className="offcanvas-item w-100 p-1" onClick={() => { if(isLoggedIn) logOut(); props.setNavShow(true); navigate("/"); }}
+                                         onKeyUp={(e) => {
+                                             if (e.key === 'Enter') {
+                                                 if(isLoggedIn) logOut();
+                                                 props.setNavShow(true);
+                                                 navigate("/");
+                                             }
+                                         }}>
                                         <Col xs="auto">
-                                            <i className={`bi bi-door-open-fill fs-3 align-middle ${isDarkMode ? 'text-white_text' : 'text-black_text'}`}></i>
+                                            <i className={`bi ${isLoggedIn? "bi-door-open-fill" : "bi-house-fill"} fs-3 align-middle ${isDarkMode ? 'text-white_text' : 'text-black_text'}`}></i>
                                         </Col>
                                         <Col className={`${isDarkMode ? 'text-white_text' : 'text-black_text'} my-auto`}>
                                             {isVisitorLoggedIn ? "Back to Home" : "Logout"}

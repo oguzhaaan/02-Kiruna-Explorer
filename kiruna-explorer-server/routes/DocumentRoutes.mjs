@@ -95,7 +95,6 @@ router.get(
 
 router.get(
     "/filter",
-    isLoggedIn,
     [
         query("type").optional().isString().withMessage("Type must be a string"),
         query("title").optional().isString().withMessage("title must be a string"),

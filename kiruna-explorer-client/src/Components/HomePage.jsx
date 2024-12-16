@@ -53,7 +53,7 @@ function HomePage(props) {
                     What would you like to view?
                 </div>
                 <div className="bottoni flex flex-row justify-content-between mt-10 w-full gap-10">
-                    <div className="w-1/3">
+                    <div className="w-1/3 hover:opacity-70 transition">
                         <div
                             onClick={() => { navigate("/diagram") }}
                             className="h-52 text-center items-center justify-center flex flex-col bg-[#2E2E2E] rounded-md cursor-pointer">
@@ -64,7 +64,7 @@ function HomePage(props) {
                             </div>
                         </div>
                     </div>
-                    <div className="w-1/3">
+                    <div className="w-1/3 hover:opacity-70 transition">
                         <div
                             onClick={() => { navigate("/mapDocuments") }}
                             className="h-52 text-center items-center justify-center flex flex-col bg-[#2E2E2E] rounded-md cursor-pointer">
@@ -76,7 +76,7 @@ function HomePage(props) {
                         </div>
                     </div>
                     {(isLoggedIn && user.role === "urban_planner") ?
-                    <div className="w-1/3">
+                    <div className="w-1/3 hover:opacity-70 transition">
                         <div
                             onClick={() => { navigate("/documents") }}
                             className="h-52 text-center items-center justify-center flex flex-col bg-[#2E2E2E] rounded-md cursor-pointer">
@@ -95,6 +95,8 @@ function HomePage(props) {
                             <div className="text-2xl">Documents</div>
                             <div className="text-sm m-2 text-[#989898]">
                                 Browse and filter documents. Add New.
+                            <br/>
+                                (Only for Urban Planners)
                             </div>
                         </div>
                     </div>}

@@ -9,8 +9,6 @@ import DocumentTypeDAO from "../dao/DocumentTypDAO.mjs";
 const DocumentTypeDao = new DocumentTypeDAO();
 
 router.get("/",
-    isLoggedIn,
-    authorizeRoles('admin', 'urban_planner'),
     async (req, res) => {
         try {
             const types = await DocumentTypeDao.getAllDocumentTypes();

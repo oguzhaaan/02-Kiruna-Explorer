@@ -76,8 +76,6 @@ router.post(
 );
 
 router.get("/",
-    isLoggedIn,
-    authorizeRoles('admin', 'urban_planner'),
     async (req, res) => {
         try {
             const stakeholders = await StakeholderDao.getStakeholders();

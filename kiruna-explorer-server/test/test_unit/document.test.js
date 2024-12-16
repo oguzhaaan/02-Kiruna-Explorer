@@ -873,7 +873,7 @@ describe("getDocumentStakeholders", () => {
         });
 
         const docId = 42;
-        const result = await documentDAO.getDpcumentStakeholders(docId);
+        const result = await documentDAO.getDocumentStakeholders(docId);
 
         expect(result).toEqual(mockRows);
         expect(mockDbAll).toHaveBeenCalledTimes(1);

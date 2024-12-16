@@ -12,6 +12,7 @@ export function cleanup() {
             db.run("DELETE FROM attachment")
             db.run("DELETE FROM document_link")
             db.run("DELETE FROM document_stakeholder")
+            db.run("DELETE FROM document_position")
             db.run("DELETE FROM document")
             db.run("DELETE FROM stakeholder")
             db.run("DELETE FROM document_type")

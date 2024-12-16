@@ -31,6 +31,11 @@ router.get("/:areaId", //isLoggedIn,
         .withMessage("Area ID must be a valid number")
     ], 
     async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     try {
         const params = req.params;
         const areaId = params.areaId
@@ -41,8 +46,10 @@ router.get("/:areaId", //isLoggedIn,
         if (err instanceof AreaNotFound) {
             res.status(404).json({ error: "Area not found" });
         }
-        console.error("Error fetching areas:", err);
-        res.status(500).json({ error: "Internal server error" });
+        else {
+            console.error("Error fetching areas:", err);
+            res.status(500).json({ error: "Internal server error" });
+        }
     }
 });
 

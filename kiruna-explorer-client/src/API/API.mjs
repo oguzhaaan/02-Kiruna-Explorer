@@ -642,8 +642,52 @@ const addStakeholdersToDocument = async (documentId, stakeholders) => {
   }
 };
 
+const getAllDiagramPositions = async () => {
+  try {
+    const response = await fetch(`${SERVER_URL}/api/documents/diagramPositions`, {
+      //  credentials: 'include',
+    });
 
+    if (!response.ok) {
+      const errMessage = await response.json();
+      throw new Error(`${errMessage.message || 'Error while getting diagram positions.'}`);
+    }
 
+    return await response.json()
+
+  } catch (error) {
+    console.error("Error in get all diagram positions:", error.message);
+    throw new Error(`${error.message || 'EError in get all diagram positions'}`);
+  }
+};
+
+const postNewDiagramPosition = async (position) => {
+
+  try {
+    const response = await fetch(`${SERVER_URL}/api/documents/${position.docId}/diagramPosition`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        docId: position.docId,
+        x: position.x,
+        y: position.y
+      }),
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const errMessage = await response.json();
+      throw new Error(`${errMessage.message || 'Error while adding a new position.'}`);
+    }
+
+    const result = await response.json();
+    return result.lastId;
+
+  } catch (error) {
+    console.error("Error in add position:", error.message);
+    throw new Error(`${error.message || 'Error while adding a new position.'}`);
+  }
+};
 
 const API = {
   logIn,
@@ -671,7 +715,9 @@ const API = {
   getAllStakeholders,
   addType,
   addNewStakeholders,
-  addStakeholdersToDocument
+  addStakeholdersToDocument,
+  getAllDiagramPositions,
+  postNewDiagramPosition
 };
 
 export default API;

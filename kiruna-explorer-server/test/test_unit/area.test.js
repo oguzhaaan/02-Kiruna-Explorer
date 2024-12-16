@@ -145,18 +145,18 @@ describe("Unit Test getAreaById", () => {
     // Caso di area non trovata
     test("should return null if no area with the given id is found", async () => {
         const areaId = 2;
-
+    
         // Mock di db.get per simulare un'area non trovata
         vi.spyOn(db, "get").mockImplementation((_sql, _params, callback) => {
             callback(null, null); // Simula il caso in cui nessuna riga sia trovata
         });
-
+    
         // Chiama la funzione da testare
-        const area = await areaDao.getAreaById(areaId);
-
-        // Verifica che il risultato sia null
-        expect(area).toBeNull();
-
+        await expect(areaDao.getAreaById(areaId)).rejects.toMatchObject({
+            customMessage: 'Area not found',
+            status: 404,
+        });
+    
         // Verifica che db.get sia stato chiamato correttamente
         expect(db.get).toHaveBeenCalledTimes(1);
         expect(db.get).toHaveBeenCalledWith(

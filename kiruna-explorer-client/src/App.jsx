@@ -55,7 +55,6 @@ function App() {
     return (
         <>
             <ThemeProvider>
-                <NodePositionProvider>
                     <Routes>
 
                         <Route element={
@@ -113,8 +112,8 @@ function App() {
                                     setConnectionsInForm={setConnections} /> : <Navigate replace to="/" />} />
 
                             <Route path="/diagram" element={(isLoggedIn || isVisitorLoggedIn) ?
-                                <DiagramBoard setShowArea={setShowArea} municipalGeoJson={municipalGeoJson}
-                                    showDiagramDoc={showDiagramDoc} setShowDiagramDoc={setShowDiagramDoc} /> :
+                                <NodePositionProvider><DiagramBoard setShowArea={setShowArea} municipalGeoJson={municipalGeoJson}
+                                    showDiagramDoc={showDiagramDoc} setShowDiagramDoc={setShowDiagramDoc} /></NodePositionProvider> :
                                 <Navigate replace to="/" />} />
 
                             <Route path="*" element={isLoggedIn ? (user.role === "urban_planner" ?
@@ -124,7 +123,6 @@ function App() {
 
                         </Route>
                     </Routes>
-                </NodePositionProvider>
             </ThemeProvider>
         </>
     );

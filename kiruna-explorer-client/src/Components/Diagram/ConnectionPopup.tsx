@@ -4,16 +4,16 @@ import {Charging} from '../Charging.jsx';
 import React, {useEffect, useState} from "react";
 import API from "../../API/API.mjs";
 import dayjs from "dayjs";
-import Alert from "../Alert.jsx";
 
 interface ConnectionPopupProps {
     isEditing: boolean;
     documentFromId: number;
     documentToId: number;
     closePopup: () => void;
+    setAlertMessage: (message: [string, string]) => void;
 }
 
-function ConnectionPopup({isEditing, documentFromId, documentToId, closePopup}: ConnectionPopupProps) {
+function ConnectionPopup({isEditing, documentFromId, documentToId, closePopup, setAlertMessage}: ConnectionPopupProps) {
 
     const {isDarkMode} = useTheme();
 
@@ -22,7 +22,6 @@ function ConnectionPopup({isEditing, documentFromId, documentToId, closePopup}: 
     const [documentTo, setDocumentTo] = useState<any>(null);
 
     const [showConfirm, setShowConfirm] = useState(false);
-    const [alertMessage, setAlertMessage] = useState(['', '']);
 
     const defaultConnectionOptions:any = [
         "direct_consequence",
@@ -78,7 +77,7 @@ function ConnectionPopup({isEditing, documentFromId, documentToId, closePopup}: 
             } else {
                 await API.addLinks(linkArray);
             }
-            setAlertMessage([isEditing? "Connection updated correctly!" : "Connection created correctly!!", "success"]);
+            setAlertMessage([isEditing? "Connection updated correctly!" : "Connection created correctly!", "success"]);
         } catch (error) {
             setAlertMessage(["Error while saving the connection, please retry!", "error"]);
         }
@@ -95,7 +94,7 @@ function ConnectionPopup({isEditing, documentFromId, documentToId, closePopup}: 
                     setDocumentFrom(documentFromTemp);
                     setLink((prevLinks:any) => ({
                         ...prevLinks,
-                        [documentToId]: linkedDocument.filter((link) => link.id === documentToId).map((link) => link.type)
+                        [documentToId]: linkedDocument.filter((link) => link.id == documentToId).map((link) => link.connection)
                     }));
                 } catch (error) {
                     console.error(error)
@@ -107,12 +106,10 @@ function ConnectionPopup({isEditing, documentFromId, documentToId, closePopup}: 
 
     return (
         <>
-            <Alert message={alertMessage[0]} type={alertMessage[1]}
-                   clearMessage={() => setAlertMessage(['', ''])}></Alert>
             <div className={`fixed z-[1000] inset-0 flex items-center justify-center ${isDarkMode ? "dark" : "light"}`}>
                 {!showConfirm ?
                     <div
-                        className="w-[50em] flex flex-col bg-background_color_light dark:bg-background_color shadow-md rounded-md text-black_text dark:text-white_text font-sans p-4 overflow-y-auto">
+                        className="w-[50em] h-[30em] flex flex-col bg-background_color_light dark:bg-background_color shadow-md rounded-md text-black_text dark:text-white_text font-sans p-4 overflow-y-auto">
                         <div className="w-full pb-3 flex flex-row justify-content-between">
                             <p className="m-0 p-0 font-normal text-xl">{isEditing ? "Edit Connection" : "Add Connection"}</p>
                             <button onClick={() => {
@@ -173,7 +170,7 @@ function ConnectionPopup({isEditing, documentFromId, documentToId, closePopup}: 
                                 Cancel
                             </button>
                             <button
-                                onClick={() => {
+                                onClick={ () => {
                                     handleConfirm();
                                     closePopup();
                                 }}

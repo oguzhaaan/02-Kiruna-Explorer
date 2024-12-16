@@ -242,7 +242,7 @@ const LinkDocuments = ({
     <div
       className={`${
         isDarkMode ? "dark" : "light"
-      } min-h-screen bg-background_color_light dark:bg-background_color px-3 text-black_text dark:text-white_text h-100`}
+      } min-h-screen bg-background_color_light dark:bg-background_color px-3 text-black_text dark:text-white_text h-100 overflow-auto`}
     >
       {/* Navigation Bar */}
       <div className="flex items-center justify-between w-full h-16">

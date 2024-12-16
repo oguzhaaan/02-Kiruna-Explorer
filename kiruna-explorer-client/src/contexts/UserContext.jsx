@@ -51,6 +51,7 @@ export const UserProvider = ({ children }) => {
     const user = await API.getUserInfo();
     setIsLoggedIn(true);
     setUser(user);
+    setisVisitorLoggedIn(false)
     }
     catch(error){
       console.log(error)

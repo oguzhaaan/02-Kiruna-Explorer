@@ -10,14 +10,13 @@ function HomePage(props) {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Code to run when the component mounts
+        // When the component mounts
         props.setIsHomePage(true);
-
         return () => {
-            // Code to run when the component unmounts
+            // When the component unmounts
             props.setIsHomePage(false);
         };
-    }, []); // Empty dependency array ensures this runs only on mount and unmount
+    }, []);
 
     return (
         <div className="h-full w-full min-h-screen flex flex-col justify-content-between bg-black">

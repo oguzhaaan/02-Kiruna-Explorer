@@ -32,7 +32,7 @@ function App() {
     const [showArea, setShowArea] = useState(null)
     const [showDiagramDoc, setShowDiagramDoc] = useState(null)
     const [isHomePage, setIsHomePage] = useState(false);
-    
+
 
     useEffect(() => {
         try {
@@ -60,7 +60,7 @@ function App() {
 
                         <Route element={
                             <>
-                                <NavHeader isLoggedIn={isLoggedIn} navShow={navShow} setNavShow={setNavShow} isHomePage={isHomePage}/>
+                                <NavHeader isLoggedIn={isLoggedIn} navShow={navShow} setNavShow={setNavShow} isHomePage={isHomePage} />
                                 <Container fluid className="m-0 p-0">
                                     <Outlet />
                                 </Container>
@@ -68,7 +68,7 @@ function App() {
                         }>
 
                             {/* <Route path="/" element={(isLoggedIn || isVisitorLoggedIn) ? (<Navigate replace to="/mapDocuments" />)  : <HomePage /> } /> */}
-                            <Route path="/" element={<HomePage setIsHomePage={setIsHomePage}/>} />
+                            <Route path="/" element={<HomePage setIsHomePage={setIsHomePage} />} />
                             <Route path="/login" element={isLoggedIn ? (user.role === "urban_planner" ?
                                 <Navigate replace to="/mapDocuments" /> : user.role === "resident" ?
                                     <Navigate replace to="/mapDocuments" /> : <LoginPage setNavShow={setNavShow} />) :
@@ -119,7 +119,7 @@ function App() {
 
                             <Route path="*" element={isLoggedIn ? (user.role === "urban_planner" ?
                                 <Navigate replace to="/mapDocuments" /> : user.role === "resident" ?
-                                    <Navigate replace to="/mapDocuments" /> : <HomePage />) : <HomePage />} />
+                                    <Navigate replace to="/mapDocuments" /> : <HomePage setIsHomePage={setIsHomePage} />) : <HomePage setIsHomePage={setIsHomePage} />} />
 
 
                         </Route>

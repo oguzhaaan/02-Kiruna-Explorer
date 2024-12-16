@@ -1,20 +1,20 @@
-import { Navbar, Nav, Container, Offcanvas, Row, Col } from "react-bootstrap";
-import { Link } from "react-router-dom";
-import { useUserContext } from "../contexts/UserContext";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useTheme } from "../contexts/ThemeContext.jsx";
-import { useEffect, useState } from "react";
+import {Navbar, Nav, Container, Offcanvas, Row, Col} from "react-bootstrap";
+import {Link} from "react-router-dom";
+import {useUserContext} from "../contexts/UserContext";
+import {useNavigate, useLocation} from "react-router-dom";
+import {useTheme} from "../contexts/ThemeContext.jsx";
+import {useEffect, useState} from "react";
 import API from "../API/API.mjs";
-import { getIcon } from "./Utilities/DocumentIcons.jsx";
+import {getIcon} from "./Utilities/DocumentIcons.jsx";
 
-function DocumentsNavMap({ clickedDocs, handleDocumentClick, setShowDiagramDoc }) {
-    const { isDarkMode, toggleTheme, isSatelliteMap } = useTheme();
+function DocumentsNavMap({clickedDocs, handleDocumentClick, setShowDiagramDoc}) {
+    const {isDarkMode, toggleTheme, isSatelliteMap} = useTheme();
     const [isCanvasOpen, setIsCanvasOpen] = useState(false);
 
     const navigate = useNavigate();
     const location = useLocation();
     const currentRoute = location.pathname;
-    const { user, isLoggedIn, logOut, handleVisitor, isVisitorLoggedIn } = useUserContext();
+    const {user, isLoggedIn, logOut, handleVisitor, isVisitorLoggedIn} = useUserContext();
 
     const [documents, setDocuments] = useState([]);
 
@@ -37,16 +37,17 @@ function DocumentsNavMap({ clickedDocs, handleDocumentClick, setShowDiagramDoc }
     }, [clickedDocs]);
 
 
-
     return (
         <div className={isDarkMode ? "dark" : "light"}>
             <Navbar expand="false" className={`fixed top-20 z-[1000]`}>
                 <Container fluid>
+                    <div
+                        className="bg-background_color_light dark:bg-background_color rounded-md h-12 w-12 absolute z-[-1] ml-1"></div>
                     <Navbar.Toggle
                         aria-controls="basic-navbar-nav"
                         onClick={() => setIsCanvasOpen(true)}
                     >
-                        <i className="bi bi-file-text fs-2 dark:text-white_text"></i>
+                        <i className="bi bi-file-text fs-2 text-black_text dark:text-white_text"></i>
                     </Navbar.Toggle>
                     <Navbar.Offcanvas
                         show={isCanvasOpen}
@@ -54,9 +55,9 @@ function DocumentsNavMap({ clickedDocs, handleDocumentClick, setShowDiagramDoc }
                         className={`drop-shadow-xl ${isDarkMode
                             ? "bg-background_color text-white_text"
                             : "bg-[#f6f6f6] text-black_text"
-                            } z-[20000] overflow-hidden`}
+                        } z-[20000] overflow-hidden`}
                         backdropClassName={`${isDarkMode ? "bg-black_text" : "bg-white_text"
-                            }`}
+                        }`}
                         backdrop={false}
                     >
                         <Offcanvas.Body className="flex flex-col justify-between">
@@ -83,13 +84,15 @@ function DocumentsNavMap({ clickedDocs, handleDocumentClick, setShowDiagramDoc }
                                             className={`w-full h-fit transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 cursor-pointer rounded-lg p-2 flex justify-start items-center ${isDarkMode
                                                 ? "bg-document_item_radient_blue"
                                                 : "bg-document_item_radient_blue_light"
-                                                }`}
+                                            }`}
                                         >
-                                            <div className="w-5/6 flex flex-row" onClick={() => handleDocumentClick(document)} title="deselect document area">
+                                            <div className="w-5/6 flex flex-row"
+                                                 onClick={() => handleDocumentClick(document)}
+                                                 title="deselect document area">
                                                 <img
                                                     src={getIcon(
-                                                        { type: document.type.toLowerCase() },
-                                                        { darkMode: isDarkMode }
+                                                        {type: document.type.toLowerCase()},
+                                                        {darkMode: isDarkMode}
                                                     )}
                                                     className="w-8 mr-2"
                                                     alt="type_icon"
@@ -102,7 +105,7 @@ function DocumentsNavMap({ clickedDocs, handleDocumentClick, setShowDiagramDoc }
                                                 className={`w-1/6 h-fit transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 cursor-pointer rounded-2xl p-2 flex justify-center ${isDarkMode
                                                     ? "bg-document_item_radient_blue"
                                                     : "bg-document_item_radient_blue_light"
-                                                    }`}
+                                                }`}
                                                 onClick={() => {
                                                     setShowDiagramDoc(document.id)
                                                     navigate("/diagram")
@@ -116,11 +119,11 @@ function DocumentsNavMap({ clickedDocs, handleDocumentClick, setShowDiagramDoc }
                                     ))}
                                 {/* Separator */}
                                 {Object.values(clickedDocs).some((value) => value) && (
-                                        <div
-                                            className={`separator w-full ${isDarkMode ? "bg-white_text" : "bg-black_text"
-                                                } opacity-20`}
-                                        />
-                                    )}
+                                    <div
+                                        className={`separator w-full ${isDarkMode ? "bg-white_text" : "bg-black_text"
+                                        } opacity-20`}
+                                    />
+                                )}
 
                                 {/* Available Documents */}
                                 {documents
@@ -136,13 +139,15 @@ function DocumentsNavMap({ clickedDocs, handleDocumentClick, setShowDiagramDoc }
                                             className={`flex-row w-full h-fit transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 cursor-pointer rounded-lg p-2 flex justify-start items-center ${isDarkMode
                                                 ? "bg-document_item_radient_grey"
                                                 : "bg-[#ffffffdd]"
-                                                }`}
+                                            }`}
                                         >
-                                            <div className="w-5/6 flex flex-row" onClick={() => handleDocumentClick(document)} title="highlight document area">
+                                            <div className="w-5/6 flex flex-row"
+                                                 onClick={() => handleDocumentClick(document)}
+                                                 title="highlight document area">
                                                 <img
                                                     src={getIcon(
-                                                        { type: document.type.toLowerCase() },
-                                                        { darkMode: isDarkMode }
+                                                        {type: document.type.toLowerCase()},
+                                                        {darkMode: isDarkMode}
                                                     )}
                                                     className="w-8 mr-2"
                                                     alt="type_icon"
@@ -155,7 +160,7 @@ function DocumentsNavMap({ clickedDocs, handleDocumentClick, setShowDiagramDoc }
                                                 className={`w-1/6 h-fit transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 cursor-pointer rounded-2xl p-2 flex justify-center ${isDarkMode
                                                     ? "bg-document_item_radient_grey"
                                                     : "bg-[#ffffffdd]"
-                                                    }`}
+                                                }`}
                                                 onClick={() => {
                                                     setShowDiagramDoc(document.id)
                                                     navigate("/diagram")
@@ -172,7 +177,7 @@ function DocumentsNavMap({ clickedDocs, handleDocumentClick, setShowDiagramDoc }
                             <div className="absolute top-0 right-0 mt-3 mr-4">
                                 <button
                                     className={`${isDarkMode ? "text-white_text" : "text-black_text"
-                                        } justify-items-center hover:opacity-50`}
+                                    } justify-items-center hover:opacity-50`}
                                     onClick={() => {
                                         setIsCanvasOpen(false);
                                     }}
@@ -190,4 +195,4 @@ function DocumentsNavMap({ clickedDocs, handleDocumentClick, setShowDiagramDoc }
     );
 }
 
-export { DocumentsNavMap };
+export {DocumentsNavMap};

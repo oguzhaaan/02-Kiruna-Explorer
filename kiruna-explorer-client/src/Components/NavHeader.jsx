@@ -70,12 +70,14 @@ function NavHeader(props) {
                 props.navShow && !props.isHomePage &&
                 <Navbar expand="false" className="fixed z-[1500]">
                     <Container fluid>
+                        <div className={`absolute mt-2.5 ml-[0.16rem] w-12 h-12 rounded-full ${(currentRoute === '/mapDocuments') ? !isDarkMode? "bg-[#f6f6f6]" : "bg-background_color" : ""}`}></div>
                         <Navbar.Toggle
-                            className={`navbar-toggler custom-toggler mt-2.5 
+                            className={`navbar-toggler custom-toggler mt-2.5 w-[3.3rem]
                                 ${(isDarkMode) ? 'text-white_text' : 'text-black_text'}`}
                             aria-controls="basic-navbar-nav"
                             onClick={() => setIsCanvasOpen(prev => !prev)}
                         >
+                            {/* <div className={`absolute h-10 w-10 bg-red-500 mt-2.5`}></div>*/}
                             <span className={`toggler-bar ${(isDarkMode /*|| (isSatelliteMap && !isCanvasOpen && (currentRoute.includes("map") || currentRoute.includes("mapDocuments")))*/) ? 'bg-white_text' : 'bg-black_text'}`}></span>
                             <span className={`toggler-bar middle-bar ${(isDarkMode /*|| (isSatelliteMap && !isCanvasOpen && (currentRoute.includes("map") || currentRoute.includes("mapDocuments")))*/) ? 'bg-white_text' : 'bg-black_text'}`}></span>
                             <span className={`toggler-bar ${(isDarkMode /*|| (isSatelliteMap &&  !isCanvasOpen && (currentRoute.includes("map") || currentRoute.includes("mapDocuments")))*/) ? 'bg-white_text' : 'bg-black_text'}`}></span>

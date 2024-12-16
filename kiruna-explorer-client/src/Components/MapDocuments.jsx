@@ -67,18 +67,20 @@ function GeoreferenceMapDoc(props) {
   const [OpenTooltipDocs, setOpenTooltipDocs] = useState(null)
   const [ShowSingleDocument, setShowSingleDocument] = useState(false);
   const [documentId, setDocumentId] = useState(null);
-  const [hoveredArea, setHoveredArea] = useState(null)
+  const [hoveredArea, setHoveredArea] = useState(null);
 
   const isSingleDoc = currentRoute.includes("documents") || currentRoute.includes("diagram")
 
   const [clickedDocs, setClickedDocs] = useState({});
   const [areaCounts, setAreaCounts] = useState({});
+  const [lastAreaClicked, setLastAreaClicked] = useState(null)
 
   const mapRef = useRef(null);
 
   const handleDocumentClick = (doc, highlighted=null) => {
     const { id, areaId } = doc;
     let wasClicked, newClickedState
+    setLastAreaClicked(areaId)
     if (highlighted===null){
     wasClicked = clickedDocs[id];
     newClickedState = !wasClicked;
@@ -224,7 +226,7 @@ function GeoreferenceMapDoc(props) {
               }}
             >
               {presentAreas.map((area, index) =>
-                <Markers key={index} setShowArea={props.setShowArea} showArea={props.showArea} isSingleDoc={isSingleDoc} currentDocAreaId={props.currentDocAreaId} center={center} area={area} boundaries={boundaries} setDocumentId={setDocumentId} setShowSingleDocument={setShowSingleDocument} handleMouseOver={handleMouseOver} handleMouseOut={handleMouseOut} OpenTooltipDocs={OpenTooltipDocs} setOpenTooltipDocs={setOpenTooltipDocs} clickedAreas={clickedAreas} setAreaSelected={setAreaSelected} hoveredArea={hoveredArea} handleDocumentClick={handleDocumentClick}></Markers>
+                <Markers key={index} setLastAreaClicked={setLastAreaClicked} lastAreaClicked={lastAreaClicked} setShowArea={props.setShowArea} showArea={props.showArea} isSingleDoc={isSingleDoc} currentDocAreaId={props.currentDocAreaId} center={center} area={area} boundaries={boundaries} setDocumentId={setDocumentId} setShowSingleDocument={setShowSingleDocument} handleMouseOver={handleMouseOver} handleMouseOut={handleMouseOut} OpenTooltipDocs={OpenTooltipDocs} setOpenTooltipDocs={setOpenTooltipDocs} clickedAreas={clickedAreas} setAreaSelected={setAreaSelected} hoveredArea={hoveredArea} handleDocumentClick={handleDocumentClick}></Markers>
               )
               }
             </MarkerClusterGroup>
@@ -270,7 +272,7 @@ function Message({ alertMessage, setAlertMessage }) {
   )
 }
 
-function Markers({ showArea, setShowArea, area, currentDocAreaId, center, boundaries, isSingleDoc, handleMouseOver, handleMouseOut, clickedAreas, setDocumentId, setShowSingleDocument, OpenTooltipDocs, setOpenTooltipDocs, setAreaSelected, hoveredArea, handleDocumentClick }) {
+function Markers({ setLastAreaClicked, lastAreaClicked,showArea, setShowArea, area, currentDocAreaId, center, boundaries, isSingleDoc, handleMouseOver, handleMouseOut, clickedAreas, setDocumentId, setShowSingleDocument, OpenTooltipDocs, setOpenTooltipDocs, setAreaSelected, hoveredArea, handleDocumentClick }) {
   const map = useMap()
   const [areaDoc, setAreaDoc] = useState([])
   const geometry = area.geoJson.geometry;
@@ -376,13 +378,18 @@ function Markers({ showArea, setShowArea, area, currentDocAreaId, center, bounda
       else {
         map.setView([geometry.coordinates[1], geometry.coordinates[0]], 14)
       }
+      if(lastAreaClicked){
+        setLastAreaClicked(null)
+      }
+      else{
       handleMouseOver(area.id, areaDoc.length)
       setAreaSelected(area.id)
       handleAreaDocuments(area.id)
       setShowArea(null)
+      }
     }
-    if (currentDocAreaId == area.id || showArea == area.id) setCurrentView()
-  }, [currentDocAreaId, showArea, areaDoc])
+    if (currentDocAreaId == area.id || showArea == area.id || lastAreaClicked == area.id) setCurrentView()
+  }, [currentDocAreaId, showArea, areaDoc, lastAreaClicked])
 
   return (
     geometry.type === 'Polygon' || geometry.type === "MultiPolygon" ? (

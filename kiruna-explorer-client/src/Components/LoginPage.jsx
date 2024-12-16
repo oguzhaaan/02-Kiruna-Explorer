@@ -53,7 +53,7 @@ function LoginPage(props) {
                    clearMessage={() => setAlertMessage(['', ''])}></Alert>
 
             {/* Dark overlay */}
-            <div className="absolute inset-0 bg-black opacity-50 overflow-y-auto w-full h-full">
+            <div className="fixed inset-0 bg-black opacity-50 overflow-y-auto w-full h-full">
             </div>
 
             <div className="w-100 h-100 grid place-items-center">

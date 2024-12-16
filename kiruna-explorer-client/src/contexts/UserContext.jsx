@@ -8,10 +8,11 @@ const UserContext = createContext();
 export const UserProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState({});
-  const [isVisitorLoggedIn, setisVisitorLoggedIn] = useState(() => {
-    const visitor = localStorage.getItem("isVisitorLoggedIn");
-    return visitor ? JSON.parse(visitor) : false; // Default to false
-  });
+  const [isVisitorLoggedIn, setisVisitorLoggedIn] = useState(true)
+  // const [isVisitorLoggedIn, setisVisitorLoggedIn] = useState(() => {
+  //   const visitor = localStorage.getItem("isVisitorLoggedIn");
+  //   return visitor ? JSON.parse(visitor) : false; // Default to false
+  // });
 
   // Update localStorage whenever the visitor changes
   useEffect(() => {
@@ -27,6 +28,7 @@ export const UserProvider = ({ children }) => {
       const user = await API.logIn(credentials);
       setIsLoggedIn(true);
       setUser(user);
+      setisVisitorLoggedIn(false);
     }
     catch (error) {
       throw new Error(error);
@@ -37,6 +39,7 @@ export const UserProvider = ({ children }) => {
     try {
       await API.logOut();
       setIsLoggedIn(false);
+      setisVisitorLoggedIn(true);
     }
     catch (error) {
       throw new Error(error);
@@ -48,6 +51,7 @@ export const UserProvider = ({ children }) => {
     const user = await API.getUserInfo();
     setIsLoggedIn(true);
     setUser(user);
+    setisVisitorLoggedIn(false)
     }
     catch(error){
       console.log(error)

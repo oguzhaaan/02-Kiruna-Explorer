@@ -53,7 +53,7 @@ function LoginPage(props) {
                    clearMessage={() => setAlertMessage(['', ''])}></Alert>
 
             {/* Dark overlay */}
-            <div className="absolute inset-0 bg-black opacity-50 overflow-y-auto w-full h-full">
+            <div className="fixed inset-0 bg-black opacity-50 overflow-y-auto w-full h-full">
             </div>
 
             <div className="w-100 h-100 grid place-items-center">
@@ -98,17 +98,17 @@ function LoginPage(props) {
                             />
                         </div>
 
-                        <div className="flex justify-between">
+                        <div className="flex flex-row space-x-2 min-w-48">
                             <button
                                 type="button"
                                 onClick={handleCancel}
-                                className="w-44 h-14 bg-customGray bg-opacity-80 shadow text-xl  font-normal text-black rounded-full hover:bg-gray-400"
+                                className="w-full h-14 bg-customGray bg-opacity-80 shadow text-xl font-normal text-black rounded-full hover:bg-gray-400"
                             >
                                 Go back
                             </button>
                             <button
                                 type="submit"
-                                className="w-44 h-14  bg-customBlue bg-opacity-100 shadow text-xl  font-normal rounded-full hover:bg-[#2e5c79]"
+                                className="w-full h-14  bg-customBlue bg-opacity-100 shadow text-xl  font-normal rounded-full hover:bg-[#2e5c79]"
                             >
                                 Enter
                             </button>

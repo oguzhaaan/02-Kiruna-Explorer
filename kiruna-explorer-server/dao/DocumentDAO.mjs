@@ -41,7 +41,7 @@ export default function DocumentDAO(areaDAO) {
             }
             // boundary calculations for X
             const yearStartX = getXDatePosition(minYear-1, year, 1); // start of the year (month=1)
-            const yearEndX = getXDatePosition(minYear-1, year, 12); // end of the year (month=12)
+            const yearEndX = getXDatePosition(minYear-1, year, 12) + 5; // end of the year (month=12)
             const limitedX = Math.max(yearStartX, Math.min(x, yearEndX));
 
             // boundary calculations for Y

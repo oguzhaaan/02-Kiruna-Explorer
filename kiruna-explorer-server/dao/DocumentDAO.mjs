@@ -55,12 +55,12 @@ export default function DocumentDAO(areaDAO) {
                 maxY = YScalePosition[scale] + 100;
             }
          
+            
             const limitedY = Math.max(minY, Math.min(y, maxY));
-            console.log(limitedY);
             if (x !== limitedX || y !== limitedY) {
                 throw new InvalidDocumentPosition("Position exceeds boundaries");
             }
-
+            
             const existingPositions = await documentPositionDAO.getDocumentPosition(docId);
             if (existingPositions.length > 0) {
                 const existingPosition = existingPositions[0];

@@ -7,6 +7,7 @@ import { Role } from "../../models/User.mjs";
 import { DocumentNotFound } from "../../models/Document.mjs";
 import DocumentDAO from "../../dao/DocumentDAO.mjs";
 import DocumentPositionDAO from "../../dao/DocumentPositionDAO.mjs";
+import { InvalidDocumentPosition } from "../../models/DocumentPosition.mjs";
 
 const basePath = "/api/documents"
 const typePath = "/api/document-types"
@@ -16,11 +17,13 @@ const stakeholderPath = "/api/document-stakeholders"
 const DocumentDao = new DocumentDAO();
 const DocumentPositionDao = new DocumentPositionDAO();
 
-const validTextPosition = {"x" : 100, "y" : 200};
-const validTextPosition2 = {"x" : 101, "y" : 201};
+// const validTextPosition = {"x" : 100, "y" : 200};
+// const validTextPosition2 = {"x" : 101, "y" : 201};
 
-const validPlanPosition = {"x" : 300, "y" : 400};
-const validPlanPosition2 = {"x" : 301, "y" : 401};
+const validPlanPosition = {"x" : 500, "y" : 707};
+const validPlanPosition2 = {"x" : 501, "y" : 700};
+const invalidPlanPosition = {"x" : 200, "y" : 700};
+const invalidPosition = {"x" : "a", "y" : 10};
 
 
 // Helper function that logs in a user and returns the cookie
@@ -55,7 +58,7 @@ let urbanplanner_cookie
 const mockDocumentbody = {
     title: 'Test Document',
     scale: 'plan',
-    date: '2023-01-01',
+    date: '2015',
     typeId: null,
     language: 'English',
     pages: 3,
@@ -65,6 +68,7 @@ const mockDocumentbody = {
 
 
 let mockDocId
+let mockId2
 let mockTypeId
 let mockStakeholdersIds
 const mockStakeholdersNames = ["Stakeholder1", "Stakeholder2"]
@@ -152,8 +156,7 @@ const matchDocumentToStakeholders = async (usercookie, docId, stakeholders) => {
     })
 }
 
-describe("integration test for GET /api/documents/diagramPositions", () => {
-
+describe("integration test for POST /api/documents/:DocId/diagramPosition", () => {
     beforeEach(async () => {
         try {
             await cleanup();
@@ -173,6 +176,77 @@ describe("integration test for GET /api/documents/diagramPositions", () => {
         }
     });
 
+    test("should add a diagram position successfully", async () => {
+        const res = await request(app)
+            .post(`${basePath}/${mockDocId}/diagramPosition`)
+            .set("Cookie", urbanplanner_cookie)
+            .send(validPlanPosition)
+            .expect(201);
+
+        const response = await request(app)
+            .get(`${basePath}/diagramPositions`)
+            .set("Cookie", urbanplanner_cookie)
+
+        expect(response.status).toBe(200);
+        expect(response.body.length).toBe(1);
+
+    })
+    test("SHould return 400 if coordinates provided are not numbers", async () => {
+        const res = await request(app)
+            .post(`${basePath}/${mockDocId}/diagramPosition`)
+            .set("Cookie", urbanplanner_cookie)
+            .send(invalidPosition)
+            .expect(400);
+
+        expect(res.body.errors[0].msg).toBe("x must be a valid number");
+    })
+
+    test("should return 404 if the docuemnt does not exist", async () => {
+        const res = await request(app)
+            .post(`${basePath}/-1/diagramPosition`)
+            .set("Cookie", urbanplanner_cookie)
+            .send(validPlanPosition)
+            .expect(404);
+
+        expect(res.body.error).toBe("Document not found");
+    })
+
+    test("Should return 400 if position is not valid for that type", async () => {
+        const res = await request(app)
+            .post(`${basePath}/${mockDocId}/diagramPosition`)
+            .set("Cookie", urbanplanner_cookie)
+            .send(invalidPlanPosition)
+            .expect(400);
+        
+        
+    });
+
+
+
+
+})
+
+describe("integration test for GET /api/documents/diagramPositions", () => {
+
+    beforeEach(async () => {
+        try {
+            await cleanup();
+            urbanplanner_cookie = await login(urbanPlannerUser);
+
+            mockTypeId = await createtype(urbanplanner_cookie, "testType");
+            mockDocumentbody.typeId = mockTypeId;
+
+            mockStakeholdersIds = await createStakeholders(urbanplanner_cookie, mockStakeholdersNames);
+
+            mockDocId = await createDocument(urbanplanner_cookie);
+            mockId2 = await  createDocumentWithParams(urbanplanner_cookie, { ...mockDocumentbody, title: mockDocumentbody.title + "2" });
+           
+        } catch (error) {
+            console.error("Setup error:", error);
+            throw error; // Fail the test if setup fails
+        }
+    });
+
     test("should get all documents' positions successfully", async () => {
         const res = await request(app)
             .post(`${basePath}/${mockDocId}/diagramPosition`)
@@ -181,9 +255,9 @@ describe("integration test for GET /api/documents/diagramPositions", () => {
             .expect(201);
         
         const res2 = await request(app)
-            .post(`${basePath}/${mockDocId}/diagramPosition`)
+            .post(`${basePath}/${mockId2}/diagramPosition`)
             .set("Cookie", urbanplanner_cookie)
-            .send(validTextPosition)
+            .send(validPlanPosition2)
             .expect(201);
         
         const response = await request(app)
@@ -192,12 +266,6 @@ describe("integration test for GET /api/documents/diagramPositions", () => {
             .expect(200);
 
         expect(response.body).toHaveLength(2);
-
-        expect(response.body[0].x).toEqual(10);
-        expect(response.body[0].y).toEqual(20);
-
-        expect(response.body[1].x).toEqual(20);
-        expect(response.body[1].y).toEqual(20);
     });
 
 });

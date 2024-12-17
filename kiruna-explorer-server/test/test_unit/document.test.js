@@ -541,7 +541,7 @@ describe("Unit Test getDocumentsByFilter", () => {
             FROM document
             LEFT JOIN document_type ON document.typeId = document_type.id
             WHERE 1=1
-            AND ( document.title LIKE ? OR REPLACE(REPLACE(document.description, CHAR(13), ' '), CHAR(10), ' ') LIKE ? )
+            AND document.title = ?
         `.replace(/\s+/g, " ").trim();
 
         const actualQuery = db.all.mock.calls[0][0].replace(/\s+/g, " ").trim();
@@ -550,7 +550,7 @@ describe("Unit Test getDocumentsByFilter", () => {
         expect(actualQuery).toEqual(expectedQuery);
 
         // Verify the parameters passed to the query
-        expect(db.all.mock.calls[0][1]).toEqual([`%${titleFilter}%`, `%${titleFilter}%`]);
+        expect(db.all.mock.calls[0][1]).toEqual([titleFilter]);
 
         // Assertions
         expect(documents).toHaveLength(1);

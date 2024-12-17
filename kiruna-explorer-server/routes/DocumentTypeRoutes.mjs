@@ -51,6 +51,8 @@ router.post("/", isLoggedIn, authorizeRoles('admin', 'urban_planner'), [
         if (existingTypes[nameLowerCase]) {
             // Se il tipo esiste già, restituisci il suo ID
             typeId = existingTypes[nameLowerCase];
+            return res.status(409).json({ error: "Type name already exists" });
+
         } else {
             // Se il tipo non esiste, crealo e ottieni il suo ID
             typeId = await DocumentTypeDao.addDocumentType(name);

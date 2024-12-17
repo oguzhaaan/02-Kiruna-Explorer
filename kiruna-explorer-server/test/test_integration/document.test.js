@@ -770,7 +770,7 @@ describe("Integration Test POST / - Create stakeholders", () => {
 
     test("should return 403 if the user is not authorized", async () => {
         const response = await request(app)
-            .get(stakeholderPath)
+            .post(stakeholderPath)
             .set("Cookie", resident_cookie)
             .expect('Content-Type', /json/)
             .expect(403);

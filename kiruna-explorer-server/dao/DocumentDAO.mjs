@@ -229,17 +229,11 @@ export default function DocumentDAO(areaDAO) {
             params.push(type);
         }
 
-        // Filter by document title
         if (title) {
-            // Normalizzare accapi nel database durante la query
-            query += `
-                AND (
-                    document.title LIKE ? 
-                    OR REPLACE(REPLACE(document.description, CHAR(13), ' '), CHAR(10), ' ') LIKE ?
-                )
-            `;
-            params.push(`%${title}%`, `%${title}%`);
-        }
+    query += ` AND document.title = ?`;
+    params.push(title);
+}
+
 
         // Filter by stakeholders if provided
         if (stakeholders && stakeholders.length > 0) {

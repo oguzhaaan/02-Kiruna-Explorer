@@ -160,6 +160,19 @@ Defines different types of documents in the system.
 
 ---
 
+### **"document_position" Table**
+
+Defines the modified position of certain documents in the diagram.
+
+| Column     | Type       | Description                                |
+| ---------- | ---------  | ------------------------------------------ |
+| **`id`**   | _Integer_  | **Primary Key** - Unique identifier for each position. |
+| **`docId`** | _Integer_ | Id of the document.                |
+| **`x`** | _Integer_     | The coordinate x.                |
+| **`y`** | _Integer_     | The coordinate y.                |
+
+---
+
 ### **Tables Relationships**
 
 1. **Users**:
@@ -734,6 +747,73 @@ Response body:
   }
 ]
 ```
+
+### **Get Diagram Positions**
+
+**GET** `api/documents/diagramPositions`
+
+Description : Get all the modified positions (x,y) of documents in the Diagram.
+
+Response :
+
+- `200 OK`
+- `500 Internal Server Error`
+
+Response body:
+
+```
+[
+  {
+    'id' : 1,
+    'docId' : 65,
+    'x' : 523,
+    'y' : 2140
+  },
+  {
+    'id' : 2,
+    'docId' : 325,
+    'x' : 235,
+    'y' : 1200
+  }
+]
+```
+
+### **Modify Document Position on the diagram**
+
+**POST** `api/documents/:DocId/diagramPosition`
+
+Description : Upsert the position of that document in the diagram
+
+Request body :
+
+- body with all fields:
+
+  ```
+  {
+    "docId": 235,
+    "x": 2351,
+    "y": 235,
+  }
+  ```
+
+  Response:
+- `201 Created`;
+- `400 Bad Request` (the document can't be moved because it doesn't respect its boundaries)
+- `400 Not Found` (the document with docId doesn't exist)
+- `500 Internal Server Error`
+
+Response body:
+
+```
+{
+  "lastId": 235,
+  "message": "Document moved successfully in the diagram"
+}
+```
+
+It overwrites the old position of the document if it exists or it adds a new one
+
+---
 
 ## Users Credentials
 

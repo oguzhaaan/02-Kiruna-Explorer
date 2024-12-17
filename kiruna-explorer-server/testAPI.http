@@ -56,3 +56,17 @@ GET http://localhost:3000/api/documents/1/files HTTP/1.1
 
 ###
 DELETE http://localhost:3000/api/documents/1/files/\/uploads\/1731860563551-753580087-dbscan_report HTTP/1.1
+
+
+###
+GET http://localhost:3000/api/documents/diagramPositions/ HTTP/1.1
+
+
+###
+POST http://localhost:3000/api/documents/1/diagramPosition/  HTTP/1.1
+Content-Type: application/json
+
+{
+  "x" : 0,
+  "y" : 200
+}

@@ -7,8 +7,8 @@ import path from "path";
 
 require('dotenv').config();
 
-const filePath = path.resolve(__dirname, '../file/test.pdf'); 
-const videoPath = path.resolve(__dirname, '../file/video.mp4'); 
+const filePath = path.resolve(__dirname, '../file/test.pdf');
+const videoPath = path.resolve(__dirname, '../file/video.mp4');
 const basePath = "/api/documents";
 const typePath = "/api/document-types";
 const stakeholderPath = "/api/document-stakeholders";
@@ -115,7 +115,7 @@ const mockDocumentbody = {
     description: 'A test document',
     stakeholders: [],
     planNumber: 10,
-    areaId : null
+    areaId: null
 };
 
 let urbanplanner_cookie;
@@ -127,28 +127,28 @@ describe("Integration Test POST /api/documents/:DocId/files - Attach a new file"
     beforeEach(async () => {
         await cleanup();
         urbanplanner_cookie = await login(urbanPlannerUser);
-       // resident_cookie = await login(residentUser);
-       console.log("Creating type...");
-       const mockTypeId = await createtype(urbanplanner_cookie, "testType");
-       console.log("Type created with ID:", mockTypeId);
-       
-       console.log("Creating stakeholders...");
-       const stakeholders = ["Stakeholder1", "Stakeholder2"];
-       const stakeholderIds = await createStakeholders(urbanplanner_cookie, stakeholders);
-       console.log("Stakeholders created with IDs:", stakeholderIds);
-       
-       console.log("Creating document...");
-       mockDocumentbody.typeId = mockTypeId;
-       console.log("Document body:", mockDocumentbody);
-    //   mockDocumentbody.stakeholders = stakeholders;
-       
-       try {
-           mockDocId = await createDocument(urbanplanner_cookie, mockDocumentbody);
-           console.log("Document created with ID:", mockDocId);
-       } catch (err) {
-           console.error("Error adding document:", err);
-       }
-       
+        // resident_cookie = await login(residentUser);
+        console.log("Creating type...");
+        const mockTypeId = await createtype(urbanplanner_cookie, "testType");
+        console.log("Type created with ID:", mockTypeId);
+
+        console.log("Creating stakeholders...");
+        const stakeholders = ["Stakeholder1", "Stakeholder2"];
+        const stakeholderIds = await createStakeholders(urbanplanner_cookie, stakeholders);
+        console.log("Stakeholders created with IDs:", stakeholderIds);
+
+        console.log("Creating document...");
+        mockDocumentbody.typeId = mockTypeId;
+        console.log("Document body:", mockDocumentbody);
+        //   mockDocumentbody.stakeholders = stakeholders;
+
+        try {
+            mockDocId = await createDocument(urbanplanner_cookie, mockDocumentbody);
+            console.log("Document created with ID:", mockDocId);
+        } catch (err) {
+            console.error("Error adding document:", err);
+        }
+
     });
 
     test("Should upload a file successfully", async () => {
@@ -187,7 +187,22 @@ describe("Integration Test POST /api/documents/:DocId/files - Attach a new file"
         expect(response.body.error).toBe("Invalid file type. Allowed types: attachment, original");
     });
 
-   
+    test("should return 400 if file size is not allowed", async () => {
+        const invalid_filePath = path.resolve(__dirname, '../file/file2.pdf');
+        
+        const response = await request(app)
+            .post(`${basePath}/${mockDocId}/files`)
+            .set("Cookie", urbanplanner_cookie)
+            .attach("file", invalid_filePath)
+            .field("fileType", "attachment")
+          //  .expect(400);
+
+            expect(response.body.error).toBe("File size exceeds the maximum limit of 20MB.");
+
+        
+    });
+
+
 });
 
 describe("Integration Test GET /api/documents/:DocId/files - Get all files", () => {
@@ -200,7 +215,7 @@ describe("Integration Test GET /api/documents/:DocId/files - Get all files", () 
 
         const stakeholders = ["Stakeholder1", "Stakeholder2"];
         const stakeholderIds = await createStakeholders(urbanplanner_cookie, stakeholders);
-      
+
 
         mockDocId = await createDocument(urbanplanner_cookie, mockDocumentbody);
     });
@@ -235,7 +250,7 @@ describe("Integration Test DELETE /api/documents/:DocId/files/:FileId - Delete a
 
         const stakeholders = ["Stakeholder1", "Stakeholder2"];
         const stakeholderIds = await createStakeholders(urbanplanner_cookie, stakeholders);
-      //  mockDocumentbody.stakeholders = stakeholders;
+        //  mockDocumentbody.stakeholders = stakeholders;
 
         mockDocId = await createDocument(urbanplanner_cookie, mockDocumentbody);
     });
@@ -268,3 +283,59 @@ describe("Integration Test DELETE /api/documents/:DocId/files/:FileId - Delete a
         expect(response.body.error).toBe('File not found');
     });
 });
+
+describe("Integration Test GET /api/documents/:DocId/files/downloads/:FileId - Get all files", () => {
+    beforeEach(async () => {
+        await cleanup();
+        urbanplanner_cookie = await login(urbanPlannerUser);
+
+        const mockTypeId = await createtype(urbanplanner_cookie, "testType");
+        mockDocumentbody.typeId = mockTypeId;
+
+        const stakeholders = ["Stakeholder1", "Stakeholder2"];
+        const stakeholderIds = await createStakeholders(urbanplanner_cookie, stakeholders);
+
+
+        mockDocId = await createDocument(urbanplanner_cookie, mockDocumentbody);
+    });
+
+    test("download file successfully", async () => {
+        const res = await request(app)
+            .post(`${basePath}/${mockDocId}/files`)
+            .set("Cookie", urbanplanner_cookie)
+            .attach('file', filePath)
+            .field('fileType', 'original');
+        console.log(res.body);
+
+        const response = await request(app)
+            .get(`${basePath}/${mockDocId}/files/download/${res.body.fileId}`)
+            .set("Cookie", urbanplanner_cookie)
+            .expect(200);
+
+        // Check that the response is a file
+        expect(response.headers['content-disposition']).toBe(`attachment; filename="${res.body.fileName}"`);
+
+
+        // Cleanup
+        const fileId = res.body.fileId;
+        await deleteFile(urbanplanner_cookie, mockDocId, fileId);
+    });
+
+    test("should return 400 if parameters (file id or doc id) aren't vlaid ids", async () => {
+        const response = await request(app)
+            .get(`${basePath}/a/files/download/b`)
+            .set("Cookie", urbanplanner_cookie)
+            .expect(400);
+    });
+
+    test("should return 404 if file doesn't exist", async () => {
+        const response = await request(app)
+            .get(`${basePath}/${mockDocId}/files/download/-1`)
+            .set("Cookie", urbanplanner_cookie)
+            .expect(404);
+        
+    });
+
+ 
+});
+

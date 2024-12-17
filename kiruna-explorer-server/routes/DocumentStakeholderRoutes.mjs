@@ -27,8 +27,12 @@ router.post(
         try {
             const array = req.body.stakeholders;
 
+            // Recupera tutti gli stakeholder esistenti dal database
             const stakeholders = await StakeholderDao.getStakeholders();
-            const existingNames = stakeholders.map(stakeholder => stakeholder.name.toLowerCase()); // Convert to lowercase
+            const existingStakeholders = stakeholders.reduce((acc, stakeholder) => {
+                acc[stakeholder.name.toLowerCase()] = stakeholder.id;
+                return acc;
+            }, {});
 
             let id = [];
             let errors = [];
@@ -36,19 +40,20 @@ router.post(
             for (const name of array) {
                 const lowerName = name.toLowerCase();
 
-                // Check if stakeholder already exists
-                if (existingNames.includes(lowerName)) {
-                    errors.push({ name, error: "Stakeholder already exists" });
-                    continue; // Skip to the next stakeholder
+                // Verifica se lo stakeholder esiste già
+                if (existingStakeholders[lowerName]) {
+                    // Aggiungi l'ID dell'esistente stakeholder all'array di ID
+                    id.push(existingStakeholders[lowerName]);
+                    continue; // Salta alla prossima iterazione
                 }
 
-                // Format the name
+                // Formatta il nome
                 const formattedName = lowerName.replace(/\b\w/g, match => match.toUpperCase());
 
                 try {
-                    // Add the new stakeholder
-                    const lastId = await StakeholderDao.addStakeholder(formattedName);
-                    id.push(lastId); // Add ID to the list
+                    // Aggiungi lo stakeholder nuovo e ottieni l'ID
+                    const newId = await StakeholderDao.addStakeholder(formattedName);
+                    id.push(newId); // Aggiungi l'ID all'array
                 } catch (err) {
                     errors.push({ name: formattedName, error: err.message });
                 }
@@ -71,8 +76,6 @@ router.post(
 );
 
 router.get("/",
-    isLoggedIn,
-    authorizeRoles('admin', 'urban_planner'),
     async (req, res) => {
         try {
             const stakeholders = await StakeholderDao.getStakeholders();

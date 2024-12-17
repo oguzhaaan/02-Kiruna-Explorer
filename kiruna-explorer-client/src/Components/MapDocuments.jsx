@@ -9,12 +9,14 @@ import { useNavigate, useLocation } from "react-router-dom";
 import API from "../API/API.mjs";
 import markerpin from "../assets/marker-pin.svg";
 import polygonpin from "../assets/polygon-pin.svg";
+import markerpinselected from "../assets/marker-pin-selected.svg"
 import municipalarea from "../assets/municipal-area.svg"
 import { useTheme } from "../contexts/ThemeContext.jsx";
 import { getIcon } from "./Utilities/DocumentIcons.jsx";
 import { formatString } from "./Utilities/StringUtils.js";
 import { SingleDocumentMap } from "./SingleDocumentMap.jsx";
 import { collect } from "@turf/turf";
+import { DocumentsNavMap } from "./DocumentsNavMap.jsx";
 
 function calculateCentroid(coordinates) {
   const polygon = L.polygon(coordinates.map(coord => [coord[1], coord[0]])); // Inverti [lng, lat] -> [lat, lng]
@@ -51,7 +53,6 @@ function GeoreferenceMapDoc(props) {
   const location = useLocation();
   const currentRoute = location.pathname;
 
-  const isSingleDoc = currentRoute.includes("documents")
   //define default  position to "center of Kiruna"
   const center = [68.20805, 20.593249999999998]
 
@@ -61,13 +62,72 @@ function GeoreferenceMapDoc(props) {
   );
 
   const [presentAreas, setPresentAreas] = useState(null);
-  const [clickedArea, setClickedArea] = useState(null);
+  const [clickedAreas, setClickedAreas] = useState({});
   const [alertMessage, setAlertMessage] = useState("");
   const [OpenTooltipDocs, setOpenTooltipDocs] = useState(null)
   const [ShowSingleDocument, setShowSingleDocument] = useState(false);
   const [documentId, setDocumentId] = useState(null);
+  const [hoveredArea, setHoveredArea] = useState(null);
+
+  const isSingleDoc = currentRoute.includes("documents") || currentRoute.includes("diagram")
+
+  const [clickedDocs, setClickedDocs] = useState({});
+  const [areaCounts, setAreaCounts] = useState({});
+  const [lastAreaClicked, setLastAreaClicked] = useState(null)
 
   const mapRef = useRef(null);
+
+  const handleDocumentClick = (doc, highlighted=null) => {
+    const { id, areaId } = doc;
+    let wasClicked, newClickedState
+    setLastAreaClicked(areaId)
+    if (highlighted===null){
+    wasClicked = clickedDocs[id];
+    newClickedState = !wasClicked;
+    }
+    else{
+      newClickedState = !highlighted
+    }
+    setClickedDocs((prev) => ({
+        ...prev,
+        [id]: newClickedState,
+    }));
+
+    if(!isSingleDoc)setHoveredArea(null)
+
+    setAreaCounts((prev) => {
+        const currentCount = prev[areaId] || 0;
+        const newCount = newClickedState ? currentCount + 1 : currentCount - 1;
+
+        // Toggle area if a 0 <-> 1 transition occurs
+        if (
+            (currentCount === 0 && newCount === 1) ||
+            (currentCount === 1 && newCount === 0)
+        ) {
+            setAreaSelected(areaId);
+        }
+
+        return {
+            ...prev,
+            [areaId]: Math.max(newCount, 0),
+        };
+    });
+};
+
+  const setAreaSelected = (areaId, hover = null) => {
+    let activate
+    if (!clickedAreas[areaId]) {
+      activate = true
+    }
+    else {
+      activate = false
+    }
+
+    setClickedAreas(prev => ({
+      ...prev,
+      [areaId]: activate,
+    }));
+  };
 
   {/* Hide navbar at start and take all present areas*/ }
   useEffect(() => {
@@ -83,28 +143,31 @@ function GeoreferenceMapDoc(props) {
   {/* Refresh to show modifications*/ }
   useEffect(() => {
     //refresh
-  }, [presentAreas, ShowSingleDocument, props.municipalGeoJson, props.showArea, isSatelliteMap, isDarkMode])
+  }, [presentAreas, ShowSingleDocument, props.municipalGeoJson, props.showArea, isSatelliteMap, isDarkMode, alertMessage, clickedAreas, clickedDocs])
 
   // Mouse over the area
   const handleMouseOver = (id, content) => {
-    if (id === 1) {
+    if (id === 1 && content !== 0) {
       setAlertMessage(`${content} documents in Municipal Area`)
     }
-    else {
+    else if (content !== 0) {
       setAlertMessage(`${content} documents in this spot`)
     }
-    setClickedArea(id)
+    else {
+      setAlertMessage("The document selected is in this spot")
+    }
+    setHoveredArea(id)
   };
   // Mouse out the area
-  const handleMouseOut = (e) => {
-    setClickedArea(null)
+  const handleMouseOut = (id) => {
+    setHoveredArea(null)
     setAlertMessage(``)
   };
 
   return (
     <>
       <div className={isDarkMode ? "dark" : "light"}>
-        {ShowSingleDocument && <SingleDocumentMap setDocumentId={setDocumentId} id={documentId} setShowSingleDocument={setShowSingleDocument}></SingleDocumentMap>}
+        {ShowSingleDocument && <SingleDocumentMap setShowArea={props.setShowArea} municipalGeoJson={props.municipalGeoJson} setDocumentId={setDocumentId} id={documentId} setShowSingleDocument={setShowSingleDocument}></SingleDocumentMap>}
         <MapContainer
           center={center}
           zoom={5} ref={mapRef}
@@ -121,6 +184,9 @@ function GeoreferenceMapDoc(props) {
             className={isSatelliteMap ? " " : `${isDarkMode ? "custom-tile-layer" : ""}`}
           />
           <SwitchMapButton toggleMap={toggleMap} isSatelliteMap={isSatelliteMap}></SwitchMapButton>
+
+          {!isSingleDoc && <DocumentsNavMap clickedDocs={clickedDocs} handleDocumentClick={handleDocumentClick} setShowDiagramDoc={props.setShowDiagramDoc}></DocumentsNavMap>}
+
           <ZoomControl position="topright" />
           {props.municipalGeoJson && <GeoJSON data={props.municipalGeoJson} pathOptions={{ color: `${isDarkMode ? "#CCCCCC" : "grey"}`, weight: 2, dashArray: "5, 5" }} />}
           {/* Visualize All present Areas*/}
@@ -160,7 +226,7 @@ function GeoreferenceMapDoc(props) {
               }}
             >
               {presentAreas.map((area, index) =>
-                <Markers key={index} setShowArea={props.setShowArea} showArea={props.showArea} isSingleDoc={isSingleDoc} currentDocAreaId={props.currentDocAreaId} center={center} area={area} boundaries={boundaries} setDocumentId={setDocumentId} setShowSingleDocument={setShowSingleDocument} handleMouseOver={handleMouseOver} handleMouseOut={handleMouseOut} OpenTooltipDocs={OpenTooltipDocs} setOpenTooltipDocs={setOpenTooltipDocs} clickedArea={clickedArea}></Markers>
+                <Markers key={index} setLastAreaClicked={setLastAreaClicked} lastAreaClicked={lastAreaClicked} setShowArea={props.setShowArea} showArea={props.showArea} isSingleDoc={isSingleDoc} currentDocAreaId={props.currentDocAreaId} center={center} area={area} boundaries={boundaries} setDocumentId={setDocumentId} setShowSingleDocument={setShowSingleDocument} handleMouseOver={handleMouseOver} handleMouseOut={handleMouseOut} OpenTooltipDocs={OpenTooltipDocs} setOpenTooltipDocs={setOpenTooltipDocs} clickedAreas={clickedAreas} setAreaSelected={setAreaSelected} hoveredArea={hoveredArea} handleDocumentClick={handleDocumentClick}></Markers>
               )
               }
             </MarkerClusterGroup>
@@ -206,7 +272,7 @@ function Message({ alertMessage, setAlertMessage }) {
   )
 }
 
-function Markers({ showArea, setShowArea, area, currentDocAreaId, center, boundaries, isSingleDoc, handleMouseOver, handleMouseOut, clickedArea, setDocumentId, setShowSingleDocument, OpenTooltipDocs, setOpenTooltipDocs }) {
+function Markers({ setLastAreaClicked, lastAreaClicked,showArea, setShowArea, area, currentDocAreaId, center, boundaries, isSingleDoc, handleMouseOver, handleMouseOut, clickedAreas, setDocumentId, setShowSingleDocument, OpenTooltipDocs, setOpenTooltipDocs, setAreaSelected, hoveredArea, handleDocumentClick }) {
   const map = useMap()
   const [areaDoc, setAreaDoc] = useState([])
   const geometry = area.geoJson.geometry;
@@ -224,6 +290,13 @@ function Markers({ showArea, setShowArea, area, currentDocAreaId, center, bounda
     shadowSize: [41, 41]
   });
 
+  const PointSelected = L.icon({
+    iconUrl: markerpinselected,
+    iconSize: [45, 55],
+    iconAnchor: [20, 50], // Imposta l'ancoraggio (es. al centro-inferiore dell'icona)
+    shadowSize: [41, 41]
+  });
+
   const GenericPolygon = L.icon({
     iconUrl: polygonpin,
     iconSize: [30, 41],
@@ -237,6 +310,18 @@ function Markers({ showArea, setShowArea, area, currentDocAreaId, center, bounda
     iconAnchor: [20, 40], // Imposta l'ancoraggio (es. al centro-inferiore dell'icona)
     shadowSize: [41, 41]
   });
+
+  const handleAreaDocuments = async (areaid) =>{
+    try{
+      const areadocs = await API.getDocumentsFromArea(areaid)
+      const highlighted = clickedAreas[areaid] 
+      for (let doc of areadocs){
+        handleDocumentClick(doc, highlighted)
+      }
+    }catch(err){
+      console.log(err)
+    }
+  } 
 
   useEffect(() => {
     const takeDocumentsArea = async () => {
@@ -293,11 +378,18 @@ function Markers({ showArea, setShowArea, area, currentDocAreaId, center, bounda
       else {
         map.setView([geometry.coordinates[1], geometry.coordinates[0]], 14)
       }
+      if(lastAreaClicked){
+        setLastAreaClicked(null)
+      }
+      else{
       handleMouseOver(area.id, areaDoc.length)
+      setAreaSelected(area.id)
+      handleAreaDocuments(area.id)
       setShowArea(null)
+      }
     }
-    if (currentDocAreaId == area.id || showArea == area.id) setCurrentView()
-  }, [currentDocAreaId, showArea, areaDoc])
+    if (currentDocAreaId == area.id || showArea == area.id || lastAreaClicked == area.id) setCurrentView()
+  }, [currentDocAreaId, showArea, areaDoc, lastAreaClicked])
 
   return (
     geometry.type === 'Polygon' || geometry.type === "MultiPolygon" ? (
@@ -314,10 +406,12 @@ function Markers({ showArea, setShowArea, area, currentDocAreaId, center, bounda
                 }
                 else {
                   map.fitBounds(area.id === 1 ? boundaries : calculateBounds(geometry.coordinates[0]))
+                  setAreaSelected(area.id)
+                  handleAreaDocuments(area.id)
                 }
               },
               mouseover: (e) => handleMouseOver(area.id, areaDoc.length),
-              mouseout: (e) => handleMouseOut(e),
+              mouseout: (e) => handleMouseOut(area.id),
             }}
           >
             {OpenTooltipDocs !== area.id && !isSingleDoc ? (
@@ -358,7 +452,7 @@ function Markers({ showArea, setShowArea, area, currentDocAreaId, center, bounda
             }
           </Marker>
 
-          {clickedArea === area.id && (
+          {(clickedAreas[area.id] || hoveredArea === area.id) && (
             area.id != 1 ?
               <Polygon
                 positions={geometry.coordinates[0].map(coord => [coord[1], coord[0]])} // Inverti le coordinate per Leaflet
@@ -378,7 +472,7 @@ function Markers({ showArea, setShowArea, area, currentDocAreaId, center, bounda
           <Marker
             key={area.id}
             position={[geometry.coordinates[1], geometry.coordinates[0]]} // Inverti lat/lng per Leaflet
-            icon={GenericPoints} // Puoi scegliere di usare un'icona personalizzata per i punti
+            icon={(clickedAreas[area.id] || hoveredArea === area.id) ? PointSelected : GenericPoints} // Puoi scegliere di usare un'icona personalizzata per i punti
             eventHandlers={{
               click: (e) => {
                 if (isSingleDoc) {
@@ -386,7 +480,9 @@ function Markers({ showArea, setShowArea, area, currentDocAreaId, center, bounda
                   navigate("/mapDocuments")
                 }
                 else {
-                  map.setView([geometry.coordinates[1], geometry.coordinates[0]], 14);
+                  map.setView([geometry.coordinates[1], geometry.coordinates[0]], 15);
+                  setAreaSelected(area.id)
+                  handleAreaDocuments(area.id)
                 }
               },
               mouseover: (e) => handleMouseOver(area.id, areaDoc.length),
@@ -460,8 +556,8 @@ function ListDocuments({ docs, setOpenTooltipDocs, setDocumentId, setShowSingleD
             <i className="bi bi-x-lg text-2xl"></i>
           </button>
         </div>
-        <div className="z-[0] relative mb-1">
-          <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-black_text">
+        <div className="z-[0] relative w-full mb-1">
+          <span className="absolute inset-y-0 flex items-center pl-3 text-black_text">
             <i className="bi bi-search"></i>
           </span>
           <input
@@ -469,7 +565,7 @@ function ListDocuments({ docs, setOpenTooltipDocs, setDocumentId, setShowSingleD
             placeholder="Search"
             input={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="outline outline-1 outline-customGray1 dark:outline-none bg-search_dark_color w-auto py-2 pl-10 pr-4 text-black_text rounded-[50px] placeholder-black_text"
+            className="outline outline-1 outline-customGray1 dark:outline-none bg-search_dark_color w-full py-2 pl-10 pr-4 text-black_text rounded-[50px] placeholder-black_text"
           />
         </div>
         {/* Lista di documenti */}

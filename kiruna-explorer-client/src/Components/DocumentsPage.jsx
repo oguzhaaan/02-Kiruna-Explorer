@@ -18,6 +18,11 @@ function DocumentsPage(props) {
   const [searchQuery, setSearchQuery] = useState(""); // User's input
   const [debouncedQuery, setDebouncedQuery] = useState(""); // Debounced query
   // --- Filter ---
+  // --- Filter ---
+  const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
+  const toggleFilterMenu = () => {
+    setIsFilterMenuOpen((prevState) => !prevState);
+  };
   const [filterValues, setFilterValues] = useState({
     type: "",
     stakeholders: [],
@@ -90,7 +95,7 @@ function DocumentsPage(props) {
 
   return (
     <div className={isDarkMode ? "dark" : "light"}>
-      <div className="bg-background_color_light dark:bg-background_color min-h-screen flex flex-col h-full">
+      <div className="bg-background_color_light dark:bg-background_color min-h-screen flex flex-col h-full overflow-hidden">
         <SingleDocument
           updateAreaId={props.updateAreaId}
           setUpdateAreaId={props.setUpdateAreaId}
@@ -123,6 +128,26 @@ function DocumentsPage(props) {
                 />
               </div>
             </div>
+            <div className="relative lg:hidden">
+              {/* Filter Button */}
+              <button
+                className="text-black_text dark:text-white_text text-2xl"
+                onClick={toggleFilterMenu}
+              >
+                <i className="bi bi-sort-down-alt"></i>
+              </button>
+
+              {/* Conditional Filter Menu */}
+              {isFilterMenuOpen && (
+                <div className="absolute top-full min-w-80 left-0 -ml-10 -mt-32 z-50 transform scale-50">
+                  <FilterMenu
+                    filterValues={filterValues}
+                    setFilterValues={setFilterValues}
+                    toggleFilterMenu={toggleFilterMenu}
+                  />
+                </div>
+              )}
+            </div>
 
             <div className="flex flex-row justify-content-end gap-3 align-items-center">
               {/* Add document Button */}
@@ -139,29 +164,29 @@ function DocumentsPage(props) {
           </div>
         </div>
         <div className="flex flex-row w-full h-[calc(100vh-4rem)]">
-          <div className="flex flex-col justify-content-between pb-3 mt-3 mx-7 w-1/4">
+          <div className="flex-col justify-content-between pb-3 mt-3 mx-7 w-1/4 overflow-auto hidden lg:block">
             {/* Filter Menu */}
             <FilterMenu
-                homePage={true}
+              homePage={true}
               filterValues={filterValues}
               setFilterValues={setFilterValues}
             />
             {/* Pagination Controls */}
-            <PaginationControls
+            {/* <PaginationControls
               previousPage={previousPage}
               currentPage={currentPage}
               totalNumberOfPages={totalNumberOfPages}
               nextPage={nextPage}
-            />
+            /> */}
           </div>
-          <div className="flex flex-col gap-3 w-3/4 overflow-y-scroll mr-7 pt-3 pb-5 px-3">
+          <div className="flex flex-col gap-3 w-full lg:w-3/4 overflow-y-scroll mr-7 pt-3 px-3">
             {/* Filter Labels */}
-            {/*<div className="w-full">
+            <div className="w-full lg:hidden">
               <FilterLabels
                 filterValues={filterValues}
                 setFilterValues={setFilterValues}
               />
-            </div>*/}
+            </div>
             {/* Documents List */}
             {documents.map((doc) => (
               <DocumentItem
@@ -174,6 +199,15 @@ function DocumentsPage(props) {
                 isDarkMode={isDarkMode}
               />
             ))}
+            <div className=" w-min self-center -mt-28">
+              {/* Pagination Controls */}
+              <PaginationControls
+                previousPage={previousPage}
+                currentPage={currentPage}
+                totalNumberOfPages={totalNumberOfPages}
+                nextPage={nextPage}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -216,7 +250,7 @@ function PaginationControls({
         className="ml-3 bi bi-arrow-left cursor-pointer text-3xl"
         onClick={previousPage}
         onKeyUp={(e) => {
-          if (e.key === 'Enter') {
+          if (e.key === "Enter") {
             previousPage();
           }
         }}
@@ -233,7 +267,7 @@ function PaginationControls({
         className="mr-3 bi bi-arrow-right cursor-pointer  text-3xl"
         onClick={nextPage}
         onKeyUp={(e) => {
-          if (e.key === 'Enter') {
+          if (e.key === "Enter") {
             nextPage();
           }
         }}

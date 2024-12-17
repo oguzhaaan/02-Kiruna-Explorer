@@ -17,16 +17,46 @@ function NavHeader(props) {
 
     return (
         <div className={`${isDarkMode ? 'dark' : 'light'}`}>
-            {(!isLoggedIn && !isVisitorLoggedIn) ?
-                props.navShow &&
+            {props.isHomePage && isLoggedIn &&
                 <Navbar expand="false" className="fixed z-[2000]">
                     <Container fluid className="text-center w-screen justify-end">
+                        
                         <Navbar.Brand className="text-white_text text-xl flex items-center justify-center mt-4 mr-10">
+                            <i className={`pr-2 bi bi-person-circle fs-2 align-middle text-white_text`}></i>
+                                {user.username}
+                        </Navbar.Brand>
+                        <Navbar.Brand className="text-white_text text-xl flex items-center justify-center mt-4 mr-10">
+                            <Link to="login" className="text-inherit no-underline hover:text-slate-300" onClick={() => logOut()}>
+                            <i className={` pr-2 bi bi-door-open-fill fs-3 align-middle text-white_text`}></i>
+                                Logout
+                            </Link>
+                        </Navbar.Brand>
+
+                    </Container>
+                </Navbar>
+            }
+            {props.isHomePage && !isLoggedIn &&
+                <Navbar expand="false" className="fixed z-[2000]">
+                <Container fluid className="text-center w-screen justify-end">
+                    <Navbar.Brand className="text-white_text text-xl flex items-center justify-center mt-4 mr-10">
+                        <Link to="login" className="text-inherit no-underline hover:text-slate-300" onClick={() => props.setNavShow(false)}>
+                            <i className="bi bi-person fs-2 align-middle mx-2"></i>
+                            Login
+                        </Link>
+                    </Navbar.Brand>
+                </Container>
+                </Navbar>
+            }
+            {(!isLoggedIn && !isVisitorLoggedIn) ?
+                props.navShow && !props.isHomePage &&
+                <Navbar expand="false" className="fixed z-[2000]">
+                    <Container fluid className="text-center w-screen justify-end">
+                        {/* <Navbar.Brand className="text-white_text text-xl flex items-center justify-center mt-4 mr-10">
                             <Link to="mapDocuments" className="text-inherit no-underline hover:text-slate-300" onClick={() => handleVisitor()}>
                                 <i className="bi bi-map fs-2 align-middle mx-2"></i>
                                 Enter as a visitor
                             </Link>
-                        </Navbar.Brand>
+                        </Navbar.Brand> */}
                         <Navbar.Brand className="text-white_text text-xl flex items-center justify-center mt-4 mr-10">
                             <Link to="login" className="text-inherit no-underline hover:text-slate-300" onClick={() => props.setNavShow(false)}>
                                 <i className="bi bi-person fs-2 align-middle mx-2"></i>
@@ -37,15 +67,17 @@ function NavHeader(props) {
                     </Container>
                 </Navbar>
                 :
-                props.navShow &&
-                <Navbar expand="false" className="fixed z-[20000]">
+                props.navShow && !props.isHomePage &&
+                <Navbar expand="false" className="fixed z-[1500]">
                     <Container fluid>
+                        <div className={`absolute mt-2.5 ml-[0.16rem] w-12 h-12 rounded-full ${(currentRoute === '/mapDocuments') ? !isDarkMode? "bg-[#f6f6f6]" : "bg-background_color" : ""}`}></div>
                         <Navbar.Toggle
-                            className={`navbar-toggler custom-toggler mt-2.5 
+                            className={`navbar-toggler custom-toggler mt-2.5 w-[3.3rem]
                                 ${(isDarkMode) ? 'text-white_text' : 'text-black_text'}`}
                             aria-controls="basic-navbar-nav"
                             onClick={() => setIsCanvasOpen(prev => !prev)}
                         >
+                            {/* <div className={`absolute h-10 w-10 bg-red-500 mt-2.5`}></div>*/}
                             <span className={`toggler-bar ${(isDarkMode /*|| (isSatelliteMap && !isCanvasOpen && (currentRoute.includes("map") || currentRoute.includes("mapDocuments")))*/) ? 'bg-white_text' : 'bg-black_text'}`}></span>
                             <span className={`toggler-bar middle-bar ${(isDarkMode /*|| (isSatelliteMap && !isCanvasOpen && (currentRoute.includes("map") || currentRoute.includes("mapDocuments")))*/) ? 'bg-white_text' : 'bg-black_text'}`}></span>
                             <span className={`toggler-bar ${(isDarkMode /*|| (isSatelliteMap &&  !isCanvasOpen && (currentRoute.includes("map") || currentRoute.includes("mapDocuments")))*/) ? 'bg-white_text' : 'bg-black_text'}`}></span>
@@ -127,16 +159,28 @@ function NavHeader(props) {
                                         </div>
                                     </button>
                                 </div>
-                                <div className="offcanvas-content" onClick={() => { (isVisitorLoggedIn) ? handleVisitor() : logOut(); props.setNavShow(true); }}
-                                    onKeyUp={(e) => {
-                                        if (e.key === 'Enter') {
-                                            (isVisitorLoggedIn) ? handleVisitor() : logOut(); 
-                                            props.setNavShow(true);
-                                        }
-                                    }}>
-                                    <Row className="offcanvas-item w-100 p-1">
+                                <div className="offcanvas-content">
+                                    {
+                                        isLoggedIn &&
+                                        <Row className="offcanvas-item w-100 p-1" onClick={() => {props.setNavShow(true); navigate("/");}}>
+                                            <Col xs="auto">
+                                                <i className={`bi bi-house-fill fs-3 align-middle ${isDarkMode ? 'text-white_text' : 'text-black_text'}`}></i>
+                                            </Col>
+                                            <Col className={`${isDarkMode ? 'text-white_text' : 'text-black_text'} my-auto`}>
+                                                Back to Home
+                                            </Col>
+                                        </Row>
+                                    }
+                                    <Row className="offcanvas-item w-100 p-1" onClick={() => { if(isLoggedIn) logOut(); props.setNavShow(true); navigate("/"); }}
+                                         onKeyUp={(e) => {
+                                             if (e.key === 'Enter') {
+                                                 if(isLoggedIn) logOut();
+                                                 props.setNavShow(true);
+                                                 navigate("/");
+                                             }
+                                         }}>
                                         <Col xs="auto">
-                                            <i className={`bi bi-door-open-fill fs-3 align-middle ${isDarkMode ? 'text-white_text' : 'text-black_text'}`}></i>
+                                            <i className={`bi ${isLoggedIn? "bi-door-open-fill" : "bi-house-fill"} fs-3 align-middle ${isDarkMode ? 'text-white_text' : 'text-black_text'}`}></i>
                                         </Col>
                                         <Col className={`${isDarkMode ? 'text-white_text' : 'text-black_text'} my-auto`}>
                                             {isVisitorLoggedIn ? "Back to Home" : "Logout"}

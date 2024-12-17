@@ -1,8 +1,8 @@
 function getStakeholderColor({stakeholder}) {
     switch (stakeholder) {
-        case "municipality":
+        case "kiruna kommun":
             return "bg-[#8F3C3C]";
-        case "citizens":
+        case "residents":
             return "bg-[#417C95]";
         case "lkab":
             return "bg-[#8C3C8F]";
@@ -10,6 +10,8 @@ function getStakeholderColor({stakeholder}) {
             return "bg-[#8F803C]";
         case "architecture firms":
             return "bg-[#598F3C]";
+        case "white arkitekter":
+            return "bg-[#68BA6F]";
         case "others":
             return "bg-[#3C8F4D]";
         default:

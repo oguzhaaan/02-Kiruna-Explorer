@@ -3,7 +3,7 @@ import whiteCloseIcon from "../assets/close-icon-white.svg";
 import blackCloseIcon from "../assets/close-icon-black.svg";
 import redCloseIcon from "../assets/close-icon-red.svg";
 
-function FilterLabels({ filterValues, setFilterValues }) {
+function FilterLabels({ filterValues, setFilterValues, setNodeStates }) {
   const { isDarkMode } = useTheme();
   const handleRemoveFilter = (key, value) => {
     setFilterValues((prevFilters) => {
@@ -18,6 +18,7 @@ function FilterLabels({ filterValues, setFilterValues }) {
       }
       return { ...prevFilters, [key]: "" };
     });
+    setNodeStates && setNodeStates({})
   };
   return (
     <div className="flex flex-row ml-0 justify-start text-black_text dark:text-white_text rounded-lg gap-2 pt-3">

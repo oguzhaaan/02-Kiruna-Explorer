@@ -1,15 +1,20 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Charging } from "./Charging.jsx";
 import { getIcon, getIconByExtension } from "./Utilities/DocumentIcons.jsx";
 import { getStakeholderColor } from "./Utilities/StakeholdersColors.jsx";
 import { getLanguageName } from "./Utilities/Languages.jsx";
 import API from "../API/API.mjs";
 import { useTheme } from "../contexts/ThemeContext.jsx";
+import { GeoreferenceMapDoc } from "./MapDocuments.jsx";
 
-function SingleDocumentMap({ setDocumentId, id, setShowSingleDocument }) {
+function SingleDocumentMap({setShowArea,municipalGeoJson,  setDocumentId, id, setShowSingleDocument }) {
 
     const { isDarkMode } = useTheme();
+
+    const location = useLocation();
+    const currentRoute = location.pathname;
+    const isMapDocument = currentRoute.includes("mapDocument")
 
     const [collapsedFileSections, setCollapsedFileSections] = useState({});
     const [collapsedSections, setCollapsedSections] = useState({});
@@ -146,7 +151,7 @@ function SingleDocumentMap({ setDocumentId, id, setShowSingleDocument }) {
                 <div className="w-100 flex flex-row justify-content-end">
                     <button onClick={() => {
                         setShowSingleDocument(false);
-                    }} className="text-black_text dark:text-white_text text-base right-4 hover:text-gray-600">
+                    }} className="text-black_text dark:text-white_text text-base right-4 hover:opacity-50 transition">
                         <i className="bi bi-x-lg text-2xl"></i>
                     </button>
                 </div>
@@ -214,6 +219,10 @@ function SingleDocumentMap({ setDocumentId, id, setShowSingleDocument }) {
 
                             {/* Description */}
                             <div className="font-normal text-base">{document.description}</div>
+                            {/* Map Georeference*/}
+                            {<div>
+                                {!isMapDocument && document.areaId && !isCharging && <GeoreferenceMapDoc setShowArea={setShowArea} municipalGeoJson={municipalGeoJson} currentDocAreaId={document.areaId}></GeoreferenceMapDoc>}
+                            </div>}
                         </div>
                     </div>
 

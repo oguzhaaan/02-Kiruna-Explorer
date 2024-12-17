@@ -1,8 +1,8 @@
-import { describe, test, expect, beforeEach } from "vitest";
+import {describe, test, expect, beforeEach} from "vitest";
 import request from "supertest";
-import { app } from "../../server.mjs";
-import { cleanup } from "../cleanup.js";
-import { Role } from "../../models/User.mjs";
+import {app} from "../../server.mjs";
+import {cleanup} from "../cleanup.js";
+import {Role} from "../../models/User.mjs";
 
 require('dotenv').config();
 
@@ -28,7 +28,12 @@ const login = async (userInfo) => {
 };
 
 // Utente di test
-const urbanPlannerUser = { id: 1, username: "Romeo", password: process.env.URBAN_PLANNER_PASSWORD, role: Role.URBAN_PLANNER };
+const urbanPlannerUser = {
+    id: 1,
+    username: "Romeo",
+    password: process.env.URBAN_PLANNER_PASSWORD,
+    role: Role.URBAN_PLANNER
+};
 
 // Variabile globale per il cookie
 let urbanplanner_cookie;
@@ -41,8 +46,8 @@ describe("Integration Test GET / - Fetch All Document Types", () => {
 
     test("should return all document types", async () => {
         // Step 1: Aggiungi i tipi di documento
-        const type1 = { name: "Type1" };
-        const type2 = { name: "Type2" };
+        const type1 = {name: "Type1"};
+        const type2 = {name: "Type2"};
 
         await request(app)
             .post(basePath)
@@ -89,7 +94,7 @@ describe("Integration Test POST / - Add Document Type", () => {
     });
 
     test("should add a new document type successfully", async () => {
-        const type = { name: "NewType" };
+        const type = {name: "NewType"};
 
         const response = await request(app)
             .post(basePath)
@@ -101,23 +106,25 @@ describe("Integration Test POST / - Add Document Type", () => {
         expect(response.body.message).toBe("Document type processed successfully");
     });
 
-    test("should return 409 if type name already exists", async () => {
-        const type = { name: "ExistingType" };
+    test("should return the typeId of the existing type if it already exists", async () => {
+        const type = {name: "ExistingType"};
 
         // Aggiungi il tipo di documento una prima volta
-        await request(app)
+        const first_response = await request(app)
             .post(basePath)
             .send(type)
             .set("Cookie", urbanplanner_cookie)
             .expect(201);
+
+        const typeId = first_response.body.typeId;
 
         // Riprova ad aggiungere lo stesso tipo di documento
         const response = await request(app)
             .post(basePath)
             .send(type)
             .set("Cookie", urbanplanner_cookie)
-            .expect(409);
+            .expect(201);
 
-        expect(response.body.error).toBe("Type name already exists");
+        expect(response.body.typeId).toBe(typeId);
     });
 });

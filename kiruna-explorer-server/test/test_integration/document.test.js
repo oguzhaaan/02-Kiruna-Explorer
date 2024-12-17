@@ -208,8 +208,6 @@ describe("Integration Test GET /:DocId - Get Document by ID", () => {
             .expect(404)
             .catch(err => err)
 
-        //console.log(result.text.error)
-
         expect(result.body.error.customMessage).toEqual("Document Not Found");
     });
 
@@ -404,7 +402,7 @@ describe("Integration Test GET /filter - Get Documents by Title", () => {
             .expect(201);
     });
 
-    test("should return documents that match the title filter", async () => {
+    test("should return documents that match the title/description filter", async () => {
         const titleFilter = 'Test Document';
         const result = await request(app)
             .get(`${basePath}/filter`)
@@ -419,7 +417,8 @@ describe("Integration Test GET /filter - Get Documents by Title", () => {
         }));
 
         expect(result.body).toEqual([
-            { id: expect.any(Number), areaId: null, stakeholders: stakeholders, ...mockDocumentbodyToGet }
+            { id: expect.any(Number), areaId: null, stakeholders: stakeholders, ...mockDocumentbodyToGet },
+            { id: expect.any(Number), areaId: null, stakeholders: [], ...mockDocumentbodyToGet, title: 'Another Document' }
         ]);
     });
 });
@@ -505,7 +504,6 @@ describe("Integration Test GET /filter - Get Documents by Start Date", () => {
             name: mockStakeholdersNames[index]
         }));
 
-        console.log(result.body)
         expect(result.body).toEqual([
             { id: mockDocId, areaId: null, stakeholders: stakeholders, ...mockDocumentbodyToGet }
         ]);
@@ -550,7 +548,6 @@ describe("Integration Test GET /filter - Get Documents by End Date", () => {
             name: mockStakeholdersNames[index]
         }));
 
-        console.log(result.body)
         expect(result.body).toEqual([
             { id: mockDocId, areaId: null, stakeholders: stakeholders, ...mockDocumentbodyToGet }
         ]);
@@ -743,7 +740,7 @@ describe("Integration Test GET /filter/pagination - Filter and Pagination", () =
     });
 });
 
-describe("Integration Test POST / - Create stakeholders", () => {
+describe("Integration Test GET / - Stakeholders", () => {
     beforeEach(async () => {
         await cleanup(); // Clean up the database before each test
         urbanplanner_cookie = await login(urbanPlannerUser);
@@ -768,13 +765,15 @@ describe("Integration Test POST / - Create stakeholders", () => {
             ]);
     });
 
-    test("should return 403 if the user is not authorized", async () => {
+    test("should return 200 even if the user is not logged-in", async () => {
         const response = await request(app)
             .get(stakeholderPath)
             .set("Cookie", resident_cookie)
             .expect('Content-Type', /json/)
-            .expect(403);
+            .expect(200);
 
-        expect(response.body.error).toBe("Forbidden");
+        expect(response.body).toEqual([]);
     });
+
+
 });

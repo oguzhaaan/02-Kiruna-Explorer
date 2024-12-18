@@ -173,16 +173,16 @@ const LinkDocuments = ({
           const linkObject =
             mode === "return"
               ? {
-                  selectedDocId: docId,
-                  connectionType,
-                  date: dayjs().format("YYYY-MM-DD"),
-                }
+                selectedDocId: docId,
+                connectionType,
+                date: dayjs().format("YYYY-MM-DD"),
+              }
               : {
-                  originalDocId,
-                  selectedDocId: docId,
-                  connectionType,
-                  date: dayjs().format("YYYY-MM-DD"),
-                };
+                originalDocId,
+                selectedDocId: docId,
+                connectionType,
+                date: dayjs().format("YYYY-MM-DD"),
+              };
           acc.push(linkObject);
         }
       });
@@ -240,9 +240,8 @@ const LinkDocuments = ({
 
   return (
     <div
-      className={`${
-        isDarkMode ? "dark" : "light"
-      } min-h-screen bg-background_color_light dark:bg-background_color px-3 text-black_text dark:text-white_text h-100 overflow-auto`}
+      className={`${isDarkMode ? "dark" : "light"
+        } min-h-screen bg-background_color_light dark:bg-background_color px-3 text-black_text dark:text-white_text h-100 overflow-auto`}
     >
       {/* Navigation Bar */}
       <div className="flex items-center justify-between w-full h-16">
@@ -378,6 +377,16 @@ const LinkDocuments = ({
   );
 };
 
+LinkDocuments.propTypes = {
+  originalDocId: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number,
+  ]).isRequired, // Deve essere una stringa e obbligatoria
+  mode: PropTypes.string.isRequired, // Deve essere una stringa e obbligatoria
+  setConnectionsInForm: PropTypes.func.isRequired, // Deve essere una funzione e obbligatoria
+  setOriginalDocId: PropTypes.func.isRequired, // Deve essere una funzione e obbligatoria
+};
+
 const DocumentItem = ({
   title,
   type,
@@ -396,21 +405,21 @@ const DocumentItem = ({
     >
       {/* Connection Section */}
       <div className="flex flex-col lg:w-3/12 md:w-[45%] sm:w-[45%]">
-        <label>Connections:</label>
+        <div>Connections:</div>
         {selectedOption.length > 0
           ? selectedOption.map((option, idx) => (
-              <div key={idx} className="flex items-center">
-                <span className="flex flex-row gap-2 rounded-lg px-3 py-1 bg-primary_color_light dark:bg-customPill text-black_text dark:text-white_text mr-2 mt-1">
-                  {formatString(option)}
-                  <button
-                    className="text-my_red"
-                    onClick={() => onConnectionChange(option)}
-                  >
-                    <i className="bi bi-x-circle"></i>
-                  </button>
-                </span>
-              </div>
-            ))
+            <div key={idx} className="flex items-center">
+              <span className="flex flex-row gap-2 rounded-lg px-3 py-1 bg-primary_color_light dark:bg-customPill text-black_text dark:text-white_text mr-2 mt-1">
+                {formatString(option)}
+                <button
+                  className="text-my_red"
+                  onClick={() => onConnectionChange(option)}
+                >
+                  <i className="bi bi-x-circle"></i>
+                </button>
+              </span>
+            </div>
+          ))
           : null}
         {connectionOptions && (
           <div className="mt-3 gap-2 align-items-center relative">
@@ -427,11 +436,18 @@ const DocumentItem = ({
               <div className="absolute top-full mt-2 bg-[#FFFFFF60] dark:bg-customGray3_30 backdrop-blur-xl text-text_white rounded-xl drop-shadow-2xl z-10">
                 {connectionOptions.map((option, idx) => (
                   <div
+                    role="button"
                     key={idx}
                     className={`px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl cursor-pointer`}
                     onClick={() => {
                       onConnectionChange(option);
                       setDropdownOpen(false);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        onConnectionChange(option);
+                        setDropdownOpen(false);
+                      }
                     }}
                   >
                     {formatString(option)}
@@ -489,6 +505,17 @@ const DocumentItem = ({
   );
 };
 
+DocumentItem.propTypes = {
+  title: PropTypes.string.isRequired, // Deve essere una stringa obbligatoria
+  type: PropTypes.string.isRequired,  // Deve essere una stringa obbligatoria
+  date: PropTypes.string.isRequired,  // Deve essere una stringa obbligatoria
+  stakeholders: PropTypes.array,      // Deve essere un array
+  connectionOptions: PropTypes.array, // Deve essere un array
+  selectedOption: PropTypes.array,    // Deve essere un array
+  onConnectionChange: PropTypes.func.isRequired, // Deve essere una funzione obbligatoria
+  isDarkMode: PropTypes.bool.isRequired,         // Deve essere un booleano obbligatorio
+};
+
 export const SelectedDocument = ({
   docId,
   title,
@@ -503,15 +530,9 @@ export const SelectedDocument = ({
 }) => {
   const filteredOptions = getFilteredOptions(docId);
 
-  const [actualOption, setActualOption] = useState("None");
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  useEffect(() => {
-    if (filteredOptions && filteredOptions.length > 0) {
-      setActualOption(filteredOptions[0]);
-    }
-  }, [filteredOptions]);
 
   return (
     <div
@@ -585,11 +606,12 @@ SelectedDocument.propTypes = {
   title: PropTypes.string.isRequired,
   type: PropTypes.string.isRequired,
   date: PropTypes.string,
-  stakeholders: PropTypes.arrayOf(PropTypes.string),
+  stakeholders: PropTypes.arrayOf(PropTypes.object),
   connectionOptions: PropTypes.arrayOf(PropTypes.string).isRequired,
   selectedOption: PropTypes.arrayOf(PropTypes.string),
   onConnectionChange: PropTypes.func.isRequired,
   getFilteredOptions: PropTypes.func.isRequired,
+  isDarkMode: PropTypes.bool.isRequired
 };
 
 // Modal component for confirmation

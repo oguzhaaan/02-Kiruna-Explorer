@@ -1,11 +1,11 @@
 import { useEffect } from "react";
-import {Row, Col, Container, Button} from "react-bootstrap";
 import { useUserContext } from "../contexts/UserContext";
 import { useNavigate } from "react-router-dom";
+import PropTypes from 'prop-types';
 
 function HomePage(props) {
 
-    const { user, isLoggedIn} = useUserContext();
+    const { user, isLoggedIn } = useUserContext();
 
     const navigate = useNavigate();
 
@@ -55,7 +55,11 @@ function HomePage(props) {
                 <div className="bottoni flex flex-row justify-content-between mt-10 w-full gap-10">
                     <div className="w-1/3 hover:opacity-70 transition">
                         <div
+                            role="button"
                             onClick={() => { navigate("/diagram") }}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') navigate("/diagram");
+                            }}
                             className="h-52 text-center items-center justify-center flex flex-col bg-[#2E2E2E] rounded-md cursor-pointer">
                             <i className="bi bi-diagram-3 text-6xl"></i>
                             <div className="text-2xl">Diagram</div>
@@ -66,7 +70,11 @@ function HomePage(props) {
                     </div>
                     <div className="w-1/3 hover:opacity-70 transition">
                         <div
+                            role="button"
                             onClick={() => { navigate("/mapDocuments") }}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') navigate("/mapDocuments");
+                            }}
                             className="h-52 text-center items-center justify-center flex flex-col bg-[#2E2E2E] rounded-md cursor-pointer">
                             <i className="bi bi-globe-europe-africa text-6xl"></i>
                             <div className="text-2xl">Map</div>
@@ -76,30 +84,34 @@ function HomePage(props) {
                         </div>
                     </div>
                     {(isLoggedIn && user.role === "urban_planner") ?
-                    <div className="w-1/3 hover:opacity-70 transition">
-                        <div
-                            onClick={() => { navigate("/documents") }}
-                            className="h-52 text-center items-center justify-center flex flex-col bg-[#2E2E2E] rounded-md cursor-pointer">
-                            <i className="bi bi-journals text-6xl"></i>
-                            <div className="text-2xl">Documents</div>
-                            <div className="text-sm m-2 text-[#989898]">
-                                Browse and filter documents. Add New.
+                        <div className="w-1/3 hover:opacity-70 transition">
+                            <div
+                                role="button"
+                                onClick={() => { navigate("/documents") }}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') navigate("/documents") ;
+                                }}
+                                className="h-52 text-center items-center justify-center flex flex-col bg-[#2E2E2E] rounded-md cursor-pointer">
+                                <i className="bi bi-journals text-6xl"></i>
+                                <div className="text-2xl">Documents</div>
+                                <div className="text-sm m-2 text-[#989898]">
+                                    Browse and filter documents. Add New.
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    : 
-                    <div className="w-1/3">
-                        <div
-                            className="h-52 text-center items-center justify-center flex flex-col bg-[#2E2E2E] opacity-50 rounded-md">
-                            <i className="bi bi-journals text-6xl"></i>
-                            <div className="text-2xl">Documents</div>
-                            <div className="text-sm m-2 text-[#989898]">
-                                Browse and filter documents. Add New.
-                            <br/>
-                                (Only for Urban Planners)
+                        :
+                        <div className="w-1/3">
+                            <div
+                                className="h-52 text-center items-center justify-center flex flex-col bg-[#2E2E2E] opacity-50 rounded-md">
+                                <i className="bi bi-journals text-6xl"></i>
+                                <div className="text-2xl">Documents</div>
+                                <div className="text-sm m-2 text-[#989898]">
+                                    Browse and filter documents. Add New.
+                                    <br />
+                                    (Only for Urban Planners)
+                                </div>
                             </div>
-                        </div>
-                    </div>}
+                        </div>}
                 </div>
             </div>
 
@@ -107,9 +119,9 @@ function HomePage(props) {
             <div className="flex flex-col text-[#777777] text-center bg-[#181818] h-full py-5 px-3">
                 <p className="m-0 p-0">
                     Kiruna Explorer
-                    <br/>
+                    <br />
                     © 2024 Group 02
-                    <br/>
+                    <br />
                     This application is licensed under the Creative Commons
                     Attribution-NonCommercial 4.0 International License. You are free
                     to share and adapt this work for non-commercial purposes, provided
@@ -122,4 +134,9 @@ function HomePage(props) {
     );
 }
 
-export {HomePage};
+export { HomePage };
+
+HomePage.propTypes = {
+    setIsHomePage: PropTypes.func.isRequired,
+
+}

@@ -4,11 +4,11 @@ import { getIcon } from "../Utilities/DocumentIcons.jsx";
 import { useTheme } from "../../contexts/ThemeContext.jsx";
 // @ts-ignore
 
-import GenericDocumentIcon from "../../assets/generic-document.svg"
-import switchIcon from "../../assets/switch.svg"
+import GenericDocumentIcon from "../../assets/generic-document.svg";
+import switchIcon from "../../assets/switch.svg";
 
-import { useEffect, useState } from "react";
-import React from 'react';
+
+import React, { useState } from 'react';
 import { Item } from './DiagramBoard.js';
 
 interface GroupNodeProps extends NodeProps {
@@ -17,11 +17,11 @@ interface GroupNodeProps extends NodeProps {
         distanceBetweenYears: number;
         clickedNode: string | null;
         group: Item[],
-        pos:{x:number,y:number},
+        pos: { x: number, y: number },
         zoom: number;
         setNodeSelected: (id: number) => void
-        showSingleDocument: (id:string) => void
-        showDiagramDoc:number | null;
+        showSingleDocument: (id: string) => void
+        showDiagramDoc: number | null;
         currentFilteredDoc: number
     };
 }
@@ -39,17 +39,18 @@ function GroupNode({
     const [isDropDownOpen, setIsDropDownOpen] = useState(false);
 
     let zoom = data.zoom <= 0.9 ? 0.9 : data.zoom >= 2 ? 2 : data.zoom
-    zoom = isClicked || isHovered? zoom /1.2 : zoom
+    zoom = isClicked || isHovered ? zoom / 1.2 : zoom
 
-    const {setCenter} = useReactFlow()
+    const { setCenter } = useReactFlow()
 
-    if (id === data.showDiagramDoc?.toString() || id===`${data.currentFilteredDoc}`){
-        setCenter(data.pos.x,data.pos.y, {zoom:1.2, duration:1000})
+    if (id === data.showDiagramDoc?.toString() || id === `${data.currentFilteredDoc}`) {
+        setCenter(data.pos.x, data.pos.y, { zoom: 1.2, duration: 1000 })
     }
 
     return (
         <>
             <div className={` ${isClicked ? "" : "opacity-35"}`}
+                role="button"
                 style={{
                     width: `${64 / zoom}px`,
                     height: `${64 / zoom}px`,
@@ -59,10 +60,13 @@ function GroupNode({
                 title={`Title: ${selectedDocument.title} \nType: ${selectedDocument.type}`}
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
-                onClick={()=>{
-                    setCenter(data.pos.x,data.pos.y, {zoom:1.2, duration:1000})
+                onClick={() => {
+                    setCenter(data.pos.x, data.pos.y, { zoom: 1.2, duration: 1000 })
                 }}
-                >
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {setCenter(data.pos.x, data.pos.y, { zoom: 1.2, duration: 1000 });}
+                }}
+            >
                 <div
                     className={`flex flex-row w-100 h-100 justify-content-center align-content-center text-black_text dark:text-white_text rounded-full bg-light_node dark:bg-dark_node`}
                 >
@@ -99,6 +103,7 @@ function GroupNode({
             {/* Open Document */}
             <div
                 className={`fixed text-black_text dark:text-white_text rounded-full z-[1] bg-primary_color_light dark:bg-primary_color_dark hover:shadow-lg hover:shadow-primary_color_light/70 dark:hover:shadow-primary_color_dark/70 transition`}
+                role="button"
                 style={{
                     width: `${20 / zoom}px`,
                     height: `${20 / zoom}px`,
@@ -110,7 +115,7 @@ function GroupNode({
                 }}
                 onKeyUp={(e) => {
                     if (e.key === 'Enter') {
-                        data.showSingleDocument(`${selectedDocument.docid}`)  
+                        data.showSingleDocument(`${selectedDocument.docid}`)
                     }
                 }}>
                 <img src={GenericDocumentIcon} alt="switch icon" className="p-1" />
@@ -118,6 +123,7 @@ function GroupNode({
             {
                 !isDropDownOpen ?
                     <div
+                        role="button"
                         className={`fixed text-black_text dark:text-white_text rounded-full z-[1] bg-primary_color_light dark:bg-primary_color_dark hover:shadow-lg hover:shadow-primary_color_light/70 dark:hover:shadow-primary_color_dark/70 transition`}
                         style={{
                             width: `${20 / zoom}px`,

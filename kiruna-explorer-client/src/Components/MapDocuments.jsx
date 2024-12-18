@@ -4,7 +4,7 @@ import MarkerClusterGroup from "react-leaflet-markercluster"
 import "./map.css"
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
-import L, { geoJSON } from "leaflet";
+import L from "leaflet";
 import { useNavigate, useLocation } from "react-router-dom";
 import API from "../API/API.mjs";
 import markerpin from "../assets/marker-pin.svg";
@@ -15,8 +15,9 @@ import { useTheme } from "../contexts/ThemeContext.jsx";
 import { getIcon } from "./Utilities/DocumentIcons.jsx";
 import { formatString } from "./Utilities/StringUtils.js";
 import { SingleDocumentMap } from "./SingleDocumentMap.jsx";
-import { collect } from "@turf/turf";
 import { DocumentsNavMap } from "./DocumentsNavMap.jsx";
+import PropTypes from "prop-types";
+
 
 function calculateCentroid(coordinates) {
   const polygon = L.polygon(coordinates.map(coord => [coord[1], coord[0]])); // Inverti [lng, lat] -> [lat, lng]
@@ -35,17 +36,29 @@ function calculateBounds(coordinates) {
 
 const SwitchMapButton = ({ toggleMap, isSatelliteMap }) => {
   return (
-    <div title={isSatelliteMap ? "Street View" : "Satellite View"} className="custom-switch-button" onClick={() => {
-      toggleMap();
-    }}
+    <div
+      title={isSatelliteMap ? "Switch to Street View" : "Switch to Satellite View"}
+      className="custom-switch-button"
+      role="button" // Adds button role for better accessibility
+      aria-label={isSatelliteMap ? "Switch to Street View" : "Switch to Satellite View"}
+      onClick={() => {
+        toggleMap();
+      }}
       onKeyUp={(e) => {
-        if (e.key === 'Enter') {
+        if (e.key === "Enter" || e.key === " ") { // Handle both Enter and Space for activation
           toggleMap();
         }
-      }}>
+      }}
+    >
       <i className="bi bi-arrow-left-right text-[#464646]"></i>
     </div>
   );
+};
+
+// PropType validation for the component
+SwitchMapButton.propTypes = {
+  toggleMap: PropTypes.func.isRequired, // Ensure toggleMap is a function
+  isSatelliteMap: PropTypes.bool.isRequired, // Ensure isSatelliteMap is a boolean
 };
 
 function GeoreferenceMapDoc(props) {
@@ -146,6 +159,8 @@ function GeoreferenceMapDoc(props) {
     //console.log(areaCounts)
   }, [presentAreas, ShowSingleDocument, props.municipalGeoJson, props.showArea, isSatelliteMap, isDarkMode, alertMessage, clickedAreas, clickedDocs])
 
+
+
   // Mouse over the area
   const handleMouseOver = (id, content) => {
     if (id === 1 && content !== 0) {
@@ -241,6 +256,15 @@ function GeoreferenceMapDoc(props) {
   )
 }
 
+GeoreferenceMapDoc.propsTypes = {
+  showArea:PropTypes.bool,
+  setNavShow:PropTypes.func,
+  municipalGeoJson:PropTypes.object,
+  setShowArea:PropTypes.func,
+  setShowDiagramDoc:PropTypes.func,
+  currentDocAreaId:PropTypes.number
+}
+
 function Message({ alertMessage, setAlertMessage }) {
   {/* Clear Alert message after 5 sec*/ }
   useEffect(() => {
@@ -271,6 +295,11 @@ function Message({ alertMessage, setAlertMessage }) {
       {alertMessage}
     </div>
   )
+}
+
+Message.propTypes = {
+  alertMessage:PropTypes.string,
+  setAlertMessage:PropTypes.func
 }
 
 function Markers({ setLastAreaClicked, lastAreaClicked,showArea, setShowArea, area, currentDocAreaId, center, boundaries, isSingleDoc, handleMouseOver, handleMouseOut, clickedAreas, setDocumentId, setShowSingleDocument, OpenTooltipDocs, setOpenTooltipDocs, setAreaSelected, hoveredArea, handleDocumentClick }) {
@@ -532,6 +561,37 @@ function Markers({ setLastAreaClicked, lastAreaClicked,showArea, setShowArea, ar
     )
   );
 }
+
+Markers.propTypes = {
+  setLastAreaClicked: PropTypes.func.isRequired,
+  lastAreaClicked: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  showArea: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  setShowArea: PropTypes.func.isRequired,
+  area: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+    geoJson: PropTypes.shape({
+      geometry: PropTypes.shape({
+        type: PropTypes.string.isRequired,
+        coordinates: PropTypes.array.isRequired,
+      }).isRequired,
+    }).isRequired,
+  }).isRequired,
+  currentDocAreaId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  center: PropTypes.arrayOf(PropTypes.number).isRequired,
+  boundaries: PropTypes.object.isRequired,
+  isSingleDoc: PropTypes.bool,
+  handleMouseOver: PropTypes.func.isRequired,
+  handleMouseOut: PropTypes.func.isRequired,
+  clickedAreas: PropTypes.object.isRequired,
+  setDocumentId: PropTypes.func.isRequired,
+  setShowSingleDocument: PropTypes.func.isRequired,
+  OpenTooltipDocs: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  setOpenTooltipDocs: PropTypes.func.isRequired,
+  setAreaSelected: PropTypes.func.isRequired,
+  hoveredArea: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  handleDocumentClick: PropTypes.func.isRequired,
+};
+
 function ListDocuments({ docs, setOpenTooltipDocs, setDocumentId, setShowSingleDocument }) {
   const { isDarkMode } = useTheme();
   const [query, setQuery] = useState("");

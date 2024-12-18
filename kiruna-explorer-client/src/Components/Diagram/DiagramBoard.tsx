@@ -99,6 +99,7 @@ const DiagramBoard = (props) => {
 
     useEffect(() => {
         setColorMode(isDarkMode ? "dark" : "light")
+        if (props.setNavShow) props.setNavShow(true);
     }, [isDarkMode])
 
     const setNodeSelected = (nodeindex: number, docselected: string) => {
@@ -190,13 +191,15 @@ const DiagramBoard = (props) => {
 
                 //Group items by scale and date
                 const groupedByScaleAndDate = mappedItems.reduce((acc: { [x: string]: any[]; }, item: Item) => {
-                    const key = `${item.scale}${item.planNumber}_${item.year}_${item.month}`;
+                    const key = item.planNumber? `${item.scale}${item.planNumber && item.planNumber}_${item.year}_${item.month}`:`${item.scale}_${item.year}_${item.month}`;
                     if (!acc[key]) {
                         acc[key] = [];
                     }
                     acc[key].push(item);
                     return acc;
                 }, {} as Record<string, Item[]>);
+
+                console.log(groupedByScaleAndDate)
 
                 const docItems: DiagramItem[] = Object.entries(groupedByScaleAndDate).map((i: any[]) => {
                     const element = i[1][0]
@@ -485,7 +488,8 @@ const DiagramBoard = (props) => {
                     : [edge.target, edge.source];
 
                 // Verifica se una connessione simile esiste già
-                return self.findIndex((e) => (e.source === finalSource && e.target === finalTarget)) === index;
+                if (sourceNode.position.x === targetNode.position.x) return self.findIndex((e) => (e.source === finalSource && e.target === finalTarget) || (e.target === finalSource && e.source === finalTarget) ) === index;
+                return self.findIndex((e) => (e.source === finalSource && e.target === finalTarget) ) === index;
             });
 
             setLinks(filteredEdges);

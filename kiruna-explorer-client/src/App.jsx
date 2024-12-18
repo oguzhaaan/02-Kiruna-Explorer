@@ -112,7 +112,7 @@ function App() {
                                     setConnectionsInForm={setConnections} /> : <Navigate replace to="/" />} />
 
                             <Route path="/diagram" element={(isLoggedIn || isVisitorLoggedIn) ?
-                                <NodePositionProvider><DiagramBoard setShowArea={setShowArea} municipalGeoJson={municipalGeoJson}
+                                <NodePositionProvider><DiagramBoard setNavShow={setNavShow} setShowArea={setShowArea} municipalGeoJson={municipalGeoJson}
                                     showDiagramDoc={showDiagramDoc} setShowDiagramDoc={setShowDiagramDoc} /></NodePositionProvider> :
                                 <Navigate replace to="/" />} />
 

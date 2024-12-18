@@ -77,7 +77,7 @@ function GeoreferenceMapDoc(props) {
 
   const mapRef = useRef(null);
 
-  const handleDocumentClick = (doc, highlighted=null) => {
+  const handleDocumentClick = (doc, highlighted=null, numdocs = null) => {
     const { id, areaId } = doc;
     let wasClicked, newClickedState
     if (!isSingleDoc) setLastAreaClicked(areaId)
@@ -96,7 +96,7 @@ function GeoreferenceMapDoc(props) {
     if(!isSingleDoc)setHoveredArea(null)
 
     setAreaCounts((prev) => {
-        const currentCount = props.showArea?0: prev[areaId] || 0;
+        const currentCount = props.showArea?numdocs-1: prev[areaId] || 0;
         const newCount = newClickedState ? currentCount + 1 : currentCount - 1;
 
         // Toggle area if a 0 <-> 1 transition occurs
@@ -143,7 +143,7 @@ function GeoreferenceMapDoc(props) {
   {/* Refresh to show modifications*/ }
   useEffect(() => {
     //refresh
-    console.log(areaCounts)
+    //console.log(areaCounts)
   }, [presentAreas, ShowSingleDocument, props.municipalGeoJson, props.showArea, isSatelliteMap, isDarkMode, alertMessage, clickedAreas, clickedDocs])
 
   // Mouse over the area
@@ -317,7 +317,7 @@ function Markers({ setLastAreaClicked, lastAreaClicked,showArea, setShowArea, ar
       const areadocs = await API.getDocumentsFromArea(areaid)
       const highlighted = clickedAreas[areaid] 
       for (let doc of areadocs){
-        handleDocumentClick(doc, highlighted)
+        handleDocumentClick(doc, highlighted, areadocs.length)
       }
     }catch(err){
       console.log(err)
@@ -377,7 +377,7 @@ function Markers({ setLastAreaClicked, lastAreaClicked,showArea, setShowArea, ar
         map.fitBounds(boundaries)
       }
       else {
-        map.setView([geometry.coordinates[1], geometry.coordinates[0]], 15)
+        map.setView([geometry.coordinates[1], geometry.coordinates[0]], 16)
       }
       if(lastAreaClicked){
         setLastAreaClicked(null)
@@ -481,7 +481,7 @@ function Markers({ setLastAreaClicked, lastAreaClicked,showArea, setShowArea, ar
                   navigate("/mapDocuments")
                 }
                 else {
-                  map.setView([geometry.coordinates[1], geometry.coordinates[0]], 15);
+                  map.setView([geometry.coordinates[1], geometry.coordinates[0]], 16);
                   setAreaSelected(area.id)
                   handleAreaDocuments(area.id)
                 }

@@ -156,7 +156,7 @@ function DocumentsPage(props) {
                 className="bg-primary_color_light dark:bg-primary_color_dark hover:bg-[#2E6A8E66] transition text-black_text dark:text-white_text flex flex-row gap-2 justify-items-end py-2 px-3 rounded-md"
               >
                 <i className="bi bi-file-earmark-plus"></i>
-                <p className="text-base m-0 p-0 lg:inline-block md:inline-block sm:hidden">
+                <p className="text-base m-0 p-0 lg:inline-block md:inline-block max-sm:hidden">
                   Add document
                 </p>
               </button>

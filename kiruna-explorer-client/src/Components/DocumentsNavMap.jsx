@@ -1,5 +1,4 @@
-import {Navbar, Nav, Container, Offcanvas, Row, Col} from "react-bootstrap";
-import {Link} from "react-router-dom";
+import {Navbar, Container, Offcanvas} from "react-bootstrap";
 import {useUserContext} from "../contexts/UserContext";
 import {useNavigate, useLocation} from "react-router-dom";
 import {useTheme} from "../contexts/ThemeContext.jsx";

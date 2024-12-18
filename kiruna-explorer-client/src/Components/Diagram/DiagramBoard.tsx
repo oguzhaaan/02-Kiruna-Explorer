@@ -191,7 +191,7 @@ const DiagramBoard = (props) => {
 
                 //Group items by scale and date
                 const groupedByScaleAndDate = mappedItems.reduce((acc: { [x: string]: any[]; }, item: Item) => {
-                    const key = item.planNumber? `${item.scale}${item.planNumber && item.planNumber}_${item.year}_${item.month}`:`${item.scale}_${item.year}_${item.month}`;
+                    const key = item.planNumber? `${item.scale}${item.planNumber}_${item.year}_${item.month}`:`${item.scale}_${item.year}_${item.month}`;
                     if (!acc[key]) {
                         acc[key] = [];
                     }

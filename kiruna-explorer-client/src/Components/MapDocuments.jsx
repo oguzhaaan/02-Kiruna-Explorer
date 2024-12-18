@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
-import { MapContainer, TileLayer, Polygon, Popup, Marker, ZoomControl, useMap, Tooltip, GeoJSON } from "react-leaflet";
+import { MapContainer, TileLayer, Polygon, Marker, ZoomControl, useMap, Tooltip, GeoJSON } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-markercluster"
 import "./map.css"
 import "leaflet/dist/leaflet.css";
@@ -257,12 +257,12 @@ function GeoreferenceMapDoc(props) {
 }
 
 GeoreferenceMapDoc.propsTypes = {
-  showArea:PropTypes.bool,
-  setNavShow:PropTypes.func,
-  municipalGeoJson:PropTypes.object,
-  setShowArea:PropTypes.func,
-  setShowDiagramDoc:PropTypes.func,
-  currentDocAreaId:PropTypes.number
+  showArea: PropTypes.bool.isRequired,
+  setNavShow:PropTypes.func.isRequired,
+  municipalGeoJson:PropTypes.object.isRequired,
+  setShowArea:PropTypes.func.isRequired,
+  setShowDiagramDoc:PropTypes.func.isRequired,
+  currentDocAreaId:PropTypes.number.isRequired
 }
 
 function Message({ alertMessage, setAlertMessage }) {

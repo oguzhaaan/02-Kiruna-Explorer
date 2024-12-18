@@ -96,7 +96,7 @@ function GeoreferenceMapDoc(props) {
     if(!isSingleDoc)setHoveredArea(null)
 
     setAreaCounts((prev) => {
-        const currentCount = prev[areaId] || 0;
+        const currentCount = props.showArea?0: prev[areaId] || 0;
         const newCount = newClickedState ? currentCount + 1 : currentCount - 1;
 
         // Toggle area if a 0 <-> 1 transition occurs
@@ -377,7 +377,7 @@ function Markers({ setLastAreaClicked, lastAreaClicked,showArea, setShowArea, ar
         map.fitBounds(boundaries)
       }
       else {
-        map.setView([geometry.coordinates[1], geometry.coordinates[0]], 14)
+        map.setView([geometry.coordinates[1], geometry.coordinates[0]], 15)
       }
       if(lastAreaClicked){
         setLastAreaClicked(null)

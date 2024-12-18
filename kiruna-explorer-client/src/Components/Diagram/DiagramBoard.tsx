@@ -410,7 +410,8 @@ const DiagramBoard = (props) => {
                                 index: index,
                                 setNodeSelected: (id: number) => setNodeSelected(index, `${id}`),
                                 showSingleDocument: (id: string) => {
-                                    setDocumentId(id), setShowSingleDocument(true)
+                                    setDocumentId(id);
+                                    setShowSingleDocument(true);
                                 },
                                 showDiagramDoc: props.showDiagramDoc,
                                 currentFilteredDoc: currentFilteredDoc

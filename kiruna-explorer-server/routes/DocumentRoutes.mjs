@@ -670,7 +670,7 @@ const storage = multer.diskStorage({
         cb(null, `${uniqueSuffix}-${file.originalname}`);
     },
     limits: {
-        fileSize: 7000000 // Sensitive: 10MB is more than the recommended limit of 8MB
+        fileSize: 100000000 // Sensitive: 10MB is more than the recommended limit of 8MB
     }
 });
 
@@ -708,7 +708,7 @@ const upload = multer({
     },
 });
 
-const MAX_SIZE = 20 * 1024 * 1024;
+const MAX_SIZE = 90 * 1024 * 1024;
 
 // API route to handle file upload
 router.post(
@@ -737,7 +737,7 @@ router.post(
         if (req.file.size > MAX_SIZE) {
             return res
                 .status(400)
-                .json({ error: "File size exceeds the maximum limit of 20MB." });
+                .json({ error: "File size exceeds the maximum limit of 90MB." });
         }
         //check if file type is allowed
         const allowedTypes = ["attachment", "original"];

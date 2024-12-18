@@ -187,7 +187,7 @@ describe("Integration Test POST /api/documents/:DocId/files - Attach a new file"
         expect(response.body.error).toBe("Invalid file type. Allowed types: attachment, original");
     });
 
-    test("should return 400 if file size is not allowed", async () => {
+    test("should return an error if file size is not allowed (>90MB)", async () => {
         const invalid_filePath = path.resolve(__dirname, '../file/file2.pdf');
         
         const response = await request(app)
@@ -195,9 +195,8 @@ describe("Integration Test POST /api/documents/:DocId/files - Attach a new file"
             .set("Cookie", urbanplanner_cookie)
             .attach("file", invalid_filePath)
             .field("fileType", "attachment")
-          //  .expect(400);
 
-            expect(response.body.error).toBe("File size exceeds the maximum limit of 20MB.");
+            expect(response.body.error).toBe("File size exceeds the maximum limit of 90MB.");
 
         
     });

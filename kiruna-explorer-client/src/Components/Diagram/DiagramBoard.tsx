@@ -142,7 +142,14 @@ const DiagramBoard = (props) => {
             try {
                 let docs = await API.getFilteredDocuments(filterValues);
                 setAlertMessage("")
-                setFilteredDocs(docs)
+                setFilteredDocs(docs.sort((a, b) => {
+                    // Converte le date in oggetti Date
+                    const dateA = new Date(a.date);
+                    const dateB = new Date(b.date);
+                  
+                    // Confronta i timestamp
+                    return dateA.getTime() - dateB.getTime();
+                  }))
 
 
                 if (docs.length === 0) {

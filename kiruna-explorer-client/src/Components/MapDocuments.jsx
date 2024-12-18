@@ -80,7 +80,7 @@ function GeoreferenceMapDoc(props) {
   const handleDocumentClick = (doc, highlighted=null) => {
     const { id, areaId } = doc;
     let wasClicked, newClickedState
-    setLastAreaClicked(areaId)
+    if (!isSingleDoc) setLastAreaClicked(areaId)
     if (highlighted===null){
     wasClicked = clickedDocs[id];
     newClickedState = !wasClicked;
@@ -143,6 +143,7 @@ function GeoreferenceMapDoc(props) {
   {/* Refresh to show modifications*/ }
   useEffect(() => {
     //refresh
+    console.log(areaCounts)
   }, [presentAreas, ShowSingleDocument, props.municipalGeoJson, props.showArea, isSatelliteMap, isDarkMode, alertMessage, clickedAreas, clickedDocs])
 
   // Mouse over the area

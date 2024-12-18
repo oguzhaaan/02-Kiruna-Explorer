@@ -60,10 +60,11 @@ function FilterMenu({ filterValues, setFilterValues, homePage, setCurrentFiltere
     setFilterValues(clearedValues);
     setCurrentFilteredDoc && setCurrentFilteredDoc(null)
     setFilteredDocs && setFilteredDocs(null)
-    setFilteredDocs && setNodeStates({})
+    setNodeStates && setNodeStates({})
   };
 
   const handleApply = () => {
+    setNodeStates && setNodeStates({})
     setFilterValues(tempFilterValues);
   };
 

@@ -831,6 +831,24 @@ $docker compose build
 $docker compose up
 ```
 
+### To build separately the client and the server:
+
+for client: move in the `kiruna-explorer-client` folder and run:
+```bash
+$docker build -t mick18/02-kiruna-explorer:client .
+```
+
+for server: move in the `kiruna-explorer-server` folder and run:
+```bash
+$docker build -t mick18/02-kiruna-explorer:server .
+```
+
+### Push on Docker Hub
+```bash
+$docker push mick18/02-kiruna-explorer:client
+$docker push mick18/02-kiruna-explorer:server
+```
+
 **note**: You need to have Docker Desktop installed and opened in background
 
 ## SCREENSHOTS

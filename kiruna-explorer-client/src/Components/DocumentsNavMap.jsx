@@ -1,19 +1,18 @@
-import {Navbar, Container, Offcanvas} from "react-bootstrap";
-import {useUserContext} from "../contexts/UserContext";
-import {useNavigate, useLocation} from "react-router-dom";
-import {useTheme} from "../contexts/ThemeContext.jsx";
-import {useEffect, useState} from "react";
+import { Navbar, Container, Offcanvas } from "react-bootstrap";
+import { useUserContext } from "../contexts/UserContext";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useTheme } from "../contexts/ThemeContext.jsx";
+import { useEffect, useState } from "react";
 import API from "../API/API.mjs";
-import {getIcon} from "./Utilities/DocumentIcons.jsx";
+import { getIcon } from "./Utilities/DocumentIcons.jsx";
+import PropTypes from 'prop-types';
 
-function DocumentsNavMap({clickedDocs, handleDocumentClick, setShowDiagramDoc}) {
-    const {isDarkMode, toggleTheme, isSatelliteMap} = useTheme();
+
+function DocumentsNavMap({ clickedDocs, handleDocumentClick, setShowDiagramDoc }) {
+    const { isDarkMode } = useTheme();
     const [isCanvasOpen, setIsCanvasOpen] = useState(false);
 
     const navigate = useNavigate();
-    const location = useLocation();
-    const currentRoute = location.pathname;
-    const {user, isLoggedIn, logOut, handleVisitor, isVisitorLoggedIn} = useUserContext();
 
     const [documents, setDocuments] = useState([]);
 
@@ -54,9 +53,9 @@ function DocumentsNavMap({clickedDocs, handleDocumentClick, setShowDiagramDoc}) 
                         className={`drop-shadow-xl ${isDarkMode
                             ? "bg-background_color text-white_text"
                             : "bg-[#f6f6f6] text-black_text"
-                        } z-[20000] overflow-hidden`}
+                            } z-[20000] overflow-hidden`}
                         backdropClassName={`${isDarkMode ? "bg-black_text" : "bg-white_text"
-                        }`}
+                            }`}
                         backdrop={false}
                     >
                         <Offcanvas.Body className="flex flex-col justify-between">
@@ -83,31 +82,37 @@ function DocumentsNavMap({clickedDocs, handleDocumentClick, setShowDiagramDoc}) 
                                             className={`w-full h-fit transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 cursor-pointer rounded-lg p-2 flex justify-start items-center ${isDarkMode
                                                 ? "bg-document_item_radient_blue"
                                                 : "bg-document_item_radient_blue_light"
-                                            }`}
+                                                }`}
                                         >
-                                            <div className="w-5/6 flex flex-row"
-                                                 onClick={() => handleDocumentClick(document)}
-                                                 title="deselect document area">
+                                            <div role="button" className="w-5/6 flex flex-row"
+                                                onClick={() => handleDocumentClick(document)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' || e.key === ' ') handleDocumentClick(document);
+                                                }}
+                                                title="deselect document area">
                                                 <img
                                                     src={getIcon(
-                                                        {type: document.type.toLowerCase()},
-                                                        {darkMode: isDarkMode}
+                                                        { type: document.type.toLowerCase() },
+                                                        { darkMode: isDarkMode }
                                                     )}
                                                     className="w-8 mr-2"
                                                     alt="type_icon"
                                                 />
                                                 <span className="font-sans text-base">{document.title}</span>
                                             </div>
-
                                             <div
+                                                role="button"
                                                 key={document.id}
                                                 className={`w-1/6 h-fit transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 cursor-pointer rounded-2xl p-2 flex justify-center ${isDarkMode
                                                     ? "bg-document_item_radient_blue"
                                                     : "bg-document_item_radient_blue_light"
-                                                }`}
+                                                    }`}
                                                 onClick={() => {
-                                                    setShowDiagramDoc(document.id)
-                                                    navigate("/diagram")
+                                                    setShowDiagramDoc(document.id);
+                                                    navigate("/diagram");
+                                                }}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' || e.key === ' ') { setShowDiagramDoc(document.id); navigate("/diagram"); }
                                                 }}
                                                 title="see document in the diagram"
                                             >
@@ -120,7 +125,7 @@ function DocumentsNavMap({clickedDocs, handleDocumentClick, setShowDiagramDoc}) 
                                 {Object.values(clickedDocs).some((value) => value) && (
                                     <div
                                         className={`separator w-full ${isDarkMode ? "bg-white_text" : "bg-black_text"
-                                        } opacity-20`}
+                                            } opacity-20`}
                                     />
                                 )}
 
@@ -138,15 +143,19 @@ function DocumentsNavMap({clickedDocs, handleDocumentClick, setShowDiagramDoc}) 
                                             className={`flex-row w-full h-fit transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 cursor-pointer rounded-lg p-2 flex justify-start items-center ${isDarkMode
                                                 ? "bg-document_item_radient_grey"
                                                 : "bg-[#ffffffdd]"
-                                            }`}
+                                                }`}
                                         >
                                             <div className="w-5/6 flex flex-row"
-                                                 onClick={() => handleDocumentClick(document)}
-                                                 title="highlight document area">
+                                                role="button"
+                                                onClick={() => handleDocumentClick(document)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' || e.key === ' ') {handleDocumentClick(document);}
+                                                }}
+                                                title="highlight document area">
                                                 <img
                                                     src={getIcon(
-                                                        {type: document.type.toLowerCase()},
-                                                        {darkMode: isDarkMode}
+                                                        { type: document.type.toLowerCase() },
+                                                        { darkMode: isDarkMode }
                                                     )}
                                                     className="w-8 mr-2"
                                                     alt="type_icon"
@@ -156,13 +165,17 @@ function DocumentsNavMap({clickedDocs, handleDocumentClick, setShowDiagramDoc}) 
 
                                             <div
                                                 key={document.id}
+                                                role="button"
                                                 className={`w-1/6 h-fit transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 cursor-pointer rounded-2xl p-2 flex justify-center ${isDarkMode
                                                     ? "bg-document_item_radient_grey"
                                                     : "bg-[#ffffffdd]"
-                                                }`}
+                                                    }`}
                                                 onClick={() => {
                                                     setShowDiagramDoc(document.id)
                                                     navigate("/diagram")
+                                                }}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' || e.key === ' ') {setShowDiagramDoc(document.id); navigate("/diagram");}
                                                 }}
                                                 title="see document in the diagram"
                                             >
@@ -176,7 +189,7 @@ function DocumentsNavMap({clickedDocs, handleDocumentClick, setShowDiagramDoc}) 
                             <div className="absolute top-0 right-0 mt-3 mr-4">
                                 <button
                                     className={`${isDarkMode ? "text-white_text" : "text-black_text"
-                                    } justify-items-center hover:opacity-50`}
+                                        } justify-items-center hover:opacity-50`}
                                     onClick={() => {
                                         setIsCanvasOpen(false);
                                     }}
@@ -190,8 +203,14 @@ function DocumentsNavMap({clickedDocs, handleDocumentClick, setShowDiagramDoc}) 
                     </Navbar.Offcanvas>
                 </Container>
             </Navbar>
-        </div>
+        </div >
     );
 }
 
-export {DocumentsNavMap};
+export { DocumentsNavMap };
+
+DocumentsNavMap.propTypes = {
+    clickedDocs: PropTypes.object.isRequired, // Tipo array, obbligatorio
+    handleDocumentClick: PropTypes.func.isRequired, // Tipo funzione, obbligatorio
+    setShowDiagramDoc: PropTypes.func.isRequired, // Tipo funzione, obbligatorio
+};

@@ -186,7 +186,6 @@ const getAreaById = async (areaId) => {
 };
 
 const addArea = async (geoJson) => {
-  //console.log("Sending GeoJSON:", JSON.stringify(geoJson, null, 2));  // Controllo per verificare cosa viene inviato
 
   try {
     const response = await fetch(`${SERVER_URL}/api/areas`, {
@@ -218,12 +217,10 @@ const getAllDocuments = async () => {
 
     if (!response.ok) {
       const errMessage = await response.json();
-      throw new Error(`${errMessage.message || 'Error while creating the document.'}`);
-      throw new Error(`Error ${response.status}: ${errMessage.message || 'Error while creating the document.'}`);
+      throw new Error(`${errMessage.message || 'Error while getting all documents.'}`);
     }
 
     const result = await response.json();
-    //console.log(result)
     return result;
 
   } catch (error) {
@@ -433,10 +430,10 @@ const uploadFile = async (id, formData) => {
     if (response.ok) {
       return result;
     } else {
-      //console.log(result);
       throw new Error(result.error + "");
     }
   } catch (error) {
+    console.error("Error uploading file: ", error);
     throw error;
   }
 };
@@ -453,15 +450,13 @@ const getDocumentFiles = async (DocId) => {
       throw new Error('File upload failed');
     }
   } catch (error) {
-    console.error("Error fetching document files:", error);
+    console.error("Error fetching document files: ", error);
     throw error;
   }
 };
 
 const deleteFile = async (DocId, FileId) => {
 
-  //const encodedFilePath = encodeURIComponent(FilePath);
-  //console.log(DocId, FileId);
   try {
     const response = await fetch(`${SERVER_URL}/api/documents/${DocId}/files/${FileId}`, {
       method: 'DELETE',
@@ -478,12 +473,12 @@ const deleteFile = async (DocId, FileId) => {
     }
 
   } catch (error) {
+    console.error("Error deleting document file: ", error);
     throw error;
   }
 };
 
 const downloadFile = async (DocId, FileId, FilePath) => {
-  //const encodedFilePath = encodeURIComponent(FileId);
 
   try {
     const fileDownloadUrl = `${SERVER_URL}/api/documents/${DocId}/files/download/${FileId}`;  // Sostituisci con il percorso corretto dell'endpoint
@@ -520,6 +515,7 @@ const downloadFile = async (DocId, FileId, FilePath) => {
     window.URL.revokeObjectURL(url);  // Libera la memoria del blob
 
   } catch (error) {
+    console.error("Error downloading document file: ", error);
     throw error;  // Puoi gestire l'errore come preferisci
   }
 };
@@ -533,7 +529,6 @@ const getAllTypes = async () => {
     if (!response.ok) {
       const errMessage = await response.json();
       throw new Error(`${errMessage.message || 'Error while getting all types.'}`);
-      //throw new Error(`Error ${response.status}: ${errMessage.message || 'Error while creating the document.'}`);
     }
 
     const result = await response.json();
@@ -555,7 +550,6 @@ const getAllStakeholders = async () => {
     if (!response.ok) {
       const errMessage = await response.json();
       throw new Error(`${errMessage.message || 'Error while getting all stakeholders.'}`);
-      //throw new Error(`Error ${response.status}: ${errMessage.message || 'Error while creating the document.'}`);
     }
 
     const result = await response.json();

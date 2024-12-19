@@ -1,4 +1,23 @@
-# Addressing Technical Debt
+## Technical Debt Plan - Sprint 4
+
+**Goal:**
+* Increase "reliability" rating from C to a higher level.
+* Address critical "security hotspots".
+
+**Rationale:**
+* Avoid repeating the mistake of the previous sprint (i.e., starting to solve some of the issues at the beginning of the sprint and others at the end) which did not bring significant benefits but only complications.
+
+**Action Plan:**
+* **Dedicated time:** 6 hours to do as last thing of the sprint.
+* **Priorities:**
+    * Reliability issues
+    * Security hotspots
+
+**Reasons:**
+* We neglected the code duplication issues because it would be too burdensome in terms of effort, preferring to complete more stories as possible.
+
+
+## Technical Debt Plan - Sprint 3
 
 To proactively manage our technical debt, we've implemented a sprint-based approach. 
 

@@ -1,4 +1,4 @@
-# RETROSPECTIVE 3 (Team 02)
+# RETROSPECTIVE 4 (Team 02)
 
 - [process measures](#process-measures)
 - [quality measures](#quality-measures)
@@ -41,7 +41,6 @@ Definition of Done:
   - Standard Deviation:
     - Estimated: 187,89
     - Actual: 186,82
-  
 - Total estimation error ratio: sum of total hours spent / sum of total hours effort - 1
 
   $$\frac{\sum_i spent_{task_i}}{\sum_i estimation_{task_i}} - 1$$
@@ -76,18 +75,26 @@ Definition of Done:
 
 - What caused your errors in estimation (if any)?
 
+  - Our estimations were largely accurate. However, there were a few cases where tasks took longer than expected.
 
 - What lessons did you learn (both positive and negative) in this sprint?
 
+  - As team members became more familiar with each other’s strengths and capabilities, our collaboration became more efficient.
+  - Developing software in a reusable way significantly accelerated our workflow. For instance, in some new user stories, we were able to leverage components that had been developed earlier in the project.
+  - Working on this project taught us the value of a well-defined team workflow and how to navigate it effectively.
+  - By the end of the project, using Git had become second nature to everyone on the team.
 
 - Which improvement goals set in the previous retrospective were you able to achieve?
 
+  - We achieved an acceptable level of test coverage.
+  - We successfully automated parts of our end-to-end testing process using the Cypress framework.
 
 - Which ones you were not able to achieve? Why?
-
+  - ???????
 
 - Improvement goals for the next sprint and how to achieve them (technical tasks, team coordination, etc.)
 
+  - RIP
 
 - One thing you are proud of as a Team!!
-
+  - We’ve built a strong, cohesive team that genuinely enjoys working, learning, and improving together. We’re proud to have nearly completed the project with polished and deliverable work.

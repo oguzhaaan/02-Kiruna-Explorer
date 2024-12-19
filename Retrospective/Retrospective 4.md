@@ -75,12 +75,12 @@ Definition of Done:
 
 - What caused your errors in estimation (if any)?
 
-  - Our estimations were largely accurate. However, there were a few cases where tasks took longer than expected.
+  - Our estimations were largely accurate, as all the stories were successfully completed and passed all relevant tests. Additionally, we managed to resolve all the issues raised during the previous sprint.
 
 - What lessons did you learn (both positive and negative) in this sprint?
 
   - As team members became more familiar with each other’s strengths and capabilities, our collaboration became more efficient.
-  - Developing software in a reusable way significantly accelerated our workflow. For instance, in some new user stories, we were able to leverage components that had been developed earlier in the project.
+  - Developing software in a reusable way significantly accelerated our workflow. For instance, in some new user stories, we were able to leverage components that had been developed earlier in the project, which enabled us to complete all six stories successfully.
   - Working on this project taught us the value of a well-defined team workflow and how to navigate it effectively.
   - By the end of the project, using Git had become second nature to everyone on the team.
 
@@ -88,13 +88,14 @@ Definition of Done:
 
   - We achieved an acceptable level of test coverage.
   - We successfully automated parts of our end-to-end testing process using the Cypress framework.
+  - The priority of completing the previous sprint's changes and merging them promptly has been successfully achieved.
 
 - Which ones you were not able to achieve? Why?
-  - ???????
+  - We were unable to give sufficient attention to SonarCloud issues, which resulted in minimal improvements despite a slight reduction in the number of issues, even with an increase in lines of code. However, we managed to improve the "reliability" rating to a B and addressed only a few of the identified "security hotspots."
 
 - Improvement goals for the next sprint and how to achieve them (technical tasks, team coordination, etc.)
 
-  - RIP
+  - 
 
 - One thing you are proud of as a Team!!
   - We’ve built a strong, cohesive team that genuinely enjoys working, learning, and improving together. We’re proud to have nearly completed the project with polished and deliverable work.

@@ -42,16 +42,28 @@ function HomePage(props) {
                     </div>
 
                 </div>
+                
 
                 <div className="absolute inset-0 bg-black opacity-80 h-[28rem]"></div>
             </div>
 
-
-            {/* Middle Section */}
-            <div className="flex flex-col text-white_text px-[10%] py-24 w-full h-full bg-black">
-                <div className="text-white_text text-2xl">
-                    What would you like to view?
+            <div className="flex flex-col px-[10%] mt-4 w-full h-full">
+            <div className="text-md text-white w-full bg-gradient-to-r from-[#333333] to-[#555555] p-6 rounded-lg shadow-lg flex flex-row">
+                <div className="w-1/2">
+                    <h2 className="font-bold mb-2 text-2xl">Discover Kiruna</h2>
+                    <p>Kiruna is a charming town with a population of 20,000. Established in the early 20th century, it thrives around Europe's largest iron ore mine, operated by the renowned state-owned company, LKAB.</p>
+                    <br/>
+                    <p>Explore Kiruna with the Kiruna Explorer! This intuitive platform allows you to delve into development plans, technical documents, and city planning resources effortlessly. Navigate through a user-friendly map and timeline diagram to access all these features seamlessly.</p>
+                    </div>
+                <div className="w-1/2 flex justify-content-end">
+                    <iframe width="560" height="315" src="https://www.youtube.com/embed/tBeTpJUX_DI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                 </div>
+            </div>
+
+            </div>
+            {/* Middle Section */}
+            <div className="flex flex-col text-white_text px-[10%] pb-4 w-full h-full bg-black">
+               
                 <div className="bottoni flex flex-row justify-content-between mt-10 w-full gap-10">
                     <div className="w-1/3 hover:opacity-70 transition">
                         <div
@@ -89,7 +101,7 @@ function HomePage(props) {
                                 role="button"
                                 onClick={() => { navigate("/documents") }}
                                 onKeyDown={(e) => {
-                                    if (e.key === 'Enter' || e.key === ' ') navigate("/documents") ;
+                                    if (e.key === 'Enter' || e.key === ' ') navigate("/documents");
                                 }}
                                 className="h-52 text-center items-center justify-center flex flex-col bg-[#2E2E2E] rounded-md cursor-pointer">
                                 <i className="bi bi-journals text-6xl"></i>

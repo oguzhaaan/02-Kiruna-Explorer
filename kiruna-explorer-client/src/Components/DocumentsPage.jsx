@@ -4,6 +4,8 @@ import Alert from "./Alert.jsx";
 import { SingleDocument } from "./SingleDocument.jsx";
 import { useTheme } from "../contexts/ThemeContext.jsx";
 import API from "../API/API.mjs";
+import { useLocation } from "react-router-dom";
+
 
 import FilterMenu from "./FilterMenu.jsx";
 import FilterLabels from "./FilterLabels.jsx";
@@ -12,6 +14,9 @@ import DocumentItem from "./DocumentItem.jsx";
 
 function DocumentsPage(props) {
   const { isDarkMode } = useTheme();
+  const location = useLocation();
+  let { open } = location.state || false;
+  const [isOpen, setIsOpen] = useState(open);
   const [documents, setDocuments] = useState([]);
 
   // --- Search ---
@@ -49,6 +54,11 @@ function DocumentsPage(props) {
     };
   }, [searchQuery]);
   useEffect(() => {
+    if(isOpen) {
+      props.setIsModalOpen(true);
+      setIsOpen(false);
+      open = false;
+    }
     const fetchFilteredDocuments = async () => {
       try {
         // Fetch paginated documents

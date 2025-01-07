@@ -8,7 +8,7 @@ import API from "../API/API.mjs";
 import { useTheme } from "../contexts/ThemeContext.jsx";
 import { GeoreferenceMapDoc } from "./MapDocuments.jsx";
 
-function SingleDocumentMap({setShowArea,municipalGeoJson,  setDocumentId, id, setShowSingleDocument }) {
+function SingleDocumentMap({ setShowArea, municipalGeoJson, setDocumentId, id, setShowSingleDocument, setShowDiagramDoc}) {
 
     const { isDarkMode } = useTheme();
 
@@ -224,6 +224,17 @@ function SingleDocumentMap({setShowArea,municipalGeoJson,  setDocumentId, id, se
                                 {!isMapDocument && document.areaId && !isCharging && <GeoreferenceMapDoc setShowArea={setShowArea} municipalGeoJson={municipalGeoJson} currentDocAreaId={document.areaId}></GeoreferenceMapDoc>}
                             </div>}
                         </div>
+                        {isMapDocument && 
+                        <div className="flex flex-row gap-3 font-normal pt-3">
+                            <button title="see document in the diagram" onClick={() => {
+                                setShowDiagramDoc(document.id);
+                                navigate("/diagram");
+                            }}
+                                className="flex flex-row gap-2 align-items-center text-black_text dark:text-white_text text-sm bg-[#76767655] dark:bg-[#a0a0a058] hover:bg-[#FFFFFF55] dark:hover:bg-[#d9d9d974] transition rounded-2xl px-3 py-2 drop-shadow-lg">
+                                <i className="bi bi-diagram-3 fs-4"></i>
+                                <p className="m-0 p-0">Go to diagram</p>
+                            </button>
+                        </div>}
                     </div>
 
                     {/* Links */}

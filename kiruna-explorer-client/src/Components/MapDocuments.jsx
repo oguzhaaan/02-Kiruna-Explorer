@@ -183,7 +183,7 @@ function GeoreferenceMapDoc(props) {
   return (
     <>
       <div className={isDarkMode ? "dark" : "light"}>
-        {ShowSingleDocument && <SingleDocumentMap setShowArea={props.setShowArea} municipalGeoJson={props.municipalGeoJson} setDocumentId={setDocumentId} id={documentId} setShowSingleDocument={setShowSingleDocument}></SingleDocumentMap>}
+        {ShowSingleDocument && <SingleDocumentMap setShowDiagramDoc={props.setShowDiagramDoc} setShowArea={props.setShowArea} municipalGeoJson={props.municipalGeoJson} setDocumentId={setDocumentId} id={documentId} setShowSingleDocument={setShowSingleDocument}></SingleDocumentMap>}
         <MapContainer
           center={center}
           zoom={5} ref={mapRef}

@@ -52,8 +52,8 @@ function GroupNode({
             <div className={` ${isClicked ? "" : "opacity-35"}`}
                 role="button"
                 style={{
-                    width: `${64 / zoom}px`,
-                    height: `${64 / zoom}px`,
+                    width: `${94 / zoom}px`,
+                    height: `${94 / zoom}px`,
                     padding: `${1 / zoom}px`,
                     transition: "all 0.4s"
                 }}
@@ -79,8 +79,8 @@ function GroupNode({
                 <div
                     className={`absolute text-black_text dark:text-white_text rounded-full z-[-1] bg-[#999999] dark:bg-[#797979]`}
                     style={{
-                        width: `${64 / zoom}px`,
-                        height: `${64 / zoom}px`,
+                        width: `${94 / zoom}px`,
+                        height: `${94 / zoom}px`,
                         bottom: `${2 * 1.5 * zoom}px`,
                         left: `${4 * 1.5 * zoom}px`,
                     }}>
@@ -89,8 +89,8 @@ function GroupNode({
                 <div
                     className={`absolute text-black_text dark:text-white_text rounded-full z-[-2] bg-[#555555] dark:bg-[#C8C8C8]`}
                     style={{
-                        width: `${64 / zoom}px`,
-                        height: `${64 / zoom}px`,
+                        width: `${94 / zoom}px`,
+                        height: `${94 / zoom}px`,
                         bottom: `${4 * 1.5 * zoom}px`,
                         right: `${1 * 1.5 * zoom}px`,
                     }}
